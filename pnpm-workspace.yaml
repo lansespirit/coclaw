@@ -1,0 +1,9 @@
+packages:
+  - '.'
+
+# pnpm v10+ blocks dependency lifecycle scripts unless explicitly allowed.
+# These packages need their install scripts to run for the project to build.
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - '@heroui/shared-utils'
