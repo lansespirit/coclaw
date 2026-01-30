@@ -1,0 +1,88 @@
+---
+title: "Quick Start Guide - Install OpenClaw in 5 Minutes"
+description: "Get OpenClaw up and running quickly with this streamlined installation guide for beginners."
+category: "getting-started"
+difficulty: "beginner"
+estimatedTime: "5 minutes"
+publishDate: 2026-01-30
+lastUpdated: 2026-01-30
+author: "CoClaw Team"
+keywords:
+  - "OpenClaw installation"
+  - "quick start"
+  - "beginner guide"
+layout: ../../layouts/DocsLayout.astro
+---
+
+## Prerequisites
+
+Before you begin, make sure you have:
+
+- **Node.js 22 or higher** installed on your system
+- A terminal or command prompt
+- Basic familiarity with command-line tools
+
+## Installation Steps
+
+### 1. Install Node.js
+
+If you don't have Node.js installed, download it from [nodejs.org](https://nodejs.org/).
+
+```bash
+# Verify Node.js installation
+node --version
+```
+
+### 2. Install OpenClaw
+
+```bash
+# Using npm
+npm install -g openclaw
+
+# Or using pnpm (recommended)
+pnpm add -g openclaw
+```
+
+### 3. Initialize Configuration
+
+```bash
+# Create a new OpenClaw configuration
+openclaw init
+```
+
+This will create a basic `openclaw.json` configuration file in your current directory.
+
+### 4. Configure Your First Channel
+
+Edit the `openclaw.json` file to add your first messaging platform. For example, to add Telegram:
+
+```json
+{
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "botToken": "YOUR_BOT_TOKEN_HERE"
+    }
+  }
+}
+```
+
+### 5. Start OpenClaw
+
+```bash
+openclaw start
+```
+
+## Next Steps
+
+- [Configure additional channels](/channels)
+- [Set up security settings](/guides/security)
+- [Explore automation features](/guides/automation)
+
+## Troubleshooting
+
+If you encounter issues:
+
+- Check the [troubleshooting guide](/troubleshooting)
+- Visit the [community forum](https://forum.coclaw.com)
+- Review the [official documentation](https://docs.openclaw.ai)

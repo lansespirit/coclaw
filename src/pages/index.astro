@@ -1,0 +1,71 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="CoClaw - OpenClaw User Support & Community Platform"
+  description="Comprehensive support and community platform for OpenClaw users. Tutorials, troubleshooting, and best practices."
+>
+  <main
+    class="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800"
+  >
+    <div class="container mx-auto px-4 py-16">
+      <div class="text-center mb-16">
+        <h1 class="text-5xl font-bold mb-4 text-gray-900 dark:text-white">Welcome to CoClaw</h1>
+        <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          Your comprehensive guide to successfully deploying and maximizing OpenClaw's potential
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">🚀 Getting Started</h2>
+          <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Step-by-step installation guides for macOS, Linux, and Windows
+          </p>
+          <a href="/getting-started" class="text-blue-600 dark:text-blue-400 hover:underline">
+            Start here →
+          </a>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">📚 Documentation</h2>
+          <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Comprehensive guides for channels, security, and automation
+          </p>
+          <a href="/guides" class="text-blue-600 dark:text-blue-400 hover:underline">
+            Browse docs →
+          </a>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+          <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">🔧 Troubleshooting</h2>
+          <p class="text-gray-600 dark:text-gray-300 mb-4">
+            Searchable database of common errors and solutions
+          </p>
+          <a href="/troubleshooting" class="text-blue-600 dark:text-blue-400 hover:underline">
+            Find solutions →
+          </a>
+        </div>
+      </div>
+
+      <div class="mt-16 text-center">
+        <h2 class="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Featured Tools</h2>
+        <div
+          class="bg-gradient-to-r from-blue-500 to-purple-600 p-8 rounded-lg shadow-xl max-w-4xl mx-auto"
+        >
+          <h3 class="text-2xl font-bold mb-4 text-white">🛠️ Visual Configuration Generator</h3>
+          <p class="text-white mb-6">
+            Generate secure OpenClaw configurations without manual JSON editing
+          </p>
+          <a
+            href="/tools/config-generator"
+            class="inline-block bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
+          >
+            Try it now
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</BaseLayout>
