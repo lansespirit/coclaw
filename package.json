@@ -16,7 +16,7 @@
     "lint:fix": "eslint . --ext .js,.ts,.astro --fix",
     "format": "prettier --write \"**/*.{js,mjs,cjs,ts,tsx,astro,json,md}\"",
     "format:check": "prettier --check \"**/*.{js,mjs,cjs,ts,tsx,astro,json,md}\"",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
