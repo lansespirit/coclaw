@@ -18,6 +18,19 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
+    <!-- Tailwind config enables class-based dark mode; keep current behavior via system preference by default. -->
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem('theme'); // "light" | "dark"
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const shouldDark = stored ? stored === 'dark' : prefersDark;
+          document.documentElement.classList.toggle('dark', shouldDark);
+        } catch {
+          // If storage is blocked, fall back to no-op.
+        }
+      })();
+    </script>
 
     <!-- Primary Meta Tags -->
     <title>{title}</title>
