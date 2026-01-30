@@ -1,48 +1,137 @@
+@config '../../tailwind.config.cjs';
 @import 'tailwindcss';
 
-/* Custom global styles */
-body {
-  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+@theme {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
 }
 
-/* Prose styles for documentation */
+/* Custom global styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-white dark:bg-black text-[#11181C] dark:text-[#ECEDEE] antialiased min-h-screen;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  ::selection {
+    background-color: rgb(0 114 245 / 0.25);
+  }
+
+  .dark ::selection {
+    background-color: rgb(0 114 245 / 0.35);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-b from-[#11181C] to-[#4B5563] dark:from-[#FFFFFF] dark:to-[#A1A1AA];
+  }
+}
+
+@layer components {
+  /* Shared content container width for Astro + React components */
+  .site-container {
+    @apply mx-auto w-full max-w-7xl px-6;
+  }
+
+  /*
+   * Marketing surfaces (HeroUI-like)
+   * Keep these in the components layer so utility classes can override them when needed.
+   */
+  .m-card-surface {
+    @apply rounded-2xl border border-white/5 bg-[#09090b] shadow-2xl transition-colors hover:bg-zinc-900;
+  }
+
+  .m-card-glass {
+    @apply rounded-2xl border border-white/10 bg-[#18181b]/70 backdrop-blur-xl shadow-2xl transition-colors hover:bg-[#18181b]/80;
+  }
+
+  .m-card-glass-soft {
+    @apply rounded-xl border border-white/10 bg-zinc-900/50 backdrop-blur-md shadow-xl;
+  }
+
+  .m-pill {
+    @apply rounded-2xl border border-white/5 bg-zinc-900/50 transition-colors hover:bg-zinc-800/50;
+  }
+
+  .m-pill-glass {
+    @apply rounded-full border border-white/10 bg-[#18181b]/70 backdrop-blur-xl;
+  }
+
+  /* Modifiers */
+  .m-card-hover-border {
+    @apply hover:border-zinc-700;
+  }
+
+  .m-card-hover-lift {
+    @apply transition-transform hover:-translate-y-0.5;
+  }
+
+  .m-shadow-float {
+    @apply shadow-xl;
+  }
+}
+
+/* Typography Scale & Prose Overrides */
 .prose {
-  @apply max-w-none;
+  @apply max-w-none text-gray-600 dark:text-gray-400;
 }
 
 .prose h1 {
-  @apply text-4xl font-bold mb-4;
+  @apply text-4xl font-bold mb-6 text-gray-900 dark:text-white tracking-tight;
 }
 
 .prose h2 {
-  @apply text-3xl font-bold mt-8 mb-4;
+  @apply text-3xl font-bold mt-10 mb-6 text-gray-900 dark:text-white tracking-tight;
 }
 
 .prose h3 {
-  @apply text-2xl font-bold mt-6 mb-3;
+  @apply text-2xl font-semibold mt-8 mb-4 text-gray-900 dark:text-white tracking-tight;
 }
 
 .prose p {
-  @apply mb-4 leading-relaxed;
+  @apply mb-6 leading-7;
 }
 
 .prose code {
-  @apply bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm;
+  @apply bg-default-100 px-1.5 py-0.5 rounded text-sm font-mono text-default-700;
 }
 
 .prose pre {
-  @apply bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto mb-4;
+  @apply bg-default-50 dark:bg-default-100/10 p-5 rounded-xl overflow-x-auto mb-6 border border-default-200 dark:border-default-100/10;
 }
 
 .prose a {
-  @apply text-blue-600 dark:text-blue-400 hover:underline;
+  @apply text-primary hover:opacity-80 underline decoration-primary/30 underline-offset-4 transition-opacity;
 }
 
 .prose ul,
 .prose ol {
-  @apply mb-4 ml-6;
+  @apply mb-6 ml-6 list-outside;
 }
 
 .prose li {
-  @apply mb-2;
+  @apply mb-2 pl-2;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-default-300 dark:bg-default-500/50 rounded-full border-[2px] border-transparent bg-clip-content hover:bg-default-400 dark:hover:bg-default-500;
 }

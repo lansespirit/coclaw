@@ -1,0 +1,15 @@
+---
+interface Props {
+  /** HTML tag name. Defaults to div. */
+  as?: string;
+  /** Additional classes appended to the base container. */
+  class?: string;
+}
+
+const { as = 'div', class: className = '' } = Astro.props;
+const Tag = as as keyof HTMLElementTagNameMap;
+---
+
+<Tag class={`mx-auto w-full max-w-7xl px-6 ${className}`.trim()}>
+  <slot />
+</Tag>

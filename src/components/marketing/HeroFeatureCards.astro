@@ -1,0 +1,142 @@
+---
+type Card = {
+  title: string;
+  description: string;
+  accent: 'purple' | 'pink' | 'blue' | 'green';
+  icon: 'spark' | 'bolt' | 'moon' | 'terminal';
+};
+
+interface Props {
+  cards?: Card[];
+}
+
+const defaultCards: Card[] = [
+  {
+    title: 'Config Generator',
+    description: 'No-code config creation with secure defaults and best practices built-in.',
+    accent: 'purple',
+    icon: 'spark',
+  },
+  {
+    title: 'Fast Setup',
+    description:
+      'Step-by-step guides for Mac, VPS, Docker, and more — optimized for first success.',
+    accent: 'pink',
+    icon: 'bolt',
+  },
+  {
+    title: 'Light & Dark UI',
+    description: 'A polished experience with accessible components and theme-aware design tokens.',
+    accent: 'blue',
+    icon: 'moon',
+  },
+  {
+    title: 'Troubleshooting',
+    description: 'Searchable fixes and battle-tested checklists to resolve issues quickly.',
+    accent: 'green',
+    icon: 'terminal',
+  },
+];
+
+const { cards = defaultCards } = Astro.props;
+
+const accentStyles = {
+  purple: {
+    ring: 'bg-purple-500/10 text-purple-400',
+    glow: 'from-purple-500/15',
+  },
+  pink: {
+    ring: 'bg-pink-500/10 text-pink-400',
+    glow: 'from-pink-500/15',
+  },
+  blue: {
+    ring: 'bg-blue-500/10 text-blue-400',
+    glow: 'from-blue-500/15',
+  },
+  green: {
+    ring: 'bg-emerald-500/10 text-emerald-400',
+    glow: 'from-emerald-500/15',
+  },
+} as const;
+---
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  {
+    cards.map((card) => {
+      const accent = accentStyles[card.accent];
+
+      return (
+        <div class="relative overflow-hidden group m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <div
+            class={`pointer-events-none absolute -top-24 -left-24 h-48 w-48 rounded-full blur-3xl bg-gradient-to-br ${accent.glow} to-transparent`}
+          />
+
+          <div class="relative z-10 flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <div class={`h-10 w-10 rounded-full flex items-center justify-center ${accent.ring}`}>
+                {card.icon === 'spark' && (
+                  <svg
+                    class="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M12 2l1.2 4.2L17 8l-3.8 1.8L12 14l-1.2-4.2L7 8l3.8-1.8L12 2z"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M5 14l.7 2.4L8 17l-2.3.6L5 20l-.7-2.4L2 17l2.3-.6L5 14z"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M19 12l.7 2.4L22 15l-2.3.6L19 18l-.7-2.4L16 15l2.3-.6L19 12z"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                )}
+                {card.icon === 'bolt' && (
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+                  </svg>
+                )}
+                {card.icon === 'moon' && (
+                  <svg
+                    class="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M21 12.7A8.5 8.5 0 0 1 11.3 3a7 7 0 1 0 9.7 9.7z"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                )}
+                {card.icon === 'terminal' && (
+                  <svg
+                    class="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M4 5h16v14H4z" stroke-linejoin="round" />
+                    <path d="M7 9l3 3-3 3" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M12 15h5" stroke-linecap="round" />
+                  </svg>
+                )}
+              </div>
+              <h3 class="font-semibold text-white text-base tracking-tight">{card.title}</h3>
+            </div>
+
+            <p class="text-sm leading-relaxed text-zinc-400">{card.description}</p>
+          </div>
+        </div>
+      );
+    })
+  }
+</div>

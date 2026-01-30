@@ -1,4 +1,6 @@
 ---
+import { Navbar } from '../components/Navbar';
+import { Footer } from '../components/Footer';
 import '../styles/global.css';
 
 interface Props {
@@ -18,41 +20,53 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <!-- Tailwind config enables class-based dark mode; keep current behavior via system preference by default. -->
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Theme script -->
     <script is:inline>
       (() => {
         try {
-          const stored = localStorage.getItem('theme'); // "light" | "dark"
+          const stored = localStorage.getItem('theme');
           const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
           const shouldDark = stored ? stored === 'dark' : prefersDark;
           document.documentElement.classList.toggle('dark', shouldDark);
-        } catch {
-          // If storage is blocked, fall back to no-op.
-        }
+        } catch {}
       })();
     </script>
 
-    <!-- Primary Meta Tags -->
     <title>{title}</title>
     <meta name="title" content={title} />
     {description && <meta name="description" content={description} />}
     <link rel="canonical" href={canonicalURL} />
 
-    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     {description && <meta property="og:description" content={description} />}
     {ogImage && <meta property="og:image" content={new URL(ogImage, Astro.site)} />}
 
-    <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={canonicalURL} />
     <meta property="twitter:title" content={title} />
     {description && <meta property="twitter:description" content={description} />}
     {ogImage && <meta property="twitter:image" content={new URL(ogImage, Astro.site)} />}
   </head>
-  <body>
-    <slot />
+  <body class="bg-white dark:bg-black text-foreground min-h-screen flex flex-col">
+    <slot name="topbar" />
+    <header class="sticky top-0 z-50">
+      <Navbar client:load />
+    </header>
+
+    <main class="flex-grow">
+      <slot />
+    </main>
+    <Footer client:visible />
   </body>
 </html>

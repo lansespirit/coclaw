@@ -1,0 +1,302 @@
+---
+import { Button } from '@heroui/react';
+import Section from '../layout/Section.astro';
+import HeroFeatureCards from './HeroFeatureCards.astro';
+import HeroBackground from './backgrounds/HeroBackground.astro';
+
+interface Props {
+  badge?: string;
+  badgeUrl?: string;
+}
+
+const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
+---
+
+<Section py="py-20 lg:py-32" class="z-10 overflow-visible" containerClass="overflow-visible">
+  <div class="flex flex-col lg:flex-row items-center justify-between gap-12 overflow-visible">
+    <!-- Content Column (Left) -->
+    <div class="flex-1 text-left z-20 max-w-2xl">
+      <!-- Version Badge -->
+      {
+        badge && (
+          <a
+            href={badgeUrl}
+            class="inline-flex items-center gap-2 px-3 py-1 mb-6 text-xs font-medium transition-colors border rounded-full text-default-500 hover:text-default-300 border-default-200/50 hover:bg-default-100/10 backdrop-blur-md group"
+          >
+            <span class="text-orange-500 group-hover:animate-pulse">🔥</span>
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+              {badge}
+            </span>
+            <svg
+              class="w-3 h-3 opacity-60 group-hover:translate-x-0.5 transition-transform"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M7 17L17 7M17 7H7M17 7V17" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </a>
+        )
+      }
+
+      <!-- Main Heading -->
+      <h1 class="text-5xl font-extrabold tracking-tight md:text-7xl mb-6 leading-[1.1]">
+        Make <span class="text-pink-600">beautiful</span> websites <br />
+        regardless of your design experience.
+      </h1>
+
+      <!-- Subheading -->
+      <p class="text-lg text-default-400 md:text-xl leading-relaxed mb-8 max-w-xl">
+        Beautiful, fast and modern React UI library for building accessible and customizable web
+        applications.
+      </p>
+
+      <!-- CTA Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        <Button
+          as="a"
+          href="/docs"
+          color="primary"
+          radius="full"
+          size="lg"
+          className="font-semibold px-8 shadow-lg shadow-primary/20"
+          client:visible
+        >
+          Get Started
+          <svg
+            class="w-4 h-4 ml-1"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M5 12h14m-7-7 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </Button>
+
+        <div
+          class="m-card-glass-soft flex items-center gap-2 px-4 py-3 text-sm font-mono text-default-400"
+        >
+          <span class="text-default-500 select-none">$</span>
+          <span class="text-default-300">npx heroui-cli@latest init</span>
+          <button class="ml-4 hover:text-white transition-colors group" aria-label="Copy command">
+            <svg
+              class="w-4 h-4 group-hover:scale-110 transition-transform"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                stroke-linecap="round"
+                stroke-linejoin="round"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visual Column (Right) -->
+    <div class="flex-1 w-full relative h-[600px] hidden lg:block perspective-[1000px]">
+      <!-- Background Mesh/Glow -->
+      <!-- Floating Element 1: Top Right Camera Card -->
+      <div class="absolute top-0 right-10 animate-float-slow z-30">
+        <div class="m-card-glass w-[240px] rounded-3xl p-4">
+          <div
+            class="h-32 rounded-2xl bg-gradient-to-b from-cyan-400 to-blue-600 relative overflow-hidden mb-3 group cursor-pointer"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+              class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity mix-blend-overlay"
+            />
+            <div
+              class="absolute bottom-2 left-3 bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-2 py-1 text-[10px] font-bold text-white"
+            >
+              Camera $525
+            </div>
+          </div>
+          <div class="flex justify-between items-center px-1">
+            <div class="flex gap-1">
+              <span class="w-2 h-2 rounded-full bg-zinc-700"></span>
+              <span class="w-2 h-2 rounded-full bg-zinc-700"></span>
+            </div>
+            <div class="w-8 h-4 bg-blue-500 rounded-full"></div>
+          </div>
+        </div>
+
+        <!-- Toggle Switch attached -->
+        <div
+          class="m-pill-glass m-shadow-float absolute top-12 -right-16 p-2 flex gap-2 items-center animate-float-delayed"
+        >
+          <div class="w-12 h-6 bg-blue-500 rounded-full relative">
+            <div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Element 2: Middle Cluster (User & Input) -->
+      <div
+        class="absolute top-[180px] left-0 md:left-10 z-20 flex flex-col gap-4 animate-float-mid"
+      >
+        <!-- Notes/Tasks Pill -->
+        <div class="m-pill-glass self-end mb-4 p-1 flex text-xs font-medium text-zinc-500">
+          <span class="bg-zinc-800 text-white rounded-full px-3 py-1 shadow-sm">Notes</span>
+          <span class="px-3 py-1 cursor-pointer hover:text-zinc-300">Tasks</span>
+          <span class="px-3 py-1 cursor-pointer hover:text-zinc-300">Files</span>
+        </div>
+
+        <!-- User Card -->
+        <div class="m-card-glass p-5 rounded-[24px] w-[300px]">
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex gap-3">
+              <div
+                class="w-10 h-10 rounded-full bg-gradient-to-tr from-yellow-500 to-red-500 p-[2px]"
+              >
+                <img
+                  src="https://i.pravatar.cc/150?u=a042581f4e29026024d"
+                  alt="Zoey"
+                  class="w-full h-full rounded-full object-cover border-2 border-black"
+                />
+              </div>
+              <div>
+                <h3 class="font-bold text-white text-sm">Zoey Lang</h3>
+                <p class="text-zinc-500 text-xs">@zoeylang</p>
+              </div>
+            </div>
+            <Button
+              color="primary"
+              size="sm"
+              radius="full"
+              className="h-7 text-xs px-3"
+              client:visible>Follow</Button
+            >
+          </div>
+          <p class="text-zinc-400 text-xs leading-relaxed mb-4">
+            Full-stack developer, @heroui lover she/her 💅
+          </p>
+          <div class="flex gap-4 text-xs font-medium border-t border-white/5 pt-3">
+            <div class="text-white">4 <span class="text-zinc-500 font-normal">Following</span></div>
+            <div class="text-white">
+              97.1K <span class="text-zinc-500 font-normal">Followers</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Element 3: Input Field & UI Icon -->
+      <div
+        class="absolute top-[250px] right-0 md:right-20 z-20 animate-float-delayed flex flex-col gap-4 items-end"
+      >
+        <!-- Pagination -->
+        <div
+          class="bg-[#18181b] text-zinc-400 text-xs py-2 px-4 rounded-xl border border-white/10 flex items-center gap-3"
+        >
+          <span class="hover:text-white cursor-pointer">&lt;</span>
+          <span>1</span>
+          <span>...</span>
+          <span>5</span>
+          <span
+            class="bg-blue-600 text-white w-6 h-6 flex items-center justify-center rounded-lg shadow-lg"
+            >6</span
+          >
+          <span>7</span>
+          <span>...</span>
+          <span>10</span>
+          <span class="hover:text-white cursor-pointer">&gt;</span>
+        </div>
+
+        <!-- Input Field with UI Icon -->
+        <div class="relative flex items-center gap-4">
+          <div class="m-card-glass w-16 h-16 flex items-center justify-center">
+            <span class="text-2xl font-bold text-white">UI</span>
+          </div>
+          <div
+            class="m-card-glass-soft px-4 py-2 w-48 flex justify-between items-center text-sm text-zinc-400"
+          >
+            <span>HeroUI</span>
+            <div
+              class="w-4 h-4 rounded-full bg-zinc-700/50 flex items-center justify-center text-[10px]"
+            >
+              x
+            </div>
+          </div>
+          <span class="absolute -top-5 left-24 text-purple-500 text-xs font-mono">Input</span>
+        </div>
+      </div>
+
+      <!-- Floating Element 4: Bottom Right Gradient Card -->
+      <div class="absolute bottom-0 right-10 z-30 animate-float-slow">
+        <div
+          class="w-[200px] h-[220px] rounded-3xl overflow-hidden relative group shadow-2xl border border-white/10"
+        >
+          <img
+            src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            class="w-full h-full object-cover"
+          />
+          <div
+            class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-blue-900/90 to-transparent flex flex-col justify-end p-4"
+          >
+            <div class="flex justify-between items-center">
+              <span class="text-[10px] text-white/80 font-medium">Available soon.</span>
+              <button
+                class="bg-white/20 backdrop-blur-md hover:bg-white/30 text-white text-[10px] px-2 py-1 rounded-lg transition-colors"
+                >Notify me</button
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Tooltip -->
+        <div class="absolute -top-16 -left-20">
+          <div
+            class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg mb-2 whitespace-nowrap"
+          >
+            Build beautiful apps faster
+          </div>
+          <div
+            class="bg-[#27272a] text-zinc-400 text-[10px] px-2 py-1 rounded-md w-fit ml-auto border border-white/5"
+          >
+            Tooltip
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HeroUI-like feature cards (bottom row) -->
+  <div class="mt-14 lg:mt-20">
+    <HeroFeatureCards />
+  </div>
+
+  <HeroBackground slot="background" />
+</Section>
+
+<style>
+  .perspective-\[1000px\] {
+    perspective: 1000px;
+  }
+
+  .animate-float-slow {
+    animation: float 8s ease-in-out infinite;
+  }
+  .animate-float-mid {
+    animation: float 7s ease-in-out 1s infinite;
+  }
+  .animate-float-delayed {
+    animation: float 9s ease-in-out 2s infinite;
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-15px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+</style>

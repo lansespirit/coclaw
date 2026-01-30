@@ -1,0 +1,24 @@
+---
+import Container from './Container.astro';
+
+interface Props {
+  /** HTML tag name. Defaults to section. */
+  as?: string;
+  /** Classes applied to the outer section wrapper. */
+  class?: string;
+  /** Classes applied to the inner Container wrapper. */
+  containerClass?: string;
+  /** Vertical padding classes. Defaults to py-24. */
+  py?: string;
+}
+
+const { as = 'section', class: sectionClass = '', containerClass = '', py = 'py-24' } = Astro.props;
+const Tag = as as keyof HTMLElementTagNameMap;
+---
+
+<Tag class={`relative ${py} ${sectionClass}`.trim()}>
+  <Container class={`relative z-10 ${containerClass}`.trim()}>
+    <slot />
+  </Container>
+  <slot name="background" />
+</Tag>

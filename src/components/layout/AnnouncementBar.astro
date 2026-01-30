@@ -1,0 +1,48 @@
+---
+interface Props {
+  message?: string;
+  ctaText?: string;
+  ctaHref?: string;
+}
+
+const {
+  message = 'Ship faster with OpenClaw setup & best practices',
+  ctaText = 'Config Generator →',
+  ctaHref = '/tools/config-generator',
+} = Astro.props;
+---
+
+<div
+  class="relative w-full overflow-hidden border-b border-white/5 bg-black/40 backdrop-blur-xl backdrop-saturate-150"
+>
+  <!-- Subtle topbar gradient wash -->
+  <div
+    class="pointer-events-none absolute inset-0 z-0 bg-gradient-to-r from-purple-500/10 via-transparent to-cyan-500/10"
+  >
+  </div>
+
+  <div class="site-container relative z-10 py-2">
+    <div class="flex items-center justify-center gap-3 text-sm">
+      <span class="text-default-400">
+        <span class="mr-2" aria-hidden="true">🚀</span>
+        <span
+          class="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-pink-200 to-cyan-200"
+        >
+          {message}
+        </span>
+      </span>
+
+      <!-- Glowing gradient border CTA -->
+      <a
+        href={ctaHref}
+        class="relative inline-flex rounded-full p-[1px] bg-gradient-to-r from-fuchsia-500/80 via-pink-500/80 to-cyan-400/70 shadow-[0_0_30px_-12px_rgba(236,72,153,0.9)] hover:shadow-[0_0_42px_-14px_rgba(168,85,247,0.9)] transition-shadow"
+      >
+        <span
+          class="inline-flex items-center gap-2 rounded-full bg-black/60 px-4 py-1.5 text-white/90 hover:text-white backdrop-blur-xl transition-colors"
+        >
+          {ctaText}
+        </span>
+      </a>
+    </div>
+  </div>
+</div>

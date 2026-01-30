@@ -1,0 +1,79 @@
+---
+/**
+ * Section-level Hero backdrop (glow + mesh) inspired by heroui.com.
+ * Intended to be mounted via <Section><... slot="background" /></Section>.
+ */
+---
+
+<div class="pointer-events-none absolute inset-0 overflow-hidden">
+  <!-- Soft purple glow -->
+  <div
+    class="absolute -top-48 right-[-20%] w-[900px] h-[900px] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-purple-900/35 via-transparent to-transparent blur-3xl"
+  >
+  </div>
+
+  <!-- Subtle pink glow near the bottom -->
+  <div
+    class="absolute -bottom-64 left-[-10%] w-[900px] h-[900px] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-pink-900/20 via-transparent to-transparent blur-3xl"
+  >
+  </div>
+
+  <!-- Abstract mesh lines -->
+  <svg
+    class="absolute -top-24 -right-24 w-[140%] h-[140%] opacity-30"
+    viewBox="0 0 1000 800"
+    aria-hidden="true"
+  >
+    <defs>
+      <linearGradient id="hero-grid-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="transparent"></stop>
+        <stop offset="50%" stop-color="#ec4899"></stop>
+        <stop offset="100%" stop-color="transparent"></stop>
+      </linearGradient>
+    </defs>
+    <path d="M0,400 Q500,300 1000,400" stroke="url(#hero-grid-grad)" stroke-width="1" fill="none"
+    ></path>
+    <path d="M0,420 Q500,320 1000,420" stroke="url(#hero-grid-grad)" stroke-width="1" fill="none"
+    ></path>
+    <path d="M0,440 Q500,340 1000,440" stroke="url(#hero-grid-grad)" stroke-width="1" fill="none"
+    ></path>
+    <path d="M0,460 Q500,360 1000,460" stroke="url(#hero-grid-grad)" stroke-width="1" fill="none"
+    ></path>
+    <path d="M0,480 Q500,380 1000,480" stroke="url(#hero-grid-grad)" stroke-width="1" fill="none"
+    ></path>
+  </svg>
+
+  <!-- Bottom wave mesh (behind the feature cards) -->
+  <svg
+    class="absolute -bottom-56 left-1/2 -translate-x-1/2 w-[1600px] max-w-none h-[700px] opacity-40"
+    viewBox="0 0 1600 700"
+    aria-hidden="true"
+  >
+    <defs>
+      <linearGradient id="hero-wave-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="transparent"></stop>
+        <stop offset="35%" stop-color="#a855f7" stop-opacity="0.8"></stop>
+        <stop offset="65%" stop-color="#ec4899" stop-opacity="0.8"></stop>
+        <stop offset="100%" stop-color="transparent"></stop>
+      </linearGradient>
+    </defs>
+
+    <path
+      d="M-50 520 C 250 380, 520 660, 820 520 C 1120 380, 1390 660, 1690 520"
+      stroke="url(#hero-wave-grad)"
+      stroke-width="1"
+      fill="none"></path>
+    <path
+      d="M-50 540 C 250 400, 520 680, 820 540 C 1120 400, 1390 680, 1690 540"
+      stroke="url(#hero-wave-grad)"
+      stroke-width="1"
+      fill="none"
+      opacity="0.85"></path>
+    <path
+      d="M-50 560 C 250 420, 520 700, 820 560 C 1120 420, 1390 700, 1690 560"
+      stroke="url(#hero-wave-grad)"
+      stroke-width="1"
+      fill="none"
+      opacity="0.7"></path>
+  </svg>
+</div>

@@ -1,71 +1,53 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/marketing/Hero.astro';
+import FeaturesDetailed from '../components/marketing/FeaturesDetailed.astro';
+import BentoGrid from '../components/marketing/BentoGrid.astro';
+import Community from '../components/marketing/Community.astro';
+import Section from '../components/layout/Section.astro';
+import AnnouncementBar from '../components/layout/AnnouncementBar.astro';
 ---
 
 <BaseLayout
-  title="CoClaw - OpenClaw User Support & Community Platform"
-  description="Comprehensive support and community platform for OpenClaw users. Tutorials, troubleshooting, and best practices."
+  title="HeroUI - Make beautiful websites regardless of your design experience"
+  description="Beautiful, fast and modern React UI library for building accessible and customizable web applications."
 >
-  <main
-    class="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800"
+  <AnnouncementBar slot="topbar" />
+  <div
+    class="bg-black min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-200"
   >
-    <div class="container mx-auto px-4 py-16">
-      <div class="text-center mb-16">
-        <h1 class="text-5xl font-bold mb-4 text-gray-900 dark:text-white">Welcome to CoClaw</h1>
-        <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          Your comprehensive guide to successfully deploying and maximizing OpenClaw's potential
-        </p>
-      </div>
+    <Hero />
 
-      <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">🚀 Getting Started</h2>
-          <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Step-by-step installation guides for macOS, Linux, and Windows
-          </p>
-          <a href="/getting-started" class="text-blue-600 dark:text-blue-400 hover:underline">
-            Start here →
-          </a>
-        </div>
+    <FeaturesDetailed />
 
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">📚 Documentation</h2>
-          <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Comprehensive guides for channels, security, and automation
-          </p>
-          <a href="/guides" class="text-blue-600 dark:text-blue-400 hover:underline">
-            Browse docs →
-          </a>
-        </div>
+    <BentoGrid />
 
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-          <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white">🔧 Troubleshooting</h2>
-          <p class="text-gray-600 dark:text-gray-300 mb-4">
-            Searchable database of common errors and solutions
-          </p>
-          <a href="/troubleshooting" class="text-blue-600 dark:text-blue-400 hover:underline">
-            Find solutions →
-          </a>
-        </div>
-      </div>
+    <Community />
 
-      <div class="mt-16 text-center">
-        <h2 class="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Featured Tools</h2>
-        <div
-          class="bg-gradient-to-r from-blue-500 to-purple-600 p-8 rounded-lg shadow-xl max-w-4xl mx-auto"
+    <!-- Support Section -->
+    <Section containerClass="text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-6">
+        Support HeroUI <span class="text-pink-500">❤️</span>
+      </h2>
+      <p class="text-zinc-500 max-w-2xl mx-auto text-lg">
+        Using HeroUI in a profit-making product, as a freelancer, or for fun projects? Your
+        contributions will help to make HeroUI better.
+      </p>
+      <div class="mt-8">
+        <a
+          href="#"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#18181b] border border-white/10 hover:bg-zinc-800 transition-colors font-semibold text-white"
         >
-          <h3 class="text-2xl font-bold mb-4 text-white">🛠️ Visual Configuration Generator</h3>
-          <p class="text-white mb-6">
-            Generate secure OpenClaw configurations without manual JSON editing
-          </p>
-          <a
-            href="/tools/config-generator"
-            class="inline-block bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition"
-          >
-            Try it now
-          </a>
-        </div>
+          <span class="text-pink-500">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"
+              ><path
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              ></path></svg
+            >
+          </span>
+          Sponsor Application
+        </a>
       </div>
-    </div>
-  </main>
+    </Section>
+  </div>
 </BaseLayout>

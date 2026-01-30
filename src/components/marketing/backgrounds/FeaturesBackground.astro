@@ -1,0 +1,20 @@
+---
+/**
+ * Section-level backdrop for Features (dual glow).
+ * Intended to be mounted via <Section><... slot="background" /></Section>.
+ */
+---
+
+<div class="pointer-events-none absolute inset-0 overflow-hidden">
+  <!-- Green glow (top/right) -->
+  <div
+    class="absolute -top-64 right-[-20%] w-[900px] h-[900px] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-500/15 via-transparent to-transparent blur-3xl"
+  >
+  </div>
+
+  <!-- Orange glow (bottom/left) -->
+  <div
+    class="absolute -bottom-72 left-[-20%] w-[900px] h-[900px] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-orange-500/15 via-transparent to-transparent blur-3xl"
+  >
+  </div>
+</div>
