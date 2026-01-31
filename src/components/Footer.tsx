@@ -3,7 +3,7 @@ import { Link, HeroUIProvider } from '@heroui/react';
 export const Footer = () => {
   return (
     <HeroUIProvider>
-      <footer className="w-full border-t border-default-200 bg-white/50 dark:bg-black/50 py-12 backdrop-blur-lg">
+      <footer className="w-full border-t border-divider bg-background/60 py-12 backdrop-blur-lg">
         <div className="site-container">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
@@ -86,7 +86,7 @@ export const Footer = () => {
             </div>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-default-200">
+          <div className="mt-12 pt-8 border-t border-divider">
             <p className="text-center text-sm text-default-400">
               &copy; {new Date().getFullYear()} CoClaw. Not affiliated with the official OpenClaw
               project.

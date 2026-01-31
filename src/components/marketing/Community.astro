@@ -13,7 +13,7 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
           >Prettier</span
         >
       </h2>
-      <p class="text-xl text-zinc-400 max-w-lg">
+      <p class="text-xl text-default-500 max-w-lg">
         Experience it firsthand and show us your creations!
       </p>
       <div class="flex gap-4">
@@ -34,7 +34,7 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
           variant="bordered"
           radius="full"
           size="lg"
-          className="font-semibold px-8 border-zinc-700 text-white hover:bg-zinc-800"
+          className="font-semibold px-8"
           client:visible
         >
           <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor"
@@ -63,8 +63,8 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
             ></path></svg
           >
         </div>
-        <h3 class="font-bold text-white mb-2">Getting Started</h3>
-        <p class="text-zinc-500 text-sm">
+        <h3 class="font-bold text-foreground mb-2">Getting Started</h3>
+        <p class="text-default-500 text-sm">
           Make beautiful, modern, and fast websites/applications regardless of your design
           experience.
         </p>
@@ -77,9 +77,9 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
         >
           <span class="font-bold">N</span>
         </div>
-        <h3 class="font-bold text-white mb-2">HeroUI + Next.js</h3>
-        <p class="text-zinc-500 text-sm">
-          HeroUI is fully compatible with the new Next.js <code class="bg-zinc-800 px-1 rounded"
+        <h3 class="font-bold text-foreground mb-2">HeroUI + Next.js</h3>
+        <p class="text-default-500 text-sm">
+          HeroUI is fully compatible with the new Next.js <code class="bg-content2 text-foreground/80 px-1 rounded"
             >app/</code
           > directory structure.
         </p>
@@ -89,7 +89,7 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
 
   <div class="text-center mb-12">
     <h2 class="text-4xl md:text-5xl font-bold mb-4">Community</h2>
-    <p class="text-zinc-500">Get involved in our community. Everyone is welcome!</p>
+    <p class="text-default-500">Get involved in our community. Everyone is welcome!</p>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -119,7 +119,7 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
           class="m-card-surface m-card-hover-border m-card-hover-lift p-6 flex flex-col group"
         >
           <div class="flex items-center gap-3 mb-4">
-            <span class="text-2xl text-white group-hover:text-primary transition-colors">
+            <span class="text-2xl text-foreground group-hover:text-primary transition-colors">
               {item.icon === 'X' && (
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
@@ -136,9 +136,9 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
                 </svg>
               )}
             </span>
-            <span class="font-bold text-white">{item.name}</span>
+            <span class="font-bold text-foreground">{item.name}</span>
             <svg
-              class="w-4 h-4 text-zinc-600 group-hover:text-white transition-colors ml-auto"
+              class="w-4 h-4 text-default-500 group-hover:text-foreground transition-colors ml-auto"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -151,7 +151,7 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
               />
             </svg>
           </div>
-          <p class="text-zinc-500 text-sm leading-relaxed">{item.desc}</p>
+          <p class="text-default-500 text-sm leading-relaxed">{item.desc}</p>
         </a>
       ))
     }

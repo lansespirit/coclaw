@@ -14,7 +14,7 @@ import AnnouncementBar from '../components/layout/AnnouncementBar.astro';
 >
   <AnnouncementBar slot="topbar" />
   <div
-    class="bg-black min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-200"
+    class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
   >
     <Hero />
 
@@ -36,7 +36,7 @@ import AnnouncementBar from '../components/layout/AnnouncementBar.astro';
       <div class="mt-8">
         <a
           href="#"
-          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#18181b] border border-white/10 hover:bg-zinc-800 transition-colors font-semibold text-white"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold text-foreground"
         >
           <span class="text-pink-500">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"

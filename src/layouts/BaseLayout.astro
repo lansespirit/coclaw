@@ -34,8 +34,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       (() => {
         try {
           const stored = localStorage.getItem('theme');
-          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          const shouldDark = stored ? stored === 'dark' : prefersDark;
+          // Default to dark unless user explicitly chose a theme.
+          const shouldDark = stored ? stored === 'dark' : true;
           document.documentElement.classList.toggle('dark', shouldDark);
         } catch {}
       })();
@@ -58,7 +58,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     {description && <meta property="twitter:description" content={description} />}
     {ogImage && <meta property="twitter:image" content={new URL(ogImage, Astro.site)} />}
   </head>
-  <body class="bg-white dark:bg-black text-foreground min-h-screen flex flex-col">
+  <body class="bg-background text-foreground min-h-screen flex flex-col">
     <slot name="topbar" />
     <header class="sticky top-0 z-50">
       <Navbar client:load />

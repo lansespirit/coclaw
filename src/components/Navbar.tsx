@@ -26,12 +26,11 @@ export const Navbar = () => {
   return (
     <HeroUIProvider>
       <HeroNavbar
-        maxWidth="full"
+        maxWidth="2xl"
         position="static"
         onMenuOpenChange={setIsMenuOpen}
         classNames={{
-          base: 'bg-background/30 backdrop-blur-xl backdrop-saturate-150 shadow-[0_10px_30px_-25px_rgba(0,0,0,0.8)]',
-          wrapper: 'site-container',
+          base: 'shadow-[0_10px_30px_-25px_rgb(0_0_0/0.25)] dark:shadow-[0_10px_30px_-25px_rgb(0_0_0/0.8)]',
           item: 'data-[active=true]:text-primary',
         }}
       >
@@ -44,7 +43,7 @@ export const Navbar = () => {
             <a href="/" className="flex items-center gap-3 font-bold text-inherit">
               <span className="text-2xl">🦀</span>
               <span className="text-xl tracking-tight">CoClaw</span>
-              <span className="hidden sm:inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs font-medium text-default-400">
+              <span className="hidden sm:inline-flex items-center rounded-full border border-divider bg-content2/60 px-2 py-0.5 text-xs font-medium text-default-500">
                 v0.0.1
               </span>
             </a>
@@ -57,7 +56,7 @@ export const Navbar = () => {
               <Link
                 color="foreground"
                 href={item.href}
-                className="text-sm font-medium hover:text-white transition-colors"
+                className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
               >
                 {item.name}
               </Link>

@@ -80,7 +80,7 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
         >
           <span class="text-default-500 select-none">$</span>
           <span class="text-default-300">npx heroui-cli@latest init</span>
-          <button class="ml-4 hover:text-white transition-colors group" aria-label="Copy command">
+          <button class="ml-4 hover:text-foreground transition-colors group" aria-label="Copy command">
             <svg
               class="w-4 h-4 group-hover:scale-110 transition-transform"
               viewBox="0 0 24 24"
@@ -112,15 +112,15 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
               class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity mix-blend-overlay"
             />
             <div
-              class="absolute bottom-2 left-3 bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-2 py-1 text-[10px] font-bold text-white"
+              class="absolute bottom-2 left-3 bg-background/50 backdrop-blur-md border border-divider rounded-full px-2 py-1 text-[10px] font-bold text-foreground"
             >
               Camera $525
             </div>
           </div>
           <div class="flex justify-between items-center px-1">
             <div class="flex gap-1">
-              <span class="w-2 h-2 rounded-full bg-zinc-700"></span>
-              <span class="w-2 h-2 rounded-full bg-zinc-700"></span>
+              <span class="w-2 h-2 rounded-full bg-default-400/70"></span>
+              <span class="w-2 h-2 rounded-full bg-default-400/70"></span>
             </div>
             <div class="w-8 h-4 bg-blue-500 rounded-full"></div>
           </div>
@@ -141,10 +141,10 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
         class="absolute top-[180px] left-0 md:left-10 z-20 flex flex-col gap-4 animate-float-mid"
       >
         <!-- Notes/Tasks Pill -->
-        <div class="m-pill-glass self-end mb-4 p-1 flex text-xs font-medium text-zinc-500">
-          <span class="bg-zinc-800 text-white rounded-full px-3 py-1 shadow-sm">Notes</span>
-          <span class="px-3 py-1 cursor-pointer hover:text-zinc-300">Tasks</span>
-          <span class="px-3 py-1 cursor-pointer hover:text-zinc-300">Files</span>
+        <div class="m-pill-glass self-end mb-4 p-1 flex text-xs font-medium text-default-500">
+          <span class="bg-content1 text-foreground rounded-full px-3 py-1 shadow-sm">Notes</span>
+          <span class="px-3 py-1 cursor-pointer hover:text-foreground">Tasks</span>
+          <span class="px-3 py-1 cursor-pointer hover:text-foreground">Files</span>
         </div>
 
         <!-- User Card -->
@@ -161,8 +161,8 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
                 />
               </div>
               <div>
-                <h3 class="font-bold text-white text-sm">Zoey Lang</h3>
-                <p class="text-zinc-500 text-xs">@zoeylang</p>
+                <h3 class="font-bold text-foreground text-sm">Zoey Lang</h3>
+                <p class="text-default-500 text-xs">@zoeylang</p>
               </div>
             </div>
             <Button
@@ -173,13 +173,15 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
               client:visible>Follow</Button
             >
           </div>
-          <p class="text-zinc-400 text-xs leading-relaxed mb-4">
+          <p class="text-default-500 text-xs leading-relaxed mb-4">
             Full-stack developer, @heroui lover she/her 💅
           </p>
-          <div class="flex gap-4 text-xs font-medium border-t border-white/5 pt-3">
-            <div class="text-white">4 <span class="text-zinc-500 font-normal">Following</span></div>
-            <div class="text-white">
-              97.1K <span class="text-zinc-500 font-normal">Followers</span>
+          <div class="flex gap-4 text-xs font-medium border-t border-divider pt-3">
+            <div class="text-foreground">
+              4 <span class="text-default-500 font-normal">Following</span>
+            </div>
+            <div class="text-foreground">
+              97.1K <span class="text-default-500 font-normal">Followers</span>
             </div>
           </div>
         </div>
@@ -191,9 +193,9 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
       >
         <!-- Pagination -->
         <div
-          class="bg-[#18181b] text-zinc-400 text-xs py-2 px-4 rounded-xl border border-white/10 flex items-center gap-3"
+          class="bg-content1 text-default-500 text-xs py-2 px-4 rounded-xl border border-divider flex items-center gap-3"
         >
-          <span class="hover:text-white cursor-pointer">&lt;</span>
+          <span class="hover:text-foreground cursor-pointer">&lt;</span>
           <span>1</span>
           <span>...</span>
           <span>5</span>
@@ -204,20 +206,20 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
           <span>7</span>
           <span>...</span>
           <span>10</span>
-          <span class="hover:text-white cursor-pointer">&gt;</span>
+          <span class="hover:text-foreground cursor-pointer">&gt;</span>
         </div>
 
         <!-- Input Field with UI Icon -->
         <div class="relative flex items-center gap-4">
           <div class="m-card-glass w-16 h-16 flex items-center justify-center">
-            <span class="text-2xl font-bold text-white">UI</span>
+            <span class="text-2xl font-bold text-foreground">UI</span>
           </div>
           <div
-            class="m-card-glass-soft px-4 py-2 w-48 flex justify-between items-center text-sm text-zinc-400"
+            class="m-card-glass-soft px-4 py-2 w-48 flex justify-between items-center text-sm text-default-500"
           >
             <span>HeroUI</span>
             <div
-              class="w-4 h-4 rounded-full bg-zinc-700/50 flex items-center justify-center text-[10px]"
+              class="w-4 h-4 rounded-full bg-default-400/40 flex items-center justify-center text-[10px]"
             >
               x
             </div>
@@ -229,7 +231,7 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
       <!-- Floating Element 4: Bottom Right Gradient Card -->
       <div class="absolute bottom-0 right-10 z-30 animate-float-slow">
         <div
-          class="w-[200px] h-[220px] rounded-3xl overflow-hidden relative group shadow-2xl border border-white/10"
+          class="w-[200px] h-[220px] rounded-3xl overflow-hidden relative group shadow-2xl border border-divider"
         >
           <img
             src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
@@ -256,7 +258,7 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
             Build beautiful apps faster
           </div>
           <div
-            class="bg-[#27272a] text-zinc-400 text-[10px] px-2 py-1 rounded-md w-fit ml-auto border border-white/5"
+            class="bg-content2/80 text-default-500 text-[10px] px-2 py-1 rounded-md w-fit ml-auto border border-divider"
           >
             Tooltip
           </div>

@@ -7,10 +7,8 @@ export const ThemeSwitch = () => {
   useEffect(() => {
     // Check initial theme
     const savedTheme = localStorage.getItem('theme');
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
-    const currentTheme = savedTheme || systemTheme;
+    // Default to dark unless the user explicitly chose a theme.
+    const currentTheme = savedTheme || 'dark';
 
     setTheme(currentTheme);
     document.documentElement.classList.toggle('dark', currentTheme === 'dark');

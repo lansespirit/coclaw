@@ -13,7 +13,7 @@ const {
 ---
 
 <div
-  class="relative w-full overflow-hidden border-b border-white/5 bg-black/40 backdrop-blur-xl backdrop-saturate-150"
+  class="relative w-full overflow-hidden border-b border-divider bg-background/60 backdrop-blur-xl backdrop-saturate-150"
 >
   <!-- Subtle topbar gradient wash -->
   <div
@@ -21,12 +21,12 @@ const {
   >
   </div>
 
-  <div class="site-container relative z-10 py-2">
+  <div class="site-container-wide relative z-10 py-2">
     <div class="flex items-center justify-center gap-3 text-sm">
-      <span class="text-default-400">
+      <span class="text-default-600 dark:text-default-400">
         <span class="mr-2" aria-hidden="true">🚀</span>
         <span
-          class="bg-clip-text text-transparent bg-gradient-to-r from-purple-300 via-pink-200 to-cyan-200"
+          class="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-pink-500 to-cyan-500 dark:from-purple-300 dark:via-pink-200 dark:to-cyan-200"
         >
           {message}
         </span>
@@ -35,10 +35,10 @@ const {
       <!-- Glowing gradient border CTA -->
       <a
         href={ctaHref}
-        class="relative inline-flex rounded-full p-[1px] bg-gradient-to-r from-fuchsia-500/80 via-pink-500/80 to-cyan-400/70 shadow-[0_0_30px_-12px_rgba(236,72,153,0.9)] hover:shadow-[0_0_42px_-14px_rgba(168,85,247,0.9)] transition-shadow"
+        class="group relative isolate inline-flex rounded-full p-px bg-gradient-to-r from-fuchsia-500/80 via-pink-500/80 to-cyan-400/70 before:content-[''] before:absolute before:inset-0 before:rounded-full before:bg-gradient-to-r before:from-fuchsia-500/60 before:via-pink-500/60 before:to-cyan-400/50 before:blur-md before:opacity-60 before:-z-10 group-hover:before:opacity-90 group-hover:before:blur-lg transition-[filter,opacity] shadow-[0_0_26px_-16px_rgba(236,72,153,0.9)]"
       >
         <span
-          class="inline-flex items-center gap-2 rounded-full bg-black/60 px-4 py-1.5 text-white/90 hover:text-white backdrop-blur-xl transition-colors"
+          class="relative inline-flex items-center gap-2 rounded-full bg-background/60 px-4 py-1.5 text-foreground/90 hover:text-foreground backdrop-blur-xl transition-colors ring-1 ring-inset ring-divider"
         >
           {ctaText}
         </span>

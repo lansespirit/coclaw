@@ -13,7 +13,7 @@
   }
 
   body {
-    @apply bg-white dark:bg-black text-[#11181C] dark:text-[#ECEDEE] antialiased min-h-screen;
+    @apply bg-background text-foreground antialiased min-h-screen;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
@@ -42,33 +42,38 @@
     @apply mx-auto w-full max-w-7xl px-6;
   }
 
+  /* Header/topbar container: wider than main content, but not full width */
+  .site-container-wide {
+    @apply mx-auto w-full max-w-[1536px] px-6;
+  }
+
   /*
    * Marketing surfaces (HeroUI-like)
    * Keep these in the components layer so utility classes can override them when needed.
    */
   .m-card-surface {
-    @apply rounded-2xl border border-white/5 bg-[#09090b] shadow-2xl transition-colors hover:bg-zinc-900;
+    @apply rounded-2xl border border-divider bg-content1 shadow-2xl transition-colors hover:bg-content2;
   }
 
   .m-card-glass {
-    @apply rounded-2xl border border-white/10 bg-[#18181b]/70 backdrop-blur-xl shadow-2xl transition-colors hover:bg-[#18181b]/80;
+    @apply rounded-2xl border border-divider bg-content1/70 backdrop-blur-xl shadow-2xl transition-colors hover:bg-content1/80;
   }
 
   .m-card-glass-soft {
-    @apply rounded-xl border border-white/10 bg-zinc-900/50 backdrop-blur-md shadow-xl;
+    @apply rounded-xl border border-divider bg-content2/50 backdrop-blur-md shadow-xl;
   }
 
   .m-pill {
-    @apply rounded-2xl border border-white/5 bg-zinc-900/50 transition-colors hover:bg-zinc-800/50;
+    @apply rounded-2xl border border-divider bg-content2/50 transition-colors hover:bg-content2/70;
   }
 
   .m-pill-glass {
-    @apply rounded-full border border-white/10 bg-[#18181b]/70 backdrop-blur-xl;
+    @apply rounded-full border border-divider bg-content1/70 backdrop-blur-xl;
   }
 
   /* Modifiers */
   .m-card-hover-border {
-    @apply hover:border-zinc-700;
+    @apply hover:border-default-400;
   }
 
   .m-card-hover-lift {
