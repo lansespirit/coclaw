@@ -323,14 +323,14 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
       </div>
     </div>
   </div>
+
+  <!-- HeroUI-like feature cards (bottom row) -->
+  <div class="mt-14 lg:mt-20">
+    <HeroFeatureCards />
+  </div>
+
+  <HeroBackground slot="background" />
 </Section>
-
-<!-- HeroUI-like feature cards (bottom row) -->
-<div class="mt-14 lg:mt-20">
-  <HeroFeatureCards />
-</div>
-
-<HeroBackground slot="background" />
 
 <style>
   .perspective-\[1000px\] {
