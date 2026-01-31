@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/layout/Section.astro';
+---
+
+<BaseLayout
+  title="Troubleshooting - CoClaw"
+  description="Troubleshooting hub for common OpenClaw installation and channel issues."
+>
+  <Section containerClass="max-w-3xl">
+    <h1 class="text-4xl md:text-5xl font-bold mb-6">Troubleshooting</h1>
+    <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed mb-8">
+      The troubleshooting library is being built. If you're stuck, start with OpenClaw issues on
+      GitHub and community support channels.
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4">
+      <a
+        class="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-6 py-3 font-semibold"
+        href="https://github.com/openclaw/openclaw/issues"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Browse Issues
+      </a>
+      <a
+        class="inline-flex items-center justify-center rounded-full border border-divider bg-content1 px-6 py-3 font-semibold text-foreground"
+        href="/community"
+      >
+        Community Links
+      </a>
+    </div>
+  </Section>
+</BaseLayout>

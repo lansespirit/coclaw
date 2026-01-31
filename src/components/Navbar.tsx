@@ -45,7 +45,7 @@ export const Navbar = () => {
               <img src="/logo-dark.svg" alt="CoClaw Logo" className="w-8 h-8 hidden dark:block" />
               <span className="text-xl tracking-tight">CoClaw</span>
               <span className="hidden sm:inline-flex items-center rounded-full border border-divider bg-content2/60 px-2 py-0.5 text-xs font-medium text-default-900 dark:text-default-700">
-                v0.0.1
+                🦞
               </span>
             </a>
           </NavbarBrand>

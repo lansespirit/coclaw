@@ -8,18 +8,19 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
   <div class="flex flex-col md:flex-row gap-12 items-center mb-32">
     <div class="flex-1 space-y-8">
       <h2 class="text-4xl md:text-6xl font-bold tracking-tight">
-        Let's make the <br />
-        Web <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-pink-500"
-          >Prettier</span
+        Join the <br />
+        OpenClaw <span
+          class="bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-pink-500"
+          >Community</span
         >
       </h2>
       <p class="text-xl text-default-800 dark:text-default-600 max-w-lg">
-        Experience it firsthand and show us your creations!
+        123,000+ developers building the future of personal AI
       </p>
       <div class="flex gap-4">
         <Button
           as={Link}
-          href="/docs"
+          href="/getting-started"
           color="secondary"
           radius="full"
           size="lg"
@@ -30,7 +31,9 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
         </Button>
         <Button
           as={Link}
-          href="https://github.com"
+          href="https://github.com/openclaw/openclaw"
+          target="_blank"
+          rel="noopener noreferrer"
           variant="bordered"
           radius="full"
           size="lg"
@@ -65,8 +68,8 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
         </div>
         <h3 class="font-bold text-foreground mb-2">Getting Started</h3>
         <p class="text-default-800 dark:text-default-600 text-sm">
-          Make beautiful, modern, and fast websites/applications regardless of your design
-          experience.
+          Install your personal AI assistant in minutes with step-by-step tutorials for macOS,
+          Linux, Windows, and more.
         </p>
       </div>
       <div
@@ -75,13 +78,23 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
         <div
           class="w-10 h-10 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
         >
-          <span class="font-bold">N</span>
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+            ></path><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg
+          >
         </div>
-        <h3 class="font-bold text-foreground mb-2">HeroUI + Next.js</h3>
+        <h3 class="font-bold text-foreground mb-2">Visual Config Generator</h3>
         <p class="text-default-800 dark:text-default-600 text-sm">
-          HeroUI is fully compatible with the new Next.js <code
-            class="bg-content2 text-foreground/80 px-1 rounded">app/</code
-          > directory structure.
+          Create secure OpenClaw configurations in minutes with our no-code tool. Platform-specific,
+          security-first, and beginner-friendly.
         </p>
       </div>
     </div>
@@ -98,33 +111,35 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
     {
       [
         {
-          name: 'X',
-          icon: 'X',
-          desc: 'For announcements, tips and general information.',
-          href: 'https://x.com',
+          name: 'GitHub',
+          icon: 'Github',
+          desc: 'Official OpenClaw repository. Star the project, report bugs, and contribute code.',
+          href: 'https://github.com/openclaw/openclaw',
         },
         {
           name: 'Discord',
           icon: 'Discord',
-          desc: 'To get involved in the community, ask questions and share tips.',
-          href: 'https://discord.com',
+          desc: 'Join the OpenClaw Discord community. Get help, share setups, and connect with other users.',
+          href: 'https://discord.gg/openclaw',
         },
         {
-          name: 'Github',
-          icon: 'Github',
-          desc: 'To report bugs, request features and contribute to the project.',
-          href: 'https://github.com',
+          name: 'Forum',
+          icon: 'Forum',
+          desc: 'CoClaw community forum. Ask questions, share knowledge, and find troubleshooting solutions.',
+          href: 'https://forum.coclaw.com',
         },
       ].map((item) => (
         <a
           href={item.href}
+          target="_blank"
+          rel="noopener noreferrer"
           class="m-card-surface m-card-hover-border m-card-hover-lift p-6 flex flex-col group"
         >
           <div class="flex items-center gap-3 mb-4">
             <span class="text-2xl text-foreground group-hover:text-primary transition-colors">
-              {item.icon === 'X' && (
+              {item.icon === 'Forum' && (
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  <path d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
                 </svg>
               )}
               {item.icon === 'Discord' && (

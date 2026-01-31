@@ -9,7 +9,10 @@ interface Props {
   badgeUrl?: string;
 }
 
-const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
+const {
+  badge = '123k+ GitHub Stars ⭐ • Open Source',
+  badgeUrl = 'https://github.com/openclaw/openclaw',
+} = Astro.props;
 ---
 
 <Section py="py-20 lg:py-32" class="z-10 overflow-visible" containerClass="overflow-visible">
@@ -21,9 +24,11 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
         badge && (
           <a
             href={badgeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
             class="inline-flex items-center gap-2 px-3 py-1 mb-6 text-xs font-medium transition-colors border rounded-full text-default-800 dark:text-default-600 hover:text-foreground border-default-200/50 hover:bg-default-100/10 backdrop-blur-md group"
           >
-            <span class="text-orange-500 group-hover:animate-pulse">🔥</span>
+            <span class="text-orange-500 group-hover:animate-pulse">⭐</span>
             <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
               {badge}
             </span>
@@ -42,23 +47,23 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
 
       <!-- Main Heading -->
       <h1 class="text-5xl font-extrabold tracking-tight md:text-7xl mb-6 leading-[1.1]">
-        Make <span class="text-pink-600">beautiful</span> websites <br />
-        regardless of your design experience.
+        Your Personal <span class="text-pink-600">AI Assistant</span>, <br />
+        Running on Your Terms
       </h1>
 
       <!-- Subheading -->
       <p
         class="text-lg text-default-800 dark:text-default-600 md:text-xl leading-relaxed mb-8 max-w-xl"
       >
-        Beautiful, fast and modern React UI library for building accessible and customizable web
-        applications.
+        OpenClaw connects Claude, GPT, and local AI models to your favorite messaging apps—WhatsApp,
+        Telegram, Discord, and more. Self-hosted, privacy-first, and incredibly powerful.
       </p>
 
       <!-- CTA Buttons -->
       <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
         <Button
           as="a"
-          href="/docs"
+          href="/getting-started"
           color="primary"
           radius="full"
           size="lg"
@@ -81,10 +86,11 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
           class="m-card-glass-soft flex items-center gap-2 px-4 py-3 text-sm font-mono text-default-800 dark:text-default-600"
         >
           <span class="text-default-900 dark:text-default-700 select-none">$</span>
-          <span class="text-default-800 dark:text-default-600">npx heroui-cli@latest init</span>
+          <span class="text-default-800 dark:text-default-600">npm install -g openclaw@latest</span>
           <button
             class="ml-4 hover:text-foreground transition-colors group"
             aria-label="Copy command"
+            onclick="navigator.clipboard.writeText('npm install -g openclaw@latest')"
           >
             <svg
               class="w-4 h-4 group-hover:scale-110 transition-transform"
@@ -112,13 +118,13 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
             class="h-40 rounded-[8px] bg-gradient-to-b from-cyan-400 to-blue-600 relative overflow-hidden mb-3 group cursor-pointer shadow-inner"
           >
             <img
-              src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
+              src="/images/features/hero-chat.png"
               class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
             />
             <div
               class="absolute bottom-2 left-2 bg-black/40 backdrop-blur-md border border-white/20 rounded-full px-3 py-1 text-[10px] font-semibold text-white shadow-lg"
             >
-              Camera $525
+              AI Assistant
             </div>
           </div>
           <div class="flex justify-between items-center px-2 pb-1">
@@ -203,9 +209,9 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
               </div>
               <div>
                 <h3 class="font-bold text-foreground text-[14px] leading-tight mt-0.5">
-                  Zoey Lang
+                  Alex Chen
                 </h3>
-                <p class="text-default-800 dark:text-default-600 text-[12px]">@zoeylang</p>
+                <p class="text-default-800 dark:text-default-600 text-[12px]">@alexchen</p>
               </div>
             </div>
             <Button
@@ -217,7 +223,9 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
             >
           </div>
           <p class="text-default-800 dark:text-default-600 text-[13px] leading-relaxed mb-5">
-            Full-stack developer, @heroui lover <span class="whitespace-nowrap">she/her 💅</span>
+            Running OpenClaw on Mac Mini • 5 channels connected <span class="whitespace-nowrap"
+              >🦞</span
+            >
           </p>
           <div class="flex gap-4 text-[12px] font-medium pt-4 border-t border-default-200/20">
             <div class="text-foreground">
@@ -263,7 +271,7 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
           <div
             class="bg-black/40 backdrop-blur-xl border border-white/10 pl-5 pr-3 py-3 w-56 flex justify-between items-center rounded-[10px] shadow-2xl group"
           >
-            <span class="text-white text-sm font-medium">HeroUI</span>
+            <span class="text-white text-sm font-medium">OpenClaw</span>
             <div
               class="w-6 h-6 rounded-full bg-default-200/10 flex items-center justify-center hover:bg-default-200/20 transition-colors cursor-pointer"
             >
@@ -292,7 +300,7 @@ const { badge = 'HeroUI v3.0.0 (Beta)', badgeUrl = '#' } = Astro.props;
           <div
             class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[13px] font-bold px-5 py-2.5 rounded-full shadow-lg shadow-purple-500/30 whitespace-nowrap mb-2 relative"
           >
-            Build beautiful apps faster
+            Self-hosted AI assistant
           </div>
           <div
             class="bg-black/50 backdrop-blur-md text-default-700 dark:text-default-600 text-[10px] font-bold px-3 py-1.5 rounded-xl border border-white/10 uppercase tracking-widest"
