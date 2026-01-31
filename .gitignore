@@ -78,6 +78,7 @@ wrangler.toml.local
 
 # Local AI/IDE tooling configs (project-irrelevant)
 .claude/
+.agent/
 
 # Husky (keep the directory but ignore generated files)
 .husky/_/
