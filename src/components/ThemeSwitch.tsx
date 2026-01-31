@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Button } from '@heroui/react';
 
 export const ThemeSwitch = () => {
-  const [theme, setTheme] = useState('light');
+  // Initialize with 'dark' to match the default theme and prevent icon flashing
+  const [theme, setTheme] = useState('dark');
 
   useEffect(() => {
     // Check initial theme
@@ -23,7 +24,8 @@ export const ThemeSwitch = () => {
 
   return (
     <Button isIconOnly variant="light" onPress={toggleTheme} aria-label="Toggle Dark Mode">
-      {theme === 'light' ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
+      {/* Show the icon for the NEXT state (dark theme shows sun, light theme shows moon) */}
+      {theme === 'dark' ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
     </Button>
   );
 };
