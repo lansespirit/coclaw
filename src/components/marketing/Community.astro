@@ -13,7 +13,7 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
           >Prettier</span
         >
       </h2>
-      <p class="text-xl text-default-500 max-w-lg">
+      <p class="text-xl text-default-800 dark:text-default-600 max-w-lg">
         Experience it firsthand and show us your creations!
       </p>
       <div class="flex gap-4">
@@ -64,7 +64,7 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
           >
         </div>
         <h3 class="font-bold text-foreground mb-2">Getting Started</h3>
-        <p class="text-default-500 text-sm">
+        <p class="text-default-800 dark:text-default-600 text-sm">
           Make beautiful, modern, and fast websites/applications regardless of your design
           experience.
         </p>
@@ -78,7 +78,7 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
           <span class="font-bold">N</span>
         </div>
         <h3 class="font-bold text-foreground mb-2">HeroUI + Next.js</h3>
-        <p class="text-default-500 text-sm">
+        <p class="text-default-800 dark:text-default-600 text-sm">
           HeroUI is fully compatible with the new Next.js <code
             class="bg-content2 text-foreground/80 px-1 rounded">app/</code
           > directory structure.
@@ -89,7 +89,9 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
 
   <div class="text-center mb-12">
     <h2 class="text-4xl md:text-5xl font-bold mb-4">Community</h2>
-    <p class="text-default-500">Get involved in our community. Everyone is welcome!</p>
+    <p class="text-default-800 dark:text-default-600">
+      Get involved in our community. Everyone is welcome!
+    </p>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -138,7 +140,7 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
             </span>
             <span class="font-bold text-foreground">{item.name}</span>
             <svg
-              class="w-4 h-4 text-default-500 group-hover:text-foreground transition-colors ml-auto"
+              class="w-4 h-4 text-default-800 dark:text-default-600 group-hover:text-foreground transition-colors ml-auto"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -151,7 +153,7 @@ import CommunityBackground from './backgrounds/CommunityBackground.astro';
               />
             </svg>
           </div>
-          <p class="text-default-500 text-sm leading-relaxed">{item.desc}</p>
+          <p class="text-default-800 dark:text-default-600 text-sm leading-relaxed">{item.desc}</p>
         </a>
       ))
     }

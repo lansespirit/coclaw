@@ -2,8 +2,11 @@
 @import 'tailwindcss';
 
 @theme {
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  --font-sans:
+    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-mono:
+    'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
 }
 
 /* Custom global styles */
@@ -14,7 +17,7 @@
 
   body {
     @apply bg-background text-foreground antialiased min-h-screen;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 
   ::selection {
@@ -32,7 +35,7 @@
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-b from-[#11181C] to-[#4B5563] dark:from-[#FFFFFF] dark:to-[#A1A1AA];
+    @apply bg-clip-text text-transparent bg-gradient-to-b from-foreground to-default-800 dark:from-foreground dark:to-default-700;
   }
 }
 
@@ -87,19 +90,19 @@
 
 /* Typography Scale & Prose Overrides */
 .prose {
-  @apply max-w-none text-gray-600 dark:text-gray-400;
+  @apply max-w-none text-default-800 dark:text-default-600;
 }
 
 .prose h1 {
-  @apply text-4xl font-bold mb-6 text-gray-900 dark:text-white tracking-tight;
+  @apply text-4xl font-bold mb-6 text-foreground tracking-tight;
 }
 
 .prose h2 {
-  @apply text-3xl font-bold mt-10 mb-6 text-gray-900 dark:text-white tracking-tight;
+  @apply text-3xl font-bold mt-10 mb-6 text-foreground tracking-tight;
 }
 
 .prose h3 {
-  @apply text-2xl font-semibold mt-8 mb-4 text-gray-900 dark:text-white tracking-tight;
+  @apply text-2xl font-semibold mt-8 mb-4 text-foreground tracking-tight;
 }
 
 .prose p {

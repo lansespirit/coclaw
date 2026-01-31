@@ -13,7 +13,7 @@ import FeaturesBackground from './backgrounds/FeaturesBackground.astro';
         Accessibility <br />
         <span class="text-green-500">out of the box.</span>
       </h2>
-      <p class="text-xl text-default-500">
+      <p class="text-xl text-default-800 dark:text-default-600">
         HeroUI components are built on top of React Aria ensuring exceptional accessibility support
         as a top priority.
       </p>
@@ -68,7 +68,8 @@ import FeaturesBackground from './backgrounds/FeaturesBackground.astro';
           class="relative m-card-glass rounded-xl p-2 w-64 scale-100 hover:scale-105 transition-transform duration-500"
         >
           <div class="px-2 py-1 mb-2">
-            <span class="text-xs font-semibold text-default-500 uppercase tracking-wider"
+            <span
+              class="text-xs font-semibold text-default-900 dark:text-default-700 uppercase tracking-wider"
               >Actions</span
             >
           </div>
@@ -90,7 +91,9 @@ import FeaturesBackground from './backgrounds/FeaturesBackground.astro';
                 </div>
                 <div class="flex flex-col">
                   <span class="text-sm font-medium text-foreground/90">Edit file</span>
-                  <span class="text-[10px] text-default-500">Allows you to edit the file</span>
+                  <span class="text-[10px] text-default-800 dark:text-default-600"
+                    >Allows you to edit the file</span
+                  >
                 </div>
               </div>
               <span class="text-xs text-default-500 border border-divider rounded px-1">⌘E</span>
@@ -114,7 +117,7 @@ import FeaturesBackground from './backgrounds/FeaturesBackground.astro';
                 </div>
                 <div class="flex flex-col">
                   <span class="text-sm font-medium text-red-500">Delete file</span>
-                  <span class="text-[10px] text-red-500/50">Permanently delete</span>
+                  <span class="text-[10px] text-red-500/70">Permanently delete</span>
                 </div>
               </div>
               <span class="text-xs text-red-500/50 border border-red-500/20 rounded px-1">⌘D</span>
@@ -142,7 +145,7 @@ import FeaturesBackground from './backgrounds/FeaturesBackground.astro';
         Dark mode <br />
         <span class="text-orange-500 animate-pulse">is effortless.</span>
       </h2>
-      <p class="text-xl text-default-500">
+      <p class="text-xl text-default-800 dark:text-default-600">
         HeroUI comes with a fully well-scaled default dark theme that you can apply to your
         application.
       </p>
@@ -250,7 +253,12 @@ import FeaturesBackground from './backgrounds/FeaturesBackground.astro';
           </div>
           <span class="text-xs text-zinc-500">_app.tsx</span>
         </div>
-        <div class="p-6 font-mono text-sm leading-relaxed overflow-auto">
+        <!--
+          In light mode the page text color is dark, but this code block uses a fixed dark background.
+          Any unwrapped characters (e.g. = ; () <> , etc.) inherit the page color and become invisible.
+          Set an explicit base text color so symbols remain readable in both themes.
+        -->
+        <div class="p-6 font-mono text-sm leading-relaxed overflow-auto text-zinc-200">
           <span class="text-purple-400">import</span>
           <span class="text-white">React</span>
           <span class="text-purple-400">from</span>

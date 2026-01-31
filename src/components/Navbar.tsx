@@ -44,7 +44,7 @@ export const Navbar = () => {
               <img src="/logo.svg" alt="CoClaw Logo" className="w-8 h-8 dark:hidden" />
               <img src="/logo-dark.svg" alt="CoClaw Logo" className="w-8 h-8 hidden dark:block" />
               <span className="text-xl tracking-tight">CoClaw</span>
-              <span className="hidden sm:inline-flex items-center rounded-full border border-divider bg-content2/60 px-2 py-0.5 text-xs font-medium text-default-500">
+              <span className="hidden sm:inline-flex items-center rounded-full border border-divider bg-content2/60 px-2 py-0.5 text-xs font-medium text-default-900 dark:text-default-700">
                 v0.0.1
               </span>
             </a>
@@ -57,7 +57,7 @@ export const Navbar = () => {
               <Link
                 color="foreground"
                 href={item.href}
-                className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+                className="text-sm font-medium text-foreground/90 hover:text-foreground transition-colors"
               >
                 {item.name}
               </Link>

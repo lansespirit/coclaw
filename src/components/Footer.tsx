@@ -11,7 +11,7 @@ export const Footer = () => {
                 <span className="text-2xl">🦀</span>
                 <span className="text-xl tracking-tight">CoClaw</span>
               </div>
-              <p className="text-sm text-default-500">
+              <p className="text-sm text-default-800 dark:text-default-600">
                 The open-source community platform for OpenClaw (clawdbot) users.
               </p>
             </div>
@@ -87,7 +87,7 @@ export const Footer = () => {
           </div>
 
           <div className="mt-12 pt-8 border-t border-divider">
-            <p className="text-center text-sm text-default-400">
+            <p className="text-center text-sm text-default-900 dark:text-default-700">
               &copy; {new Date().getFullYear()} CoClaw. Not affiliated with the official OpenClaw
               project.
             </p>
