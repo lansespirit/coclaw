@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://coclaw.com/sitemap-index.xml
+

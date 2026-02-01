@@ -1,0 +1,224 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+import { Button, Chip, Avatar } from '@heroui/react';
+
+export async function getStaticPaths() {
+  return [
+    {
+      params: { slug: 'matt-schlicht' },
+      props: {
+        name: 'Matt Schlicht',
+        role: 'Octane AI CEO',
+        company: 'Moltbook (project)',
+        image: '/images/stories/moltbook.svg',
+        summary: 'Building Moltbook: a social network where AI agents post and interact.',
+        publishDate: '2026-02-01',
+        keywords:
+          'OpenClaw story, Moltbook, AI agents, agent workflows, tool allowlist, automation safety',
+        sources: [
+          {
+            label: 'The Verge — “AI “agents” are coming. You’re not prepared.”',
+            url: 'https://www.theverge.com/24374225/ai-agents-moltbot-open-source-manus',
+          },
+        ],
+        content: `
+          <p class="text-2xl font-medium text-foreground/80 mb-12 leading-relaxed italic">
+            Press coverage describes Matt Schlicht building <strong>Moltbook</strong>, a “social network”
+            where <strong>AI agents</strong> generate posts and interact—powered by an OpenClaw agent.
+          </p>
+          <h2 class="text-3xl font-bold mt-16 mb-8">What Moltbook Demonstrates</h2>
+          <p class="mb-8 text-lg leading-relaxed">
+            Moltbook is a concrete example of what happens when you connect an agent runtime to real
+            APIs: the agent can create content, react to other agents, and enforce basic rules—without
+            a human manually pushing every button.
+          </p>
+          <h2 class="text-3xl font-bold mt-16 mb-8">Why This Matters for CoClaw Users</h2>
+          <ul class="list-disc pl-6 space-y-4 mb-8 text-lg leading-relaxed">
+            <li><strong>Multi-step workflows:</strong> the agent can chain actions across tools instead of answering a single prompt.</li>
+            <li><strong>Operational safety:</strong> the moment an agent can post / delete / message, you must restrict tools and identities.</li>
+            <li><strong>Observability:</strong> logs and clear “who did what” audit trails become essential.</li>
+          </ul>
+          <p class="mb-8 text-lg leading-relaxed">
+            If you're building anything “agentic” on top of OpenClaw, start with conservative
+            allowlists and test in a throwaway environment before connecting to production accounts.
+          </p>
+        `,
+      },
+    },
+    {
+      params: { slug: 'peter-steinberger' },
+      props: {
+        name: 'Peter Steinberger',
+        role: 'Creator of OpenClaw',
+        company: 'Independent / Community',
+        image: '/images/stories/rebrand.svg',
+        summary:
+          'From viral weekend project to rebrand—and what the community learned about trust.',
+        publishDate: '2026-02-01',
+        keywords: 'OpenClaw story, rebrand, Moltbot, trust, scams, supply chain security',
+        sources: [
+          {
+            label: 'Business Insider — “The AI agent Moltbot is now called OpenClaw...”',
+            url: 'https://www.businessinsider.com/moltbot-rebranded-openclaw-anthropic-scammer-hijacked-2025-12',
+          },
+          {
+            label: 'TechCrunch — “Viral open source project Moltbot changes its name to OpenClaw”',
+            url: 'https://techcrunch.com/2025/12/01/viral-open-source-project-moltbot-changes-its-name-to-openclaw/',
+          },
+        ],
+        content: `
+            <p class="text-2xl font-medium text-foreground/80 mb-12 leading-relaxed italic">
+              Press coverage describes OpenClaw’s creator navigating a rapid rebrand and a wave of
+              copycats and scams.
+            </p>
+            <h2 class="text-3xl font-bold mt-16 mb-8">The Rebrand Lesson: Names Change, Trust Shouldn’t</h2>
+            <p class="mb-8 text-lg leading-relaxed">
+              When a project goes viral, attackers follow. The reporting around the name change
+              highlights a basic safety rule for OpenClaw users: trust the <strong>source</strong>, not
+              the keyword.
+            </p>
+            <h2 class="text-3xl font-bold mt-16 mb-8">Practical Trust Checklist</h2>
+            <ul class="list-disc pl-6 space-y-4 mb-8 text-lg leading-relaxed">
+              <li>Only install from official links (GitHub, official docs) and verify repository ownership.</li>
+              <li>Be skeptical of “easy install” prompts that ask for shell commands you don’t understand.</li>
+              <li>Prefer minimal permissions and per-agent tool allowlists.</li>
+              <li>Keep your dashboard behind localhost/VPN; never expose it without authentication.</li>
+            </ul>
+        `,
+      },
+    },
+    {
+      params: { slug: 'security-scam-wave' },
+      props: {
+        name: 'Security Scam Wave',
+        role: 'Community / Researchers',
+        company: 'VS Code Extension Incident',
+        image: '/images/stories/security.svg',
+        summary: 'A fake VS Code extension and broader scam patterns—and how to stay safe.',
+        publishDate: '2026-02-01',
+        keywords: 'OpenClaw security, VS Code extension malware, supply chain, tokens, allowlists',
+        sources: [
+          {
+            label: 'TechRadar — “Fake VSCode extension installs malware on Moltbot AI users”',
+            url: 'https://www.techradar.com/pro/security/fake-vscode-extension-installs-malware-on-moltbot-ai-users',
+          },
+          {
+            label: 'Forbes — “Moltbot AI Agent... Security Brief”',
+            url: 'https://www.forbes.com/sites/daveywinder/2026/01/28/moltbot-ai-agent-with-100000-github-stars-gets-new-name-with-new-threat-warning/',
+          },
+          {
+            label: 'Reddit — community discussion about OpenClaw security',
+            url: 'https://www.reddit.com/r/cybersecurity/comments/1k06hpo/openclaw_moltbot_security_brief_anti_scam/',
+          },
+        ],
+        content: `
+            <p class="text-2xl font-medium text-foreground/80 mb-12 leading-relaxed italic">
+              A fake VS Code extension targeting OpenClaw/Moltbot users was reported by security
+              researchers. Community members also shared anti-scam guidance.
+            </p>
+            <h2 class="text-3xl font-bold mt-16 mb-8">What Happened (High Level)</h2>
+            <p class="mb-8 text-lg leading-relaxed">
+              Reporting described a malicious extension that could exfiltrate secrets and attempt
+              remote access. The broader pattern is familiar: popular projects attract “helper tools”
+              that are not maintained or reviewed by the original authors.
+            </p>
+            <h2 class="text-3xl font-bold mt-16 mb-8">What You Should Do</h2>
+            <ul class="list-disc pl-6 space-y-4 mb-8 text-lg leading-relaxed">
+              <li>Do not install random extensions or scripts that claim to “auto-configure” OpenClaw.</li>
+              <li>Rotate any keys/tokens if you installed suspicious software.</li>
+              <li>Keep dashboards local (127.0.0.1) or behind VPN with authentication.</li>
+              <li>Use conservative allowlists, pairing, and minimal tool permissions.</li>
+            </ul>
+            <p class="mb-8 text-lg leading-relaxed">
+              CoClaw will maintain a safety-first installation path: curated links, explicit warnings,
+              and up-to-date references to official documentation.
+            </p>
+        `,
+      },
+    },
+  ];
+}
+
+const { name, role, company, image, summary, content, publishDate, sources, keywords } =
+  Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: `${name} — OpenClaw Story`,
+  description: summary,
+  datePublished: publishDate,
+  dateModified: publishDate,
+  author: { '@type': 'Organization', name: 'CoClaw' },
+  publisher: { '@type': 'Organization', name: 'CoClaw', url: 'https://coclaw.com' },
+  mainEntityOfPage: canonicalURL.toString(),
+};
+---
+
+<BaseLayout
+  title={`${name} | CoClaw Stories`}
+  description={summary}
+  keywords={keywords}
+  ogImage={image}
+  type="article"
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
+  <div class="bg-background min-h-screen pt-32 pb-24">
+    <Section containerClass="max-w-4xl mx-auto px-6">
+      <div class="flex flex-col items-center text-center mb-16">
+        <Avatar src={image} className="w-24 h-24 mb-6" isBordered color="primary" />
+        <div class="flex items-center gap-2 mb-4">
+          <Chip size="sm" color="primary" variant="flat" className="font-bold">STORY</Chip>
+        </div>
+        <h1 class="text-4xl md:text-6xl font-black tracking-tighter mb-4">{name}</h1>
+        <p class="text-xl text-default-500 font-medium">{role} @ {company}</p>
+        {
+          sources?.length ? (
+            <p class="mt-6 text-sm text-default-600 max-w-2xl">
+              Sources:{' '}
+              {sources.map((s, idx) => (
+                <>
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-primary hover:underline"
+                  >
+                    {s.label}
+                  </a>
+                  {idx < sources.length - 1 ? ' · ' : ''}
+                </>
+              ))}
+            </p>
+          ) : null
+        }
+      </div>
+
+      <article
+        class="prose prose-lg dark:prose-invert prose-primary max-w-none text-default-800 dark:text-default-300"
+        set:html={content}
+      />
+
+      <div
+        class="mt-24 p-12 rounded-[40px] bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 text-center"
+      >
+        <h3 class="text-3xl font-bold mb-6 italic">Ready to write your own story?</h3>
+        <p class="text-xl text-default-600 mb-10 max-w-2xl mx-auto">
+          Join thousands of users who are building the future of automated, private communication.
+        </p>
+        <Button
+          as="a"
+          href="/getting-started"
+          size="lg"
+          color="primary"
+          radius="full"
+          className="font-bold px-12 h-16 text-lg"
+        >
+          Get Started with OpenClaw
+        </Button>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>

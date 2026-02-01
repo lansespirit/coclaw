@@ -9,10 +9,8 @@ interface Props {
   badgeUrl?: string;
 }
 
-const {
-  badge = '123k+ GitHub Stars ⭐ • Open Source',
-  badgeUrl = 'https://github.com/openclaw/openclaw',
-} = Astro.props;
+const { badge = 'Open Source • GitHub', badgeUrl = 'https://github.com/openclaw/openclaw' } =
+  Astro.props;
 ---
 
 <Section py="py-20 lg:py-32" class="z-10 overflow-visible" containerClass="overflow-visible">

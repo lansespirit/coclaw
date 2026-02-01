@@ -1,0 +1,208 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+import { BlogCard } from '../../components/BlogCard';
+import { Button, Chip, Input } from '@heroui/react';
+
+const blogPosts = [
+  {
+    title: 'The Rise of Proactive AI: Why Reactive Chatbots are Obsolete',
+    excerpt:
+      'Explore how OpenClaw is shifting the paradigm from "wait-for-input" to proactive assistance, initiating critical workflows before you even ask.',
+    author: 'Sarah Chen',
+    date: 'Feb 1, 2026',
+    keywords: ['AI Trends', 'Proactive'],
+    category: 'Analysis',
+    image:
+      'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1200',
+    href: '/blog/proactive-ai-rise',
+    featured: true,
+  },
+  {
+    title: 'Privacy-First AI: How OpenClaw Keeps Your Data on Your Infrastructure',
+    excerpt:
+      'A deep dive into the self-hosting architecture of OpenClaw and how it ensures your conversations with LLMs remain truly private.',
+    author: 'Michael Rodriguez',
+    date: 'Jan 28, 2026',
+    keywords: ['Privacy', 'Self-hosting'],
+    category: 'Security',
+    image:
+      'https://images.unsplash.com/photo-1633265485768-3069cb89f57a?auto=format&fit=crop&q=80&w=800',
+    href: '/blog/privacy-first-ai',
+  },
+  {
+    title: 'OpenClaw: Release Notes Reading Guide (How to Track Changes Safely)',
+    excerpt:
+      'A practical checklist for tracking OpenClaw changes, testing upgrades, and avoiding breaking your setup.',
+    author: 'Emily Watson',
+    date: 'Jan 25, 2026',
+    keywords: ['Upgrade', 'Release Notes'],
+    category: 'Product',
+    image:
+      'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&q=80&w=800',
+    href: '/blog/openclaw-v2-announcement',
+  },
+  {
+    title: 'Optimizing Context Efficiency in Large Language Models',
+    excerpt:
+      'Technical breakdown of how OpenClaw handles long-running sessions without hitting token limits or losing conversation quality.',
+    author: 'David Zhang',
+    date: 'Jan 20, 2026',
+    keywords: ['Engineering', 'LLMs'],
+    category: 'Engineering',
+    image:
+      'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800',
+    href: '/blog/context-efficiency',
+  },
+];
+
+const featuredPost = blogPosts.find((post) => post.featured);
+const regularPosts = blogPosts.filter((post) => !post.featured);
+---
+
+<BaseLayout
+  title="OpenClaw Blog & Insights | CoClaw"
+  description="Practical guides and insights on self-hosting, channel integrations, security, and running OpenClaw effectively."
+>
+  <div class="bg-background min-h-screen relative overflow-hidden">
+    <!-- Background Accents -->
+    <div
+      class="absolute top-0 right-0 w-[800px] h-[600px] bg-primary/5 rounded-full blur-[140px] -z-10 rotate-12"
+    >
+    </div>
+    <div
+      class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/5 rounded-full blur-[120px] -z-10"
+    >
+    </div>
+
+    <!-- Hero Section -->
+    <Section py="pt-32 pb-12">
+      <div class="max-w-4xl mb-16 px-6 md:px-0">
+        <h1
+          class="text-6xl md:text-8xl font-black mb-6 tracking-tighter text-foreground leading-tight"
+        >
+          Insights for the <br /><span class="text-primary italic">AI Sovereign.</span>
+        </h1>
+        <p class="text-xl text-default-500 font-medium max-w-xl">
+          Exploring the frontiers of autonomous agents, privacy-first engineering, and proactive
+          digital workflows.
+        </p>
+      </div>
+
+      {
+        featuredPost && (
+          <div class="group relative w-full h-[500px] md:h-[650px] rounded-[48px] overflow-hidden m-card-glass border border-white/10 shadow-2xl transition-all duration-700 hover:border-primary/30 mb-20 mb-32">
+            <a href={featuredPost.href} class="absolute inset-0 z-20" />
+            <img
+              src={featuredPost.image}
+              alt={featuredPost.title}
+              class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-60 group-hover:opacity-80"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent z-10" />
+
+            <div class="absolute bottom-0 left-0 w-full p-8 md:p-16 z-30">
+              <div class="max-w-3xl">
+                <Chip
+                  color="primary"
+                  variant="shadow"
+                  className="mb-6 font-bold uppercase tracking-wider"
+                >
+                  FEATURED STORY
+                </Chip>
+                <h2 class="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight leading-tight">
+                  {featuredPost.title}
+                </h2>
+                <p class="text-white/70 text-lg md:text-xl mb-8 line-clamp-2 max-w-2xl font-medium">
+                  {featuredPost.excerpt}
+                </p>
+                <div class="flex items-center gap-4">
+                  <Button
+                    radius="full"
+                    color="primary"
+                    className="font-bold px-8 h-12 shadow-lg shadow-primary/30"
+                  >
+                    Read Article
+                  </Button>
+                  <span class="text-white/40 text-sm font-bold">
+                    {featuredPost.date} • 12 MIN READ
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
+    </Section>
+
+    <!-- Content Section -->
+    <Section py="pb-24">
+      <div class="flex items-center justify-between mb-16 px-6 md:px-0">
+        <h3 class="text-3xl font-black tracking-tighter">Recent Articles</h3>
+        <div class="hidden md:flex gap-2">
+          <Chip
+            variant="flat"
+            color="default"
+            className="hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors font-bold"
+            >All</Chip
+          >
+          <Chip
+            variant="light"
+            className="hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors font-bold"
+            >Security</Chip
+          >
+          <Chip
+            variant="light"
+            className="hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors font-bold"
+            >Product</Chip
+          >
+          <Chip
+            variant="light"
+            className="hover:bg-primary/10 hover:text-primary cursor-pointer transition-colors font-bold"
+            >Tutorial</Chip
+          >
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+        {
+          regularPosts.map((post) => (
+            <div class="group">
+              <BlogCard {...post} client:load />
+            </div>
+          ))
+        }
+      </div>
+    </Section>
+
+    <!-- Subscription Section -->
+    <Section py="py-24">
+      <div
+        class="p-12 md:p-24 rounded-[64px] bg-gradient-to-br from-primary/20 via-background to-secondary/10 border border-divider/50 text-center relative overflow-hidden"
+      >
+        <div class="absolute inset-0 bg-grid-white/[0.02] -z-10"></div>
+        <h2 class="text-4xl md:text-6xl font-black mb-6 tracking-tighter">
+          Stay ahead of the curve.
+        </h2>
+        <p class="text-xl text-default-500 mb-10 max-w-xl mx-auto">
+          Get the latest technical deep-dives and OpenClaw releases delivered to your inbox weekly.
+        </p>
+        <div class="max-w-md mx-auto flex gap-3">
+          <Input
+            placeholder="Enter your email"
+            radius="full"
+            classNames={{ inputWrapper: 'bg-content1' }}
+          />
+          <Button color="primary" radius="full" className="font-bold px-8">Join</Button>
+        </div>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>
+
+<style>
+  .text-gradient {
+    background: linear-gradient(to right, #6366f1, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+</style>

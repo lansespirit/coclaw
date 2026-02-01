@@ -30,7 +30,7 @@ export default function QuickInstallTabs() {
                 <h3 className="text-xl font-bold mb-3">Prerequisites</h3>
                 <ul className="list-disc list-inside space-y-2 text-default-700 dark:text-default-500">
                   <li>macOS (Intel & Apple Silicon supported)</li>
-                  <li>Node.js 22.12+ (Node 22 LTS recommended)</li>
+                  <li>Node.js 22+ (Node 22 LTS recommended)</li>
                 </ul>
               </div>
 
@@ -98,7 +98,7 @@ export default function QuickInstallTabs() {
                 <h3 className="text-xl font-bold mb-3">Prerequisites</h3>
                 <ul className="list-disc list-inside space-y-2 text-default-700 dark:text-default-500">
                   <li>Any modern Linux distro (Ubuntu/Debian/Fedora/Arch, etc.)</li>
-                  <li>Node.js 22.12+ (Node 22 LTS recommended)</li>
+                  <li>Node.js 22+ (Node 22 LTS recommended)</li>
                 </ul>
               </div>
 
@@ -111,7 +111,7 @@ export default function QuickInstallTabs() {
                   sudo apt-get install -y nodejs
                 </Code>
                 <p className="text-default-700 dark:text-default-500 mt-4">
-                  For other distros, install Node.js 22.12+ using your distro’s preferred method.
+                  For other distros, install Node.js 22+ using your distro’s preferred method.
                 </p>
               </div>
 
@@ -161,7 +161,7 @@ export default function QuickInstallTabs() {
                 <ul className="list-disc list-inside space-y-2 text-default-700 dark:text-default-500">
                   <li>Windows 10 or Windows 11</li>
                   <li>WSL2 (Windows Subsystem for Linux) recommended for best experience</li>
-                  <li>Node.js 22.12+ (recommended inside WSL2)</li>
+                  <li>Node.js 22+ (recommended inside WSL2)</li>
                 </ul>
               </div>
 

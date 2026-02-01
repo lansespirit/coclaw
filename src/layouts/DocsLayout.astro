@@ -30,7 +30,7 @@ const hasValidLastUpdated = !Number.isNaN(lastUpdated.getTime());
 ---
 
 <BaseLayout title={frontmatter.title} description={frontmatter.description}>
-  <main class="container mx-auto px-4 py-8 max-w-4xl">
+  <div class="container mx-auto px-4 py-8 max-w-4xl">
     <article class="prose prose-lg dark:prose-invert">
       <header class="mb-8">
         <div class="flex gap-2 mb-4">
@@ -91,5 +91,5 @@ const hasValidLastUpdated = !Number.isNaN(lastUpdated.getTime());
       </header>
       <slot />
     </article>
-  </main>
+  </div>
 </BaseLayout>

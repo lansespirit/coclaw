@@ -9,7 +9,8 @@ export const LiteYouTubeEmbed = ({ videoId, title }: LiteYouTubeEmbedProps) => {
       <iframe
         width="100%"
         height="100%"
-        src={`https://www.youtube.com/embed/${videoId}/?autoplay=1&rel=0&modestbranding=1`}
+        // Use the privacy-enhanced domain to reduce tracking.
+        src={`https://www.youtube-nocookie.com/embed/${videoId}/?autoplay=1&rel=0&modestbranding=1`}
         title={title}
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

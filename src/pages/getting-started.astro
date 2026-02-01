@@ -4,6 +4,7 @@ import Section from '../components/layout/Section.astro';
 import QuickInstallTabs from '../components/QuickInstallTabs.tsx';
 
 // SEO-optimized structured data
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -19,7 +20,7 @@ const structuredData = {
     {
       '@type': 'HowToStep',
       name: 'Install Node.js',
-      text: 'Install Node.js 22.12+ (Node 22 LTS recommended)',
+      text: 'Install Node.js 22+ (Node 22 LTS recommended)',
     },
     {
       '@type': 'HowToStep',
@@ -38,6 +39,15 @@ const structuredData = {
     },
   ],
 };
+
+const breadcrumbData = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://coclaw.com/' },
+    { '@type': 'ListItem', position: 2, name: 'Getting Started', item: canonicalURL.toString() },
+  ],
+};
 ---
 
 <BaseLayout
@@ -45,7 +55,8 @@ const structuredData = {
   description="Complete OpenClaw installation guide for all platforms. Install on macOS, Linux, Windows, Docker, VPS, AWS, and more. Get your AI assistant running in 5 minutes with step-by-step instructions."
   keywords="OpenClaw installation, install OpenClaw, OpenClaw setup guide, OpenClaw macOS install, OpenClaw Linux installation, OpenClaw Windows setup, OpenClaw Docker, OpenClaw VPS deployment, OpenClaw AWS, AI assistant installation, OpenClaw tutorial, OpenClaw quick start"
 >
-  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(breadcrumbData)} />
 
   <div
     class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"

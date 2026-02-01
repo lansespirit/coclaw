@@ -1,0 +1,149 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+import { GuideCard } from '../../components/GuideCard';
+import { Button } from '@heroui/react';
+
+const guides = [
+  {
+    title: 'Self-Hosting OpenClaw with Docker',
+    description:
+      'Master the containerized deployment of OpenClaw for local or cloud infrastructure.',
+    difficulty: 'Intermediate' as const,
+    platforms: ['Linux', 'Docker', 'Self-hosted'],
+    href: '/guides/docker-deployment',
+    category: 'deployment',
+  },
+  {
+    title: 'Configure WhatsApp for OpenClaw',
+    description: 'Connect WhatsApp and lock down who can message your agent with allowlists.',
+    difficulty: 'Beginner' as const,
+    platforms: ['WhatsApp', 'Messaging'],
+    href: '/guides/whatsapp-setup',
+    category: 'integration',
+  },
+  {
+    title: 'Enable Tools and Plugins (Advanced)',
+    description: 'Enable optional plugins and explicitly allowlist tools for safer automation.',
+    difficulty: 'Advanced' as const,
+    platforms: ['Plugins', 'Tools'],
+    href: '/guides/custom-tools',
+    category: 'advanced',
+  },
+];
+
+const categories = [
+  { id: 'all', name: 'All Modules' },
+  { id: 'deployment', name: 'Deployment' },
+  { id: 'integration', name: 'Integrations' },
+  { id: 'advanced', name: 'Advanced Kernels' },
+];
+---
+
+<BaseLayout
+  title="OpenClaw Guides | CoClaw"
+  description="Community-maintained guides for installing, deploying, and safely extending OpenClaw."
+>
+  <div class="bg-background min-h-screen relative">
+    <!-- Grid Background -->
+    <div
+      class="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))] -z-10 opacity-20 dark:opacity-40"
+    >
+    </div>
+
+    <!-- Header -->
+    <Section py="pt-32 pb-24">
+      <div class="flex flex-col lg:flex-row items-end justify-between gap-12">
+        <div class="max-w-2xl">
+          <div
+            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-success/10 text-success border border-success/20 text-xs font-bold mb-6"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span>
+            COMMUNITY GUIDES
+          </div>
+          <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9]">
+            Engineer your <br /><span class="text-success">assistant.</span>
+          </h1>
+          <p class="text-xl text-default-500 font-medium leading-relaxed max-w-xl">
+            Deep-dive technical documentation for building production-grade autonomous
+            infrastructure.
+          </p>
+        </div>
+
+        <div
+          class="w-full lg:w-auto flex flex-wrap gap-2 bg-content1/50 backdrop-blur-md p-2 rounded-2xl border border-divider"
+        >
+          {
+            categories.map((cat) => (
+              <button
+                class={`px-6 py-3 rounded-xl text-sm font-bold transition-all ${cat.id === 'all' ? 'bg-success text-white' : 'hover:bg-content2 text-default-600'}`}
+              >
+                {cat.name}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+    </Section>
+
+    <!-- Bento Grid for Guides -->
+    <Section py="pb-32">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <!-- Learning Track Card -->
+        <div
+          class="md:col-span-12 lg:col-span-4 bg-gradient-to-br from-success/20 to-success/5 border border-success/20 p-10 rounded-[40px] flex flex-col justify-between relative overflow-hidden group"
+        >
+          <div
+            class="absolute -top-12 -right-12 w-48 h-48 bg-success/10 rounded-full blur-3xl group-hover:bg-success/20 transition-all"
+          >
+          </div>
+          <div>
+            <h3 class="text-3xl font-black mb-4">The 101 Path</h3>
+            <p class="text-default-700 font-medium mb-8 leading-relaxed">
+              New to self-hosted AI? Follow our curated path to go from zero to a fully integrated
+              WhatsApp/Slack assistant in one afternoon.
+            </p>
+          </div>
+          <Button
+            color="success"
+            radius="full"
+            size="lg"
+            className="font-bold shadow-lg shadow-success/20 h-14"
+          >
+            Start Learning Path
+          </Button>
+        </div>
+
+        <!-- Guides Grid Adjustment -->
+        {
+          guides.map((guide, idx) => (
+            <div
+              class={`${idx === 0 ? 'md:col-span-8 lg:col-span-8' : 'md:col-span-6 lg:col-span-4'}`}
+            >
+              <div class="h-full">
+                <GuideCard {...guide} client:load />
+              </div>
+            </div>
+          ))
+        }
+
+        <!-- Bottom CTA Bento -->
+        <div
+          class="md:col-span-12 lg:col-span-8 p-10 rounded-[40px] bg-content1 border border-divider flex flex-col md:flex-row items-center gap-10"
+        >
+          <div class="flex-1">
+            <h3 class="text-3xl font-black mb-4">Can't find a plugin?</h3>
+            <p class="text-default-500 font-medium">
+              Our plugin SDK is open source. Contribute your own integrations or request a dedicated
+              build from the core team.
+            </p>
+          </div>
+          <div class="flex gap-4">
+            <Button variant="flat" radius="full" className="font-bold px-8">View SDK</Button>
+            <Button color="primary" radius="full" className="font-bold px-8">Request Plugin</Button>
+          </div>
+        </div>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>

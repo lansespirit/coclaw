@@ -2,23 +2,39 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const breadcrumbData = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://coclaw.com/' },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Getting Started',
+      item: 'https://coclaw.com/getting-started/',
+    },
+    { '@type': 'ListItem', position: 3, name: 'Cloud', item: canonicalURL.toString() },
+  ],
+};
+
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
   name: 'How to Deploy OpenClaw on Cloud Providers',
   description:
-    'Comprehensive guide to deploying OpenClaw AI assistant on cloud platforms with official support for Fly.io and Render.',
+    'Comprehensive guide to deploying OpenClaw AI assistant on popular cloud platforms like Fly.io, Render, AWS, and GCP.',
   step: [
     {
       '@type': 'HowToStep',
       name: 'Choose Cloud Provider',
-      text: 'Select between officially supported platforms (Fly.io, Render) or other cloud providers',
+      text: 'Pick a platform that matches your needs (simplicity vs. control) and budget',
     },
     { '@type': 'HowToStep', name: 'Setup Account', text: 'Create and configure cloud account' },
     {
       '@type': 'HowToStep',
       name: 'Deploy Application',
-      text: 'Deploy OpenClaw using platform-specific tools or official configurations',
+      text: 'Deploy OpenClaw using platform-specific tooling or Docker-based workflows',
     },
     {
       '@type': 'HowToStep',
@@ -35,11 +51,12 @@ const structuredData = {
 ---
 
 <BaseLayout
-  title="Deploy OpenClaw on Cloud - Fly.io, Render, AWS, GCP Official Guide"
-  description="Complete guide to deploying OpenClaw AI assistant on cloud platforms. Official support for Fly.io and Render. Step-by-step instructions for AWS, Google Cloud, Azure, and more."
+  title="Deploy OpenClaw on Cloud - Fly.io, Render, AWS, GCP Community Guide"
+  description="Complete guide to deploying OpenClaw on cloud platforms. Step-by-step community guidance for Fly.io, Render, AWS, Google Cloud, Azure, and more."
   keywords="OpenClaw cloud, deploy OpenClaw, OpenClaw Fly.io, OpenClaw Render, OpenClaw AWS, OpenClaw Google Cloud, OpenClaw Azure, OpenClaw Tailscale, cloud AI assistant"
 >
-  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(breadcrumbData)} />
 
   <div
     class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"

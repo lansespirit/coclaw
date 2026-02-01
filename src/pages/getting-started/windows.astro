@@ -2,6 +2,22 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const breadcrumbData = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://coclaw.com/' },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Getting Started',
+      item: 'https://coclaw.com/getting-started/',
+    },
+    { '@type': 'ListItem', position: 3, name: 'Windows', item: canonicalURL.toString() },
+  ],
+};
+
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -13,7 +29,7 @@ const structuredData = {
     {
       '@type': 'HowToStep',
       name: 'Install Node.js',
-      text: 'Install Node.js 22.12+ (Node 22 LTS recommended) inside WSL2',
+      text: 'Install Node.js 22+ (Node 22 LTS recommended) inside WSL2',
     },
     { '@type': 'HowToStep', name: 'Install OpenClaw', text: 'Install OpenClaw globally' },
     {
@@ -35,7 +51,8 @@ const structuredData = {
   description="Complete guide to installing OpenClaw on Windows via WSL2 (recommended). Native Windows installs are untested."
   keywords="OpenClaw Windows, install OpenClaw Windows 10, OpenClaw Windows 11, OpenClaw WSL2, Windows AI assistant, OpenClaw PowerShell"
 >
-  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(breadcrumbData)} />
 
   <div
     class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
@@ -133,7 +150,7 @@ const structuredData = {
                       stroke-width="2"
                       d="M5 13l4 4L19 7"></path>
                   </svg>
-                  <span>Node.js 22.12+ (recommended inside WSL2)</span>
+                  <span>Node.js 22+ (recommended inside WSL2)</span>
                 </li>
                 <li class="flex items-start gap-2">
                   <svg
@@ -201,7 +218,7 @@ const structuredData = {
                         class="text-primary hover:underline"
                         target="_blank"
                         rel="noopener">nodejs.org</a
-                      > and download Node 22 LTS (22.12+ recommended).
+                      > and download Node 22 LTS.
                     </p>
                   </div>
                   <p class="text-default-700 dark:text-default-500 mb-2">
@@ -210,7 +227,7 @@ const structuredData = {
                   <div class="rounded-lg bg-content2 p-4">
                     <pre
                       class="text-sm overflow-x-auto"><code>node --version
-# Should output: v22.12.0+ (v22.x.x)</code></pre>
+                    # Should output: v22.x.x</code></pre>
                   </div>
                 </div>
                 <div>

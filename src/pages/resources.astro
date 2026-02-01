@@ -12,108 +12,70 @@ import { Button, Chip } from '@heroui/react';
 // Mock data for Blog & Articles
 const blogPosts = [
   {
-    title: "Getting Started with OpenClaw: A Complete Beginner's Guide",
+    title: 'The Rise of Proactive AI: Why Reactive Chatbots are Obsolete',
     excerpt:
-      'Learn how to set up OpenClaw from scratch, configure your first channel, and start using your personal AI assistant in under 15 minutes.',
+      'Explore how OpenClaw is shifting the paradigm from "wait-for-input" to proactive assistance, initiating critical workflows before you even ask.',
     author: 'Sarah Chen',
-    keywords: ['beginner', 'setup'],
-    category: 'Tutorial',
-    href: '/blog/getting-started-guide',
+    keywords: ['AI Trends', 'Proactive'],
+    category: 'Analysis',
+    href: '/blog/proactive-ai-rise',
   },
   {
-    title: '5 Essential Security Best Practices for OpenClaw',
+    title: 'Privacy-First AI: How OpenClaw Keeps Your Data on Your Infrastructure',
     excerpt:
-      'Protect your OpenClaw installation with these critical security configurations, including DM pairing, sandboxing, and token management.',
+      'A deep dive into the self-hosting architecture of OpenClaw and how it ensures your conversations with LLMs remain truly private.',
     author: 'Michael Rodriguez',
-    keywords: ['security', 'best practices'],
+    keywords: ['Privacy', 'Self-hosting'],
     category: 'Security',
-    href: '/blog/security-best-practices',
+    href: '/blog/privacy-first-ai',
   },
   {
-    title: 'How to Optimize OpenClaw Token Usage and Reduce Costs',
+    title: 'OpenClaw: Release Notes Reading Guide (How to Track Changes Safely)',
     excerpt:
-      'Discover practical strategies to minimize API token consumption while maintaining full functionality of your OpenClaw assistant.',
+      'A practical checklist for tracking OpenClaw changes, testing upgrades, and avoiding breaking your setup.',
     author: 'Emily Watson',
-    keywords: ['optimization', 'cost'],
-    category: 'Optimization',
-    href: '/blog/optimize-token-usage',
+    keywords: ['Upgrade', 'Release Notes'],
+    category: 'Product',
+    href: '/blog/openclaw-v2-announcement',
   },
 ];
 
 // Mock data for Guides & Tutorials
 const guides = [
   {
-    title: 'Installing OpenClaw on macOS',
-    description:
-      'Step-by-step installation guide for macOS users, including prerequisites, troubleshooting, and first-time configuration.',
-    difficulty: 'Beginner' as const,
-    platforms: ['macOS', 'Apple Silicon', 'Intel'],
-    href: '/guides/install-macos',
+    title: 'Self-Hosting OpenClaw with Docker',
+    description: 'Run OpenClaw with Docker Compose for a reproducible, isolated setup.',
+    difficulty: 'Intermediate' as const,
+    platforms: ['Linux', 'Docker', 'Self-hosted'],
+    href: '/guides/docker-deployment',
   },
   {
-    title: 'Setting Up Telegram Integration',
+    title: 'Configure WhatsApp for OpenClaw',
     description:
-      'Complete guide to connecting OpenClaw with Telegram, including bot creation, webhook configuration, and testing.',
+      'Connect WhatsApp and lock down who can message your agent with allowlists and pairing.',
     difficulty: 'Beginner' as const,
-    platforms: ['Telegram', 'Cross-platform'],
-    href: '/guides/telegram-setup',
+    platforms: ['WhatsApp', 'Messaging'],
+    href: '/guides/whatsapp-setup',
   },
   {
-    title: 'Multi-Agent Routing Configuration',
+    title: 'Enable Tools and Plugins (Advanced)',
     description:
-      'Advanced guide for setting up workspace isolation, session management, and routing between multiple AI agents.',
+      'Turn on optional plugins and explicitly allowlist tools so your agent can call them safely.',
     difficulty: 'Advanced' as const,
-    platforms: ['All platforms'],
-    href: '/guides/multi-agent-routing',
+    platforms: ['Plugins', 'Tools'],
+    href: '/guides/custom-tools',
   },
 ];
 
-// Mock data for Videos
-const videos = [
-  {
-    videoId: 'dQw4w9WgXcQ',
-    title: 'Install OpenClaw (macOS)',
-    category: 'Installation',
-    duration: '3:45',
-  },
-  {
-    videoId: 'dQw4w9WgXcQ',
-    title: 'WhatsApp Setup',
-    category: 'Integration',
-    duration: '4:20',
-  },
-  {
-    videoId: 'dQw4w9WgXcQ',
-    title: 'Security Deep Dive',
-    category: 'Security',
-    duration: '7:15',
-  },
-  {
-    videoId: 'dQw4w9WgXcQ',
-    title: 'Multi-Agent Routing',
-    category: 'Advanced',
-    duration: '6:30',
-  },
-  {
-    videoId: 'dQw4w9WgXcQ',
-    title: 'Custom Tool Building',
-    category: 'Tutorial',
-    duration: '12:00',
-  },
-  {
-    videoId: 'dQw4w9WgXcQ',
-    title: 'Docker Deployment',
-    category: 'Setup',
-    duration: '5:10',
-  },
-];
+// Video library: intentionally empty until we have curated, verified content.
+const videos: { videoId: string; title: string; category: string; duration: string }[] = [];
 
 // Mock data for FAQs
 const faqs = [
   {
     question: 'What are the system requirements for OpenClaw?',
     answer:
-      'OpenClaw requires Node.js 22.12.0 or higher, at least 4GB of RAM, and works on macOS, Linux, and Windows.',
+      'OpenClaw requires a modern Node.js runtime (Node 22+ recommended) and runs on macOS, Linux, and Windows.',
   },
   {
     question: 'How much does it cost to run OpenClaw?',
@@ -133,7 +95,7 @@ const faqs = [
   {
     question: 'Does it support self-hosted LLMs like Llama 3?',
     answer:
-      'Yes! OpenClaw integrates seamlessly with Ollama, enabling you to run local models without any API costs.',
+      'Yes. You can use local models via Ollama to reduce or avoid API costs (hardware permitting).',
   },
   {
     question: 'Can I custom the bot response behavior?',
@@ -150,33 +112,47 @@ const faqs = [
 // Mock data for User Stories
 const userStories = [
   {
-    name: 'Alex Thompson',
-    role: 'Full-stack Developer',
+    name: 'Matt Schlicht',
+    role: 'Octane AI CEO',
     quote:
-      "OpenClaw transformed my workflow. I use it to automate code reviews and manage my calendar across Slack and Telegram. It's the glue that holds my tools together.",
-    href: '/stories/alex-thompson',
+      'Built Moltbook, a social network where AI agents post and interact—powered by an OpenClaw agent, per press coverage.',
+    href: '/stories/matt-schlicht',
   },
   {
-    name: 'Maria Garcia',
-    role: 'Security Analyst',
+    name: 'Peter Steinberger',
+    role: 'Creator of OpenClaw',
     quote:
-      'As someone who values data privacy, OpenClaw is perfect. I have full control over my data and conversations. The DM pairing feature is a genius security addition.',
-    href: '/stories/maria-garcia',
+      'A weekend project that went viral, rebranded, and quickly attracted both community attention and scams, according to reporting.',
+    href: '/stories/peter-steinberger',
   },
   {
-    name: 'David Kim',
-    role: 'Creative Director',
+    name: 'Community Security',
+    role: 'Incident Report',
     quote:
-      'I use OpenClaw to bridge the gap between my design team on Discord and our project management on Slack. It’s saved us hours of copy-pasting every week.',
-    href: '/stories/david-kim',
+      'Researchers and community members flagged a fake VS Code extension targeting OpenClaw users—use official sources and verify installs.',
+    href: '/stories/security-scam-wave',
   },
 ];
 ---
 
 <BaseLayout
-  title="Resources - OpenClaw Guides & Tutorials"
-  description="Everything you need to master OpenClaw: guides, tutorials, videos, and community insights."
+  title="OpenClaw Resources Hub | CoClaw"
+  description="Curated OpenClaw guides, tutorials, FAQs, and community resources. Start here to install, configure channels, and troubleshoot."
+  keywords="OpenClaw resources, OpenClaw guides, OpenClaw tutorials, OpenClaw help, OpenClaw community, install OpenClaw"
 >
+  <script
+    type="application/ld+json"
+    slot="head"
+    set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.question,
+        acceptedAnswer: { '@type': 'Answer', text: f.answer },
+      })),
+    })}
+  />
   <div class="bg-background min-h-screen relative selection:bg-primary/20">
     <!-- Decorative Background Elements -->
     <div
@@ -385,9 +361,39 @@ const userStories = [
       </div>
     </Section>
 
-    <!-- Video Tutorials Section (Horizontal Scroll with Lightbox) -->
+    <!-- Video Tutorials Section -->
     <Section py="py-24" class="bg-content1/20 border-y border-divider/50 overflow-hidden">
-      <VideoGallery videos={videos} client:load />
+      {
+        videos.length > 0 ? (
+          <VideoGallery videos={videos} client:load />
+        ) : (
+          <div class="site-container">
+            <div class="max-w-4xl mx-auto text-center">
+              <h2 class="text-4xl font-bold mb-4">Video Library</h2>
+              <p class="text-lg text-default-600 dark:text-default-500 mb-8">
+                Coming soon. We only list curated, verified walkthroughs to avoid outdated or unsafe
+                instructions.
+              </p>
+              <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  class="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-6 py-3 font-semibold"
+                  href="/getting-started"
+                >
+                  Install OpenClaw
+                </a>
+                <a
+                  class="inline-flex items-center justify-center rounded-full border border-divider bg-content1 px-6 py-3 font-semibold text-foreground"
+                  href="https://forum.coclaw.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Request a Video Topic
+                </a>
+              </div>
+            </div>
+          </div>
+        )
+      }
     </Section>
 
     <!-- Redesigned Support & Stories Section -->
@@ -419,7 +425,7 @@ const userStories = [
           <div class="mt-12 p-8 rounded-3xl bg-primary/5 border border-primary/10">
             <h4 class="text-lg font-bold mb-2">Can't find your answer?</h4>
             <p class="text-default-600 mb-6">
-              Check our extended database with over 200 searchable solutions.
+              Browse our troubleshooting hub and community threads for known fixes.
             </p>
             <Button
               as="a"

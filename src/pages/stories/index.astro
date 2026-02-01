@@ -1,0 +1,182 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+import { UserStoryCard } from '../../components/UserStoryCard';
+import { Button, Avatar } from '@heroui/react';
+
+const userStories = [
+  {
+    name: 'Matt Schlicht',
+    role: 'Octane AI CEO',
+    quote:
+      'Built Moltbook, a social network where AI agents post and interact—powered by an OpenClaw agent, per press coverage.',
+    href: '/stories/matt-schlicht',
+    featured: true,
+    avatar: '/images/stories/moltbook.svg',
+  },
+  {
+    name: 'Peter Steinberger',
+    role: 'Creator of OpenClaw',
+    quote:
+      'A weekend project that went viral, rebranded, and quickly attracted both community attention and scams, according to reporting.',
+    href: '/stories/peter-steinberger',
+    avatar: '/images/stories/rebrand.svg',
+  },
+  {
+    name: 'Community Security',
+    role: 'Incident Report',
+    quote:
+      'Researchers and community members flagged a fake VS Code extension targeting OpenClaw users—use official sources and verify installs.',
+    href: '/stories/security-scam-wave',
+    avatar: '/images/stories/security.svg',
+  },
+];
+
+const mainStory = userStories.find((s) => s.featured);
+const otherStories = userStories.filter((s) => !s.featured);
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'Stories & Case Studies',
+  description:
+    'Real-world stories about OpenClaw—from press-covered builds to community security lessons.',
+  url: canonicalURL.toString(),
+  hasPart: userStories.map((s) => ({
+    '@type': 'WebPage',
+    name: s.name,
+    url: new URL(s.href, Astro.site).toString(),
+    description: s.quote,
+  })),
+};
+---
+
+<BaseLayout
+  title="Stories & Case Studies | CoClaw"
+  description="Real-world stories about OpenClaw—from press-covered builds to community security lessons. Each story includes sources."
+  keywords="OpenClaw stories, OpenClaw case studies, OpenClaw users, OpenClaw security"
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
+  <div class="bg-background min-h-screen relative pb-24">
+    <!-- Fluid Background Elements -->
+    <div
+      class="absolute top-0 left-0 w-full h-[1000px] bg-gradient-to-b from-secondary/5 to-transparent -z-10"
+    >
+    </div>
+
+    <!-- Hero Header -->
+    <Section py="pt-32 pb-16">
+      <div class="text-center max-w-4xl mx-auto mb-24">
+        <h1
+          class="text-6xl md:text-9xl font-black tracking-tighter mb-8 leading-[0.8] text-foreground"
+        >
+          Built by you. <br />
+          <span class="text-secondary italic">Driven by AI.</span>
+        </h1>
+        <p class="text-2xl text-default-500 font-medium max-w-2xl mx-auto leading-relaxed">
+          Press-covered builds, founder notes, and community lessons about running OpenClaw safely.
+        </p>
+        <p class="mt-6 text-sm text-default-600 max-w-2xl mx-auto">
+          We avoid unverifiable claims. Each story links to public sources (press articles or user
+          posts). If you'd like to submit a case study, email <strong>contact@coclaw.com</strong>.
+        </p>
+      </div>
+
+      {
+        mainStory && (
+          <div class="relative w-full rounded-[64px] bg-content1 border border-divider p-12 md:p-24 overflow-hidden mb-32 group transition-all duration-500 hover:border-secondary/30 hover:shadow-2xl hover:shadow-secondary/10">
+            <a
+              href={mainStory.href}
+              class="absolute inset-0 z-20"
+              aria-label={`Read ${mainStory.name}'s story`}
+            />
+
+            <div class="absolute top-0 right-0 p-12 opacity-5 scale-150 rotate-12 select-none group-hover:scale-175 transition-transform duration-1000">
+              <svg class="w-64 h-64 text-secondary fill-current" viewBox="0 0 32 32">
+                <path d="M10 8h2v8h-6v-2c0-3.314 2.686-6 6-6zM22 8h2v8h-6v-2c0-3.314 2.686-6 6-6z" />
+              </svg>
+            </div>
+
+            <div class="flex flex-col lg:flex-row items-center gap-16 relative z-10">
+              <div class="flex-1 text-center lg:text-left">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 text-secondary font-black text-xs mb-8 uppercase tracking-widest">
+                  Spotlight Story
+                </div>
+                <blockquote class="text-4xl md:text-5xl font-black italic tracking-tight text-foreground mb-12 leading-[1.1]">
+                  "{mainStory.quote}"
+                </blockquote>
+                <div class="flex flex-col md:flex-row items-center justify-between gap-12">
+                  <div class="flex flex-col lg:flex-row items-center gap-6">
+                    <Avatar
+                      src={mainStory.avatar}
+                      className="w-20 h-20"
+                      isBordered
+                      color="secondary"
+                    />
+                    <div class="text-center lg:text-left">
+                      <p class="text-2xl font-black text-foreground">{mainStory.name}</p>
+                      <p class="text-secondary font-bold text-lg">{mainStory.role}</p>
+                    </div>
+                  </div>
+
+                  <Button
+                    radius="full"
+                    color="secondary"
+                    variant="shadow"
+                    className="font-bold px-10 h-14 text-white z-30"
+                    as="a"
+                    href={mainStory.href}
+                  >
+                    Read Full Story
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      <div class="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+        {
+          otherStories.map((story) => (
+            <div class="break-inside-avoid">
+              <UserStoryCard {...story} client:load />
+            </div>
+          ))
+        }
+      </div>
+    </Section>
+
+    <!-- Map CTA -->
+    <Section py="py-24">
+      <div
+        class="rounded-[52px] bg-secondary p-12 md:p-20 text-center text-white relative overflow-hidden shadow-2xl shadow-secondary/20"
+      >
+        <div
+          class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"
+        >
+        </div>
+        <h2 class="text-4xl md:text-7xl font-black mb-8 tracking-tighter">
+          150+ Countries. <br />Unlimited Potential.
+        </h2>
+        <p class="text-xl text-white/80 font-medium mb-12 max-w-2xl mx-auto">
+          Ready to deploy your node and join the movement? Start building your autonomous future
+          today.
+        </p>
+        <div class="flex justify-center gap-6">
+          <Button
+            variant="solid"
+            radius="full"
+            size="lg"
+            className="bg-white text-secondary font-black px-12 h-16 text-lg"
+            as="a"
+            href="/getting-started"
+          >
+            Deploy Your Node
+          </Button>
+        </div>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>

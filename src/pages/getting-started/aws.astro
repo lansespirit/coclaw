@@ -2,6 +2,22 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const breadcrumbData = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://coclaw.com/' },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: 'Getting Started',
+      item: 'https://coclaw.com/getting-started/',
+    },
+    { '@type': 'ListItem', position: 3, name: 'AWS', item: canonicalURL.toString() },
+  ],
+};
+
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
@@ -30,7 +46,8 @@ const structuredData = {
   description="Complete guide to deploying OpenClaw on AWS. Step-by-step instructions for EC2 and ECS/Fargate."
   keywords="OpenClaw AWS, deploy OpenClaw AWS, OpenClaw EC2, OpenClaw ECS, OpenClaw Fargate, AWS AI assistant, OpenClaw cloud deployment"
 >
-  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(breadcrumbData)} />
 
   <div
     class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
