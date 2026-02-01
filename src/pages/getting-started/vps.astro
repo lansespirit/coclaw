@@ -1,6 +1,13 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
+import {
+  IconAkamai,
+  IconCheck,
+  IconDigitalOcean,
+  IconServer,
+  IconVultr,
+} from '../../components/icons';
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const breadcrumbData = {
@@ -63,14 +70,7 @@ const structuredData = {
           <div
             class="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center"
           >
-            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
-              ></path>
-            </svg>
+            <IconServer className="w-12 h-12 text-white" aria-hidden="true" />
           </div>
         </div>
         <h1
@@ -91,48 +91,24 @@ const structuredData = {
               <h3 class="text-xl font-bold mb-3">Minimum Specifications</h3>
               <ul class="space-y-2 text-default-700 dark:text-default-500">
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>1 vCPU / 1GB RAM (basic usage)</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>10GB SSD storage</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>Ubuntu 20.04+ or Debian 11+</span>
                 </li>
               </ul>
@@ -141,48 +117,24 @@ const structuredData = {
               <h3 class="text-xl font-bold mb-3">Recommended Specifications</h3>
               <ul class="space-y-2 text-default-700 dark:text-default-500">
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>2 vCPU / 2GB RAM (production)</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>25GB SSD storage</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>SSH access with root privileges</span>
                 </li>
               </ul>
@@ -202,11 +154,7 @@ const structuredData = {
               <div
                 class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center mb-4"
               >
-                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path
-                    d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6-9.6-4.298-9.6-9.6S6.698 2.4 12 2.4z"
-                  ></path>
-                </svg>
+                <IconDigitalOcean className="w-6 h-6 text-white" aria-hidden="true" />
               </div>
               <h3 class="text-xl font-bold mb-2">DigitalOcean</h3>
               <p class="text-default-700 dark:text-default-500 text-sm mb-3">
@@ -228,11 +176,7 @@ const structuredData = {
               <div
                 class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-4"
               >
-                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path
-                    d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6-9.6-4.298-9.6-9.6S6.698 2.4 12 2.4z"
-                  ></path>
-                </svg>
+                <IconAkamai className="w-6 h-6 text-white" aria-hidden="true" />
               </div>
               <h3 class="text-xl font-bold mb-2">Linode</h3>
               <p class="text-default-700 dark:text-default-500 text-sm mb-3">
@@ -254,11 +198,7 @@ const structuredData = {
               <div
                 class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center mb-4"
               >
-                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path
-                    d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6-9.6-4.298-9.6-9.6S6.698 2.4 12 2.4z"
-                  ></path>
-                </svg>
+                <IconVultr className="w-6 h-6 text-white" aria-hidden="true" />
               </div>
               <h3 class="text-xl font-bold mb-2">Vultr</h3>
               <p class="text-default-700 dark:text-default-500 text-sm mb-3">

@@ -34,6 +34,12 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
+    "@iconify-json/heroicons-outline": "^1.2.1",
+    "@iconify-json/heroicons-solid": "^1.2.1",
+    "@iconify-json/mdi": "^1.2.3",
+    "@iconify-json/simple-icons": "^1.2.69",
+    "@svgr/core": "^8.1.0",
+    "@svgr/plugin-jsx": "^8.1.0",
     "@typescript-eslint/eslint-plugin": "^8.54.0",
     "@typescript-eslint/parser": "^8.54.0",
     "eslint": "^9.39.2",
@@ -42,6 +48,7 @@
     "husky": "^9.1.7",
     "pagefind": "^1.4.0",
     "prettier": "^3.8.1",
-    "prettier-plugin-astro": "^0.14.1"
+    "prettier-plugin-astro": "^0.14.1",
+    "unplugin-icons": "^23.0.1"
   }
 }

@@ -1,6 +1,15 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
+import {
+  IconCloud,
+  IconFly,
+  IconGoogleCloud,
+  IconHeroku,
+  IconMicrosoftAzure,
+  IconRailway,
+  IconRender,
+} from '../../components/icons';
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const breadcrumbData = {
@@ -67,14 +76,7 @@ const structuredData = {
           <div
             class="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center"
           >
-            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
-              ></path>
-            </svg>
+            <IconCloud className="w-12 h-12 text-white" aria-hidden="true" />
           </div>
         </div>
         <h1
@@ -105,11 +107,7 @@ const structuredData = {
                 <div
                   class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center"
                 >
-                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6-9.6-4.298-9.6-9.6S6.698 2.4 12 2.4z"
-                    ></path>
-                  </svg>
+                  <IconFly className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
                 <div>
                   <h3 class="text-2xl font-bold">Fly.io</h3>
@@ -134,11 +132,7 @@ const structuredData = {
                 <div
                   class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center"
                 >
-                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6-9.6-4.298-9.6-9.6S6.698 2.4 12 2.4z"
-                    ></path>
-                  </svg>
+                  <IconRender className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
                 <div>
                   <h3 class="text-2xl font-bold">Render</h3>
@@ -171,11 +165,7 @@ const structuredData = {
                 <div
                   class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center"
                 >
-                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M12 0C5.372 0 0 5.373 0 12s5.372 12 12 12c6.627 0 12-5.373 12-12S18.627 0 12 0zm-.84 4.67h1.68v8.36h-1.68V4.67zM18 14.09l-5.45 3.11v-6.22L18 14.09z"
-                    ></path>
-                  </svg>
+                  <IconGoogleCloud className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
                 <h3 class="text-2xl font-bold">Google Cloud Platform</h3>
               </div>
@@ -194,11 +184,7 @@ const structuredData = {
                 <div
                   class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center"
                 >
-                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M22.379 23.343a1.62 1.62 0 0 0 1.536-2.14v.002L17.35 1.76A1.62 1.62 0 0 0 15.816.657H8.184A1.62 1.62 0 0 0 6.65 1.76L.086 21.204a1.62 1.62 0 0 0 1.536 2.139h4.741a1.62 1.62 0 0 0 1.535-1.103l.977-2.892 4.947 3.675c.28.208.618.32.966.32h7.591z"
-                    ></path>
-                  </svg>
+                  <IconMicrosoftAzure className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
                 <h3 class="text-2xl font-bold">Microsoft Azure</h3>
               </div>
@@ -217,11 +203,7 @@ const structuredData = {
                 <div
                   class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center"
                 >
-                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M20.61 0H3.39C2.189 0 1.23.96 1.23 2.16v19.681c0 1.198.959 2.159 2.16 2.159h17.22c1.2 0 2.159-.961 2.159-2.159V2.16C22.77.96 21.811 0 20.61 0zm.96 21.841c0 .539-.421.96-.96.96H3.39c-.54 0-.96-.421-.96-.96V2.16c0-.54.42-.961.96-.961h17.22c.539 0 .96.421.96.961v19.681zM6.63 20.399L9.33 18l-2.7-2.4v4.799zm9.72-9.719c-.479-.48-1.379-1.08-2.879-1.08-1.621 0-3.301.421-4.5.84L3.9 8.1l2.221 2.7 3.6-1.261c.6-.179 1.32-.3 2.04-.3.66 0 1.14.12 1.38.361.179.179.24.42.24.659 0 .24-.061.48-.24.66-.24.239-.84.479-1.92.479h-1.32c-1.08 0-2.04.24-2.76.72-.72.48-1.14 1.2-1.14 2.04 0 .84.42 1.56 1.14 2.04.72.48 1.68.72 2.76.72h1.32c1.08 0 1.68.24 1.92.48.24.18.36.42.36.66 0 .24-.12.48-.36.66-.24.24-.84.48-1.92.48-1.08 0-1.92-.12-2.64-.36l-3.6 1.2 5.1 2.34c1.2.42 2.88.84 4.5.84 1.5 0 2.4-.6 2.88-1.08.48-.48.72-1.08.72-1.68 0-.6-.24-1.2-.72-1.68-.48-.48-1.38-1.08-2.88-1.08h-1.32c-.66 0-1.14-.12-1.38-.36-.18-.18-.24-.42-.24-.66 0-.24.06-.48.24-.66.24-.24.72-.48 1.38-.48h1.32c1.5 0 2.4-.6 2.88-1.08.48-.48.72-1.08.72-1.68 0-.6-.24-1.2-.72-1.68z"
-                    ></path>
-                  </svg>
+                  <IconHeroku className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
                 <h3 class="text-2xl font-bold">Heroku</h3>
               </div>
@@ -240,11 +222,7 @@ const structuredData = {
                 <div
                   class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center"
                 >
-                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6-9.6-4.298-9.6-9.6S6.698 2.4 12 2.4z"
-                    ></path>
-                  </svg>
+                  <IconRailway className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
                 <h3 class="text-2xl font-bold">Railway</h3>
               </div>
@@ -265,11 +243,7 @@ const structuredData = {
             <div
               class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center"
             >
-              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path
-                  d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6-9.6-4.298-9.6-9.6S6.698 2.4 12 2.4z"
-                ></path>
-              </svg>
+              <IconFly className="w-6 h-6 text-white" aria-hidden="true" />
             </div>
             <div>
               <h2 class="text-3xl md:text-4xl font-bold">Deploy on Fly.io</h2>
@@ -369,11 +343,7 @@ flyctl secrets set ANTHROPIC_API_KEY=sk-ant-...`}</code></pre>
             <div
               class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center"
             >
-              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path
-                  d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6-9.6-4.298-9.6-9.6S6.698 2.4 12 2.4z"
-                ></path>
-              </svg>
+              <IconRender className="w-6 h-6 text-white" aria-hidden="true" />
             </div>
             <div>
               <h2 class="text-3xl md:text-4xl font-bold">Deploy on Render</h2>

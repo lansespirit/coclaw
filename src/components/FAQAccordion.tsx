@@ -1,4 +1,5 @@
 import { Accordion, AccordionItem } from '@heroui/react';
+import { IconPlus } from './icons';
 
 interface FAQItemProps {
   question: string;
@@ -32,14 +33,7 @@ export const FAQAccordion = ({ faqs }: FAQAccordionProps) => {
             <div
               className={`transition-transform duration-300 ${isOpen ? 'rotate-45' : 'rotate-0 text-default-400'}`}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
+              <IconPlus className="w-6 h-6" aria-hidden="true" />
             </div>
           )}
         >

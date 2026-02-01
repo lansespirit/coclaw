@@ -1,4 +1,5 @@
 import { Link } from '@heroui/react';
+import { IconChevronRight, IconQuote } from './icons';
 
 interface UserStoryCardProps {
   name: string;
@@ -30,13 +31,10 @@ export const UserStoryCard = ({ name, role, quote, avatar, href }: UserStoryCard
       </div>
 
       <div className="relative mb-6">
-        <svg
+        <IconQuote
           className="absolute -top-2 -left-3 w-8 h-8 text-primary/10 -z-10"
-          fill="currentColor"
-          viewBox="0 0 32 32"
-        >
-          <path d="M10 8h2v8h-6v-2c0-3.314 2.686-6 6-6zM22 8h2v8h-6v-2c0-3.314 2.686-6 6-6z" />
-        </svg>
+          aria-hidden="true"
+        />
         <blockquote className="text-default-800 dark:text-default-600 line-clamp-4 font-medium leading-relaxed italic">
           "{quote}"
         </blockquote>
@@ -47,9 +45,7 @@ export const UserStoryCard = ({ name, role, quote, avatar, href }: UserStoryCard
         className="text-sm font-bold text-primary hover:text-primary transition-colors inline-flex items-center gap-1 group-hover:gap-2 transition-all"
       >
         Read full story
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-        </svg>
+        <IconChevronRight className="w-4 h-4" aria-hidden="true" />
       </Link>
     </article>
   );

@@ -1,6 +1,7 @@
 ---
 import Section from '../layout/Section.astro';
 import FeaturesBackground from './backgrounds/FeaturesBackground.astro';
+import { IconArrowDown, IconCheck, IconInfoSolid, IconShieldCheckSolid } from '../icons';
 ---
 
 <Section containerClass="space-y-32">
@@ -34,15 +35,7 @@ import FeaturesBackground from './backgrounds/FeaturesBackground.astro';
           ].map((item) => (
             <div class="group m-pill p-4 flex items-center gap-4 cursor-default">
               <div class="w-8 h-8 rounded-lg bg-content2 flex items-center justify-center group-hover:bg-green-500/20 group-hover:text-green-500 transition-colors">
-                <svg
-                  class="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
+                <IconCheck className="w-5 h-5" aria-hidden="true" />
               </div>
               <span class="font-medium text-foreground/80 group-hover:text-foreground transition-colors">
                 {item}
@@ -57,11 +50,7 @@ import FeaturesBackground from './backgrounds/FeaturesBackground.astro';
         class="relative h-[400px] rounded-3xl bg-gradient-to-br from-[#4ff0b7] to-[#1e9a7e] overflow-hidden flex items-center justify-center shadow-[0_0_100px_-20px_rgba(79,240,183,0.3)]"
       >
         <div class="absolute top-4 right-4 animate-bounce">
-          <svg class="w-6 h-6 text-black/50" fill="currentColor" viewBox="0 0 24 24"
-            ><path
-              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
-            ></path></svg
-          >
+          <IconInfoSolid className="w-6 h-6 text-black/50" aria-hidden="true" />
         </div>
 
         <!-- Channels Mockup -->
@@ -177,13 +166,7 @@ import FeaturesBackground from './backgrounds/FeaturesBackground.astro';
 
             <!-- Arrow Down -->
             <div class="flex justify-center">
-              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-              </svg>
+              <IconArrowDown className="w-6 h-6 text-white" aria-hidden="true" />
             </div>
 
             <!-- Channels -->
@@ -207,13 +190,7 @@ import FeaturesBackground from './backgrounds/FeaturesBackground.astro';
 
             <!-- Arrow Down -->
             <div class="flex justify-center">
-              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-              </svg>
+              <IconArrowDown className="w-6 h-6 text-white" aria-hidden="true" />
             </div>
 
             <!-- AI Models -->
@@ -231,9 +208,7 @@ import FeaturesBackground from './backgrounds/FeaturesBackground.astro';
 
             <!-- Security Badge -->
             <div class="mt-2 flex items-center justify-center gap-2 text-white/80 text-xs">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"></path>
-              </svg>
+              <IconShieldCheckSolid className="w-4 h-4" aria-hidden="true" />
               <span class="font-semibold">Local-First • Sandboxed • Secure</span>
             </div>
           </div>

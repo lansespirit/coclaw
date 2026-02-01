@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
+import { IconCheck, IconLinux } from '../../components/icons';
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const breadcrumbData = {
@@ -62,11 +63,7 @@ const structuredData = {
           <div
             class="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center"
           >
-            <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path
-                d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.84-.41 1.719-.41 2.623 0 .955.164 1.898.493 2.8.615 1.681 1.901 3.052 3.57 3.799 1.885.843 4.17.843 6.055 0 1.669-.747 2.955-2.118 3.57-3.799.329-.902.493-1.845.493-2.8 0-.904-.132-1.783-.41-2.623-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298-.165-.013-.325-.021-.48-.021zm-.005 5.326c.885 0 1.602.717 1.602 1.602 0 .885-.717 1.602-1.602 1.602-.885 0-1.602-.717-1.602-1.602 0-.885.717-1.602 1.602-1.602z"
-              ></path>
-            </svg>
+            <IconLinux className="w-12 h-12 text-white" aria-hidden="true" />
           </div>
         </div>
         <h1
@@ -87,48 +84,24 @@ const structuredData = {
               <h3 class="text-xl font-bold mb-3">System Requirements</h3>
               <ul class="space-y-2 text-default-700 dark:text-default-500">
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>Any modern Linux distro (examples: Ubuntu/Debian/Fedora/Arch)</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>x86_64 or ARM64 architecture</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>500MB free disk space</span>
                 </li>
               </ul>
@@ -137,48 +110,24 @@ const structuredData = {
               <h3 class="text-xl font-bold mb-3">Software Requirements</h3>
               <ul class="space-y-2 text-default-700 dark:text-default-500">
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>Node.js 22+ (Node 22 LTS recommended)</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>Terminal/shell access</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>sudo privileges</span>
                 </li>
               </ul>
@@ -197,11 +146,7 @@ const structuredData = {
                 <div
                   class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center"
                 >
-                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path
-                      d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.84-.41 1.719-.41 2.623 0 .955.164 1.898.493 2.8.615 1.681 1.901 3.052 3.57 3.799 1.885.843 4.17.843 6.055 0 1.669-.747 2.955-2.118 3.57-3.799.329-.902.493-1.845.493-2.8 0-.904-.132-1.783-.41-2.623-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298-.165-.013-.325-.021-.48-.021zm-.005 5.326c.885 0 1.602.717 1.602 1.602 0 .885-.717 1.602-1.602 1.602-.885 0-1.602-.717-1.602-1.602 0-.885.717-1.602 1.602-1.602z"
-                    ></path>
-                  </svg>
+                  <IconLinux className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
                 <h3 class="text-2xl font-bold">Ubuntu / Debian</h3>
               </div>

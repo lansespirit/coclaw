@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
+import { IconApple, IconBookOpen, IconCheck, IconCog, IconLifebuoy } from '../../components/icons';
 
 // SEO-optimized structured data
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -73,11 +74,7 @@ const breadcrumbData = {
           <div
             class="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center"
           >
-            <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path
-                d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
-              ></path>
-            </svg>
+            <IconApple className="w-12 h-12 text-white" aria-hidden="true" />
           </div>
         </div>
         <h1
@@ -99,48 +96,24 @@ const breadcrumbData = {
               <h3 class="text-xl font-bold mb-3">System Requirements</h3>
               <ul class="space-y-2 text-default-700 dark:text-default-500">
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>macOS (Intel or Apple Silicon)</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>Intel or Apple Silicon (M1/M2/M3)</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>500MB free disk space</span>
                 </li>
               </ul>
@@ -149,48 +122,24 @@ const breadcrumbData = {
               <h3 class="text-xl font-bold mb-3">Software Requirements</h3>
               <ul class="space-y-2 text-default-700 dark:text-default-500">
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>Node.js 22+ (Node 22 LTS recommended)</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>Terminal access</span>
                 </li>
                 <li class="flex items-start gap-2">
-                  <svg
-                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M5 13l4 4L19 7"></path>
-                  </svg>
+                  <IconCheck
+                    className="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    aria-hidden="true"
+                  />
                   <span>Homebrew (recommended)</span>
                 </li>
               </ul>
@@ -478,47 +427,21 @@ arch -arm64 npm install -g openclaw@latest</code></pre>
             href="/tools/config-generator"
             class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-semibold"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-              ></path>
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-            </svg>
+            <IconCog className="w-5 h-5" aria-hidden="true" />
             Configuration Generator
           </a>
           <a
             href="/resources"
             class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-              ></path>
-            </svg>
+            <IconBookOpen className="w-5 h-5" aria-hidden="true" />
             Browse Guides
           </a>
           <a
             href="/troubleshooting"
             class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
           >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
-              ></path>
-            </svg>
+            <IconLifebuoy className="w-5 h-5" aria-hidden="true" />
             Troubleshooting
           </a>
         </div>
