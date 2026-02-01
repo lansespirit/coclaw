@@ -1,60 +1,31 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 import { BlogCard } from '../../components/BlogCard';
 import { Button, Chip, Input } from '@heroui/react';
 
-const blogPosts = [
-  {
-    title: 'The Rise of Proactive AI: Why Reactive Chatbots are Obsolete',
-    excerpt:
-      'Explore how OpenClaw is shifting the paradigm from "wait-for-input" to proactive assistance, initiating critical workflows before you even ask.',
-    author: 'Sarah Chen',
-    date: 'Feb 1, 2026',
-    keywords: ['AI Trends', 'Proactive'],
-    category: 'Analysis',
-    image:
-      'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1200',
-    href: '/blog/proactive-ai-rise',
-    featured: true,
-  },
-  {
-    title: 'Privacy-First AI: How OpenClaw Keeps Your Data on Your Infrastructure',
-    excerpt:
-      'A deep dive into the self-hosting architecture of OpenClaw and how it ensures your conversations with LLMs remain truly private.',
-    author: 'Michael Rodriguez',
-    date: 'Jan 28, 2026',
-    keywords: ['Privacy', 'Self-hosting'],
-    category: 'Security',
-    image:
-      'https://images.unsplash.com/photo-1633265485768-3069cb89f57a?auto=format&fit=crop&q=80&w=800',
-    href: '/blog/privacy-first-ai',
-  },
-  {
-    title: 'OpenClaw: Release Notes Reading Guide (How to Track Changes Safely)',
-    excerpt:
-      'A practical checklist for tracking OpenClaw changes, testing upgrades, and avoiding breaking your setup.',
-    author: 'Emily Watson',
-    date: 'Jan 25, 2026',
-    keywords: ['Upgrade', 'Release Notes'],
-    category: 'Product',
-    image:
-      'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&q=80&w=800',
-    href: '/blog/openclaw-v2-announcement',
-  },
-  {
-    title: 'Optimizing Context Efficiency in Large Language Models',
-    excerpt:
-      'Technical breakdown of how OpenClaw handles long-running sessions without hitting token limits or losing conversation quality.',
-    author: 'David Zhang',
-    date: 'Jan 20, 2026',
-    keywords: ['Engineering', 'LLMs'],
-    category: 'Engineering',
-    image:
-      'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800',
-    href: '/blog/context-efficiency',
-  },
-];
+const entries = await getCollection('blog', ({ data }) => !data.draft);
+const blogPosts = entries
+  .sort((a, b) => {
+    if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+    return b.data.publishDate.getTime() - a.data.publishDate.getTime();
+  })
+  .map((entry) => ({
+    title: entry.data.title,
+    excerpt: entry.data.description,
+    author: entry.data.author,
+    date: entry.data.publishDate.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }),
+    keywords: entry.data.keywords,
+    category: entry.data.category,
+    image: entry.data.ogImage || '/images/og/og-main.png',
+    href: `/blog/${entry.slug}`,
+    featured: entry.data.featured,
+  }));
 
 const featuredPost = blogPosts.find((post) => post.featured);
 const regularPosts = blogPosts.filter((post) => !post.featured);

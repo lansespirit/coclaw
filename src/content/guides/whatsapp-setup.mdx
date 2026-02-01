@@ -1,0 +1,29 @@
+---
+title: "Configure WhatsApp for OpenClaw (Baileys / WhatsApp Web)"
+description: "Connect a WhatsApp account to OpenClaw and restrict who can message your agent using allowlists and pairing."
+category: "integration"
+difficulty: "Beginner"
+platforms:
+  - "WhatsApp"
+  - "Messaging"
+time: "10 min"
+publishDate: 2026-01-28
+lastUpdated: 2026-01-28
+steps:
+  - title: "Start with a dedicated number (recommended)"
+    content: >
+      If possible, use a separate phone number for the assistant. This reduces account risk and
+      avoids self-chat quirks.
+  - title: "Add minimal WhatsApp config"
+    content: >
+      In `~/.openclaw/openclaw.json`, configure WhatsApp with a conservative DM policy and allowlist
+      (e.g., `dmPolicy: "allowlist"` + `allowFrom: ["+15551234567"]`).
+  - title: "Log in (scan QR)"
+    content: >
+      Run `openclaw channels login` and scan the QR code using WhatsApp -> Linked Devices -> Link a
+      device.
+  - title: "Pairing (optional)"
+    content: >
+      If you use pairing for unknown senders, approve requests with
+      `openclaw pairing list whatsapp` and `openclaw pairing approve whatsapp <code>`.
+---

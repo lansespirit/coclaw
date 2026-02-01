@@ -1,0 +1,31 @@
+---
+title: "Optimizing Context Efficiency in LLM Workflows"
+description: "Technical breakdown of how OpenClaw handles long-running sessions without hitting token limits or losing conversation quality."
+category: "Engineering"
+author: "David Zhang"
+publishDate: 2026-01-20
+lastUpdated: 2026-02-01
+keywords:
+  - "Engineering"
+  - "LLMs"
+ogImage: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200"
+---
+<p class="text-xl leading-relaxed mb-8">
+            Most real assistants fail for a boring reason: they become expensive, slow, or lose track of what matters as conversations grow. "Context efficiency" is about keeping the model informed <em>without</em> sending everything every time.
+          </p>
+          <h2 class="text-3xl font-bold mt-12 mb-6">The Three Levers</h2>
+          <ul class="list-disc pl-6 space-y-4 mb-8">
+            <li><strong>Reduce input:</strong> summarize, prune, and de-duplicate history.</li>
+            <li><strong>Retrieve just-in-time:</strong> pull the right facts via search/RAG instead of replaying full chat logs.</li>
+            <li><strong>Constrain output:</strong> ask for structured responses, limit verbosity, and use tool calls for long data.</li>
+          </ul>
+          <h2 class="text-3xl font-bold mt-12 mb-6">A Simple Strategy That Works</h2>
+          <ol class="list-decimal pl-6 space-y-4 mb-8">
+            <li>Keep a short "current goal + constraints" memory.</li>
+            <li>Summarize after important milestones (not every message).</li>
+            <li>Store durable facts in a notes system, not the prompt.</li>
+            <li>When you need details, retrieve them (docs, files, tickets) on demand.</li>
+          </ol>
+          <p class="mb-6">
+            In practice, this means your agent stays helpful in weeks-long projects while keeping token usage predictable.
+          </p>

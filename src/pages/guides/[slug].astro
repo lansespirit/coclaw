@@ -1,114 +1,26 @@
 ---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 import { GuideStepsAccordion } from '../../components/GuideStepsAccordion';
 import { Button, Chip } from '@heroui/react';
 
-export async function getStaticPaths() {
-  return [
-    {
-      params: { slug: 'docker-deployment' },
-      props: {
-        title: 'Self-Hosting OpenClaw with Docker',
-        difficulty: 'Intermediate',
-        platform: 'Docker / Linux',
-        time: '15 min',
-        description:
-          'Run a containerized OpenClaw Gateway with Docker Compose for an isolated, reproducible setup.',
-        steps: [
-          {
-            title: 'Prerequisites',
-            content:
-              'Install Docker Desktop (or Docker Engine) and Docker Compose v2. Ensure you have enough disk space for images and logs.',
-          },
-          {
-            title: 'Clone the OpenClaw repo',
-            content:
-              'Clone the official OpenClaw repository. The Docker quick-start script lives in the repo root.',
-          },
-          {
-            title: 'Run the Docker quick start',
-            content:
-              'From the repo root, run `./docker-setup.sh`. It builds the gateway image, runs onboarding, starts the gateway via Docker Compose, and generates a gateway token in `.env`.',
-          },
-          {
-            title: 'Open the dashboard (Control UI)',
-            content:
-              'Open `http://127.0.0.1:18789/`. If prompted, paste the gateway token (Settings → token).',
-          },
-          {
-            title: 'Optional: configure channels',
-            content:
-              'Use the CLI container to configure channels (e.g., WhatsApp QR: `docker compose run --rm openclaw-cli channels login`). Then restart the gateway container if needed.',
-          },
-        ],
-      },
-    },
-    {
-      params: { slug: 'whatsapp-setup' },
-      props: {
-        title: 'Configure WhatsApp for OpenClaw (Baileys / WhatsApp Web)',
-        difficulty: 'Beginner',
-        platform: 'WhatsApp',
-        time: '10 min',
-        description:
-          'Connect a WhatsApp account to OpenClaw and restrict who can message your agent using allowlists and pairing.',
-        steps: [
-          {
-            title: 'Start with a dedicated number (recommended)',
-            content:
-              'If possible, use a separate phone number for the assistant. This reduces account risk and avoids self-chat quirks.',
-          },
-          {
-            title: 'Add minimal WhatsApp config',
-            content:
-              'In `~/.openclaw/openclaw.json`, configure WhatsApp with a conservative DM policy and allowlist (e.g., `dmPolicy: "allowlist"` + `allowFrom: ["+15551234567"]`).',
-          },
-          {
-            title: 'Log in (scan QR)',
-            content:
-              'Run `openclaw channels login` and scan the QR code using WhatsApp → Linked Devices → Link a device.',
-          },
-          {
-            title: 'Pairing (optional)',
-            content:
-              'If you use pairing for unknown senders, approve requests with `openclaw pairing list whatsapp` and `openclaw pairing approve whatsapp <code>`.',
-          },
-        ],
-      },
-    },
-    {
-      params: { slug: 'custom-tools' },
-      props: {
-        title: 'Enable Tools and Plugins (Advanced)',
-        difficulty: 'Advanced',
-        platform: 'Plugins / Tools',
-        time: '20 min',
-        description:
-          'Turn on optional plugins and explicitly allowlist tools so your agent can safely call them.',
-        steps: [
-          {
-            title: 'Enable an optional plugin',
-            content:
-              'In `~/.openclaw/openclaw.json`, enable a plugin entry (example: `llm-task`) under `plugins.entries`.',
-          },
-          {
-            title: 'Allowlist the tool for an agent',
-            content:
-              'Tools registered as optional should be explicitly allowlisted in your agent config (e.g., `agents.list[].tools.allow`). Start conservative.',
-          },
-          {
-            title: 'Restart and verify',
-            content:
-              'Restart the gateway and verify in the dashboard (tool cards) or via a controlled test prompt.',
-          },
-        ],
-      },
-    },
-  ];
-}
+export const getStaticPaths = (async () => {
+  const entries = await getCollection('guides', ({ data }) => !data.draft);
+  return entries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}) satisfies GetStaticPaths;
 
-const { title, difficulty, platform, time, description, steps } = Astro.props;
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+const { title, difficulty, platforms, time, description, steps } = entry.data;
+const platformLabel = platforms.join(' / ');
+const hasBody = Boolean(entry.body?.trim());
+
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const structuredData = {
   '@context': 'https://schema.org',
@@ -127,7 +39,7 @@ const structuredData = {
       <div class="mb-12">
         <div class="flex flex-wrap items-center gap-4 mb-6">
           <Chip color="success" variant="flat" size="sm" className="font-bold">{difficulty}</Chip>
-          <Chip variant="bordered" size="sm">{platform}</Chip>
+          <Chip variant="bordered" size="sm">{platformLabel}</Chip>
           <span class="text-default-500 text-sm font-medium">Estimated time: {time}</span>
         </div>
         <h1 class="text-4xl md:text-6xl font-black tracking-tighter mb-6">{title}</h1>
@@ -142,6 +54,14 @@ const structuredData = {
         </div>
         <GuideStepsAccordion steps={steps} client:load />
       </div>
+
+      {
+        hasBody ? (
+          <article class="mt-16 prose prose-lg dark:prose-invert prose-primary max-w-none text-default-800 dark:text-default-300">
+            <Content />
+          </article>
+        ) : null
+      }
 
       <div
         class="mt-16 flex flex-wrap gap-4 items-center justify-between p-8 rounded-3xl bg-primary/5 border border-primary/10"

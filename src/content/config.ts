@@ -54,11 +54,60 @@ const docsCollection = defineCollection({
   }),
 });
 
+const storiesCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    name: z.string(),
+    role: z.string(),
+    company: z.string(),
+    image: z.string(),
+    summary: z.string(),
+    quote: z.string(),
+    publishDate: z.date(),
+    keywords: z.string().optional(),
+    featured: z.boolean().default(false),
+    sources: z
+      .array(
+        z.object({
+          label: z.string(),
+          url: z.string().url(),
+        })
+      )
+      .optional(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+const guidesCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    category: z.string(),
+    difficulty: z.enum(['Beginner', 'Intermediate', 'Advanced']),
+    platforms: z.array(z.string()),
+    time: z.string(),
+    steps: z.array(
+      z.object({
+        title: z.string(),
+        content: z.string(),
+      })
+    ),
+    keywords: z.array(z.string()).optional(),
+    ogImage: z.string().optional(),
+    publishDate: z.date(),
+    lastUpdated: z.date(),
+    featured: z.boolean().default(false),
+    draft: z.boolean().default(false),
+  }),
+});
+
 export const collections = {
   'getting-started': docsCollection,
   channels: docsCollection,
   troubleshooting: docsCollection,
-  guides: docsCollection,
+  guides: guidesCollection,
   blog: docsCollection,
   templates: docsCollection,
+  stories: storiesCollection,
 };

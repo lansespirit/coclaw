@@ -1,165 +1,41 @@
 ---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 import { Button, Chip, Avatar } from '@heroui/react';
 
-export async function getStaticPaths() {
-  return [
-    {
-      params: { slug: 'proactive-ai-rise' },
-      props: {
-        title: 'The Rise of Proactive AI: Why Reactive Chatbots are Obsolete',
-        description:
-          'Why proactive assistants matter, and how self-hosted agent runtimes change what “automation” can look like across messaging apps.',
-        author: 'Sarah Chen',
-        datePublished: '2026-02-01',
-        dateModified: '2026-02-01',
-        category: 'Analysis',
-        image:
-          'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1200',
-        content: `
-          <p class="text-xl leading-relaxed mb-8">
-            The era of the "waiting" chatbot is over. For the past five years, we've lived in a world where AI only speaks when spoken to. You ask a question, you get an answer. But as autonomous agents like OpenClaw mature, the paradigm is shifting from reactive to <strong>proactive assistance</strong>.
-          </p>
-          <h2 class="text-3xl font-bold mt-12 mb-6">What is Proactive AI?</h2>
-          <p class="mb-6">
-            Proactive AI doesn't wait for your terminal prompt. It monitors your configured channels, cross-references your calendar, and understands the context of your ongoing projects. When it detects a misalignment or an opportunity to save you time—like reminding you of a missing follow-up on Slack after a Telegram meeting—it acts.
-          </p>
-          <blockquote class="border-l-4 border-primary pl-6 py-2 italic text-2xl my-10 text-default-700">
-            "The best AI assistants aren't just intelligent; they're attentive."
-          </blockquote>
-          <h2 class="text-3xl font-bold mt-12 mb-6">OpenClaw's Approach</h2>
-          <p class="mb-6">
-            Unlike centralized corporate bots, OpenClaw runs on your own infrastructure. This gives it "ambient awareness" without compromising your privacy. By running as a self-hosted control plane, OpenClaw can observe patterns in your communication through the WhatsApp Gateway or Discord plugins and suggest optimizations in real-time.
-          </p>
-          <ul class="list-disc pl-6 space-y-4 mb-8">
-            <li><strong>Contextual Triggers:</strong> Event-driven workflows based on message sentiment or specific keywords.</li>
-            <li><strong>Scheduled Autonomy:</strong> Agents that perform research and summarize news cycles at specific intervals.</li>
-            <li><strong>Cross-Platform Knowledge:</strong> Seamlessly carrying context from a WhatsApp chat into a Jira ticket creation.</li>
-          </ul>
-        `,
-      },
-    },
-    {
-      params: { slug: 'privacy-first-ai' },
-      props: {
-        title: 'Privacy-First AI: How OpenClaw Keeps Your Data on Your Infrastructure',
-        description:
-          'A practical look at why self-hosting matters, what stays on your machine, and how to reduce data exposure when running an AI assistant.',
-        author: 'Michael Rodriguez',
-        datePublished: '2026-01-28',
-        dateModified: '2026-01-28',
-        category: 'Security',
-        image:
-          'https://images.unsplash.com/photo-1633265485768-3069cb89f57a?auto=format&fit=crop&q=80&w=1200',
-        content: `
-          <p class="text-xl leading-relaxed mb-8">
-            In the age of LLMs, data is the new oil, and everyone wants a refill. When you use 100% cloud-based AI, you are often trading your deepest industrial secrets or personal thoughts for convenience. OpenClaw was built on a different premise: <strong>Your AI should be as private as your home.</strong>
-          </p>
-          <h2 class="text-3xl font-bold mt-12 mb-6">The Self-Hosted Advantage</h2>
-          <p class="mb-6">
-            By running OpenClaw on your local machine, a dedicated VPS, or a private Docker cluster, you ensure that the "orchestration layer"—the part that knows which contacts you talk to and what your schedules are—never leaves your perimeter.
-          </p>
-          <h2 class="text-3xl font-bold mt-12 mb-6">End-to-End Encryption Channels</h2>
-          <p class="mb-6">
-            Our integrations for Signal and WhatsApp utilize the native encryption protocols. OpenClaw interacts with these messages locally on your host OS using sandboxed browser instances or terminal-based clients, ensuring that even the metadata remained protected from third-party interception.
-          </p>
-        `,
-      },
-    },
-    {
-      params: { slug: 'openclaw-v2-announcement' },
-      props: {
-        title: 'OpenClaw: Release Notes Reading Guide (How to Track Changes Safely)',
-        description:
-          'How to follow OpenClaw updates without breaking your setup: what to check, how to test upgrades, and where to find authoritative change logs.',
-        author: 'Emily Watson',
-        datePublished: '2026-01-25',
-        dateModified: '2026-02-01',
-        category: 'Product',
-        image:
-          'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&q=80&w=1200',
-        content: `
-          <p class="text-xl leading-relaxed mb-8">
-            Open-source projects move fast. The safest way to upgrade OpenClaw is to treat every update as a change-management exercise: read the release notes, understand breaking changes, test in a throwaway environment, then upgrade your production setup.
-          </p>
-          <h2 class="text-3xl font-bold mt-12 mb-6">Where to Find Authoritative Changes</h2>
-          <ul class="list-disc pl-6 space-y-4 mb-8">
-            <li><strong>GitHub Releases:</strong> the canonical place for versioned change logs.</li>
-            <li><strong>Official Docs:</strong> updated installation and configuration guidance.</li>
-            <li><strong>Community Reports:</strong> issues/discussions often reveal edge cases early.</li>
-          </ul>
-          <h2 class="text-3xl font-bold mt-12 mb-6">A Safe Upgrade Checklist</h2>
-          <ol class="list-decimal pl-6 space-y-4 mb-8">
-            <li>Back up your config and any stateful data.</li>
-            <li>Upgrade Node.js if the runtime requirement changed.</li>
-            <li>Upgrade OpenClaw and run a smoke test on a non-production machine.</li>
-            <li>Re-validate channel integrations (tokens/webhooks) and your allowlists.</li>
-            <li>Monitor logs after deploying the upgrade.</li>
-          </ol>
-        `,
-      },
-    },
-    {
-      params: { slug: 'context-efficiency' },
-      props: {
-        title: 'Optimizing Context Efficiency in LLM Workflows',
-        description:
-          'Practical techniques to reduce token usage and improve answer quality when your assistant runs long-lived conversations across multiple channels.',
-        author: 'David Zhang',
-        datePublished: '2026-01-20',
-        dateModified: '2026-02-01',
-        category: 'Engineering',
-        image:
-          'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200',
-        content: `
-          <p class="text-xl leading-relaxed mb-8">
-            Most real assistants fail for a boring reason: they become expensive, slow, or lose track of what matters as conversations grow. “Context efficiency” is about keeping the model informed <em>without</em> sending everything every time.
-          </p>
-          <h2 class="text-3xl font-bold mt-12 mb-6">The Three Levers</h2>
-          <ul class="list-disc pl-6 space-y-4 mb-8">
-            <li><strong>Reduce input:</strong> summarize, prune, and de-duplicate history.</li>
-            <li><strong>Retrieve just-in-time:</strong> pull the right facts via search/RAG instead of replaying full chat logs.</li>
-            <li><strong>Constrain output:</strong> ask for structured responses, limit verbosity, and use tool calls for long data.</li>
-          </ul>
-          <h2 class="text-3xl font-bold mt-12 mb-6">A Simple Strategy That Works</h2>
-          <ol class="list-decimal pl-6 space-y-4 mb-8">
-            <li>Keep a short “current goal + constraints” memory.</li>
-            <li>Summarize after important milestones (not every message).</li>
-            <li>Store durable facts in a notes system, not the prompt.</li>
-            <li>When you need details, retrieve them (docs, files, tickets) on demand.</li>
-          </ol>
-          <p class="mb-6">
-            In practice, this means your agent stays helpful in weeks-long projects while keeping token usage predictable.
-          </p>
-        `,
-      },
-    },
-  ];
-}
+export const getStaticPaths = (async () => {
+  const entries = await getCollection('blog', ({ data }) => !data.draft);
+  return entries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}) satisfies GetStaticPaths;
 
-const { title, description, author, datePublished, dateModified, category, image, content } =
-  Astro.props;
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+const { title, description, author, publishDate, lastUpdated, category, ogImage, keywords } =
+  entry.data;
+const image = ogImage || '/images/og/og-main.png';
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-const publishedDate = new Date(datePublished);
-const publishedLabel = Number.isNaN(publishedDate.getTime())
-  ? datePublished
-  : publishedDate.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+const publishedLabel = publishDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
   headline: title,
   description,
-  image: [image],
+  image: [new URL(image, Astro.site).toString()],
   author: { '@type': 'Person', name: author },
   publisher: { '@type': 'Organization', name: 'CoClaw', url: 'https://coclaw.com' },
-  datePublished,
-  dateModified,
+  datePublished: publishDate.toISOString(),
+  dateModified: lastUpdated.toISOString(),
   mainEntityOfPage: canonicalURL.toString(),
 };
 ---
@@ -168,12 +44,13 @@ const structuredData = {
   title={`${title} | CoClaw Blog`}
   description={description}
   ogImage={image}
+  keywords={keywords?.join(', ')}
   type="article"
 >
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
 
-  <meta slot="head" property="article:published_time" content={datePublished} />
-  <meta slot="head" property="article:modified_time" content={dateModified} />
+  <meta slot="head" property="article:published_time" content={publishDate.toISOString()} />
+  <meta slot="head" property="article:modified_time" content={lastUpdated.toISOString()} />
   <meta slot="head" property="article:section" content={category} />
   <div class="bg-background min-h-screen relative">
     <!-- Progress Bar (Fixed Top) -->
@@ -216,8 +93,9 @@ const structuredData = {
     <Section py="py-20" containerClass="max-w-4xl mx-auto px-6">
       <article
         class="prose prose-lg dark:prose-invert prose-primary max-w-none text-default-800 dark:text-default-300"
-        set:html={content}
-      />
+      >
+        <Content />
+      </article>
 
       <div class="mt-20 pt-12 border-t border-divider">
         <h3 class="text-2xl font-bold mb-8 italic">Shared this insight?</h3>

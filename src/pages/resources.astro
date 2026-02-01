@@ -1,4 +1,5 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/layout/Section.astro';
 import { BlogCard } from '../components/BlogCard';
@@ -9,63 +10,29 @@ import { VideoGallery } from '../components/VideoGallery';
 import { ResourceSearchInput } from '../components/ResourceSearchInput';
 import { Button, Chip } from '@heroui/react';
 
-// Mock data for Blog & Articles
-const blogPosts = [
-  {
-    title: 'The Rise of Proactive AI: Why Reactive Chatbots are Obsolete',
-    excerpt:
-      'Explore how OpenClaw is shifting the paradigm from "wait-for-input" to proactive assistance, initiating critical workflows before you even ask.',
-    author: 'Sarah Chen',
-    keywords: ['AI Trends', 'Proactive'],
-    category: 'Analysis',
-    href: '/blog/proactive-ai-rise',
-  },
-  {
-    title: 'Privacy-First AI: How OpenClaw Keeps Your Data on Your Infrastructure',
-    excerpt:
-      'A deep dive into the self-hosting architecture of OpenClaw and how it ensures your conversations with LLMs remain truly private.',
-    author: 'Michael Rodriguez',
-    keywords: ['Privacy', 'Self-hosting'],
-    category: 'Security',
-    href: '/blog/privacy-first-ai',
-  },
-  {
-    title: 'OpenClaw: Release Notes Reading Guide (How to Track Changes Safely)',
-    excerpt:
-      'A practical checklist for tracking OpenClaw changes, testing upgrades, and avoiding breaking your setup.',
-    author: 'Emily Watson',
-    keywords: ['Upgrade', 'Release Notes'],
-    category: 'Product',
-    href: '/blog/openclaw-v2-announcement',
-  },
-];
+const blogEntries = await getCollection('blog', ({ data }) => !data.draft);
+const blogPosts = blogEntries
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+  .map((entry) => ({
+    title: entry.data.title,
+    excerpt: entry.data.description,
+    author: entry.data.author,
+    keywords: entry.data.keywords,
+    category: entry.data.category,
+    href: `/blog/${entry.slug}`,
+  }));
 
-// Mock data for Guides & Tutorials
-const guides = [
-  {
-    title: 'Self-Hosting OpenClaw with Docker',
-    description: 'Run OpenClaw with Docker Compose for a reproducible, isolated setup.',
-    difficulty: 'Intermediate' as const,
-    platforms: ['Linux', 'Docker', 'Self-hosted'],
-    href: '/guides/docker-deployment',
-  },
-  {
-    title: 'Configure WhatsApp for OpenClaw',
-    description:
-      'Connect WhatsApp and lock down who can message your agent with allowlists and pairing.',
-    difficulty: 'Beginner' as const,
-    platforms: ['WhatsApp', 'Messaging'],
-    href: '/guides/whatsapp-setup',
-  },
-  {
-    title: 'Enable Tools and Plugins (Advanced)',
-    description:
-      'Turn on optional plugins and explicitly allowlist tools so your agent can call them safely.',
-    difficulty: 'Advanced' as const,
-    platforms: ['Plugins', 'Tools'],
-    href: '/guides/custom-tools',
-  },
-];
+const guideEntries = await getCollection('guides', ({ data }) => !data.draft);
+const guides = guideEntries
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+  .map((entry) => ({
+    title: entry.data.title,
+    description: entry.data.description,
+    difficulty: entry.data.difficulty,
+    platforms: entry.data.platforms,
+    time: entry.data.time,
+    href: `/guides/${entry.slug}`,
+  }));
 
 // Video library: intentionally empty until we have curated, verified content.
 const videos: { videoId: string; title: string; category: string; duration: string }[] = [];
@@ -109,30 +76,16 @@ const faqs = [
   },
 ];
 
-// Mock data for User Stories
-const userStories = [
-  {
-    name: 'Matt Schlicht',
-    role: 'Octane AI CEO',
-    quote:
-      'Built Moltbook, a social network where AI agents post and interact—powered by an OpenClaw agent, per press coverage.',
-    href: '/stories/matt-schlicht',
-  },
-  {
-    name: 'Peter Steinberger',
-    role: 'Creator of OpenClaw',
-    quote:
-      'A weekend project that went viral, rebranded, and quickly attracted both community attention and scams, according to reporting.',
-    href: '/stories/peter-steinberger',
-  },
-  {
-    name: 'Community Security',
-    role: 'Incident Report',
-    quote:
-      'Researchers and community members flagged a fake VS Code extension targeting OpenClaw users—use official sources and verify installs.',
-    href: '/stories/security-scam-wave',
-  },
-];
+const storyEntries = await getCollection('stories', ({ data }) => !data.draft);
+const userStories = storyEntries
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+  .map((entry) => ({
+    name: entry.data.name,
+    role: entry.data.role,
+    quote: entry.data.quote,
+    avatar: entry.data.image,
+    href: `/stories/${entry.slug}`,
+  }));
 ---
 
 <BaseLayout

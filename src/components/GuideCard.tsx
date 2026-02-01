@@ -5,6 +5,7 @@ interface GuideCardProps {
   description: string;
   difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
   platforms: string[];
+  time?: string;
   href: string;
 }
 
@@ -20,7 +21,14 @@ const chipColors = {
   Advanced: 'danger',
 } as const;
 
-export const GuideCard = ({ title, description, difficulty, platforms, href }: GuideCardProps) => {
+export const GuideCard = ({
+  title,
+  description,
+  difficulty,
+  platforms,
+  time = '15 min',
+  href,
+}: GuideCardProps) => {
   return (
     <article className="group relative flex flex-col h-full overflow-hidden m-card-surface m-card-hover-border m-card-hover-lift p-0 transition-all duration-300">
       {/* Difficulty Visual Accent */}
@@ -45,7 +53,7 @@ export const GuideCard = ({ title, description, difficulty, platforms, href }: G
                 d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <span className="text-[11px] font-medium">15 min</span>
+            <span className="text-[11px] font-medium">{time}</span>
           </div>
         </div>
 

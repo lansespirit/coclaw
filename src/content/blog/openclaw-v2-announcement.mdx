@@ -1,0 +1,29 @@
+---
+title: "OpenClaw: Release Notes Reading Guide (How to Track Changes Safely)"
+description: "A practical checklist for tracking OpenClaw changes, testing upgrades, and avoiding breaking your setup."
+category: "Product"
+author: "Emily Watson"
+publishDate: 2026-01-25
+lastUpdated: 2026-02-01
+keywords:
+  - "Upgrade"
+  - "Release Notes"
+ogImage: "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&q=80&w=1200"
+---
+<p class="text-xl leading-relaxed mb-8">
+            Open-source projects move fast. The safest way to upgrade OpenClaw is to treat every update as a change-management exercise: read the release notes, understand breaking changes, test in a throwaway environment, then upgrade your production setup.
+          </p>
+          <h2 class="text-3xl font-bold mt-12 mb-6">Where to Find Authoritative Changes</h2>
+          <ul class="list-disc pl-6 space-y-4 mb-8">
+            <li><strong>GitHub Releases:</strong> the canonical place for versioned change logs.</li>
+            <li><strong>Official Docs:</strong> updated installation and configuration guidance.</li>
+            <li><strong>Community Reports:</strong> issues/discussions often reveal edge cases early.</li>
+          </ul>
+          <h2 class="text-3xl font-bold mt-12 mb-6">A Safe Upgrade Checklist</h2>
+          <ol class="list-decimal pl-6 space-y-4 mb-8">
+            <li>Back up your config and any stateful data.</li>
+            <li>Upgrade Node.js if the runtime requirement changed.</li>
+            <li>Upgrade OpenClaw and run a smoke test on a non-production machine.</li>
+            <li>Re-validate channel integrations (tokens/webhooks) and your allowlists.</li>
+            <li>Monitor logs after deploying the upgrade.</li>
+          </ol>

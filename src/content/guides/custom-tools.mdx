@@ -1,0 +1,25 @@
+---
+title: "Enable Tools and Plugins (Advanced)"
+description: "Turn on optional plugins and explicitly allowlist tools so your agent can safely call them."
+category: "advanced"
+difficulty: "Advanced"
+platforms:
+  - "Plugins"
+  - "Tools"
+time: "20 min"
+publishDate: 2026-01-20
+lastUpdated: 2026-01-20
+steps:
+  - title: "Enable an optional plugin"
+    content: >
+      In `~/.openclaw/openclaw.json`, enable a plugin entry (example: `llm-task`) under
+      `plugins.entries`.
+  - title: "Allowlist the tool for an agent"
+    content: >
+      Tools registered as optional should be explicitly allowlisted in your agent config (e.g.,
+      `agents.list[].tools.allow`). Start conservative.
+  - title: "Restart and verify"
+    content: >
+      Restart the gateway and verify in the dashboard (tool cards) or via a controlled test prompt.
+---
+

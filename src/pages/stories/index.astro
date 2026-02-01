@@ -1,36 +1,24 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 import { UserStoryCard } from '../../components/UserStoryCard';
 import { Button, Avatar } from '@heroui/react';
 
-const userStories = [
-  {
-    name: 'Matt Schlicht',
-    role: 'Octane AI CEO',
-    quote:
-      'Built Moltbook, a social network where AI agents post and interact—powered by an OpenClaw agent, per press coverage.',
-    href: '/stories/matt-schlicht',
-    featured: true,
-    avatar: '/images/stories/moltbook.svg',
-  },
-  {
-    name: 'Peter Steinberger',
-    role: 'Creator of OpenClaw',
-    quote:
-      'A weekend project that went viral, rebranded, and quickly attracted both community attention and scams, according to reporting.',
-    href: '/stories/peter-steinberger',
-    avatar: '/images/stories/rebrand.svg',
-  },
-  {
-    name: 'Community Security',
-    role: 'Incident Report',
-    quote:
-      'Researchers and community members flagged a fake VS Code extension targeting OpenClaw users—use official sources and verify installs.',
-    href: '/stories/security-scam-wave',
-    avatar: '/images/stories/security.svg',
-  },
-];
+const storyEntries = await getCollection('stories', ({ data }) => !data.draft);
+const userStories = storyEntries
+  .sort((a, b) => {
+    if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+    return b.data.publishDate.getTime() - a.data.publishDate.getTime();
+  })
+  .map((entry) => ({
+    name: entry.data.name,
+    role: entry.data.role,
+    quote: entry.data.quote,
+    href: `/stories/${entry.slug}`,
+    featured: entry.data.featured,
+    avatar: entry.data.image,
+  }));
 
 const mainStory = userStories.find((s) => s.featured);
 const otherStories = userStories.filter((s) => !s.featured);

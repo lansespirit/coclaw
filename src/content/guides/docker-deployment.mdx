@@ -1,0 +1,35 @@
+---
+title: "Self-Hosting OpenClaw with Docker"
+description: "Run a containerized OpenClaw Gateway with Docker Compose for an isolated, reproducible setup."
+category: "deployment"
+difficulty: "Intermediate"
+platforms:
+  - "Linux"
+  - "Docker"
+  - "Self-hosted"
+time: "15 min"
+publishDate: 2026-02-01
+lastUpdated: 2026-02-01
+featured: true
+steps:
+  - title: "Prerequisites"
+    content: >
+      Install Docker Desktop (or Docker Engine) and Docker Compose v2. Ensure you have enough disk
+      space for images and logs.
+  - title: "Clone the OpenClaw repo"
+    content: >
+      Clone the official OpenClaw repository. The Docker quick-start script lives in the repo root.
+  - title: "Run the Docker quick start"
+    content: >
+      From the repo root, run `./docker-setup.sh`. It builds the gateway image, runs onboarding,
+      starts the gateway via Docker Compose, and generates a gateway token in `.env`.
+  - title: "Open the dashboard (Control UI)"
+    content: >
+      Open `http://127.0.0.1:18789/`. If prompted, paste the gateway token (Settings -> token).
+  - title: "Optional: configure channels"
+    content: >
+      Use the CLI container to configure channels (e.g., WhatsApp QR:
+      `docker compose run --rm openclaw-cli channels login`). Then restart the gateway container if
+      needed.
+---
+

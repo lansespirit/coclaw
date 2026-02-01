@@ -1,36 +1,24 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 import { GuideCard } from '../../components/GuideCard';
 import { Button } from '@heroui/react';
 
-const guides = [
-  {
-    title: 'Self-Hosting OpenClaw with Docker',
-    description:
-      'Master the containerized deployment of OpenClaw for local or cloud infrastructure.',
-    difficulty: 'Intermediate' as const,
-    platforms: ['Linux', 'Docker', 'Self-hosted'],
-    href: '/guides/docker-deployment',
-    category: 'deployment',
-  },
-  {
-    title: 'Configure WhatsApp for OpenClaw',
-    description: 'Connect WhatsApp and lock down who can message your agent with allowlists.',
-    difficulty: 'Beginner' as const,
-    platforms: ['WhatsApp', 'Messaging'],
-    href: '/guides/whatsapp-setup',
-    category: 'integration',
-  },
-  {
-    title: 'Enable Tools and Plugins (Advanced)',
-    description: 'Enable optional plugins and explicitly allowlist tools for safer automation.',
-    difficulty: 'Advanced' as const,
-    platforms: ['Plugins', 'Tools'],
-    href: '/guides/custom-tools',
-    category: 'advanced',
-  },
-];
+const entries = await getCollection('guides', ({ data }) => !data.draft);
+const guides = entries
+  .sort((a, b) => {
+    if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+    return b.data.publishDate.getTime() - a.data.publishDate.getTime();
+  })
+  .map((entry) => ({
+    title: entry.data.title,
+    description: entry.data.description,
+    difficulty: entry.data.difficulty,
+    platforms: entry.data.platforms,
+    time: entry.data.time,
+    href: `/guides/${entry.slug}`,
+  }));
 
 const categories = [
   { id: 'all', name: 'All Modules' },

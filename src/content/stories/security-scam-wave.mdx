@@ -1,0 +1,38 @@
+---
+name: Security Scam Wave
+role: Community / Researchers
+company: VS Code Extension Incident
+image: /images/stories/security.svg
+summary: "A fake VS Code extension and broader scam patterns--and how to stay safe."
+quote: "Researchers and community members flagged a fake VS Code extension targeting OpenClaw users--use official sources and verify installs."
+publishDate: 2026-02-01
+keywords: "OpenClaw security, VS Code extension malware, supply chain, tokens, allowlists"
+sources:
+  - label: "TechRadar -- Fake VSCode extension installs malware on Moltbot AI users"
+    url: https://www.techradar.com/pro/security/fake-vscode-extension-installs-malware-on-moltbot-ai-users
+  - label: "Forbes -- Moltbot AI Agent... Security Brief"
+    url: https://www.forbes.com/sites/daveywinder/2026/01/28/moltbot-ai-agent-with-100000-github-stars-gets-new-name-with-new-threat-warning/
+  - label: "Reddit -- community discussion about OpenClaw security"
+    url: https://www.reddit.com/r/cybersecurity/comments/1k06hpo/openclaw_moltbot_security_brief_anti_scam/
+---
+
+<p class="text-2xl font-medium text-foreground/80 mb-12 leading-relaxed italic">
+  A fake VS Code extension targeting OpenClaw/Moltbot users was reported by security researchers.
+  Community members also shared anti-scam guidance.
+</p>
+
+## What Happened (High Level)
+
+Reporting described a malicious extension that could exfiltrate secrets and attempt remote access.
+The broader pattern is familiar: popular projects attract "helper tools" that are not maintained or
+reviewed by the original authors.
+
+## What You Should Do
+
+- Do not install random extensions or scripts that claim to "auto-configure" OpenClaw.
+- Rotate any keys/tokens if you installed suspicious software.
+- Keep dashboards local (127.0.0.1) or behind VPN with authentication.
+- Use conservative allowlists, pairing, and minimal tool permissions.
+
+CoClaw will maintain a safety-first installation path: curated links, explicit warnings, and
+up-to-date references to official documentation.

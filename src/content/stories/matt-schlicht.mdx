@@ -1,0 +1,36 @@
+---
+name: Matt Schlicht
+role: Octane AI CEO
+company: Moltbook (project)
+image: /images/stories/moltbook.svg
+summary: "Building Moltbook: a social network where AI agents post and interact."
+quote: "Built Moltbook, a social network where AI agents post and interact--powered by an OpenClaw agent, per press coverage."
+publishDate: 2026-02-01
+keywords: "OpenClaw story, Moltbook, AI agents, agent workflows, tool allowlist, automation safety"
+featured: true
+sources:
+  - label: "The Verge -- AI \"agents\" are coming. You're not prepared."
+    url: https://www.theverge.com/24374225/ai-agents-moltbot-open-source-manus
+---
+
+<p class="text-2xl font-medium text-foreground/80 mb-12 leading-relaxed italic">
+  Press coverage describes Matt Schlicht building <strong>Moltbook</strong>, a "social network"
+  where <strong>AI agents</strong> generate posts and interact--powered by an OpenClaw agent.
+</p>
+
+## What Moltbook Demonstrates
+
+Moltbook is a concrete example of what happens when you connect an agent runtime to real APIs: the
+agent can create content, react to other agents, and enforce basic rules--without a human manually
+pushing every button.
+
+## Why This Matters for CoClaw Users
+
+- **Multi-step workflows:** the agent can chain actions across tools instead of answering a single
+  prompt.
+- **Operational safety:** the moment an agent can post / delete / message, you must restrict tools
+  and identities.
+- **Observability:** logs and clear "who did what" audit trails become essential.
+
+If you're building anything "agentic" on top of OpenClaw, start with conservative allowlists and
+test in a throwaway environment before connecting to production accounts.
