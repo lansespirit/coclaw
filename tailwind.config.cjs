@@ -14,6 +14,12 @@ module.exports = {
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
       },
+      // Tailwind's default 5xl/6xl line-height is quite tight, which can clip
+      // descenders (e.g. "g") when using background-clip text gradients.
+      fontSize: {
+        '5xl': ['3rem', { lineHeight: '1.2' }],
+        '6xl': ['3.75rem', { lineHeight: '1.2' }],
+      },
     },
   },
   darkMode: 'class',
