@@ -1,0 +1,128 @@
+---
+title: "Updating and Migrating OpenClaw Safely (No Surprises)"
+description: "A battle-tested update flow: snapshot state, update with checks, restart cleanly, and migrate to a new machine without losing credentials or sessions."
+category: "deployment"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+time: "20 min"
+publishDate: 2026-02-01
+lastUpdated: 2026-02-01
+steps:
+  - title: "Snapshot your state directory"
+    content: >
+      Back up the full state directory (default `~/.openclaw/`) before changing anything.
+  - title: "Update OpenClaw via your install method"
+    content: >
+      For global installs, use `npm i -g openclaw@latest` (or pnpm). For source installs, use `openclaw update`.
+  - title: "Run checks and restart the gateway"
+    content: >
+      Run `openclaw doctor`, then `openclaw gateway restart`, then verify with `openclaw health`.
+  - title: "If something breaks, roll back or force-reinstall the service"
+    content: >
+      Prefer reverting version/channel or reinstalling the gateway service (`openclaw gateway install --force`) over deleting state.
+  - title: "Migrate by copying the entire state directory"
+    content: >
+      Move `~/.openclaw/` (or `$OPENCLAW_STATE_DIR`) to the new machine, then reinstall OpenClaw and restart the gateway.
+---
+
+## Why updates break (and how to avoid it)
+
+OpenClaw moves fast. Most "update regressions" are actually one of these:
+
+- You updated the binary but your gateway service is still pointing at an old path/runtime.
+- You have multiple installs (brew/node version manager) and launchd/systemd is using a different PATH.
+- You partially migrated state (copied config but not credentials/sessions).
+
+Official references:
+
+- Updating guide: https://docs.openclaw.ai/install/updating
+- Gateway runbook: https://docs.openclaw.ai/gateway
+
+## 1) Snapshot state (do not skip this)
+
+Default state directory:
+
+- `~/.openclaw/`
+
+Backup:
+
+```bash
+tar -czf openclaw-state-backup.tgz ~/.openclaw
+```
+
+This contains secrets. Store it securely.
+
+## 2) Update (global installs)
+
+```bash
+npm i -g openclaw@latest
+```
+
+Then run checks and restart:
+
+```bash
+openclaw doctor
+openclaw gateway restart
+openclaw health
+```
+
+## 3) Update (from source)
+
+If you installed from a git checkout, prefer:
+
+```bash
+openclaw update
+```
+
+That flow is designed to build, run checks, and restart safely.
+
+## 4) If the gateway service is "running" but the port is dead
+
+This often means the service is installed but pointing at the wrong runtime or a stale path.
+
+Try:
+
+```bash
+openclaw gateway status
+openclaw gateway install --force
+openclaw gateway restart
+```
+
+Then re-open the dashboard:
+
+```bash
+openclaw dashboard
+```
+
+## 5) Migration: copy the entire state directory
+
+Migration should be boring:
+
+1. Stop the gateway on the old machine.
+2. Copy the full state directory to the new machine.
+3. Install OpenClaw on the new machine.
+4. Install/restart the service and verify health.
+
+Example (SSH):
+
+```bash
+# On the new machine, pull from old:
+rsync -a --progress user@old-host:~/.openclaw/ ~/.openclaw/
+
+# Install OpenClaw (global):
+npm install -g openclaw@latest
+
+# Ensure the service is installed and running:
+openclaw gateway install --force
+openclaw gateway restart
+openclaw health
+```
+
+## 6) What not to do
+
+- Do not copy only `openclaw.json` and call it a migration.
+- Do not delete `~/.openclaw/` as a first-line fix; you will lose creds and sessions.
+- Do not expose the Control UI publicly while debugging auth; use SSH tunnel or Tailscale instead.

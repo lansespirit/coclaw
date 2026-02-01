@@ -258,10 +258,11 @@ RUN npm install -g openclaw@latest
 # Persist this via EFS/EBS (mount to /data in ECS)
 ENV OPENCLAW_STATE_DIR=/data/.openclaw
 
+# Required for non-loopback binds: set OPENCLAW_GATEWAY_TOKEN via ECS env/secrets
 EXPOSE 3000
 
 # ECS/LB health checks typically expect a non-loopback bind + stable port
-CMD ["openclaw", "gateway", "run", "--bind", "lan", "--port", "3000", "--allow-unconfigured"]`}</code></pre>
+CMD ["openclaw", "gateway", "run", "--bind", "lan", "--port", "3000", "--auth", "token", "--allow-unconfigured"]`}</code></pre>
               </div>
             </div>
 

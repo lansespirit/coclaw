@@ -333,9 +333,16 @@ openclaw gateway status`}</code></pre>
                       class="text-sm overflow-x-auto"><code>{`# On your laptop:
 ssh -N -L 18789:127.0.0.1:18789 YOUR_USER@YOUR_VPS_IP
 
-# Then open:
-http://127.0.0.1:18789/`}</code></pre>
+# On the VPS (prints a tokenized link; use --no-open on headless servers):
+openclaw dashboard --no-open
+
+# Then open the tokenized URL it prints (http://127.0.0.1:18789/?token=...)`}</code></pre>
                   </div>
+                  <p class="text-sm text-default-600 mt-3">
+                    If you open <code class="text-primary">http://127.0.0.1:18789/</code> and see “unauthorized”,
+                    use the tokenized link from <code class="text-primary">openclaw dashboard</code
+                    >.
+                  </p>
                 </div>
               </div>
             </div>
@@ -456,7 +463,7 @@ openclaw logs`}</code></pre>
               <p class="text-default-700 dark:text-default-500 mb-3">Keep OpenClaw updated:</p>
               <div class="rounded-lg bg-content2 p-3">
                 <pre
-                  class="text-sm"><code>{`npm update -g openclaw
+                  class="text-sm"><code>{`npm i -g openclaw@latest
 openclaw gateway restart`}</code></pre>
               </div>
             </div>

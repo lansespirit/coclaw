@@ -517,6 +517,10 @@ openclaw onboard --install-daemon`}</code></pre>
 
             <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
               <h3 class="text-2xl font-bold mb-4">Option 2: Cloud Run (Serverless)</h3>
+              <p class="text-default-700 dark:text-default-500 mb-4">
+                Note: OpenClaw is stateful (credentials/sessions). Serverless platforms are often a
+                poor fit unless you persist the full state directory and keep the service warm.
+              </p>
               <div class="space-y-4">
                 <div>
                   <p class="text-default-700 dark:text-default-500 mb-2">Deploy using Docker:</p>
@@ -526,16 +530,15 @@ openclaw onboard --install-daemon`}</code></pre>
 FROM node:22-alpine
 RUN npm install -g openclaw@latest
 
-# Cloud Run requires a non-loopback bind + $PORT. Persist state yourself if needed.
-CMD ["sh", "-lc", "openclaw gateway run --bind lan --port $PORT --allow-unconfigured"]
+# Cloud Run requires a non-loopback bind + $PORT and persistent state. Also set OPENCLAW_GATEWAY_TOKEN.
+CMD ["sh", "-lc", "openclaw gateway run --bind lan --port $PORT --auth token --allow-unconfigured"]
 
 # Build and deploy
 gcloud builds submit --tag gcr.io/PROJECT_ID/openclaw
 gcloud run deploy openclaw \\
   --image gcr.io/PROJECT_ID/openclaw \\
   --platform managed \\
-  --region us-central1 \\
-  --allow-unauthenticated`}</code></pre>
+  --region us-central1`}</code></pre>
                   </div>
                 </div>
               </div>
@@ -624,7 +627,7 @@ cat > package.json << 'EOF'
   "name": "openclaw-gateway",
   "version": "1.0.0",
   "scripts": {
-    "start": "openclaw gateway run --bind lan --port $PORT --allow-unconfigured"
+    "start": "openclaw gateway run --bind lan --port $PORT --auth token --allow-unconfigured"
   },
   "dependencies": {
     "openclaw": "latest"
@@ -702,7 +705,7 @@ heroku config:set OPENCLAW_GATEWAY_TOKEN=your_gateway_token`}</code></pre>
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "openclaw gateway run --bind lan --port $PORT --allow-unconfigured",
+    "startCommand": "openclaw gateway run --bind lan --port $PORT --auth token --allow-unconfigured",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }

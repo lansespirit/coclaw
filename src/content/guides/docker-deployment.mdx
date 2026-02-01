@@ -33,3 +33,144 @@ steps:
       needed.
 ---
 
+## What this guide gives you
+
+This is a **containerized Gateway** setup. You get:
+
+- A reproducible install (everything runs in Docker containers)
+- A persistent state directory on the host (config, credentials, sessions)
+- An easy way to onboard and manage channels using the bundled CLI container
+
+Docker is optional in OpenClaw. Use it if you want isolation or if you are deploying on a host
+where you do not want global Node/npm installs.
+
+Further reading (official):
+
+- Docker install: https://docs.openclaw.ai/install/docker
+- Dashboard access/auth: https://docs.openclaw.ai/web/dashboard
+
+## Prerequisites
+
+- Docker Desktop (macOS/Windows) or Docker Engine (Linux)
+- Docker Compose v2 (`docker compose version` works)
+- A machine with enough disk for images + logs (plan for a few GB)
+
+## Recommended: quick start with `docker-setup.sh`
+
+1. Clone the repo:
+
+```bash
+git clone https://github.com/openclaw/openclaw.git
+cd openclaw
+```
+
+2. Run the setup script:
+
+```bash
+./docker-setup.sh
+```
+
+What it does (high level):
+
+- Builds the image
+- Runs the onboarding wizard in a CLI container
+- Starts the Gateway via Docker Compose
+- Generates a Gateway token and writes it to `.env`
+
+3. Open the Control UI:
+
+- Open: http://127.0.0.1:18789/
+- If the UI asks for a token, paste the token printed by the script (or stored in `.env`)
+
+## Persistence and where your data lives
+
+By default, the Docker flow keeps OpenClaw state on the **host**, not inside the container:
+
+- State dir: `~/.openclaw/`
+- Workspace dir: `~/.openclaw/workspace`
+
+Treat the state dir like production secrets. It contains credentials (OAuth tokens, WhatsApp
+creds, etc.).
+
+Basic backup:
+
+```bash
+tar -czf openclaw-backup.tgz ~/.openclaw
+```
+
+## Optional: extra mounts, packages, and home volume
+
+These environment variables are the "power user" knobs for Docker installs.
+
+Extra bind mounts (example: mount your Codex home + a work repo):
+
+```bash
+export OPENCLAW_EXTRA_MOUNTS="$HOME/.codex:/home/node/.codex:ro,$HOME/github:/home/node/github:rw"
+./docker-setup.sh
+```
+
+Install extra apt packages into the image (example: `ffmpeg`):
+
+```bash
+export OPENCLAW_DOCKER_APT_PACKAGES="ffmpeg"
+./docker-setup.sh
+```
+
+Persist the entire container home as a named volume (optional):
+
+```bash
+export OPENCLAW_HOME_VOLUME="openclaw_home"
+./docker-setup.sh
+```
+
+## Channel setup from Docker (examples)
+
+Most channel workflows can be run via the CLI container:
+
+```bash
+docker compose run --rm openclaw-cli --help
+```
+
+WhatsApp login (QR):
+
+```bash
+docker compose run --rm openclaw-cli channels login
+```
+
+After changing channel config or creds, restart the gateway container:
+
+```bash
+docker compose restart openclaw-gateway
+```
+
+## Day-2 operations: logs, restart, stop
+
+Check status:
+
+```bash
+docker compose ps
+```
+
+Follow logs:
+
+```bash
+docker compose logs -f openclaw-gateway
+```
+
+Stop everything (keeps host state):
+
+```bash
+docker compose down
+```
+
+## Security notes (important)
+
+- The Control UI is an **admin surface**. Avoid exposing it directly on the public internet.
+- If you must access remotely, prefer Tailscale or SSH tunneling (see the official dashboard doc).
+- Keep your Gateway token secret; rotate it if it leaks.
+
+## Common issues
+
+- "Unauthorized" in the browser: open the Control UI, then paste the gateway token (Settings -> token).
+- Port conflict: something else is using `18789`. Stop the conflicting process, or change the port in the Docker env/config and redeploy.
+- Permission issues on mounted folders: ensure the mounted paths are shared with Docker Desktop (macOS/Windows) and accessible by the container user.

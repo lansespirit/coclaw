@@ -1,0 +1,282 @@
+---
+title: "Telegram + OpenClaw: Setup, Group Controls, and Common Pitfalls"
+description: "A practical guide to wiring OpenClaw to Telegram (Bot API) with safe defaults, plus the lessons that usually bite first-time users."
+category: "integration"
+difficulty: "Beginner"
+platforms:
+  - "Telegram"
+  - "Messaging"
+time: "20 min"
+publishDate: 2026-02-01
+lastUpdated: 2026-02-01
+featured: true
+steps:
+  - title: "Create a Telegram bot (BotFather) and save the token"
+    content: >
+      Create a bot via @BotFather (`/newbot`) and copy the Bot API token. Treat it like a secret.
+  - title: "Add the token to OpenClaw config (recommended) and start the gateway"
+    content: >
+      Set `channels.telegram.botToken` in `~/.openclaw/openclaw.json` and start/restart the gateway.
+  - title: "Lock down DMs (pairing or allowlist)"
+    content: >
+      Keep `dmPolicy: "pairing"` (default) or use `dmPolicy: "allowlist"` with `allowFrom` to restrict who can DM the bot.
+  - title: "Configure groups intentionally (allowlist + mention rules)"
+    content: >
+      Decide if the bot should reply only to mentions or always, then set `channels.telegram.groups` accordingly. Remember: defining `groups` turns it into a group allowlist.
+  - title: "Troubleshoot the 3 common breakpoints (privacy mode, allowlists, network)"
+    content: >
+      If the bot doesn't see group messages, fix Telegram privacy mode or admin rights. If it sees messages but ignores them, check OpenClaw allowlists. If it fails API calls, fix DNS/IPv6/proxy egress to `api.telegram.org`.
+---
+
+## Why Telegram is a great first channel
+
+Telegram is a clean "day-0" channel for OpenClaw:
+
+- Bot tokens are simple (no browser QR login).
+- DMs and groups both work well.
+- You get strong routing control: group sessions stay isolated by default.
+
+Official references:
+
+- OpenClaw Telegram channel docs: https://docs.openclaw.ai/channels/telegram
+- OpenClaw FAQ (Telegram + dashboard auth gotchas): https://docs.openclaw.ai/help/faq
+- BotFather `/setprivacy` reference: https://telegram.me/s/BotFther
+
+## Step 1: Create the bot token (BotFather)
+
+In Telegram, open `@BotFather`:
+
+1. Run `/newbot`
+2. Choose a name and a username (must end in `bot`)
+3. Copy the token
+
+Optional BotFather settings that matter for OpenClaw:
+
+- `/setjoingroups`: whether the bot can be added to groups at all.
+- `/setprivacy`: whether the bot receives all group messages or only mentions/replies.
+
+## Step 2: Minimal OpenClaw config (safe defaults)
+
+Edit `~/.openclaw/openclaw.json` (JSON5 is allowed; comments and trailing commas are OK):
+
+```json5
+{
+  channels: {
+    telegram: {
+      enabled: true,
+      botToken: "123:abc",
+
+      // Secure by default: unknown senders must be approved
+      dmPolicy: "pairing",
+
+      // Optional hardening: block Telegram-initiated config writes (advanced).
+      // This prevents things like supergroup ID migration writes and /config set|unset.
+      // configWrites: false,
+    },
+  },
+}
+```
+
+Then restart the gateway:
+
+```bash
+openclaw gateway restart
+```
+
+Open the dashboard:
+
+```bash
+openclaw dashboard
+```
+
+## Step 3: DM access control (pairing vs allowlist)
+
+### Option A (recommended for most users): pairing
+
+Pairing is the safest default for DMs. On first contact, the user receives a pairing code and the
+bot ignores messages until you approve it. Approvals are written into credentials state.
+
+Commands:
+
+```bash
+openclaw pairing list telegram
+openclaw pairing approve telegram <CODE>
+```
+
+### Option B: allowlist
+
+If you already know exactly who should be able to DM the bot, use an allowlist:
+
+```json5
+{
+  channels: {
+    telegram: {
+      dmPolicy: "allowlist",
+      // Use Telegram numeric user IDs when possible (more reliable than usernames).
+      // Prefix with `tg:` to make the identity explicit.
+      allowFrom: ["tg:123456789"],
+    },
+  },
+}
+```
+
+How to get your Telegram user ID without using third-party bots:
+
+1. Start the gateway and DM your bot once.
+2. Run `openclaw logs --follow` on the gateway host and look for `from.id`.
+
+## Step 4: Groups (the #1 "why is it ignoring us?" source)
+
+There are two separate layers to understand:
+
+1. Telegram-side message visibility (privacy mode / admin rights)
+2. OpenClaw-side group access controls (which groups, who can speak, and whether mentions are required)
+
+### 4.1 Telegram-side: Privacy Mode vs Admin
+
+Telegram bots default to **privacy mode ON**, which means the bot often only sees:
+
+- mentions, commands, and replies to the bot
+
+If you want the bot to see all messages in a group:
+
+- BotFather: `/setprivacy` -> Disable
+- Then remove + re-add the bot to the group (Telegram requirement)
+
+Alternatively, make the bot a group admin (admin bots can see all messages regardless of privacy
+mode).
+
+### 4.2 OpenClaw-side: group allowlist + mention rules
+
+OpenClaw group behavior is intentionally explicit and has 3 knobs:
+
+1. Which groups are allowed: `channels.telegram.groups` (allowlist when present)
+2. Which senders are allowed inside groups: `channels.telegram.groupPolicy` + `groupAllowFrom`
+3. Whether the bot should require mentions: `groups.*.requireMention`
+
+- If you set `channels.telegram.groups`, it becomes a group allowlist.
+- If a group is not in the allowlist, messages are ignored.
+
+Default behavior for group replies is "mention-only". A good starting configuration is:
+
+```json5
+{
+  channels: {
+    telegram: {
+      // Allow any group (still keep mention-only)
+      groups: {
+        "*": { requireMention: true },
+      },
+
+      // IMPORTANT: by default, groupPolicy is allowlist (blocked unless you allow senders).
+      // If you want the bot to respond to everyone in allowed groups, set:
+      groupPolicy: "open",
+    },
+  },
+}
+```
+
+If you want a specific group to be always-on (no mention required):
+
+```json5
+{
+  channels: {
+    telegram: {
+      groups: {
+        "-1001234567890": { requireMention: false },
+      },
+
+      // Safer default than "open": restrict group senders (example: only you).
+      // groupPolicy: "allowlist",
+      // groupAllowFrom: ["tg:123456789"],
+    },
+  },
+}
+```
+
+Note: if you set `requireMention: false`, Telegram privacy mode must be disabled (or the bot must
+be a group admin), otherwise the bot will not receive unmentioned messages.
+
+Important: if you set a specific numeric group ID, but you forget `"*"` and you later add the bot
+to other groups, it will ignore them (because you turned on the allowlist).
+
+### 4.3 Getting the group chat ID (safe options)
+
+Safer (no third-party bots):
+
+1. Add the bot to the group.
+2. Send any message that the bot can see (mention it if privacy mode is on).
+3. On the gateway host: `openclaw logs --follow` and read `chat.id`.
+
+Official Bot API method (also safe):
+
+```bash
+curl "https://api.telegram.org/bot<bot_token>/getUpdates"
+```
+
+Look for `message.chat.id` in the JSON.
+
+## Step 5: Common pitfalls and fixes
+
+### Pitfall: "Bot sees mentions but not normal messages"
+
+- Telegram privacy mode is still ON, or the bot is not an admin.
+- Fix: disable privacy mode (and re-add the bot) or grant admin.
+
+### Pitfall: "Bot is in the group but never responds"
+
+Most common OpenClaw-side causes:
+
+- You set `channels.telegram.groups` but did not include this group ID (and did not include `"*"`).
+- The group requires mentions (`requireMention: true`) but you are not mentioning the bot.
+
+Quick test:
+
+- In the group, try mention the bot: `@your_bot ...`
+
+### Pitfall: "`setMyCommands failed` / `sendMessage` failures"
+
+This usually means the gateway host cannot reliably reach `api.telegram.org`:
+
+- outbound HTTPS blocked (firewall / corporate proxy)
+- DNS issues
+- IPv6 issues (host resolves AAAA first but IPv6 egress is broken)
+
+Debug checklist:
+
+```bash
+openclaw channels status
+openclaw channels status --probe
+openclaw channels logs --channel telegram
+openclaw logs --follow
+```
+
+On a VPS, also check DNS and IPv6:
+
+```bash
+dig +short api.telegram.org A
+dig +short api.telegram.org AAAA
+```
+
+If AAAA exists but your server has no IPv6 egress, fix IPv6 routing or prefer IPv4 at the OS layer.
+
+## Optional: webhook mode (when you actually need it)
+
+Long-polling is easiest and works well on most machines.
+
+Use webhooks only when:
+
+- you must run behind an HTTPS endpoint and cannot keep long-polling alive, or
+- your environment requires inbound-only traffic (rare)
+
+If you go down the webhook route, plan for:
+
+- a stable public HTTPS URL
+- network egress to Telegram
+- secret management for tokens
+
+## Suggested next guides
+
+- WhatsApp setup: `/guides/whatsapp-setup`
+- Docker gateway setup: `/guides/docker-deployment`
+- Tool allowlists and sandbox policy: `/guides/custom-tools`

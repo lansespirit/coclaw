@@ -262,6 +262,11 @@ WantedBy=default.target`}</code></pre>
                 >systemctl --user enable --now openclaw-gateway.service</code
               >
             </p>
+            <p class="text-sm text-default-600 mt-3">
+              For a user service to survive logout/idle on servers, enable lingering:
+              <code class="text-primary">sudo loginctl enable-linger $USER</code> (the wizard may do this
+              for you).
+            </p>
           </div>
         </div>
       </Section>

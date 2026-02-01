@@ -8,7 +8,7 @@ platforms:
   - "Tools"
 time: "20 min"
 publishDate: 2026-01-20
-lastUpdated: 2026-01-20
+lastUpdated: 2026-02-01
 steps:
   - title: "Enable an optional plugin"
     content: >
@@ -23,3 +23,112 @@ steps:
       Restart the gateway and verify in the dashboard (tool cards) or via a controlled test prompt.
 ---
 
+## Mental model: plugins vs tools vs sandbox
+
+People often mix these up. In OpenClaw they are separate levers:
+
+- **Plugins** add capabilities (some plugins register tools).
+- **Tools** are the callable "functions" the agent can use during runs.
+- **Sandboxing** decides *where* tools run (host vs Docker sandbox), not which tools exist.
+
+Official reference (recommended reading):
+
+- Tool policy vs sandbox vs elevated: https://docs.openclaw.ai/gateway/sandbox-vs-tool-policy-vs-elevated
+- Plugin tools (optional allowlists): https://docs.openclaw.ai/plugins/agent-tools
+
+## 1) Enable an optional plugin (example: `llm-task`)
+
+Edit your config (default: `~/.openclaw/openclaw.json`) and enable the plugin:
+
+```json5
+{
+  plugins: {
+    entries: {
+      "llm-task": { enabled: true },
+    },
+  },
+}
+```
+
+Optional: set a restrictive config so it can only run the models you expect:
+
+```json5
+{
+  plugins: {
+    entries: {
+      "llm-task": {
+        enabled: true,
+        config: {
+          // Example values; adjust to your providers/models
+          allowedModels: ["openai-codex/gpt-5.2"],
+          maxTokens: 800,
+          timeoutMs: 30000,
+        },
+      },
+    },
+  },
+}
+```
+
+## 2) Allowlist the tool (per-agent is recommended)
+
+Most optional plugin tools are **opt-in**. Add them to the agent allowlist:
+
+```json5
+{
+  agents: {
+    list: [
+      {
+        id: "main",
+        tools: {
+          allow: [
+            "llm-task",
+            // You can also allow an entire plugin id, or a group like:
+            // "group:plugins"
+          ],
+        },
+      },
+    ],
+  },
+}
+```
+
+Rules of thumb:
+
+- Start conservative: only allow what you need.
+- Prefer per-agent allowlists over a global allowlist, so you can run a "safe" agent alongside a "power" agent.
+- Remember: **deny wins**. If a tool is denied anywhere in policy, it stays denied.
+
+## 3) Restart and verify
+
+If your gateway is installed as a service:
+
+```bash
+openclaw gateway restart
+```
+
+Then verify:
+
+- Open the dashboard (`openclaw dashboard`)
+- Confirm the tool is visible/available
+- Run a controlled test prompt that should call the tool once (no side effects)
+
+## Debugging: "why is my tool blocked?"
+
+If a tool is present but not callable, the fastest way to see what's happening is:
+
+```bash
+openclaw sandbox explain
+```
+
+It will show:
+
+- whether your session is sandboxed
+- the effective tool allow/deny policy
+- which config keys are responsible
+
+Common failure patterns:
+
+- Plugin enabled but tool not allowlisted (optional tools)
+- Tool allowlist exists but does not include the tool (everything else becomes blocked)
+- Tool is allowed globally, but denied in sandbox policy (when sandboxed)

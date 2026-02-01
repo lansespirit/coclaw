@@ -11,21 +11,94 @@ keywords:
 ogImage: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200"
 ---
 <p class="text-xl leading-relaxed mb-8">
-            Most real assistants fail for a boring reason: they become expensive, slow, or lose track of what matters as conversations grow. "Context efficiency" is about keeping the model informed <em>without</em> sending everything every time.
-          </p>
-          <h2 class="text-3xl font-bold mt-12 mb-6">The Three Levers</h2>
-          <ul class="list-disc pl-6 space-y-4 mb-8">
-            <li><strong>Reduce input:</strong> summarize, prune, and de-duplicate history.</li>
-            <li><strong>Retrieve just-in-time:</strong> pull the right facts via search/RAG instead of replaying full chat logs.</li>
-            <li><strong>Constrain output:</strong> ask for structured responses, limit verbosity, and use tool calls for long data.</li>
-          </ul>
-          <h2 class="text-3xl font-bold mt-12 mb-6">A Simple Strategy That Works</h2>
-          <ol class="list-decimal pl-6 space-y-4 mb-8">
-            <li>Keep a short "current goal + constraints" memory.</li>
-            <li>Summarize after important milestones (not every message).</li>
-            <li>Store durable facts in a notes system, not the prompt.</li>
-            <li>When you need details, retrieve them (docs, files, tickets) on demand.</li>
-          </ol>
-          <p class="mb-6">
-            In practice, this means your agent stays helpful in weeks-long projects while keeping token usage predictable.
-          </p>
+  Most assistants fail for a boring reason: they become expensive, slow, or forgetful as a project
+  stretches from minutes to weeks. <strong>Context efficiency</strong> is the discipline of keeping
+  the model informed <em>without</em> paying to resend everything, every time.
+</p>
+
+## A Useful Reframe: Context Is Not Memory, It’s a Budget
+
+When people say “the model forgot,” they often mean one of three things:
+
+1. **The model never saw the fact** (it wasn’t in the prompt).
+2. **The model saw it, but it wasn’t salient** (it got buried).
+3. **The model saw it, but can’t reliably use it** (retrieval/format/constraints were weak).
+
+In other words: the failure mode isn’t “memory.” It’s *information management under a constrained
+budget*.
+
+OpenClaw projects that feel “smart for weeks” usually implement an explicit memory hierarchy:
+
+- **Working set**: the current goal, constraints, and next actions (tiny, always in context).
+- **Episodic history**: what happened recently (summarized, lossy, rotated).
+- **Durable knowledge**: facts that must remain true (stored outside the prompt and retrieved on
+  demand).
+
+## The Three Levers (and Why They Work Together)
+
+### 1) Reduce input (make the prompt smaller)
+
+Reduction is not “delete messages.” It’s prioritization:
+
+- **Summarize at milestones**, not every message.
+- **Deduplicate repeated constraints** (“don’t expose secrets”, “use TypeScript”) into a single
+  pinned block.
+- **Compress the task state** into a stable representation (e.g., a checklist or a plan).
+
+The key idea: *preserve decisions and constraints; discard chatter*.
+
+### 2) Retrieve just-in-time (make the prompt more relevant)
+
+Retrieval-Augmented Generation (RAG) is a strong default when:
+
+- facts live in docs/files/tickets,
+- the conversation is long-lived, or
+- you need provenance (“where did that come from?”).
+
+The classic RAG result is not “more tokens.” It’s **better tokens**: a small number of relevant
+snippets beat a giant unfiltered transcript. (The original RAG paper is still a good mental model
+for the hybrid of parametric memory + non-parametric memory.)
+
+Practical OpenClaw rule: if the assistant can fetch the answer, don’t let it “remember” it.
+
+### 3) Constrain output (make generation cheaper and safer)
+
+If your agent always responds in free-form prose, you pay twice:
+
+- token cost now, and
+- token cost later (because you have to resend long outputs as context).
+
+Better patterns:
+
+- **Structured outputs** (tables, JSON, bullet checklists).
+- **Tool calls for long artifacts** (write to files, store notes, create tickets) instead of pasting
+  huge blobs into chat.
+- **Verbosity budgets**: ask for “the minimal answer that unblocks the next action.”
+
+## A Strategy That Holds Up in Week-Long Projects
+
+Here’s the simplest strategy that consistently works:
+
+1. Keep a short, pinned “Goal + Constraints + Current Plan” section.
+2. Every few milestones, write an “Update Summary” (what changed, what’s decided, what’s next).
+3. Move durable facts into a notes system (docs, repo files, tickets).
+4. Use retrieval to pull only the pieces you need for the next decision.
+
+If you adopt just this, you’ll feel the difference immediately: the agent stays coherent over time,
+and your token usage becomes predictable.
+
+## What to Measure (So This Doesn’t Become Vibes)
+
+If you want to improve context efficiency systematically, measure:
+
+- **Task success rate** (did it finish without human rescue?)
+- **Cost per completed task** (tokens/tool calls)
+- **Latency** (first token + end-to-end)
+- **Regression rate after upgrades** (prompts, models, tools)
+
+The biggest “aha”: a cheaper model with better retrieval often beats an expensive model with a
+giant prompt.
+
+## References
+
+- Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (Lewis et al., NeurIPS 2020): https://nlp.cs.ucl.ac.uk/publications/2020-05-retrieval-augmented-generation-for-knowledge-intensive-nlp-tasks/

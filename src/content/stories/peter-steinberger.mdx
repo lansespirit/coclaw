@@ -3,30 +3,107 @@ name: Peter Steinberger
 role: Creator of OpenClaw
 company: Independent / Community
 image: /images/stories/rebrand.svg
-summary: "From viral weekend project to rebrand--and what the community learned about trust."
-quote: "A weekend project that went viral, rebranded, and quickly attracted both community attention and scams, according to reporting."
+summary: "A viral open-source project, a forced rebrand, and the trust lessons you only learn at scale."
+quote: "Names change. Your install chain shouldn’t."
 publishDate: 2026-02-01
 keywords: "OpenClaw story, rebrand, Moltbot, trust, scams, supply chain security"
 sources:
-  - label: "Business Insider -- The AI agent Moltbot is now called OpenClaw..."
-    url: https://www.businessinsider.com/moltbot-rebranded-openclaw-anthropic-scammer-hijacked-2025-12
-  - label: "TechCrunch -- Viral open source project Moltbot changes its name to OpenClaw"
-    url: https://techcrunch.com/2025/12/01/viral-open-source-project-moltbot-changes-its-name-to-openclaw/
+  - label: "GitHub — OpenClaw release: openclaw 2026.1.30"
+    url: https://github.com/openclaw/openclaw/releases/tag/v2026.1.30
+  - label: "Mashable — Clawdbot is now Moltbot… (updated: now OpenClaw)"
+    url: https://mashable.com/article/clawdbot-changes-name-to-moltbot-openclaw
+  - label: "Malwarebytes — Clawdbot (now OpenClaw) hit by scammers / supply-chain risk recap"
+    url: https://www.malwarebytes.com/blog/news/2026/01/from-clawdbot-to-openclaw-new-name-same-scammers
+  - label: "OpenClaw Docs — Lore (community backstory)"
+    url: https://docs.openclaw.ai/start/lore
 ---
 
 <p class="text-2xl font-medium text-foreground/80 mb-12 leading-relaxed italic">
-  Press coverage describes OpenClaw's creator navigating a rapid rebrand and a wave of copycats and
-  scams.
+  In open source, most projects grow like trees.
+  <br />
+  OpenClaw grew like a fire.
 </p>
 
-## The Rebrand Lesson: Names Change, Trust Shouldn't
+## The Rebrand Sprint (and Why It Was Inevitable)
 
-When a project goes viral, attackers follow. The reporting around the name change highlights a
-basic safety rule for OpenClaw users: trust the <strong>source</strong>, not the keyword.
+Public reporting and project materials describe a fast sequence of renames—**Clawdbot → Moltbot →
+OpenClaw**—triggered by trademark pressure and the realities of branding a viral project.
 
-## Practical Trust Checklist
+It’s tempting to treat this as a meme. But the deeper point is operational:
 
-- Only install from official links (GitHub, official docs) and verify repository ownership.
-- Be skeptical of "easy install" prompts that ask for shell commands you don't understand.
-- Prefer minimal permissions and per-agent tool allowlists.
-- Keep your dashboard behind localhost/VPN; never expose it without authentication.
+> A rename is not a cosmetic event.
+> It is a supply-chain event.
+
+When a tool becomes popular, the internet doesn’t just bring users. It brings:
+
+- typosquatters,
+- fake “install helpers,”
+- copycat repos,
+- and bad actors who know exactly where beginners click.
+
+Mashable reported that the project’s GitHub page was briefly targeted by crypto scammers (per the
+creator’s own posts), which is a blunt reminder that *attention is an attack surface*.
+
+Security researchers also warned about copycats and malicious “helpers” emerging around the
+rebrand—exactly the kind of supply-chain pressure that shows up when a project becomes a default
+recommendation in group chats.
+
+## What “Trust the Source” Actually Means
+
+New users often hear: “install from official sources.”
+
+But what is “official,” in practice?
+
+Here’s a pragmatic rule set you can apply in under a minute:
+
+### 1) Prefer identity over keywords
+
+“OpenClaw” is a string. Attackers can copy it.
+
+What’s harder to fake quickly:
+
+- the GitHub organization (`openclaw/openclaw`),
+- the release artifacts and tags,
+- and the project’s own docs domain.
+
+### 2) Use release pages as your truth anchor
+
+If you want to know what’s current, check the release page and treat it as canonical. For example,
+the `openclaw 2026.1.30` release lives under the official repository and includes security-related
+notes and operational changes.
+
+### 3) Expect security posture to evolve fast
+
+One of the subtle shifts visible in recent release notes: the Gateway’s defaults harden over time.
+This is what “viral project adulthood” looks like—more fail-closed defaults, fewer footguns.
+
+## A Founder’s Problem: Shipping Features While Fighting the Internet
+
+The OpenClaw docs even keep a “Lore” page—part backstory, part community catharsis. Read it as a
+tone document, not a court filing, but the emotional truth is familiar to anyone who has shipped a
+popular developer tool:
+
+- you are building product,
+- while simultaneously triaging the consequences of attention.
+
+That tension is the story: not just the rename, but what the rename reveals about modern software
+distribution.
+
+## Practical Trust Checklist (Do This, Not That)
+
+- **Do** bookmark the official repo and docs.
+- **Do** install from release links and documented commands.
+- **Do** keep the dashboard private (localhost/VPN/SSH tunnel), and treat tokens like passwords.
+- **Don’t** run random “one-liner installers” from strangers unless you can audit them.
+- **Don’t** grant broad tool permissions until you understand what the agent can actually do.
+
+## Closing: The Name Is the Least Interesting Part
+
+The rename is headline material. The real lesson is quieter:
+
+When you adopt an agent runtime, you aren’t just installing software—you’re enrolling in an ongoing
+relationship with its update cadence, its threat model, and its community norms.
+
+That’s not a reason to avoid OpenClaw.
+
+It’s a reason to run it like you mean it.

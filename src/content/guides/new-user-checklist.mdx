@@ -1,0 +1,154 @@
+---
+title: "New User Checklist: Secure Setup, Backups, and First Week Wins"
+description: "A practical, opinionated checklist for new OpenClaw users: secure defaults, dashboard access, backups, updates, and the most common early gotchas."
+category: "deployment"
+difficulty: "Beginner"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+time: "15 min"
+publishDate: 2026-02-01
+lastUpdated: 2026-02-01
+steps:
+  - title: "Install OpenClaw and run the wizard with a daemon"
+    content: >
+      Install via npm/pnpm and run `openclaw onboard --install-daemon` so the gateway stays running.
+  - title: "Open the dashboard the right way (tokenized link)"
+    content: >
+      Use `openclaw dashboard` to get a tokenized URL if you see unauthorized in the browser.
+  - title: "Lock down inbound messaging (pairing or allowlists)"
+    content: >
+      For every channel, choose a DM policy you can explain (pairing/allowlist). Avoid open DMs.
+  - title: "Make a backup plan for your state directory"
+    content: >
+      Back up the full state dir (default `~/.openclaw/`). It contains config, creds, sessions, and workspace data.
+  - title: "Learn the 3 core debug commands"
+    content: >
+      `openclaw gateway status`, `openclaw health`, and `openclaw logs --follow` solve most early mysteries.
+---
+
+## What this checklist is optimizing for
+
+New users generally want three things:
+
+1. A working install (fast)
+2. A safe install (not an open relay / not public)
+3. A recoverable install (backups + upgrades without pain)
+
+Official references:
+
+- Dashboard (Control UI): https://docs.openclaw.ai/web/dashboard
+- Updating: https://docs.openclaw.ai/install/updating
+- Gateway runbook: https://docs.openclaw.ai/gateway
+
+## 1) Install + daemonize the gateway (recommended)
+
+Runtime requirement: Node >= 22.
+
+Global install:
+
+```bash
+npm install -g openclaw@latest
+# or:
+pnpm add -g openclaw@latest
+```
+
+Run onboarding (recommended path):
+
+```bash
+openclaw onboard --install-daemon
+```
+
+This installs a per-user supervised service (launchd on macOS, systemd user service on Linux/WSL2)
+so the gateway keeps running in the background.
+
+## 2) Dashboard access: avoid the "unauthorized" trap
+
+The Control UI is served by the gateway (default http://127.0.0.1:18789/), but auth is enforced.
+
+If you open the URL and see "unauthorized":
+
+```bash
+openclaw dashboard
+```
+
+Use the tokenized link it prints (`?token=...`). The UI stores the token locally after first load.
+
+## 3) Secure inbound messaging (do not run "open" by accident)
+
+The most common beginner mistake is leaving a DM policy too permissive.
+
+Recommended pattern:
+
+- DMs: `pairing` (approve new senders) or `allowlist`
+- Groups: require mentions by default (so the bot does not reply to everything)
+
+Examples:
+
+- Telegram guide: `/guides/telegram-setup`
+- WhatsApp guide: `/guides/whatsapp-setup`
+
+## 4) Back up the correct thing: the state directory
+
+OpenClaw is stateful. Back up the full state directory:
+
+- Default: `~/.openclaw/`
+
+It includes:
+
+- config (`openclaw.json`)
+- credentials (OAuth tokens, channel creds)
+- sessions
+- workspace files
+
+Simple backup:
+
+```bash
+tar -czf openclaw-state-backup.tgz ~/.openclaw
+```
+
+Security note: treat backups like secrets.
+
+## 5) Updates: prefer the boring path
+
+For global installs, update like this:
+
+```bash
+npm i -g openclaw@latest
+openclaw doctor
+openclaw gateway restart
+openclaw health
+```
+
+If something breaks after an update:
+
+- do not "randomly reinstall" first
+- capture status + logs, then rollback or adjust config
+
+## 6) The 3 commands that solve most early problems
+
+Gateway supervisor + probe:
+
+```bash
+openclaw gateway status
+```
+
+Health snapshot:
+
+```bash
+openclaw health
+```
+
+Live logs:
+
+```bash
+openclaw logs --follow
+```
+
+## 7) First-week wins (high ROI)
+
+- Set a strict DM policy for every channel you enable.
+- Decide your remote access story early (SSH tunnel vs Tailscale). Avoid public exposure of the Control UI.
+- Add a scheduled backup of `~/.openclaw/`.
+- Keep a "rescue path": you should be able to reinstall OpenClaw and restore state in under 15 minutes.

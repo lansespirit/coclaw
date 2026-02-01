@@ -261,6 +261,12 @@ const breadcrumbData = {
                 class="text-sm overflow-x-auto"><code>openclaw dashboard
 # Or open: http://127.0.0.1:18789/</code></pre>
             </div>
+            <p class="text-sm text-default-600 mt-3">
+              If you see “unauthorized” in the browser, run <code class="text-primary"
+                >openclaw dashboard</code
+              >
+              and use the tokenized link it prints (<code class="text-primary">?token=...</code>).
+            </p>
             <div class="mt-6 p-4 rounded-xl bg-success/10 border border-success/20">
               <p class="text-success-700 dark:text-success-300 font-semibold">
                 ✅ Congratulations! OpenClaw is now running on your Mac.
@@ -388,9 +394,9 @@ arch -arm64 npm install -g openclaw@latest</code></pre>
             <div class="p-6 rounded-xl bg-content1 border border-divider">
               <h3 class="text-xl font-bold mb-3">Run as Service</h3>
               <p class="text-default-700 dark:text-default-500">
-                Use launchd to run OpenClaw automatically on startup. Create a plist file in <code
-                  class="text-primary">~/Library/LaunchAgents/</code
-                >
+                On macOS, the recommended service install is handled by the wizard. Reinstall it
+                anytime with <code class="text-primary">openclaw gateway install</code> (or rerun
+                <code class="text-primary">openclaw onboard --install-daemon</code>).
               </p>
             </div>
 
@@ -400,7 +406,7 @@ arch -arm64 npm install -g openclaw@latest</code></pre>
                 Regularly update OpenClaw to get the latest features and security fixes:
               </p>
               <div class="mt-3 rounded-lg bg-content2 p-3">
-                <pre class="text-sm"><code>npm update -g openclaw</code></pre>
+                <pre class="text-sm"><code>npm i -g openclaw@latest</code></pre>
               </div>
             </div>
 

@@ -207,7 +207,10 @@ export default function QuickInstallTabs() {
 
               <div>
                 <h3 className="text-xl font-bold mb-3">3. Run the Setup Wizard</h3>
-                <Code className="w-full p-4 bg-content2">openclaw onboard</Code>
+                <Code className="w-full p-4 bg-content2">
+                  openclaw onboard --install-daemon
+                  <br /># Native Windows (experimental): openclaw onboard
+                </Code>
               </div>
 
               <div>

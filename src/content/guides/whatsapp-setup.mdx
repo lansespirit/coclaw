@@ -8,7 +8,7 @@ platforms:
   - "Messaging"
 time: "10 min"
 publishDate: 2026-01-28
-lastUpdated: 2026-01-28
+lastUpdated: 2026-02-01
 steps:
   - title: "Start with a dedicated number (recommended)"
     content: >
@@ -27,3 +27,129 @@ steps:
       If you use pairing for unknown senders, approve requests with
       `openclaw pairing list whatsapp` and `openclaw pairing approve whatsapp <code>`.
 ---
+
+## Before you start (important expectations)
+
+OpenClaw connects to WhatsApp using the **WhatsApp Web** flow (Baileys-style).
+That means:
+
+- You will log in by scanning a QR code (Linked Devices)
+- The connection relies on WhatsApp Web session credentials stored in your OpenClaw state dir
+- You should treat the WhatsApp integration as "powerful but sensitive": keep it private and locked down
+
+Official reference:
+
+- WhatsApp channel docs: https://docs.openclaw.ai/channels/whatsapp
+
+## Recommended setup: dedicated number
+
+If you can, use a **separate number** for the assistant:
+
+- Lower risk (you are not experimenting on your personal account)
+- Cleaner routing (no self-chat quirks)
+- Easier recovery if you need to rotate credentials
+
+Avoid "free SMS"/VoIP numbers when possible (WhatsApp often blocks them).
+
+## Step 1: minimal WhatsApp config (secure defaults)
+
+Open your config file:
+
+- Default path: `~/.openclaw/openclaw.json` (or `$OPENCLAW_STATE_DIR/openclaw.json`)
+
+Add a conservative DM policy and allowlist:
+
+```json5
+{
+  channels: {
+    whatsapp: {
+      // Options are typically: "pairing" (default), "allowlist", "open", "disabled"
+      dmPolicy: "allowlist",
+      allowFrom: ["+15551234567"],
+    },
+  },
+}
+```
+
+Notes:
+
+- Use E.164 format (`+15551234567`)
+- Start strict. You can loosen it later once you trust your setup.
+
+## Step 2: log in (scan QR)
+
+Run:
+
+```bash
+openclaw channels login
+```
+
+Then on your phone:
+
+- WhatsApp -> Settings
+- Linked Devices -> Link a device
+- Scan the QR
+
+When login succeeds, OpenClaw will persist credentials under your state directory.
+Back up your state directory if you want an easy restore path.
+
+## Step 3: choose your inbound DM policy
+
+You have two common secure patterns:
+
+### Option A (simplest): allowlist only
+
+- Set `dmPolicy: "allowlist"`
+- Add trusted numbers to `allowFrom`
+- Everyone else is blocked
+
+### Option B (friendlier): pairing
+
+Pairing lets unknown senders request access, and you approve them:
+
+```json5
+{
+  channels: {
+    whatsapp: {
+      dmPolicy: "pairing",
+    },
+  },
+}
+```
+
+Approve requests:
+
+```bash
+openclaw pairing list whatsapp
+openclaw pairing approve whatsapp <code>
+```
+
+## Optional: personal number + self-chat mode (fallback)
+
+If you must run on your personal number, enable self-chat mode and keep an allowlist:
+
+```json5
+{
+  channels: {
+    whatsapp: {
+      selfChatMode: true,
+      dmPolicy: "allowlist",
+      allowFrom: ["+15551234567"],
+    },
+  },
+}
+```
+
+This is useful for testing without messaging other people.
+
+## Troubleshooting quick wins
+
+- QR does not appear: make sure the gateway is running, then rerun `openclaw channels login`.
+- "Logged out" or messages stop arriving: rerun `openclaw channels login` to re-link.
+- You changed config but behavior did not change: restart the gateway (`openclaw gateway restart`).
+
+## Security checklist (do this)
+
+- Do not run with `dmPolicy: "open"` unless you really understand the blast radius.
+- Keep the gateway Control UI private (token/password protected, not public).
+- Keep `~/.openclaw/` private and backed up (it contains WhatsApp creds).

@@ -1,38 +1,140 @@
 ---
 name: Security Scam Wave
-role: Community / Researchers
-company: VS Code Extension Incident
+role: Community / Maintainers
+company: OpenClaw community
 image: /images/stories/security.svg
-summary: "A fake VS Code extension and broader scam patterns--and how to stay safe."
-quote: "Researchers and community members flagged a fake VS Code extension targeting OpenClaw users--use official sources and verify installs."
+summary: "When OpenClaw went viral, scammers followed. This is the practical security playbook we wish every 'day-0' user had."
+quote: "If your assistant can act, your threat model isn’t theoretical."
 publishDate: 2026-02-01
-keywords: "OpenClaw security, VS Code extension malware, supply chain, tokens, allowlists"
+keywords: "OpenClaw security, supply chain, typosquatting, tokens, allowlists"
 sources:
-  - label: "TechRadar -- Fake VSCode extension installs malware on Moltbot AI users"
-    url: https://www.techradar.com/pro/security/fake-vscode-extension-installs-malware-on-moltbot-ai-users
-  - label: "Forbes -- Moltbot AI Agent... Security Brief"
-    url: https://www.forbes.com/sites/daveywinder/2026/01/28/moltbot-ai-agent-with-100000-github-stars-gets-new-name-with-new-threat-warning/
-  - label: "Reddit -- community discussion about OpenClaw security"
-    url: https://www.reddit.com/r/cybersecurity/comments/1k06hpo/openclaw_moltbot_security_brief_anti_scam/
+  - label: "Mashable — Clawdbot is now Moltbot… (updated: now OpenClaw)"
+    url: https://mashable.com/article/clawdbot-changes-name-to-moltbot-openclaw
+  - label: "Malwarebytes — Clawdbot (now OpenClaw) hit by scammers / supply-chain risk recap"
+    url: https://www.malwarebytes.com/blog/news/2026/01/from-clawdbot-to-openclaw-new-name-same-scammers
+  - label: "GitHub — OpenClaw release: openclaw 2026.1.30 (security-related notes)"
+    url: https://github.com/openclaw/openclaw/releases/tag/v2026.1.30
+  - label: "OpenClaw Docs — Dashboard security notes"
+    url: https://docs.openclaw.ai/web/dashboard
+  - label: "OpenClaw Docs — Lore (community account of early scams)"
+    url: https://docs.openclaw.ai/start/lore
 ---
 
 <p class="text-2xl font-medium text-foreground/80 mb-12 leading-relaxed italic">
-  A fake VS Code extension targeting OpenClaw/Moltbot users was reported by security researchers.
-  Community members also shared anti-scam guidance.
+  Viral projects don’t just attract contributors.
+  <br />
+  They attract people who can type faster than you can think.
 </p>
 
-## What Happened (High Level)
+## What We Can Verify (and What We Can’t)
 
-Reporting described a malicious extension that could exfiltrate secrets and attempt remote access.
-The broader pattern is familiar: popular projects attract "helper tools" that are not maintained or
-reviewed by the original authors.
+There are two kinds of “security stories” in a community’s first month:
 
-## What You Should Do
+- the verifiable, linkable incidents (press reports, official notes), and
+- the fog-of-war anecdotes (Discord screenshots, reuploads, “my friend got hacked”).
 
-- Do not install random extensions or scripts that claim to "auto-configure" OpenClaw.
-- Rotate any keys/tokens if you installed suspicious software.
-- Keep dashboards local (127.0.0.1) or behind VPN with authentication.
-- Use conservative allowlists, pairing, and minimal tool permissions.
+CoClaw’s promise is simple: we’ll keep the drama to the prose, and the facts to the sources.
+
+From public reporting and project materials, we can say with confidence:
+
+- The project’s rapid popularity created a fertile environment for scams and copycats (including
+  crypto-focused impersonation, per reporting).
+- The OpenClaw team has been actively hardening defaults (for example, Gateway auth moving toward
+  fail-closed behavior and other security notes in release changelogs).
+- The official docs emphasize that the dashboard is an **admin surface** and should not be exposed
+  publicly.
+
+That is enough to build a real safety playbook.
+
+## The Moment It Turns Serious: When “AI” Becomes “Admin”
+
+If your assistant only chats, the worst-case outcome is usually embarrassment.
+
+If your assistant can:
+
+- send messages,
+- read files,
+- run tools,
+- or open remote access surfaces,
+
+then the worst-case outcome becomes **account compromise** and **secret theft**.
+
+This is why “agent security” feels different from “app security.” A normal app has a UI. An agent
+has a language interface—meaning an attacker can try to *talk* their way into your system.
+
+## The Five Scam Patterns to Assume on Day 0
+
+### 1) Typosquatted repos and look-alike orgs
+
+The easiest scam is the oldest: a near-identical repository name and a README that tells you to
+run a suspicious installer.
+
+### 2) “Helpful” installers that ask for too much
+
+Any script that:
+
+- requests your API keys in plaintext,
+- uploads your config somewhere,
+- or changes your shell profile without explanation,
+
+is not “help.” It’s a credential extraction pipeline.
+
+### 3) Fake “official” support accounts
+
+Attackers impersonate maintainers, “support engineers,” and “heads of engineering” because it
+short-circuits a beginner’s skepticism.
+
+### 4) Malicious “configuration generators” and “one-click setup” tools
+
+Config is power. A config generator that quietly enables permissive auth modes or open DM policies
+can turn your assistant into a public service you didn’t intend to run.
+
+### 5) Token and dashboard leakage
+
+If your gateway token leaks—and your dashboard is reachable—you’ve effectively handed someone the
+keys to your admin surface.
+
+## The CoClaw Defensive Checklist
+
+### Protect installs
+
+- Bookmark the official repo and docs.
+- Prefer documented commands over random scripts.
+- If you use Docker, keep volumes and `.env` files private.
+
+### Protect the gateway
+
+- Keep the dashboard on localhost, or behind Tailscale/SSH.
+- Rotate tokens if you pasted them into any untrusted UI.
+
+### Protect messaging channels
+
+- Use pairing or allowlists.
+- Keep group behavior “mention-only” by default.
+
+### Protect tool permissions
+
+- Start with conservative allowlists.
+- Treat tool enablement as a security change, not a convenience toggle.
+
+## If You Think You Got Burned
+
+Do the boring steps, in order:
+
+1. Disconnect the gateway from the internet (stop the service / pull network).
+2. Rotate provider keys (OpenAI/Anthropic/etc.) and channel tokens.
+3. Rotate the gateway token/password and restart.
+4. Audit `~/.openclaw/` (or your state dir) for unexpected changes.
+5. Reinstall from official sources if you can’t account for what ran on your machine.
+
+## Closing: The Price of “Viral”
+
+The internet rewards useful tools—and punishes them for being useful.
+
+OpenClaw’s community responded the only way that scales: by hardening defaults, writing warnings,
+and teaching users how to think like operators.
+
+This story is that lesson, condensed.
 
 CoClaw will maintain a safety-first installation path: curated links, explicit warnings, and
 up-to-date references to official documentation.

@@ -12,7 +12,7 @@ export const Footer = () => {
                 <span className="text-xl tracking-tight">CoClaw</span>
               </div>
               <p className="text-sm text-default-800 dark:text-default-600">
-                The open-source community platform for OpenClaw (clawdbot) users.
+                The open-source community platform for OpenClaw (formerly ClawDBot) users.
               </p>
             </div>
 
