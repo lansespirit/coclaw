@@ -18,8 +18,29 @@ import {
 } from '../components/icons';
 
 const blogEntries = await getCollection('blog', ({ data }) => !data.draft);
+const blogEntriesSorted = [...blogEntries].sort(
+  (a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime()
+);
+const featuredBlogEntry =
+  blogEntries
+    .filter((e) => e.data.featured)
+    .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())[0] ??
+  blogEntriesSorted[0];
+
+const featuredBlog = featuredBlogEntry
+  ? {
+      title: featuredBlogEntry.data.title,
+      excerpt: featuredBlogEntry.data.description,
+      category: featuredBlogEntry.data.category,
+      href: `/blog/${featuredBlogEntry.slug}`,
+      image: featuredBlogEntry.data.ogImage || '/images/og/og-main.png',
+    }
+  : null;
+
 const blogPosts = blogEntries
+  .filter((e) => !e.data.featured)
   .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+  .slice(0, 6)
   .map((entry) => ({
     title: entry.data.title,
     excerpt: entry.data.description,
@@ -165,28 +186,41 @@ const userStories = storyEntries
               class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10"
             >
             </div>
-            <img
-              src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1200"
-              class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-            />
+            {
+              featuredBlog && (
+                <>
+                  <a
+                    href={featuredBlog.href}
+                    class="absolute inset-0 z-20"
+                    aria-label="Featured blog"
+                  />
+                  <img
+                    src={featuredBlog.image}
+                    alt={featuredBlog.title}
+                    class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+                  />
+                </>
+              )
+            }
             <div class="relative z-20">
               <Chip color="primary" variant="shadow" size="sm" className="mb-4">
-                FEATURED GUIDE
+                FEATURED BLOG
               </Chip>
               <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
-                The Ultimate Multi-Agent Architecture Guide for 2024
+                {featuredBlog?.title}
               </h2>
               <p class="text-white/80 text-lg mb-6 max-w-xl">
-                Learn how to scale your OpenClaw instance to handle hundreds of concurrent AI tasks
-                across multiple channels.
+                {featuredBlog?.excerpt}
               </p>
               <Button
                 color="default"
                 radius="full"
                 variant="solid"
                 className="font-bold bg-white text-black border-none"
+                as="a"
+                href={featuredBlog?.href}
               >
-                Read Masterclass
+                Read Article
               </Button>
             </div>
           </div>
