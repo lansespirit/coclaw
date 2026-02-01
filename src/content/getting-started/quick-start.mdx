@@ -18,7 +18,7 @@ layout: ../../layouts/DocsLayout.astro
 
 Before you begin, make sure you have:
 
-- **Node.js 22 or higher** installed on your system
+- **Node.js 22.12+** (Node 22 LTS recommended) installed on your system
 - A terminal or command prompt
 - Basic familiarity with command-line tools
 
@@ -37,47 +37,33 @@ node --version
 
 ```bash
 # Using npm
-npm install -g openclaw
+npm install -g openclaw@latest
 
 # Or using pnpm (recommended)
-pnpm add -g openclaw
+pnpm add -g openclaw@latest
 ```
 
-### 3. Initialize Configuration
+### 3. Run the Setup Wizard
 
 ```bash
-# Create a new OpenClaw configuration
-openclaw init
+openclaw onboard --install-daemon
 ```
 
-This will create a basic `openclaw.json` configuration file in your current directory.
+This creates your config at `~/.openclaw/openclaw.json` and installs a per-user Gateway service.
 
-### 4. Configure Your First Channel
-
-Edit the `openclaw.json` file to add your first messaging platform. For example, to add Telegram:
-
-```json
-{
-  "channels": {
-    "telegram": {
-      "enabled": true,
-      "botToken": "YOUR_BOT_TOKEN_HERE"
-    }
-  }
-}
-```
-
-### 5. Start OpenClaw
+### 4. Open the Dashboard
 
 ```bash
-openclaw start
+openclaw dashboard
 ```
+
+Or open: http://127.0.0.1:18789/
 
 ## Next Steps
 
-- [Configure additional channels](/channels)
-- [Set up security settings](/guides/security)
-- [Explore automation features](/guides/automation)
+- [Browse guides and tutorials](/resources)
+- [Use the configuration generator](/tools/config-generator)
+- [Explore troubleshooting solutions](/troubleshooting)
 
 ## Troubleshooting
 
@@ -85,4 +71,4 @@ If you encounter issues:
 
 - Check the [troubleshooting guide](/troubleshooting)
 - Visit the [community forum](https://forum.coclaw.com)
-- Review the [official documentation](https://docs.openclaw.ai)
+- Join the [Discord community](https://discord.gg/clawd)

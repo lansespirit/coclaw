@@ -17,10 +17,10 @@ export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const menuItems = [
-    { name: 'Getting Started', href: '/getting-started' },
-    { name: 'Documentation', href: '/docs' },
-    { name: 'Troubleshooting', href: '/troubleshooting' },
-    { name: 'Community', href: '/community' },
+    { name: 'Getting Started', href: '/getting-started', external: false },
+    { name: 'Resources', href: '/resources', external: false },
+    { name: 'Troubleshooting', href: '/troubleshooting', external: false },
+    { name: 'Community', href: 'https://forum.coclaw.com', external: true },
   ];
 
   return (
@@ -58,6 +58,8 @@ export const Navbar = () => {
                 color="foreground"
                 href={item.href}
                 className="text-sm font-medium text-foreground/90 hover:text-foreground transition-colors"
+                isExternal={item.external}
+                showAnchorIcon={item.external}
               >
                 {item.name}
               </Link>
@@ -84,7 +86,14 @@ export const Navbar = () => {
         <NavbarMenu>
           {menuItems.map((item, index) => (
             <NavbarMenuItem key={`${item.name}-${index}`}>
-              <Link color="foreground" className="w-full" href={item.href} size="lg">
+              <Link
+                color="foreground"
+                className="w-full"
+                href={item.href}
+                size="lg"
+                isExternal={item.external}
+                showAnchorIcon={item.external}
+              >
                 {item.name}
               </Link>
             </NavbarMenuItem>

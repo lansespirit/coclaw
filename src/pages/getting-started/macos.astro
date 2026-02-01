@@ -1,0 +1,511 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+
+// SEO-optimized structured data
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to Install OpenClaw on macOS - Complete Setup Guide',
+  description:
+    'Step-by-step guide to installing OpenClaw AI assistant on macOS. Supports both Intel and Apple Silicon Macs.',
+  step: [
+    {
+      '@type': 'HowToStep',
+      name: 'Install Homebrew',
+      text: 'Install Homebrew package manager if not already installed',
+    },
+    {
+      '@type': 'HowToStep',
+      name: 'Install Node.js',
+      text: 'Install Node.js 22.12+ (Node 22 LTS recommended) using Homebrew',
+    },
+    {
+      '@type': 'HowToStep',
+      name: 'Install OpenClaw',
+      text: 'Install OpenClaw globally using npm or pnpm',
+    },
+    {
+      '@type': 'HowToStep',
+      name: 'Run the Setup Wizard',
+      text: 'Run openclaw onboard (recommended: openclaw onboard --install-daemon)',
+    },
+    {
+      '@type': 'HowToStep',
+      name: 'Open the Dashboard',
+      text: 'Open http://127.0.0.1:18789/ or run openclaw dashboard',
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Install OpenClaw on macOS - Complete Setup Guide for Mac (Intel & Apple Silicon)"
+  description="Complete guide to installing OpenClaw AI assistant on macOS. Step-by-step instructions for both Intel and Apple Silicon Macs. Get your AI assistant running in minutes."
+  keywords="OpenClaw macOS, install OpenClaw Mac, OpenClaw Apple Silicon, OpenClaw M1 M2, OpenClaw Homebrew, macOS AI assistant, OpenClaw setup Mac"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+  <div
+    class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
+  >
+    <div class="flex flex-col gap-16 pb-16">
+      <!-- Hero Section -->
+      <Section py="pt-24 pb-12" containerClass="text-center">
+        <div class="flex justify-center mb-6">
+          <div
+            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center"
+          >
+            <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+              ></path>
+            </svg>
+          </div>
+        </div>
+        <h1
+          class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent"
+        >
+          Install OpenClaw on macOS
+        </h1>
+        <p class="text-xl text-default-800 dark:text-default-600 max-w-3xl mx-auto">
+          Complete installation guide for macOS • Supports Intel & Apple Silicon
+        </p>
+      </Section>
+
+      <!-- Prerequisites Section -->
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-6">Prerequisites</h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">System Requirements</h3>
+              <ul class="space-y-2 text-default-700 dark:text-default-500">
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>macOS (Intel or Apple Silicon)</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Intel or Apple Silicon (M1/M2/M3)</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>500MB free disk space</span>
+                </li>
+              </ul>
+            </div>
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Software Requirements</h3>
+              <ul class="space-y-2 text-default-700 dark:text-default-500">
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Node.js 22.12+ (Node 22 LTS recommended)</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Terminal access</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Homebrew (recommended)</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Installation Steps -->
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Step-by-Step Installation Guide</h2>
+
+          <!-- Step 1 -->
+          <div class="mb-12">
+            <div class="flex items-center gap-4 mb-4">
+              <div
+                class="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl"
+              >
+                1
+              </div>
+              <h3 class="text-2xl font-bold">Install Homebrew</h3>
+            </div>
+            <p class="text-default-700 dark:text-default-500 mb-4">
+              If you don't have Homebrew installed, install it first. Homebrew is the recommended
+              package manager for macOS.
+            </p>
+            <div class="rounded-xl bg-content1 border border-divider p-6">
+              <pre
+                class="text-sm overflow-x-auto"><code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code></pre>
+            </div>
+            <p class="text-sm text-default-600 mt-3">Already have Homebrew? Skip to step 2.</p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="mb-12">
+            <div class="flex items-center gap-4 mb-4">
+              <div
+                class="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl"
+              >
+                2
+              </div>
+              <h3 class="text-2xl font-bold">Install Node.js</h3>
+            </div>
+            <p class="text-default-700 dark:text-default-500 mb-4">
+              Install Node.js 22 (22.12+ recommended) using Homebrew:
+            </p>
+            <div class="rounded-xl bg-content1 border border-divider p-6 mb-4">
+              <pre class="text-sm overflow-x-auto"><code>brew install node@22</code></pre>
+            </div>
+            <p class="text-default-700 dark:text-default-500 mb-4">Verify the installation:</p>
+            <div class="rounded-xl bg-content1 border border-divider p-6">
+              <pre
+                class="text-sm overflow-x-auto"><code>node --version
+# Should output: v22.12.0+ (v22.x.x)</code></pre>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="mb-12">
+            <div class="flex items-center gap-4 mb-4">
+              <div
+                class="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl"
+              >
+                3
+              </div>
+              <h3 class="text-2xl font-bold">Install OpenClaw</h3>
+            </div>
+            <p class="text-default-700 dark:text-default-500 mb-4">
+              Install OpenClaw globally using npm:
+            </p>
+            <div class="rounded-xl bg-content1 border border-divider p-6 mb-4">
+              <pre class="text-sm overflow-x-auto"><code>npm install -g openclaw@latest</code></pre>
+            </div>
+            <p class="text-default-700 dark:text-default-500 mb-4">
+              Or using pnpm (recommended for better performance):
+            </p>
+            <div class="rounded-xl bg-content1 border border-divider p-6">
+              <pre class="text-sm overflow-x-auto"><code>pnpm add -g openclaw@latest</code></pre>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="mb-12">
+            <div class="flex items-center gap-4 mb-4">
+              <div
+                class="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl"
+              >
+                4
+              </div>
+              <h3 class="text-2xl font-bold">Run the Setup Wizard</h3>
+            </div>
+            <p class="text-default-700 dark:text-default-500 mb-4">
+              Run the guided setup (recommended):
+            </p>
+            <div class="rounded-xl bg-content1 border border-divider p-6">
+              <pre
+                class="text-sm overflow-x-auto"><code>openclaw onboard --install-daemon</code></pre>
+            </div>
+            <p class="text-sm text-default-600 mt-3">
+              This creates your config at <code class="text-primary">~/.openclaw/openclaw.json</code
+              > (and installs a per-user service).
+            </p>
+          </div>
+
+          <!-- Step 5 -->
+          <div class="mb-12">
+            <div class="flex items-center gap-4 mb-4">
+              <div
+                class="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl"
+              >
+                5
+              </div>
+              <h3 class="text-2xl font-bold">Open the Dashboard</h3>
+            </div>
+            <p class="text-default-700 dark:text-default-500 mb-4">Open the Control UI:</p>
+            <div class="rounded-xl bg-content1 border border-divider p-6">
+              <pre
+                class="text-sm overflow-x-auto"><code>openclaw dashboard
+# Or open: http://127.0.0.1:18789/</code></pre>
+            </div>
+            <div class="mt-6 p-4 rounded-xl bg-success/10 border border-success/20">
+              <p class="text-success-700 dark:text-success-300 font-semibold">
+                ✅ Congratulations! OpenClaw is now running on your Mac.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Configuration Examples -->
+      <Section py="py-8" containerClass="bg-content1/50">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Configuration Examples</h2>
+
+          <div class="space-y-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Basic Configuration</h3>
+              <pre
+                class="text-sm overflow-x-auto bg-content2 p-4 rounded-lg"><code>{`{
+  "agent": {
+    "model": "anthropic/claude-opus-4-5"
+  },
+  "channels": {
+    "telegram": {
+      "botToken": "YOUR_BOT_TOKEN_HERE"
+    }
+  }
+}`}</code></pre>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Multiple Channels</h3>
+              <pre
+                class="text-sm overflow-x-auto bg-content2 p-4 rounded-lg"><code>{`{
+  "agent": {
+    "model": "anthropic/claude-opus-4-5"
+  },
+  "channels": {
+    "telegram": {
+      "botToken": "YOUR_TELEGRAM_TOKEN"
+    },
+    "discord": {
+      "token": "YOUR_DISCORD_TOKEN"
+    }
+  }
+}`}</code></pre>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Troubleshooting -->
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Common Issues & Solutions</h2>
+
+          <div class="space-y-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3 text-warning">Permission Denied Error</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                If you get permission errors during installation:
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>{`# Avoid sudo npm installs by using a user-level global prefix:
+mkdir -p ~/.npm-global
+npm config set prefix ~/.npm-global
+echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"' >> ~/.zshrc
+source ~/.zshrc`}</code></pre>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3 text-warning">Node.js Version Too Old</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Update Node.js to version 22 or higher:
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre class="text-sm overflow-x-auto"><code>brew upgrade node@22</code></pre>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3 text-warning">Apple Silicon (M1/M2) Issues</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                If you encounter architecture issues on Apple Silicon:
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>arch -arm64 brew install node@22
+arch -arm64 npm install -g openclaw@latest</code></pre>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3 text-warning">Port Already in Use</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                If the default port is occupied, specify a different port:
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>openclaw gateway --port 18790</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Best Practices -->
+      <Section py="py-8" containerClass="bg-content1/50">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Best Practices for macOS</h2>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Use pnpm</h3>
+              <p class="text-default-700 dark:text-default-500">
+                pnpm is faster and more disk-efficient than npm. Install it with:
+              </p>
+              <div class="mt-3 rounded-lg bg-content2 p-3">
+                <pre class="text-sm"><code>brew install pnpm</code></pre>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Run as Service</h3>
+              <p class="text-default-700 dark:text-default-500">
+                Use launchd to run OpenClaw automatically on startup. Create a plist file in <code
+                  class="text-primary">~/Library/LaunchAgents/</code
+                >
+              </p>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Keep Updated</h3>
+              <p class="text-default-700 dark:text-default-500">
+                Regularly update OpenClaw to get the latest features and security fixes:
+              </p>
+              <div class="mt-3 rounded-lg bg-content2 p-3">
+                <pre class="text-sm"><code>npm update -g openclaw</code></pre>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Secure Your Config</h3>
+              <p class="text-default-700 dark:text-default-500">
+                Store sensitive tokens in environment variables instead of config files. Use a <code
+                  class="text-primary">.env</code
+                > file.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <!-- Next Steps -->
+      <Section py="py-8" containerClass="text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Next Steps</h2>
+        <p class="text-default-800 dark:text-default-600 max-w-2xl mx-auto text-lg mb-8">
+          Now that OpenClaw is installed, configure your AI assistant and start using it
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a
+            href="/tools/config-generator"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-semibold"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              ></path>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            Configuration Generator
+          </a>
+          <a
+            href="/resources"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              ></path>
+            </svg>
+            Browse Guides
+          </a>
+          <a
+            href="/troubleshooting"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
+              ></path>
+            </svg>
+            Troubleshooting
+          </a>
+        </div>
+      </Section>
+    </div>
+  </div>
+</BaseLayout>

@@ -4,31 +4,455 @@ import Section from '../components/layout/Section.astro';
 ---
 
 <BaseLayout
-  title="Troubleshooting - CoClaw"
-  description="Troubleshooting hub for common OpenClaw installation and channel issues."
+  title="Troubleshooting - OpenClaw Issues & Solutions"
+  description="Find solutions to common OpenClaw issues. Search our troubleshooting database for installation errors, channel integration problems, and configuration issues."
+  keywords="OpenClaw troubleshooting, OpenClaw errors, OpenClaw issues, OpenClaw problems, OpenClaw help, OpenClaw support"
 >
-  <Section containerClass="max-w-3xl">
-    <h1 class="text-4xl md:text-5xl font-bold mb-6">Troubleshooting</h1>
-    <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed mb-8">
-      The troubleshooting library is being built. If you're stuck, start with OpenClaw issues on
-      GitHub and community support channels.
-    </p>
+  <div
+    class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
+  >
+    <!-- Hero Section -->
+    <Section containerClass="text-center pt-24 pb-12">
+      <h1
+        class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent"
+      >
+        Troubleshooting Hub
+      </h1>
+      <p class="text-xl text-default-800 dark:text-default-600 max-w-3xl mx-auto">
+        Find solutions to common OpenClaw issues and get back up and running quickly
+      </p>
+    </Section>
 
-    <div class="flex flex-col sm:flex-row gap-4">
-      <a
-        class="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-6 py-3 font-semibold"
-        href="https://github.com/openclaw/openclaw/issues"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Browse Issues
-      </a>
-      <a
-        class="inline-flex items-center justify-center rounded-full border border-divider bg-content1 px-6 py-3 font-semibold text-foreground"
-        href="/community"
-      >
-        Community Links
-      </a>
-    </div>
-  </Section>
+    <!-- Search Bar Section -->
+    <Section>
+      <div class="max-w-3xl mx-auto">
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg
+              class="w-5 h-5 text-default-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+          <input
+            type="search"
+            placeholder="Search for errors, issues, or keywords..."
+            class="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-divider bg-content1 text-foreground placeholder:text-default-500 focus:border-primary focus:outline-none transition-colors text-lg"
+          />
+        </div>
+        <p class="text-sm text-default-600 mt-3 text-center">
+          Try searching for "Node.js version", "Telegram webhook", or "permission denied"
+        </p>
+      </div>
+    </Section>
+
+    <!-- Issue Categories -->
+    <Section containerClass="mt-16">
+      <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center">Browse by Category</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Installation Issues -->
+        <a
+          href="/resources"
+          class="group relative overflow-hidden rounded-2xl border border-divider bg-content1 p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1"
+        >
+          <div class="mb-4">
+            <div
+              class="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center"
+            >
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+            Installation Issues
+          </h3>
+          <p class="text-default-700 dark:text-default-500 text-sm mb-4">
+            Node.js errors, dependency conflicts, permission problems
+          </p>
+          <div class="flex items-center text-primary text-sm font-medium">
+            <span>View issues</span>
+            <svg
+              class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+              ></path>
+            </svg>
+          </div>
+        </a>
+
+        <!-- Channel Integration -->
+        <a
+          href="/resources"
+          class="group relative overflow-hidden rounded-2xl border border-divider bg-content1 p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1"
+        >
+          <div class="mb-4">
+            <div
+              class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center"
+            >
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+            Channel Integration
+          </h3>
+          <p class="text-default-700 dark:text-default-500 text-sm mb-4">
+            Telegram, WhatsApp, Slack, Discord connection issues
+          </p>
+          <div class="flex items-center text-primary text-sm font-medium">
+            <span>View issues</span>
+            <svg
+              class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+              ></path>
+            </svg>
+          </div>
+        </a>
+
+        <!-- Configuration Errors -->
+        <a
+          href="/resources"
+          class="group relative overflow-hidden rounded-2xl border border-divider bg-content1 p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1"
+        >
+          <div class="mb-4">
+            <div
+              class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center"
+            >
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                ></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+            Configuration Errors
+          </h3>
+          <p class="text-default-700 dark:text-default-500 text-sm mb-4">
+            JSON syntax, API keys, gateway connection problems
+          </p>
+          <div class="flex items-center text-primary text-sm font-medium">
+            <span>View issues</span>
+            <svg
+              class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+              ></path>
+            </svg>
+          </div>
+        </a>
+
+        <!-- Platform-Specific -->
+        <a
+          href="/resources"
+          class="group relative overflow-hidden rounded-2xl border border-divider bg-content1 p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1"
+        >
+          <div class="mb-4">
+            <div
+              class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center"
+            >
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                ></path>
+              </svg>
+            </div>
+          </div>
+          <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+            Platform-Specific
+          </h3>
+          <p class="text-default-700 dark:text-default-500 text-sm mb-4">
+            macOS, Linux, Windows, ARM64 compatibility issues
+          </p>
+          <div class="flex items-center text-primary text-sm font-medium">
+            <span>View issues</span>
+            <svg
+              class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"
+              ></path>
+            </svg>
+          </div>
+        </a>
+      </div>
+    </Section>
+
+    <!-- Common Issues -->
+    <Section containerClass="mt-16">
+      <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center">Most Common Issues</h2>
+      <div class="max-w-4xl mx-auto space-y-4">
+        <!-- Issue 1 -->
+        <div
+          class="rounded-xl border border-divider bg-content1 p-6 hover:border-primary/30 transition-colors"
+        >
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
+                <svg
+                  class="w-5 h-5 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold mb-2">Error: Node.js version mismatch</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                OpenClaw requires Node.js 22.12+ (Node 22 LTS recommended). Check your version with <code
+                  class="px-2 py-1 rounded bg-content2 text-sm">node --version</code
+                >
+              </p>
+              <a href="/resources" class="text-primary hover:underline text-sm font-medium">
+                View solution →
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issue 2 -->
+        <div
+          class="rounded-xl border border-divider bg-content1 p-6 hover:border-primary/30 transition-colors"
+        >
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                <svg
+                  class="w-5 h-5 text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold mb-2">Telegram webhook failed to connect</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Common causes include incorrect bot token, network issues, or webhook URL
+                configuration problems.
+              </p>
+              <a href="/resources" class="text-primary hover:underline text-sm font-medium">
+                View solution →
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issue 3 -->
+        <div
+          class="rounded-xl border border-divider bg-content1 p-6 hover:border-primary/30 transition-colors"
+        >
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                <svg
+                  class="w-5 h-5 text-purple-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold mb-2">Invalid JSON syntax in configuration</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                JSON parsing errors are often caused by missing commas, trailing commas, or unquoted
+                strings.
+              </p>
+              <a href="/resources" class="text-primary hover:underline text-sm font-medium">
+                View solution →
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issue 4 -->
+        <div
+          class="rounded-xl border border-divider bg-content1 p-6 hover:border-primary/30 transition-colors"
+        >
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
+                <svg
+                  class="w-5 h-5 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold mb-2">
+                Permission denied error during installation
+              </h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                This usually occurs when trying to install globally without proper permissions. Use
+                sudo or configure npm prefix.
+              </p>
+              <a href="/resources" class="text-primary hover:underline text-sm font-medium">
+                View solution →
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Issue 5 -->
+        <div
+          class="rounded-xl border border-divider bg-content1 p-6 hover:border-primary/30 transition-colors"
+        >
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                <svg
+                  class="w-5 h-5 text-green-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  ></path>
+                </svg>
+              </div>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold mb-2">macOS Sequoia compatibility issues</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Some users on macOS Sequoia experience issues with certain Node.js versions or
+                system permissions.
+              </p>
+              <a href="/resources" class="text-primary hover:underline text-sm font-medium">
+                View solution →
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <!-- Community Support Section -->
+    <Section containerClass="mt-16 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-6">Still Need Help?</h2>
+      <p class="text-default-800 dark:text-default-600 max-w-2xl mx-auto text-lg mb-8">
+        Can't find a solution? Our community is here to help you troubleshoot your issue
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a
+          href="https://forum.coclaw.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-semibold"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
+            ></path>
+          </svg>
+          Community Forum
+        </a>
+        <a
+          href="https://github.com/openclaw/openclaw/issues"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+            ></path>
+          </svg>
+          GitHub Issues
+        </a>
+        <a
+          href="https://discord.gg/clawd"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path
+              d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"
+            ></path>
+          </svg>
+          Discord
+        </a>
+      </div>
+    </Section>
+  </div>
 </BaseLayout>

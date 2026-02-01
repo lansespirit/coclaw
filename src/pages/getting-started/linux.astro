@@ -1,0 +1,363 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to Install OpenClaw on Linux',
+  description: 'Step-by-step guide to installing OpenClaw AI assistant on Linux distributions.',
+  step: [
+    { '@type': 'HowToStep', name: 'Update System', text: 'Update your Linux system packages' },
+    {
+      '@type': 'HowToStep',
+      name: 'Install Node.js',
+      text: 'Install Node.js 22.12+ (Node 22 LTS recommended)',
+    },
+    { '@type': 'HowToStep', name: 'Install OpenClaw', text: 'Install OpenClaw globally' },
+    {
+      '@type': 'HowToStep',
+      name: 'Run Setup Wizard',
+      text: 'Run openclaw onboard --install-daemon',
+    },
+    {
+      '@type': 'HowToStep',
+      name: 'Open Dashboard',
+      text: 'Open http://127.0.0.1:18789/ or run openclaw dashboard',
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Install OpenClaw on Linux - Ubuntu, Debian, Fedora, Arch Setup Guide"
+  description="Complete guide to installing OpenClaw AI assistant on Linux. Step-by-step instructions for Ubuntu, Debian, Fedora, Arch Linux. Get your AI assistant running in minutes."
+  keywords="OpenClaw Linux, install OpenClaw Ubuntu, OpenClaw Debian, OpenClaw Fedora, OpenClaw Arch, Linux AI assistant"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+  <div
+    class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
+  >
+    <div class="flex flex-col gap-16 pb-16">
+      <Section py="pt-24 pb-12" containerClass="text-center">
+        <div class="flex justify-center mb-6">
+          <div
+            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center"
+          >
+            <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.84-.41 1.719-.41 2.623 0 .955.164 1.898.493 2.8.615 1.681 1.901 3.052 3.57 3.799 1.885.843 4.17.843 6.055 0 1.669-.747 2.955-2.118 3.57-3.799.329-.902.493-1.845.493-2.8 0-.904-.132-1.783-.41-2.623-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298-.165-.013-.325-.021-.48-.021zm-.005 5.326c.885 0 1.602.717 1.602 1.602 0 .885-.717 1.602-1.602 1.602-.885 0-1.602-.717-1.602-1.602 0-.885.717-1.602 1.602-1.602z"
+              ></path>
+            </svg>
+          </div>
+        </div>
+        <h1
+          class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent"
+        >
+          Install OpenClaw on Linux
+        </h1>
+        <p class="text-xl text-default-800 dark:text-default-600 max-w-3xl mx-auto">
+          Complete installation guide for Ubuntu, Debian, Fedora, Arch & more
+        </p>
+      </Section>
+
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-6">Prerequisites</h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">System Requirements</h3>
+              <ul class="space-y-2 text-default-700 dark:text-default-500">
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Any modern Linux distro (examples: Ubuntu/Debian/Fedora/Arch)</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>x86_64 or ARM64 architecture</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>500MB free disk space</span>
+                </li>
+              </ul>
+            </div>
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Software Requirements</h3>
+              <ul class="space-y-2 text-default-700 dark:text-default-500">
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Node.js 22.12+ (Node 22 LTS recommended)</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Terminal/shell access</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>sudo privileges</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Installation by Distribution</h2>
+
+          <div class="space-y-8">
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <div class="flex items-center gap-3 mb-6">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center"
+                >
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.84-.41 1.719-.41 2.623 0 .955.164 1.898.493 2.8.615 1.681 1.901 3.052 3.57 3.799 1.885.843 4.17.843 6.055 0 1.669-.747 2.955-2.118 3.57-3.799.329-.902.493-1.845.493-2.8 0-.904-.132-1.783-.41-2.623-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298-.165-.013-.325-.021-.48-.021zm-.005 5.326c.885 0 1.602.717 1.602 1.602 0 .885-.717 1.602-1.602 1.602-.885 0-1.602-.717-1.602-1.602 0-.885.717-1.602 1.602-1.602z"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="text-2xl font-bold">Ubuntu / Debian</h3>
+              </div>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Update and install Node.js:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`sudo apt update
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs`}</code></pre>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">Install OpenClaw:</p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`npm install -g openclaw@latest
+openclaw onboard --install-daemon
+openclaw dashboard
+# Or open: http://127.0.0.1:18789/`}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <div class="flex items-center gap-3 mb-6">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white font-bold text-xl"
+                >
+                  F
+                </div>
+                <h3 class="text-2xl font-bold">Fedora</h3>
+              </div>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Install Node.js and OpenClaw:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`# Install Node.js 22.12+ using your distro's method, then:
+npm install -g openclaw@latest
+openclaw onboard --install-daemon
+openclaw dashboard`}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <div class="flex items-center gap-3 mb-6">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl"
+                >
+                  A
+                </div>
+                <h3 class="text-2xl font-bold">Arch Linux</h3>
+              </div>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Install Node.js and OpenClaw:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`sudo pacman -S nodejs npm
+npm install -g openclaw@latest
+openclaw onboard --install-daemon
+openclaw dashboard`}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="bg-content1/50">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Run as Systemd Service</h2>
+          <div class="p-6 rounded-xl bg-content1 border border-divider">
+            <p class="text-default-700 dark:text-default-500 mb-4">
+              Recommended: let OpenClaw install a per-user systemd service for you:
+            </p>
+            <div class="rounded-lg bg-content2 p-4 mb-4">
+              <pre
+                class="text-sm overflow-x-auto"><code>openclaw onboard --install-daemon</code></pre>
+            </div>
+            <p class="text-default-700 dark:text-default-500 mb-4">
+              Advanced (manual): create a systemd <strong>user</strong> unit at <code
+                class="text-primary">~/.config/systemd/user/openclaw-gateway.service</code
+              >:
+            </p>
+            <pre
+              class="text-sm overflow-x-auto bg-content2 p-4 rounded-lg mb-4"><code>{`[Unit]
+Description=OpenClaw Gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/env openclaw gateway --port 18789
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target`}</code></pre>
+            <p class="text-default-700 dark:text-default-500">
+              Enable and start: <code class="text-primary"
+                >systemctl --user enable --now openclaw-gateway.service</code
+              >
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Troubleshooting</h2>
+          <div class="space-y-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3 text-warning">Permission Errors</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">Fix npm permissions:</p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>{`mkdir ~/.npm-global
+npm config set prefix '~/.npm-global'
+echo 'export PATH=~/.npm-global/bin:$PATH' >> ~/.bashrc
+source ~/.bashrc`}</code></pre>
+              </div>
+            </div>
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3 text-warning">Firewall Issues</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                If you bind the Gateway to a network interface, allow port 18789:
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre class="text-sm overflow-x-auto"><code>sudo ufw allow 18789/tcp</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Next Steps</h2>
+        <p class="text-default-800 dark:text-default-600 max-w-2xl mx-auto text-lg mb-8">
+          Configure your AI assistant and start using OpenClaw
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a
+            href="/tools/config-generator"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-semibold"
+          >
+            Configuration Generator
+          </a>
+          <a
+            href="/resources"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+          >
+            Browse Guides
+          </a>
+          <a
+            href="/troubleshooting"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+          >
+            Troubleshooting
+          </a>
+        </div>
+      </Section>
+    </div>
+  </div>
+</BaseLayout>

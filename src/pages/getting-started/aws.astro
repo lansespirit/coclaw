@@ -1,0 +1,443 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to Deploy OpenClaw on AWS',
+  description: 'Step-by-step guide to deploying OpenClaw on AWS EC2 or ECS/Fargate.',
+  step: [
+    {
+      '@type': 'HowToStep',
+      name: 'Choose AWS Service',
+      text: 'Select between EC2 (VM) or ECS/Fargate (container)',
+    },
+    { '@type': 'HowToStep', name: 'Setup AWS Account', text: 'Create and configure AWS account' },
+    { '@type': 'HowToStep', name: 'Launch Instance', text: 'Create and configure AWS resources' },
+    { '@type': 'HowToStep', name: 'Deploy OpenClaw', text: 'Install and configure OpenClaw' },
+    {
+      '@type': 'HowToStep',
+      name: 'Configure Auto-Scaling',
+      text: 'Setup auto-scaling and monitoring',
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Deploy OpenClaw on AWS - EC2 & ECS/Fargate Setup Guide"
+  description="Complete guide to deploying OpenClaw on AWS. Step-by-step instructions for EC2 and ECS/Fargate."
+  keywords="OpenClaw AWS, deploy OpenClaw AWS, OpenClaw EC2, OpenClaw ECS, OpenClaw Fargate, AWS AI assistant, OpenClaw cloud deployment"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+  <div
+    class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
+  >
+    <div class="flex flex-col gap-16 pb-16">
+      <Section py="pt-24 pb-12" containerClass="text-center">
+        <div class="flex justify-center mb-6">
+          <div
+            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center"
+          >
+            <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M6.763 10.036c0 .296.032.535.088.71.064.176.144.368.256.576.04.063.056.127.056.183 0 .08-.048.16-.152.24l-.503.335c-.072.048-.144.072-.208.072-.08 0-.16-.04-.239-.112-.112-.12-.207-.248-.279-.384-.072-.135-.144-.287-.224-.463-.56.66-1.263.99-2.111.99-.604 0-1.086-.172-1.439-.517-.352-.344-.528-.804-.528-1.382 0-.61.216-1.106.64-1.478.424-.372 .984-.558 1.696-.558.234 0 .48.016.743.056.263.04.535.088.823.152V7.59c0-.563-.12-.957-.352-1.199-.24-.24-.64-.36-1.207-.36-.26 0-.527.032-.8.088-.271.056-.535.12-.791.2-.12.04-.207.064-.263.072-.056.008-.096.016-.12.016-.104 0-.16-.08-.16-.232v-.368c0-.12.016-.208.056-.264.04-.056.12-.104.239-.16.26-.136.576-.248.943-.344.368-.096.76-.144 1.175-.144.895 0 1.551.2 1.967.6.423.4.632.991.632 1.783v2.343zm-2.935 1.098c.224 0 .463-.04.712-.12.248-.08.464-.216.64-.407.104-.12.184-.256.224-.407.04-.152.064-.336.064-.552v-.271c-.2-.048-.416-.088-.64-.12-.224-.032-.448-.048-.672-.048-.479 0-.832.096-1.063.28-.232.184-.344.448-.344.792 0 .328.08.568.247.736.16.168.423.256.768.256zm5.255.752c-.136 0-.224-.024-.28-.08-.056-.048-.104-.16-.152-.311L7.583 5.687c-.048-.16-.072-.264-.072-.32 0-.128.064-.2.192-.2h.783c.144 0 .24.024.288.08.056.048.096.16.144.311l1.511 5.951 1.399-5.951c.04-.16.088-.263.136-.311.056-.048.152-.08.296-.08h.64c.144 0 .24.024.296.08.056.048.104.16.136.311l1.415 6.03 1.551-6.03c.048-.16.096-.263.144-.311.056-.048.152-.08.288-.08h.743c.128 0 .2.064.2.2 0 .04-.008.08-.016.128-.008.048-.024.112-.056.2l-2.168 5.894c-.048.16-.096.264-.152.312-.056.048-.144.08-.28.08h-.688c-.144 0-.24-.024-.296-.08-.056-.056-.104-.16-.136-.32l-1.399-5.815-1.383 5.807c-.04.16-.088.264-.136.32-.056.056-.152.08-.296.08h-.688zm8.256.215c-.336 0-.671-.04-.999-.12-.328-.08-.583-.16-.743-.248-.096-.048-.16-.104-.184-.144-.024-.04-.04-.104-.04-.176v-.384c0-.152.056-.224.16-.224.04 0 .08.008.12.016.04.008.104.032.168.056.224.096.463.168.719.216.255.048.511.072.775.072.415 0 .735-.072.959-.216.224-.144.336-.368.336-.672 0-.2-.064-.368-.192-.504-.128-.136-.368-.264-.719-.384l-1.031-.32c-.519-.16-.903-.4-1.143-.711-.24-.312-.36-.663-.36-1.055 0-.304.064-.575.2-.815.136-.24.311-.448.535-.624.224-.176.495-.304.815-.392.32-.088.671-.128 1.055-.128.144 0 .296.008.44.032.152.024.288.048.424.08.128.032.256.072.376.112.12.04.216.088.28.128.088.048.152.096.184.152.032.056.048.128.048.216v.352c0 .152-.056.232-.16.232-.064 0-.168-.032-.296-.096-.455-.2-.967-.296-1.527-.296-.375 0-.671.064-.871.2-.2.136-.296.344-.296.624 0 .2.072.376.216.52.144.144.4.28.76.4l1.015.32c.511.16.887.384 1.119.672.232.288.344.624.344 1.015 0 .312-.064.591-.192.839-.128.248-.304.464-.528.64-.224.184-.496.32-.815.416-.32.096-.672.144-1.055.144z"
+              ></path>
+            </svg>
+          </div>
+        </div>
+        <h1
+          class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent"
+        >
+          Deploy OpenClaw on AWS
+        </h1>
+        <p class="text-xl text-default-800 dark:text-default-600 max-w-3xl mx-auto">
+          Enterprise-grade deployment on EC2 or ECS/Fargate
+        </p>
+      </Section>
+
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-6">Choose Your AWS Deployment Method</h2>
+          <div class="grid md:grid-cols-3 gap-6">
+            <div
+              class="p-6 rounded-xl bg-content1 border-2 border-divider hover:border-primary/50 transition-all"
+            >
+              <div
+                class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center mb-4"
+              >
+                <svg
+                  class="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold mb-2">EC2 (Recommended)</h3>
+              <p class="text-default-700 dark:text-default-500 text-sm">
+                Full control • Easy setup • Best for most use cases
+              </p>
+            </div>
+
+            <div
+              class="p-6 rounded-xl bg-content1 border-2 border-divider hover:border-primary/50 transition-all"
+            >
+              <div
+                class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center mb-4"
+              >
+                <svg
+                  class="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold mb-2">Lambda</h3>
+              <p class="text-default-700 dark:text-default-500 text-sm">
+                Serverless • Pay per use • Event-driven workloads
+              </p>
+            </div>
+
+            <div
+              class="p-6 rounded-xl bg-content1 border-2 border-divider hover:border-primary/50 transition-all"
+            >
+              <div
+                class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4"
+              >
+                <svg
+                  class="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold mb-2">ECS/Fargate</h3>
+              <p class="text-default-700 dark:text-default-500 text-sm">
+                Containerized • Auto-scaling • Production-ready
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Deploy on AWS EC2</h2>
+
+          <div class="space-y-8">
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <div class="flex items-center gap-4 mb-4">
+                <div
+                  class="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl"
+                >
+                  1
+                </div>
+                <h3 class="text-2xl font-bold">Launch EC2 Instance</h3>
+              </div>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Create a new EC2 instance:
+                  </p>
+                  <ul class="space-y-2 text-default-700 dark:text-default-500 ml-4">
+                    <li>• AMI: Ubuntu Server 22.04 LTS</li>
+                    <li>• Instance Type: t3.micro (free tier) or t3.small</li>
+                    <li>• Storage: 20GB gp3</li>
+                    <li>
+                      • Security Group: Allow SSH (22). (Recommended: keep the Gateway private and
+                      access it via SSH tunnel or Tailscale.)
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <div class="flex items-center gap-4 mb-4">
+                <div
+                  class="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl"
+                >
+                  2
+                </div>
+                <h3 class="text-2xl font-bold">Connect to EC2 Instance</h3>
+              </div>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">SSH into your instance:</p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`chmod 400 your-key.pem
+ssh -i your-key.pem ubuntu@YOUR_EC2_PUBLIC_IP`}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <div class="flex items-center gap-4 mb-4">
+                <div
+                  class="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl"
+                >
+                  3
+                </div>
+                <h3 class="text-2xl font-bold">Install Dependencies</h3>
+              </div>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Update system and install Node.js:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`sudo apt update && sudo apt upgrade -y
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+node --version`}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <div class="flex items-center gap-4 mb-4">
+                <div
+                  class="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl"
+                >
+                  4
+                </div>
+                <h3 class="text-2xl font-bold">Install and Configure OpenClaw</h3>
+              </div>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Install OpenClaw and run the setup wizard:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`npm install -g openclaw@latest
+openclaw onboard --install-daemon
+openclaw gateway status`}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="bg-content1/50">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">AWS Lambda (Not Recommended)</h2>
+
+          <div class="p-6 rounded-xl bg-content1 border border-divider">
+            <p class="text-default-700 dark:text-default-500">
+              OpenClaw’s Gateway is a long-running process with persistent state (credentials,
+              sessions, config). AWS Lambda is request-based and not a good fit for running the
+              Gateway. Prefer EC2 or ECS/Fargate (container).
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Deploy on AWS ECS/Fargate</h2>
+
+          <div class="space-y-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Create Dockerfile</h3>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>{`FROM node:22-alpine
+
+WORKDIR /app
+
+RUN npm install -g openclaw@latest
+
+# Persist this via EFS/EBS (mount to /data in ECS)
+ENV OPENCLAW_STATE_DIR=/data/.openclaw
+
+EXPOSE 3000
+
+# ECS/LB health checks typically expect a non-loopback bind + stable port
+CMD ["openclaw", "gateway", "run", "--bind", "lan", "--port", "3000", "--allow-unconfigured"]`}</code></pre>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Build and Push to ECR</h3>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>{`# Build Docker image
+docker build -t openclaw .
+
+# Tag and push to ECR
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin YOUR_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com
+docker tag openclaw:latest YOUR_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/openclaw:latest
+docker push YOUR_ACCOUNT.dkr.ecr.us-east-1.amazonaws.com/openclaw:latest`}</code></pre>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Create ECS Task Definition</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Use AWS Console or CLI to create an ECS task definition with:
+              </p>
+              <ul class="space-y-2 text-default-700 dark:text-default-500 ml-4">
+                <li>• Launch Type: Fargate</li>
+                <li>• CPU: 0.5 vCPU (start here; scale as needed)</li>
+                <li>• Memory: 2 GB (recommended)</li>
+                <li>• Container Image: Your ECR image URI</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="bg-content1/50">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">AWS Security Best Practices</h2>
+
+          <div class="space-y-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Use IAM Roles</h3>
+              <p class="text-default-700 dark:text-default-500">
+                Assign IAM roles to EC2 instances or ECS tasks instead of using access keys. This
+                provides temporary credentials and better security.
+              </p>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Store Secrets in AWS Secrets Manager</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Store API keys and tokens securely:
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>{`aws secretsmanager create-secret \\
+  --name openclaw/bot-token \\
+  --secret-string "YOUR_BOT_TOKEN"`}</code></pre>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Enable CloudWatch Logging</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Monitor your application with CloudWatch:
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>{`# Install CloudWatch agent on EC2
+sudo apt install amazon-cloudwatch-agent
+# Configure log groups and metrics`}</code></pre>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Use VPC and Security Groups</h3>
+              <p class="text-default-700 dark:text-default-500 mb-4">
+                Deploy in a private subnet with NAT gateway for outbound traffic. Restrict inbound
+                access using security groups.
+              </p>
+              <img
+                src="/images/svg/groups-flow.svg"
+                alt="AWS security groups flow diagram"
+                loading="lazy"
+                class="w-full rounded-lg border border-divider bg-content2 p-2"
+              />
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Cost Optimization Tips</h2>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Use Spot Instances</h3>
+              <p class="text-default-700 dark:text-default-500">
+                Save up to 90% by using EC2 Spot Instances for non-critical workloads. Configure
+                auto-scaling to handle interruptions.
+              </p>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Right-Size Your Instances</h3>
+              <p class="text-default-700 dark:text-default-500">
+                Start with t3.micro and monitor usage. Use AWS Compute Optimizer recommendations to
+                adjust instance types.
+              </p>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Use Reserved Instances</h3>
+              <p class="text-default-700 dark:text-default-500">
+                Commit to 1 or 3 years for up to 72% savings on predictable workloads. Consider
+                Savings Plans for flexibility.
+              </p>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Enable Auto-Scaling</h3>
+              <p class="text-default-700 dark:text-default-500">
+                Scale down during low-traffic periods. Set up CloudWatch alarms to trigger scaling
+                based on CPU or memory usage.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Next Steps</h2>
+        <p class="text-default-800 dark:text-default-600 max-w-2xl mx-auto text-lg mb-8">
+          Your OpenClaw instance is now running on AWS with enterprise-grade reliability
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a
+            href="/tools/config-generator"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-semibold"
+          >
+            Configuration Generator
+          </a>
+          <a
+            href="/resources"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+          >
+            Browse Guides
+          </a>
+          <a
+            href="/troubleshooting"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+          >
+            Troubleshooting
+          </a>
+        </div>
+      </Section>
+    </div>
+  </div>
+</BaseLayout>

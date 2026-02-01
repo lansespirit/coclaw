@@ -5,8 +5,8 @@ interface Props {
   frontmatter: {
     title: string;
     description: string;
-    publishDate: Date;
-    lastUpdated: Date;
+    publishDate: Date | string | number;
+    lastUpdated: Date | string | number;
     author?: string;
     category: string;
     difficulty?: string;
@@ -15,6 +15,18 @@ interface Props {
 }
 
 const { frontmatter } = Astro.props;
+// MDX `layout:` frontmatter values are not guaranteed to be `Date` objects.
+// Coerce them so build-time rendering doesn't crash.
+const publishDate =
+  frontmatter.publishDate instanceof Date
+    ? frontmatter.publishDate
+    : new Date(frontmatter.publishDate);
+const lastUpdated =
+  frontmatter.lastUpdated instanceof Date
+    ? frontmatter.lastUpdated
+    : new Date(frontmatter.lastUpdated);
+const hasValidPublishDate = !Number.isNaN(publishDate.getTime());
+const hasValidLastUpdated = !Number.isNaN(lastUpdated.getTime());
 ---
 
 <BaseLayout title={frontmatter.title} description={frontmatter.description}>
@@ -47,23 +59,26 @@ const { frontmatter } = Astro.props;
         <div class="flex gap-4 text-sm text-gray-500 dark:text-gray-400">
           <span>By {frontmatter.author || 'CoClaw Team'}</span>
           <span>•</span>
-          <time datetime={frontmatter.publishDate.toISOString()}>
+          <time datetime={hasValidPublishDate ? publishDate.toISOString() : undefined}>
             {
-              frontmatter.publishDate.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })
+              hasValidPublishDate
+                ? publishDate.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })
+                : 'Unknown date'
             }
           </time>
           {
-            frontmatter.lastUpdated &&
-              frontmatter.lastUpdated.getTime() !== frontmatter.publishDate.getTime() && (
+            hasValidLastUpdated &&
+              hasValidPublishDate &&
+              lastUpdated.getTime() !== publishDate.getTime() && (
                 <>
                   <span>•</span>
                   <span>
                     Updated{' '}
-                    {frontmatter.lastUpdated.toLocaleDateString('en-US', {
+                    {lastUpdated.toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',

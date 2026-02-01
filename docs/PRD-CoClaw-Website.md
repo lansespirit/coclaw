@@ -11,7 +11,7 @@
 
 ## Executive Summary
 
-CoClaw.com is a comprehensive support and community platform designed to help users successfully adopt and utilize OpenClaw (formerly clawdbot), a rapidly growing open-source personal AI assistant. With 108k+ GitHub stars and significant community momentum, OpenClaw faces typical early-stage adoption challenges: complex setup, platform-specific issues, and fragmented documentation.
+CoClaw.com is a comprehensive support and community platform designed to help users successfully adopt and utilize OpenClaw (formerly clawdbot), a rapidly growing open-source personal AI assistant. With 133k+ GitHub stars (as of February 1, 2026) and significant community momentum, OpenClaw faces typical early-stage adoption challenges: complex setup, platform-specific issues, and fragmented documentation.
 
 CoClaw.com will serve as the central hub for tutorials, troubleshooting, community support, and best practices. The platform's flagship feature is a **Visual Configuration Generator** that eliminates the need for manual JSON editing, automatically generates secure configurations, and adapts to different deployment environments (Mac, VPS, Docker, Raspberry Pi). This tool directly addresses the #1 user pain point: complex initial setup.
 
@@ -40,7 +40,7 @@ CoClaw.com will serve as the central hub for tutorials, troubleshooting, communi
 
 **Technical Profile:**
 
-- Runtime: Node.js ≥22
+- Runtime: Node.js ≥22.12.0
 - License: MIT
 - Repository: https://github.com/openclaw/openclaw
 - Official docs: docs.openclaw.ai
@@ -49,7 +49,7 @@ CoClaw.com will serve as the central hub for tutorials, troubleshooting, communi
 
 **Rapid Growth Indicators:**
 
-- 108k+ GitHub stars indicating strong interest
+- 133k+ GitHub stars indicating strong interest (as of 2026-02-01)
 - Active community with frequent issues and discussions
 - Multiple platform implementations (macOS, iOS, Android, Linux)
 - Growing ecosystem of channels, skills, and integrations

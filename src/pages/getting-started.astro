@@ -1,34 +1,480 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/layout/Section.astro';
+import QuickInstallTabs from '../components/QuickInstallTabs.tsx';
+
+// SEO-optimized structured data
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to Install OpenClaw - AI Assistant Setup Guide',
+  description:
+    'Complete guide to installing OpenClaw AI assistant on macOS, Linux, Windows, or cloud platforms. Get started in 5 minutes.',
+  step: [
+    {
+      '@type': 'HowToStep',
+      name: 'Choose Installation Method',
+      text: 'Select between local installation (macOS, Linux, Windows) or cloud deployment (VPS, AWS, Docker)',
+    },
+    {
+      '@type': 'HowToStep',
+      name: 'Install Node.js',
+      text: 'Install Node.js 22.12+ (Node 22 LTS recommended)',
+    },
+    {
+      '@type': 'HowToStep',
+      name: 'Install OpenClaw',
+      text: 'Run npm install -g openclaw@latest (or pnpm add -g openclaw@latest)',
+    },
+    {
+      '@type': 'HowToStep',
+      name: 'Run the Setup Wizard',
+      text: 'Run openclaw onboard (recommended: openclaw onboard --install-daemon)',
+    },
+    {
+      '@type': 'HowToStep',
+      name: 'Open the Dashboard',
+      text: 'Open http://127.0.0.1:18789/ or run openclaw dashboard',
+    },
+  ],
+};
 ---
 
 <BaseLayout
-  title="Getting Started - CoClaw"
-  description="Install OpenClaw and connect your first messaging channel with step-by-step guides."
+  title="OpenClaw Installation Guide - Install AI Assistant on macOS, Linux, Windows & Cloud"
+  description="Complete OpenClaw installation guide for all platforms. Install on macOS, Linux, Windows, Docker, VPS, AWS, and more. Get your AI assistant running in 5 minutes with step-by-step instructions."
+  keywords="OpenClaw installation, install OpenClaw, OpenClaw setup guide, OpenClaw macOS install, OpenClaw Linux installation, OpenClaw Windows setup, OpenClaw Docker, OpenClaw VPS deployment, OpenClaw AWS, AI assistant installation, OpenClaw tutorial, OpenClaw quick start"
 >
-  <Section containerClass="max-w-3xl">
-    <h1 class="text-4xl md:text-5xl font-bold mb-6">Getting Started</h1>
-    <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed mb-8">
-      This guide hub is coming online. For now, start with the official OpenClaw repository and
-      installation instructions.
-    </p>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
 
-    <div class="flex flex-col sm:flex-row gap-4">
-      <a
-        class="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-6 py-3 font-semibold"
-        href="https://github.com/openclaw/openclaw"
-        target="_blank"
-        rel="noopener noreferrer"
+  <div
+    class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
+  >
+    <!-- Hero Section -->
+    <Section containerClass="text-center pt-24 pb-8">
+      <h1
+        class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent"
       >
-        OpenClaw on GitHub
-      </a>
-      <a
-        class="inline-flex items-center justify-center rounded-full border border-divider bg-content1 px-6 py-3 font-semibold text-foreground"
-        href="/"
-      >
-        Back to Home
-      </a>
-    </div>
-  </Section>
+        Getting Started with OpenClaw
+      </h1>
+      <p class="text-xl text-default-800 dark:text-default-600 max-w-3xl mx-auto">
+        Choose your installation path and get your personal AI assistant running in minutes
+      </p>
+    </Section>
+
+    <!-- Quick Installation Guide -->
+    <Section containerClass="pt-8 pb-12">
+      <div class="max-w-5xl mx-auto">
+        <div class="mb-8 text-center">
+          <h2 class="text-3xl md:text-4xl font-bold mb-4">
+            How to Install OpenClaw: Quick Setup Guide
+          </h2>
+          <p class="text-lg text-default-700 dark:text-default-500">
+            Install OpenClaw AI assistant in 5 minutes on macOS, Linux, Windows, or Docker
+          </p>
+        </div>
+
+        <QuickInstallTabs client:load />
+      </div>
+    </Section>
+
+    <!-- Installation Path Selector -->
+    <Section>
+      <div class="mb-12 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-4">
+          Choose Your OpenClaw Installation Method
+        </h2>
+        <p class="text-lg text-default-700 dark:text-default-500 max-w-3xl mx-auto">
+          Select the best installation option for your needs: local setup for privacy or cloud
+          deployment for 24/7 availability
+        </p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <!-- Local Installation Card -->
+        <div
+          class="group relative overflow-hidden rounded-2xl border-2 border-divider bg-content1 p-8 hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
+        >
+          <div class="mb-6">
+            <div
+              class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-4"
+            >
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="text-3xl font-bold mb-3 group-hover:text-primary transition-colors">
+              Install OpenClaw Locally
+            </h3>
+            <p class="text-default-700 dark:text-default-500 text-lg mb-6">
+              Install OpenClaw on your personal device for maximum privacy and control
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            <a
+              href="/getting-started/macos"
+              class="flex items-center justify-between p-4 rounded-xl bg-content2/50 hover:bg-content2 border border-divider hover:border-primary/30 transition-all group/link"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center"
+                >
+                  <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-semibold text-foreground">macOS</div>
+                  <div class="text-sm text-default-600">macOS 12+ (Intel & Apple Silicon)</div>
+                </div>
+              </div>
+              <svg
+                class="w-5 h-5 text-default-500 group-hover/link:text-primary group-hover/link:translate-x-1 transition-all"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
+
+            <a
+              href="/getting-started/linux"
+              class="flex items-center justify-between p-4 rounded-xl bg-content2/50 hover:bg-content2 border border-divider hover:border-primary/30 transition-all group/link"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center"
+                >
+                  <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.84-.41 1.719-.41 2.623 0 .955.164 1.898.493 2.8.615 1.681 1.901 3.052 3.57 3.799 1.885.843 4.17.843 6.055 0 1.669-.747 2.955-2.118 3.57-3.799.329-.902.493-1.845.493-2.8 0-.904-.132-1.783-.41-2.623-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298-.165-.013-.325-.021-.48-.021zm-.005 5.326c.885 0 1.602.717 1.602 1.602 0 .885-.717 1.602-1.602 1.602-.885 0-1.602-.717-1.602-1.602 0-.885.717-1.602 1.602-1.602z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-semibold text-foreground">Linux</div>
+                  <div class="text-sm text-default-600">Ubuntu, Debian, Fedora, Arch</div>
+                </div>
+              </div>
+              <svg
+                class="w-5 h-5 text-default-500 group-hover/link:text-primary group-hover/link:translate-x-1 transition-all"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
+
+            <a
+              href="/getting-started/windows"
+              class="flex items-center justify-between p-4 rounded-xl bg-content2/50 hover:bg-content2 border border-divider hover:border-primary/30 transition-all group/link"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center"
+                >
+                  <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-semibold text-foreground">Windows</div>
+                  <div class="text-sm text-default-600">Windows 10/11 (WSL2 recommended)</div>
+                </div>
+              </div>
+              <svg
+                class="w-5 h-5 text-default-500 group-hover/link:text-primary group-hover/link:translate-x-1 transition-all"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Cloud Installation Card -->
+        <div
+          class="group relative overflow-hidden rounded-2xl border-2 border-divider bg-content1 p-8 hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
+        >
+          <div class="mb-6">
+            <div
+              class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4"
+            >
+              <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
+                ></path>
+              </svg>
+            </div>
+            <h3 class="text-3xl font-bold mb-3 group-hover:text-primary transition-colors">
+              Deploy OpenClaw to Cloud
+            </h3>
+            <p class="text-default-700 dark:text-default-500 text-lg mb-6">
+              Deploy OpenClaw on VPS, AWS, or Docker for 24/7 availability
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            <a
+              href="/getting-started/vps"
+              class="flex items-center justify-between p-4 rounded-xl bg-content2/50 hover:bg-content2 border border-divider hover:border-primary/30 transition-all group/link"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center"
+                >
+                  <svg
+                    class="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-semibold text-foreground">VPS Setup</div>
+                  <div class="text-sm text-default-600">DigitalOcean, Hetzner, Vultr</div>
+                </div>
+              </div>
+              <svg
+                class="w-5 h-5 text-default-500 group-hover/link:text-primary group-hover/link:translate-x-1 transition-all"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
+
+            <a
+              href="/getting-started/aws"
+              class="flex items-center justify-between p-4 rounded-xl bg-content2/50 hover:bg-content2 border border-divider hover:border-primary/30 transition-all group/link"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center"
+                >
+                  <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M6.763 10.036c0 .296.032.535.088.71.064.176.144.368.256.576.04.063.056.127.056.183 0 .08-.048.16-.152.24l-.503.335c-.072.048-.144.072-.208.072-.08 0-.16-.04-.239-.112-.112-.12-.207-.248-.279-.383-.072-.136-.144-.288-.224-.463-.56.66-1.263.99-2.111.99-.604 0-1.08-.172-1.439-.517-.36-.344-.536-.804-.536-1.383 0-.612.216-1.107.647-1.487.432-.38 1.008-.57 1.727-.57.24 0 .487.016.743.056.255.04.52.088.791.16V7.19c0-.563-.12-.957-.351-1.187-.239-.23-.64-.343-1.215-.343-.264 0-.536.032-.815.095-.28.064-.551.144-.815.24-.12.047-.207.079-.263.095-.056.016-.096.024-.12.024-.104 0-.16-.08-.16-.232v-.368c0-.12.016-.208.056-.264.04-.056.12-.104.216-.152.264-.136.576-.248.943-.344.368-.096.76-.144 1.176-.144.895 0 1.551.2 1.967.6.415.4.623 1.008.623 1.823v2.407zm-2.935 1.098c.231 0 .471-.04.727-.127.255-.088.48-.24.671-.432.12-.12.207-.256.256-.415.048-.16.08-.352.08-.576V9.23c-.183-.048-.38-.088-.583-.12-.2-.032-.408-.048-.615-.048-.44 0-.76.088-.967.264-.207.176-.312.424-.312.744 0 .304.08.536.247.696.16.16.392.24.68.24zm5.735 1.439c-.128 0-.215-.024-.271-.072-.056-.048-.104-.144-.151-.28l-1.695-5.58c-.048-.16-.072-.263-.072-.312 0-.12.056-.184.176-.184h.719c.136 0 .224.024.279.072.056.048.096.144.144.28l1.215 4.783 1.127-4.783c.04-.16.088-.24.143-.28.056-.048.144-.072.28-.072h.583c.135 0 .223.024.279.072.056.048.104.144.143.28l1.143 4.847 1.247-4.847c.048-.16.096-.24.151-.28.056-.048.144-.072.28-.072h.679c.12 0 .184.056.184.184 0 .048-.008.096-.016.152-.008.056-.024.12-.048.2l-1.735 5.58c-.048.16-.096.24-.151.28-.056.048-.144.072-.272.072h-.631c-.136 0-.224-.024-.28-.072-.056-.048-.104-.144-.143-.28l-1.127-4.688-1.111 4.688c-.04.16-.088.24-.143.28-.056.048-.144.072-.28.072h-.631zm9.023.335c-.367 0-.735-.04-1.095-.12-.36-.08-.64-.168-.831-.264-.12-.064-.2-.136-.231-.2-.032-.064-.048-.136-.048-.2v-.384c0-.152.056-.232.16-.232.04 0 .08.008.12.016.04.008.096.024.16.048.224.096.463.168.719.216.255.048.511.072.775.072.415 0 .735-.072.951-.216.216-.144.327-.368.327-.672 0-.2-.064-.368-.191-.512-.128-.144-.368-.272-.719-.384l-1.031-.32c-.52-.16-.903-.4-1.143-.711-.24-.312-.36-.664-.36-1.056 0-.304.064-.576.191-.815.128-.24.296-.448.52-.624.216-.176.479-.312.775-.408.296-.096.615-.136.951-.136.16 0 .327.008.487.032.167.024.32.048.479.08.151.032.295.072.431.112.136.04.247.08.327.12.104.048.183.096.231.152.048.056.072.136.072.24v.36c0 .152-.056.232-.16.232-.064 0-.167-.032-.295-.088-.447-.2-.951-.296-1.511-.296-.375 0-.671.064-.871.2-.2.136-.303.336-.303.616 0 .2.072.368.215.52.144.151.415.295.791.423l1.007.319c.511.16.887.384 1.119.671.232.288.344.624.344 1.015 0 .312-.064.6-.191.855-.128.256-.304.479-.528.671-.224.192-.496.336-.815.44-.32.104-.671.16-1.055.16z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-semibold text-foreground">AWS</div>
+                  <div class="text-sm text-default-600">EC2, Lightsail, ECS</div>
+                </div>
+              </div>
+              <svg
+                class="w-5 h-5 text-default-500 group-hover/link:text-primary group-hover/link:translate-x-1 transition-all"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
+
+            <a
+              href="/getting-started/cloud-providers"
+              class="flex items-center justify-between p-4 rounded-xl bg-content2/50 hover:bg-content2 border border-divider hover:border-primary/30 transition-all group/link"
+            >
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center"
+                >
+                  <svg
+                    class="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-semibold text-foreground">Other Providers</div>
+                  <div class="text-sm text-default-600">Railway, Zeabur, Fly.io, GCP</div>
+                </div>
+              </div>
+              <svg
+                class="w-5 h-5 text-default-500 group-hover/link:text-primary group-hover/link:translate-x-1 transition-all"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"></path>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <!-- Quick Start Section -->
+    <Section containerClass="mt-16">
+      <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl md:text-4xl font-bold mb-4">OpenClaw Quick Start Tutorial</h2>
+          <p class="text-lg text-default-700 dark:text-default-500">
+            Advanced setup guide for experienced developers - get your AI assistant configured in 5
+            minutes
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-divider bg-content1 p-8">
+          <div class="flex items-start gap-6">
+            <div class="flex-shrink-0">
+              <div
+                class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center"
+              >
+                <svg
+                  class="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-2xl font-bold mb-3">Fast-Track Installation Guide</h3>
+              <p class="text-default-700 dark:text-default-500 mb-6">
+                Skip the detailed instructions and get OpenClaw running with your first messaging
+                channel configured. Ideal for developers familiar with Node.js and command-line
+                tools.
+              </p>
+              <a
+                href="/getting-started/quick-start"
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-semibold"
+              >
+                <span>View Quick Start Guide</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 5l7 7-7 7"></path>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <!-- Next Steps Section -->
+    <Section containerClass="mt-16 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-6">Post-Installation Setup & Configuration</h2>
+      <p class="text-default-800 dark:text-default-600 max-w-2xl mx-auto text-lg mb-8">
+        After installing OpenClaw, configure your AI assistant with these essential tools and
+        resources
+      </p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a
+          href="/tools/config-generator"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+            ></path>
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          Configuration Generator
+        </a>
+        <a
+          href="/resources"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+            ></path>
+          </svg>
+          Browse Guides
+        </a>
+        <a
+          href="/troubleshooting"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
+            ></path>
+          </svg>
+          Troubleshooting
+        </a>
+      </div>
+    </Section>
+  </div>
 </BaseLayout>

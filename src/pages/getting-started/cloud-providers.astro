@@ -1,0 +1,904 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to Deploy OpenClaw on Cloud Providers',
+  description:
+    'Comprehensive guide to deploying OpenClaw AI assistant on cloud platforms with official support for Fly.io and Render.',
+  step: [
+    {
+      '@type': 'HowToStep',
+      name: 'Choose Cloud Provider',
+      text: 'Select between officially supported platforms (Fly.io, Render) or other cloud providers',
+    },
+    { '@type': 'HowToStep', name: 'Setup Account', text: 'Create and configure cloud account' },
+    {
+      '@type': 'HowToStep',
+      name: 'Deploy Application',
+      text: 'Deploy OpenClaw using platform-specific tools or official configurations',
+    },
+    {
+      '@type': 'HowToStep',
+      name: 'Configure Environment',
+      text: 'Set environment variables and configure Tailscale for remote access',
+    },
+    {
+      '@type': 'HowToStep',
+      name: 'Monitor and Scale',
+      text: 'Setup monitoring and configure persistent storage',
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Deploy OpenClaw on Cloud - Fly.io, Render, AWS, GCP Official Guide"
+  description="Complete guide to deploying OpenClaw AI assistant on cloud platforms. Official support for Fly.io and Render. Step-by-step instructions for AWS, Google Cloud, Azure, and more."
+  keywords="OpenClaw cloud, deploy OpenClaw, OpenClaw Fly.io, OpenClaw Render, OpenClaw AWS, OpenClaw Google Cloud, OpenClaw Azure, OpenClaw Tailscale, cloud AI assistant"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+  <div
+    class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
+  >
+    <div class="flex flex-col gap-16 pb-16">
+      <Section py="pt-24 pb-12" containerClass="text-center">
+        <div class="flex justify-center mb-6">
+          <div
+            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center"
+          >
+            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
+              ></path>
+            </svg>
+          </div>
+        </div>
+        <h1
+          class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent"
+        >
+          Deploy OpenClaw on Cloud Providers
+        </h1>
+        <p class="text-xl text-default-800 dark:text-default-600 max-w-3xl mx-auto">
+          Official support for Fly.io & Render • Deploy to AWS, GCP, Azure & more
+        </p>
+      </Section>
+
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-6 text-center">
+            Officially Supported Platforms
+          </h2>
+          <p class="text-center text-default-700 dark:text-default-500 mb-8 max-w-2xl mx-auto">
+            OpenClaw provides official configuration files and tested deployment workflows for these
+            platforms
+          </p>
+
+          <div class="grid md:grid-cols-2 gap-6 mb-12">
+            <div
+              class="p-6 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-2 border-primary/30"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center"
+                >
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6-9.6-4.298-9.6-9.6S6.698 2.4 12 2.4z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-2xl font-bold">Fly.io</h3>
+                  <span class="text-xs font-semibold text-primary">✓ OFFICIAL SUPPORT</span>
+                </div>
+              </div>
+              <p class="text-default-700 dark:text-default-500 mb-4">
+                Global edge deployment with persistent volumes. Official docs provide a recommended
+                fly.toml template. Ideal for low-latency worldwide access.
+              </p>
+              <div class="flex gap-2">
+                <a href="#flyio" class="text-primary hover:underline font-semibold">
+                  View Fly.io Guide →
+                </a>
+              </div>
+            </div>
+
+            <div
+              class="p-6 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 border-2 border-primary/30"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center"
+                >
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6-9.6-4.298-9.6-9.6S6.698 2.4 12 2.4z"
+                    ></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-2xl font-bold">Render</h3>
+                  <span class="text-xs font-semibold text-primary">✓ OFFICIAL SUPPORT</span>
+                </div>
+              </div>
+              <p class="text-default-700 dark:text-default-500 mb-4">
+                Simple deployment with automatic SSL. Official render.yaml configuration included.
+                Note: persistent disk requires a paid plan (Starter+).
+              </p>
+              <div class="flex gap-2">
+                <a href="#render" class="text-primary hover:underline font-semibold">
+                  View Render Guide →
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="bg-content1/50">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Other Cloud Platforms</h2>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div
+              class="p-6 rounded-xl bg-content1 border-2 border-divider hover:border-primary/50 transition-all"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center"
+                >
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M12 0C5.372 0 0 5.373 0 12s5.372 12 12 12c6.627 0 12-5.373 12-12S18.627 0 12 0zm-.84 4.67h1.68v8.36h-1.68V4.67zM18 14.09l-5.45 3.11v-6.22L18 14.09z"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="text-2xl font-bold">Google Cloud Platform</h3>
+              </div>
+              <p class="text-default-700 dark:text-default-500 mb-4">
+                Deploy on Compute Engine, Cloud Run, or App Engine. $300 free credit for new users.
+              </p>
+              <a href="#gcp" class="text-primary hover:underline font-semibold">
+                View GCP Guide →
+              </a>
+            </div>
+
+            <div
+              class="p-6 rounded-xl bg-content1 border-2 border-divider hover:border-primary/50 transition-all"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center"
+                >
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M22.379 23.343a1.62 1.62 0 0 0 1.536-2.14v.002L17.35 1.76A1.62 1.62 0 0 0 15.816.657H8.184A1.62 1.62 0 0 0 6.65 1.76L.086 21.204a1.62 1.62 0 0 0 1.536 2.139h4.741a1.62 1.62 0 0 0 1.535-1.103l.977-2.892 4.947 3.675c.28.208.618.32.966.32h7.591z"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="text-2xl font-bold">Microsoft Azure</h3>
+              </div>
+              <p class="text-default-700 dark:text-default-500 mb-4">
+                Deploy on Azure VMs, Container Instances, or App Service. $200 free credit.
+              </p>
+              <a href="#azure" class="text-primary hover:underline font-semibold">
+                View Azure Guide →
+              </a>
+            </div>
+
+            <div
+              class="p-6 rounded-xl bg-content1 border-2 border-divider hover:border-primary/50 transition-all"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center"
+                >
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M20.61 0H3.39C2.189 0 1.23.96 1.23 2.16v19.681c0 1.198.959 2.159 2.16 2.159h17.22c1.2 0 2.159-.961 2.159-2.159V2.16C22.77.96 21.811 0 20.61 0zm.96 21.841c0 .539-.421.96-.96.96H3.39c-.54 0-.96-.421-.96-.96V2.16c0-.54.42-.961.96-.961h17.22c.539 0 .96.421.96.961v19.681zM6.63 20.399L9.33 18l-2.7-2.4v4.799zm9.72-9.719c-.479-.48-1.379-1.08-2.879-1.08-1.621 0-3.301.421-4.5.84L3.9 8.1l2.221 2.7 3.6-1.261c.6-.179 1.32-.3 2.04-.3.66 0 1.14.12 1.38.361.179.179.24.42.24.659 0 .24-.061.48-.24.66-.24.239-.84.479-1.92.479h-1.32c-1.08 0-2.04.24-2.76.72-.72.48-1.14 1.2-1.14 2.04 0 .84.42 1.56 1.14 2.04.72.48 1.68.72 2.76.72h1.32c1.08 0 1.68.24 1.92.48.24.18.36.42.36.66 0 .24-.12.48-.36.66-.24.24-.84.48-1.92.48-1.08 0-1.92-.12-2.64-.36l-3.6 1.2 5.1 2.34c1.2.42 2.88.84 4.5.84 1.5 0 2.4-.6 2.88-1.08.48-.48.72-1.08.72-1.68 0-.6-.24-1.2-.72-1.68-.48-.48-1.38-1.08-2.88-1.08h-1.32c-.66 0-1.14-.12-1.38-.36-.18-.18-.24-.42-.24-.66 0-.24.06-.48.24-.66.24-.24.72-.48 1.38-.48h1.32c1.5 0 2.4-.6 2.88-1.08.48-.48.72-1.08.72-1.68 0-.6-.24-1.2-.72-1.68z"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="text-2xl font-bold">Heroku</h3>
+              </div>
+              <p class="text-default-700 dark:text-default-500 mb-4">
+                Simple git-based deployment. Free tier available with eco dynos.
+              </p>
+              <a href="#heroku" class="text-primary hover:underline font-semibold">
+                View Heroku Guide →
+              </a>
+            </div>
+
+            <div
+              class="p-6 rounded-xl bg-content1 border-2 border-divider hover:border-primary/50 transition-all"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center"
+                >
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6-9.6-4.298-9.6-9.6S6.698 2.4 12 2.4z"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="text-2xl font-bold">Railway</h3>
+              </div>
+              <p class="text-default-700 dark:text-default-500 mb-4">
+                Modern deployment platform. $5 free credit monthly. Simple pricing.
+              </p>
+              <a href="#railway" class="text-primary hover:underline font-semibold">
+                View Railway Guide →
+              </a>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" id="flyio">
+        <div class="max-w-4xl mx-auto">
+          <div class="flex items-center gap-3 mb-8">
+            <div
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center"
+            >
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6-9.6-4.298-9.6-9.6S6.698 2.4 12 2.4z"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-3xl md:text-4xl font-bold">Deploy on Fly.io</h2>
+              <span class="text-sm text-primary font-semibold">✓ OFFICIAL SUPPORT</span>
+            </div>
+          </div>
+
+          <div class="p-6 rounded-xl bg-primary/5 border border-primary/20 mb-6">
+            <p class="text-default-700 dark:text-default-500">
+              <strong>Official Guide:</strong> OpenClaw provides an official Fly.io deployment guide with
+              a recommended <code class="text-primary">fly.toml</code> template (you create/maintain it
+              in your repo root).
+            </p>
+          </div>
+
+          <div class="space-y-6">
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <h3 class="text-2xl font-bold mb-4">Prerequisites</h3>
+              <ul class="space-y-2 text-default-700 dark:text-default-500">
+                <li>
+                  • Fly.io account (<a
+                    href="https://fly.io/app/sign-up"
+                    class="text-primary hover:underline"
+                    target="_blank"
+                    rel="noopener">sign up free</a
+                  >)
+                </li>
+                <li>
+                  • Fly CLI installed: <code class="text-primary">brew install flyctl</code> (macOS) or
+                  <code class="text-primary">curl -L https://fly.io/install.sh | sh</code>
+                </li>
+                <li>• OpenClaw repository cloned locally</li>
+              </ul>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <h3 class="text-2xl font-bold mb-4">Deployment Steps</h3>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">1. Login to Fly.io:</p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre class="text-sm overflow-x-auto"><code>flyctl auth login</code></pre>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    2. Create and deploy the app:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`# Create app (uses fly.toml configuration)
+flyctl launch --no-deploy
+
+# Create persistent volume for state
+flyctl volumes create openclaw_data --size 1 --region iad
+
+# Deploy the application
+flyctl deploy`}</code></pre>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    3. Configure environment variables:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`# Required for non-loopback binds (Fly public URL):
+flyctl secrets set OPENCLAW_GATEWAY_TOKEN=your_gateway_token
+
+# Model provider keys (example):
+flyctl secrets set ANTHROPIC_API_KEY=sk-ant-...`}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Configuration Details</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Recommended <code class="text-primary">fly.toml</code> settings include:
+              </p>
+              <ul class="space-y-2 text-default-700 dark:text-default-500 ml-4">
+                <li>• <strong>VM Size:</strong> shared-cpu-2x with 2GB RAM</li>
+                <li>• <strong>Region:</strong> iad (Northern Virginia) - customize as needed</li>
+                <li>• <strong>Storage:</strong> Persistent volume mounted at /data</li>
+                <li>• <strong>Port:</strong> Internal port 3000 with HTTPS enforced</li>
+                <li>• <strong>Auto-scaling:</strong> Minimum 1 machine always running</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="bg-content1/50" id="render">
+        <div class="max-w-4xl mx-auto">
+          <div class="flex items-center gap-3 mb-8">
+            <div
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center"
+            >
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2.4c5.302 0 9.6 4.298 9.6 9.6s-4.298 9.6-9.6 9.6-9.6-4.298-9.6-9.6S6.698 2.4 12 2.4z"
+                ></path>
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-3xl md:text-4xl font-bold">Deploy on Render</h2>
+              <span class="text-sm text-primary font-semibold">✓ OFFICIAL SUPPORT</span>
+            </div>
+          </div>
+
+          <div class="p-6 rounded-xl bg-primary/5 border border-primary/20 mb-6">
+            <p class="text-default-700 dark:text-default-500">
+              <strong>Official Configuration:</strong> OpenClaw includes a pre-configured <code
+                class="text-primary">render.yaml</code
+              > file for one-click deployment to Render with automatic SSL and health checks.
+            </p>
+          </div>
+
+          <div class="space-y-6">
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <h3 class="text-2xl font-bold mb-4">Quick Deploy (Recommended)</h3>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-3">
+                    1. Fork the OpenClaw repository to your GitHub account
+                  </p>
+                  <p class="text-default-700 dark:text-default-500 mb-3">
+                    2. Visit <a
+                      href="https://render.com"
+                      class="text-primary hover:underline"
+                      target="_blank"
+                      rel="noopener">render.com</a
+                    > and sign in with GitHub
+                  </p>
+                  <p class="text-default-700 dark:text-default-500 mb-3">
+                    3. Click "New" → "Blueprint" and select your forked repository
+                  </p>
+                  <p class="text-default-700 dark:text-default-500 mb-3">
+                    4. Render will automatically detect <code class="text-primary">render.yaml</code
+                    > and configure:
+                  </p>
+                  <ul class="space-y-2 text-default-700 dark:text-default-500 ml-6">
+                    <li>• Docker-based web service on port 8080</li>
+                    <li>• 1GB persistent disk at /data</li>
+                    <li>• Health check endpoint at /health</li>
+                    <li>• Auto-generated gateway token</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <h3 class="text-2xl font-bold mb-4">Manual Deployment</h3>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Create a new Web Service:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`# Connect your GitHub repository
+# Select: Docker runtime
+# Plan: Starter ($7/month) or Free tier
+
+# Environment Variables (set in Render dashboard):
+PORT=8080
+SETUP_PASSWORD=your_secure_password
+OPENCLAW_STATE_DIR=/data/.openclaw
+OPENCLAW_WORKSPACE_DIR=/data/workspace`}</code></pre>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">Add persistent disk:</p>
+                  <ul class="space-y-2 text-default-700 dark:text-default-500 ml-4">
+                    <li>• Name: openclaw-data</li>
+                    <li>• Mount Path: /data</li>
+                    <li>• Size: 1GB (expandable)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Features</h3>
+              <ul class="space-y-2 text-default-700 dark:text-default-500 ml-4">
+                <li>• <strong>Automatic SSL:</strong> Free SSL certificates with auto-renewal</li>
+                <li>• <strong>Health Checks:</strong> Built-in monitoring at /health endpoint</li>
+                <li>• <strong>Auto-Deploy:</strong> Automatic deployments on git push</li>
+                <li>• <strong>Free Tier:</strong> Available with 750 hours/month</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Remote Access with Tailscale</h2>
+
+          <div class="p-6 rounded-xl bg-content1 border-2 border-primary/30 mb-6">
+            <p class="text-default-700 dark:text-default-500 mb-4">
+              <strong>Recommended:</strong> Use Tailscale for secure remote access to your OpenClaw Gateway,
+              regardless of which cloud platform you choose.
+            </p>
+          </div>
+
+          <div class="space-y-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Tailscale Serve (Private Access)</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Access your Gateway only from devices on your Tailscale network:
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>{`# Install Tailscale on your server
+curl -fsSL https://tailscale.com/install.sh | sh
+
+# Enable Tailscale Serve
+tailscale serve https / http://localhost:18789
+
+# Gateway must bind to loopback
+openclaw gateway run --bind loopback --port 18789`}</code></pre>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Tailscale Funnel (Public Access)</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Expose your Gateway to the public internet with HTTPS (requires password auth):
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>{`# Enable Tailscale Funnel
+tailscale funnel 18789
+
+# Configure password authentication in openclaw.json
+# Gateway automatically requires auth for public access`}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="bg-content1/50" id="gcp">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Deploy on Google Cloud Platform</h2>
+
+          <div class="space-y-6">
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <h3 class="text-2xl font-bold mb-4">Option 1: Compute Engine (VM)</h3>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">Create a VM instance:</p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`gcloud compute instances create openclaw-vm \\
+  --image-family=ubuntu-2204-lts \\
+  --image-project=ubuntu-os-cloud \\
+  --machine-type=e2-micro \\
+  --zone=us-central1-a
+
+# SSH into the instance
+gcloud compute ssh openclaw-vm --zone=us-central1-a
+
+# Install Node.js and OpenClaw
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+npm install -g openclaw@latest
+openclaw onboard --install-daemon`}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <h3 class="text-2xl font-bold mb-4">Option 2: Cloud Run (Serverless)</h3>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">Deploy using Docker:</p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`# Create Dockerfile
+FROM node:22-alpine
+RUN npm install -g openclaw@latest
+
+# Cloud Run requires a non-loopback bind + $PORT. Persist state yourself if needed.
+CMD ["sh", "-lc", "openclaw gateway run --bind lan --port $PORT --allow-unconfigured"]
+
+# Build and deploy
+gcloud builds submit --tag gcr.io/PROJECT_ID/openclaw
+gcloud run deploy openclaw \\
+  --image gcr.io/PROJECT_ID/openclaw \\
+  --platform managed \\
+  --region us-central1 \\
+  --allow-unauthenticated`}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="bg-content1/50" id="azure">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Deploy on Microsoft Azure</h2>
+
+          <div class="space-y-6">
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <h3 class="text-2xl font-bold mb-4">Option 1: Azure Virtual Machines</h3>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Create a VM using Azure CLI:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`az vm create \\
+  --resource-group openclaw-rg \\
+  --name openclaw-vm \\
+  --image Ubuntu2204 \\
+  --size Standard_B1s \\
+  --admin-username azureuser \\
+  --generate-ssh-keys
+
+# SSH and install
+ssh azureuser@VM_PUBLIC_IP
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+npm install -g openclaw@latest
+openclaw onboard --install-daemon`}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <h3 class="text-2xl font-bold mb-4">Option 2: Azure Container Instances</h3>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Deploy containerized application:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`az container create \\
+  --resource-group openclaw-rg \\
+  --name openclaw-container \\
+  --image YOUR_REGISTRY/openclaw:latest \\
+  --cpu 1 \\
+  --memory 1 \\
+  --restart-policy Always`}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" id="heroku">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Deploy on Heroku</h2>
+
+          <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+            <div class="space-y-4">
+              <div>
+                <p class="text-default-700 dark:text-default-500 mb-2">Create a new Heroku app:</p>
+                <div class="rounded-lg bg-content2 p-4">
+                  <pre
+                    class="text-sm overflow-x-auto"><code>{`# Install Heroku CLI
+curl https://cli-assets.heroku.com/install.sh | sh
+
+# Login and create app
+heroku login
+heroku create openclaw-bot
+
+# Create package.json
+cat > package.json << 'EOF'
+{
+  "name": "openclaw-gateway",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "openclaw gateway run --bind lan --port $PORT --allow-unconfigured"
+  },
+  "dependencies": {
+    "openclaw": "latest"
+  }
+}
+EOF
+
+# Create Procfile
+echo "web: npm start" > Procfile
+
+# Deploy
+git init
+git add .
+git commit -m "Initial commit"
+git push heroku main
+
+# Scale worker
+heroku ps:scale web=1`}</code></pre>
+                </div>
+              </div>
+              <div>
+                <p class="text-default-700 dark:text-default-500 mb-2">
+                  Set environment variables:
+                </p>
+                <div class="rounded-lg bg-content2 p-4">
+                  <pre
+                    class="text-sm overflow-x-auto"><code>{`heroku config:set SETUP_PASSWORD=your_secure_password
+heroku config:set OPENCLAW_GATEWAY_TOKEN=your_gateway_token`}</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="bg-content1/50" id="railway">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Deploy on Railway</h2>
+
+          <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+            <div class="space-y-4">
+              <div>
+                <p class="text-default-700 dark:text-default-500 mb-4">
+                  Railway offers the simplest deployment experience with automatic builds from
+                  GitHub.
+                </p>
+              </div>
+              <div>
+                <p class="text-default-700 dark:text-default-500 mb-2">Steps to deploy:</p>
+                <ol class="space-y-2 text-default-700 dark:text-default-500 ml-6 list-decimal">
+                  <li>Create a GitHub repository with your OpenClaw configuration</li>
+                  <li>
+                    Visit <a
+                      href="https://railway.app"
+                      class="text-primary hover:underline"
+                      target="_blank"
+                      rel="noopener">railway.app</a
+                    > and sign in with GitHub
+                  </li>
+                  <li>Click "New Project" → "Deploy from GitHub repo"</li>
+                  <li>Select your repository</li>
+                  <li>Add environment variables in the Railway dashboard</li>
+                  <li>Railway will automatically build and deploy</li>
+                </ol>
+              </div>
+              <div>
+                <p class="text-default-700 dark:text-default-500 mb-2">
+                  Create railway.json for configuration:
+                </p>
+                <div class="rounded-lg bg-content2 p-4">
+                  <pre
+                    class="text-sm overflow-x-auto"><code>{`{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "openclaw gateway run --bind lan --port $PORT --allow-unconfigured",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}`}</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Other Cloud Platforms</h2>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Render</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Free tier available. Automatic deploys from Git. Similar to Heroku but more modern.
+              </p>
+              <a
+                href="https://render.com"
+                target="_blank"
+                rel="noopener"
+                class="text-primary hover:underline text-sm"
+              >
+                Visit Render →
+              </a>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Fly.io</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Global edge deployment. Free tier includes 3 shared VMs. Great for low-latency.
+              </p>
+              <a
+                href="https://fly.io"
+                target="_blank"
+                rel="noopener"
+                class="text-primary hover:underline text-sm"
+              >
+                Visit Fly.io →
+              </a>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Vercel</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Serverless functions. Best for event-driven workloads. Free hobby tier.
+              </p>
+              <a
+                href="https://vercel.com"
+                target="_blank"
+                rel="noopener"
+                class="text-primary hover:underline text-sm"
+              >
+                Visit Vercel →
+              </a>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Netlify</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Serverless functions and edge handlers. Free tier with 125k function invocations.
+              </p>
+              <a
+                href="https://netlify.com"
+                target="_blank"
+                rel="noopener"
+                class="text-primary hover:underline text-sm"
+              >
+                Visit Netlify →
+              </a>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="bg-content1/50">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Choosing the Right Platform</h2>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b-2 border-divider">
+                  <th class="p-4 font-bold">Platform</th>
+                  <th class="p-4 font-bold">Official Support</th>
+                  <th class="p-4 font-bold">Best For</th>
+                  <th class="p-4 font-bold">Free Tier</th>
+                  <th class="p-4 font-bold">Pricing</th>
+                </tr>
+              </thead>
+              <tbody class="text-default-700 dark:text-default-500">
+                <tr class="border-b border-divider bg-primary/5">
+                  <td class="p-4 font-semibold">Fly.io</td>
+                  <td class="p-4"><span class="text-primary font-semibold">✓ Yes</span></td>
+                  <td class="p-4">Global edge</td>
+                  <td class="p-4">Limited free</td>
+                  <td class="p-4">~$5-10/month</td>
+                </tr>
+                <tr class="border-b border-divider bg-primary/5">
+                  <td class="p-4 font-semibold">Render</td>
+                  <td class="p-4"><span class="text-primary font-semibold">✓ Yes</span></td>
+                  <td class="p-4">Simplicity</td>
+                  <td class="p-4">750 hrs/month</td>
+                  <td class="p-4">$7/month</td>
+                </tr>
+                <tr class="border-b border-divider">
+                  <td class="p-4 font-semibold">Railway</td>
+                  <td class="p-4">No</td>
+                  <td class="p-4">Developer UX</td>
+                  <td class="p-4">$5/month credit</td>
+                  <td class="p-4">Pay-as-you-go</td>
+                </tr>
+                <tr class="border-b border-divider">
+                  <td class="p-4 font-semibold">Heroku</td>
+                  <td class="p-4">No</td>
+                  <td class="p-4">Quick start</td>
+                  <td class="p-4">Eco dynos</td>
+                  <td class="p-4">$5-7/month</td>
+                </tr>
+                <tr class="border-b border-divider">
+                  <td class="p-4 font-semibold">AWS EC2</td>
+                  <td class="p-4">No</td>
+                  <td class="p-4">Full control</td>
+                  <td class="p-4">12 months</td>
+                  <td class="p-4">$3-10/month</td>
+                </tr>
+                <tr class="border-b border-divider">
+                  <td class="p-4 font-semibold">Google Cloud</td>
+                  <td class="p-4">No</td>
+                  <td class="p-4">Scalability</td>
+                  <td class="p-4">$300 credit</td>
+                  <td class="p-4">$5-15/month</td>
+                </tr>
+                <tr class="border-b border-divider">
+                  <td class="p-4 font-semibold">Azure</td>
+                  <td class="p-4">No</td>
+                  <td class="p-4">Enterprise</td>
+                  <td class="p-4">$200 credit</td>
+                  <td class="p-4">$5-15/month</td>
+                </tr>
+                <tr>
+                  <td class="p-4 font-semibold">VPS</td>
+                  <td class="p-4">No</td>
+                  <td class="p-4">Cost-effective</td>
+                  <td class="p-4">Varies</td>
+                  <td class="p-4">$5-10/month</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Next Steps</h2>
+        <p class="text-default-800 dark:text-default-600 max-w-2xl mx-auto text-lg mb-8">
+          Choose your preferred cloud platform and start deploying OpenClaw
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a
+            href="/tools/config-generator"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-semibold"
+          >
+            Configuration Generator
+          </a>
+          <a
+            href="/resources"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+          >
+            Browse Guides
+          </a>
+          <a
+            href="/troubleshooting"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+          >
+            Troubleshooting
+          </a>
+        </div>
+      </Section>
+    </div>
+  </div>
+</BaseLayout>

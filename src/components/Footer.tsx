@@ -27,8 +27,8 @@ export const Footer = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/docs" color="foreground" size="sm">
-                    Documentation
+                  <Link href="/resources" color="foreground" size="sm">
+                    Resources
                   </Link>
                 </li>
                 <li>
@@ -45,7 +45,7 @@ export const Footer = () => {
               </h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/community" color="foreground" size="sm">
+                  <Link href="https://forum.coclaw.com" isExternal color="foreground" size="sm">
                     Forum
                   </Link>
                 </li>
@@ -60,7 +60,7 @@ export const Footer = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/discord" color="foreground" size="sm">
+                  <Link href="https://discord.gg/clawd" isExternal color="foreground" size="sm">
                     Discord
                   </Link>
                 </li>

@@ -1,0 +1,495 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: 'How to Install OpenClaw on Windows',
+  description:
+    'Step-by-step guide to installing OpenClaw on Windows via WSL2 (recommended). Native Windows installs are untested.',
+  step: [
+    { '@type': 'HowToStep', name: 'Install WSL2', text: 'Install WSL2 and Ubuntu (recommended)' },
+    {
+      '@type': 'HowToStep',
+      name: 'Install Node.js',
+      text: 'Install Node.js 22.12+ (Node 22 LTS recommended) inside WSL2',
+    },
+    { '@type': 'HowToStep', name: 'Install OpenClaw', text: 'Install OpenClaw globally' },
+    {
+      '@type': 'HowToStep',
+      name: 'Run Setup Wizard',
+      text: 'Run openclaw onboard --install-daemon',
+    },
+    {
+      '@type': 'HowToStep',
+      name: 'Open Dashboard',
+      text: 'Open http://127.0.0.1:18789/ or run openclaw dashboard',
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Install OpenClaw on Windows - Windows 10/11 & WSL2 Setup Guide"
+  description="Complete guide to installing OpenClaw on Windows via WSL2 (recommended). Native Windows installs are untested."
+  keywords="OpenClaw Windows, install OpenClaw Windows 10, OpenClaw Windows 11, OpenClaw WSL2, Windows AI assistant, OpenClaw PowerShell"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+
+  <div
+    class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
+  >
+    <div class="flex flex-col gap-16 pb-16">
+      <Section py="pt-24 pb-12" containerClass="text-center">
+        <div class="flex justify-center mb-6">
+          <div
+            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center"
+          >
+            <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"
+              ></path>
+            </svg>
+          </div>
+        </div>
+        <h1
+          class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent"
+        >
+          Install OpenClaw on Windows
+        </h1>
+        <p class="text-xl text-default-800 dark:text-default-600 max-w-3xl mx-auto">
+          Complete installation guide for Windows 10/11 • WSL2 recommended
+        </p>
+      </Section>
+
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-6">Prerequisites</h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">System Requirements</h3>
+              <ul class="space-y-2 text-default-700 dark:text-default-500">
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Windows 10 (version 1903+) or Windows 11</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>x86_64 or ARM64 architecture</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>500MB free disk space</span>
+                </li>
+              </ul>
+            </div>
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Software Requirements</h3>
+              <ul class="space-y-2 text-default-700 dark:text-default-500">
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Node.js 22.12+ (recommended inside WSL2)</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>PowerShell or Command Prompt</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg
+                    class="w-5 h-5 text-primary mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Administrator privileges</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Installation Methods</h2>
+
+          <div class="space-y-8">
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <div class="flex items-center gap-3 mb-6">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center"
+                >
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="text-2xl font-bold">Native Windows Installation (Experimental)</h3>
+              </div>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Download and install Node.js:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4 mb-3">
+                    <p class="text-sm text-default-700 dark:text-default-500">
+                      Visit <a
+                        href="https://nodejs.org/"
+                        class="text-primary hover:underline"
+                        target="_blank"
+                        rel="noopener">nodejs.org</a
+                      > and download Node 22 LTS (22.12+ recommended).
+                    </p>
+                  </div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Verify installation in PowerShell:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>node --version
+# Should output: v22.12.0+ (v22.x.x)</code></pre>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Install OpenClaw globally (note: native Windows is untested; WSL2 is
+                    recommended):
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>npm install -g openclaw@latest
+openclaw onboard
+openclaw dashboard</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <div class="flex items-center gap-3 mb-6">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center"
+                >
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.84-.41 1.719-.41 2.623 0 .955.164 1.898.493 2.8.615 1.681 1.901 3.052 3.57 3.799 1.885.843 4.17.843 6.055 0 1.669-.747 2.955-2.118 3.57-3.799.329-.902.493-1.845.493-2.8 0-.904-.132-1.783-.41-2.623-.589-1.771-1.831-3.47-2.716-4.521-.75-1.067-.974-1.928-1.05-3.02-.065-1.491 1.056-5.965-3.17-6.298-.165-.013-.325-.021-.48-.021zm-.005 5.326c.885 0 1.602.717 1.602 1.602 0 .885-.717 1.602-1.602 1.602-.885 0-1.602-.717-1.602-1.602 0-.885.717-1.602 1.602-1.602z"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="text-2xl font-bold">WSL2 Installation (Recommended)</h3>
+              </div>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Install WSL2 (if not already installed):
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>wsl --install
+# Restart your computer after installation</code></pre>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Enable systemd inside WSL (required for installing the Gateway service):
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>{`# In WSL (Ubuntu):
+sudo tee /etc/wsl.conf >/dev/null <<'EOF'
+[boot]
+systemd=true
+EOF
+
+# In PowerShell:
+wsl --shutdown`}</code></pre>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Inside WSL2 Ubuntu, install Node.js and OpenClaw:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>sudo apt update
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs
+npm install -g openclaw@latest
+openclaw onboard --install-daemon
+openclaw dashboard
+# Or open: http://127.0.0.1:18789/</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border-2 border-divider">
+              <div class="flex items-center gap-3 mb-6">
+                <div
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center"
+                >
+                  <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path
+                      d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"
+                    ></path>
+                  </svg>
+                </div>
+                <h3 class="text-2xl font-bold">Chocolatey (Experimental)</h3>
+              </div>
+              <div class="space-y-4">
+                <div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Install Chocolatey (if not already installed):
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4 mb-3">
+                    <p class="text-sm text-default-700 dark:text-default-500">
+                      Visit <a
+                        href="https://chocolatey.org/install"
+                        class="text-primary hover:underline"
+                        target="_blank"
+                        rel="noopener">chocolatey.org/install</a
+                      > for installation instructions
+                    </p>
+                  </div>
+                  <p class="text-default-700 dark:text-default-500 mb-2">
+                    Install Node.js and OpenClaw:
+                  </p>
+                  <div class="rounded-lg bg-content2 p-4">
+                    <pre
+                      class="text-sm overflow-x-auto"><code>choco install nodejs-lts
+npm install -g openclaw@latest
+openclaw onboard
+openclaw dashboard</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="bg-content1/50">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Run as a Service (WSL2)</h2>
+          <div class="p-6 rounded-xl bg-content1 border border-divider">
+            <p class="text-default-700 dark:text-default-500 mb-4">
+              Recommended: install the Gateway service inside WSL2 (systemd user service):
+            </p>
+            <div class="space-y-4">
+              <div>
+                <p class="text-default-700 dark:text-default-500 mb-2">Inside WSL2:</p>
+                <div class="rounded-lg bg-content2 p-4">
+                  <pre
+                    class="text-sm overflow-x-auto"><code>{`openclaw onboard --install-daemon
+# Or:
+openclaw gateway install`}</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Troubleshooting Windows Installation</h2>
+          <div class="space-y-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3 text-warning">PowerShell Execution Policy Error</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                If you get "cannot be loaded because running scripts is disabled":
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</code></pre>
+              </div>
+            </div>
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3 text-warning">
+                Node.js Not Found After Installation
+              </h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Add Node.js to PATH manually:
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code># Add to System Environment Variables:
+C:\\Program Files\\nodejs\\</code></pre>
+              </div>
+              <p class="text-sm text-default-600 mt-3">
+                Restart PowerShell/Command Prompt after changing PATH
+              </p>
+            </div>
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3 text-warning">Windows Firewall Blocking</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Allow OpenClaw through Windows Firewall:
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>netsh advfirewall firewall add rule name="OpenClaw" dir=in action=allow protocol=TCP localport=18789</code></pre>
+              </div>
+            </div>
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3 text-warning">WSL2 Network Issues</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Access WSL2 services from Windows (most setups work via localhost):
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>{`# From Windows, try:
+http://localhost:18789/
+
+# If you need LAN access from another machine, use Windows portproxy to forward
+# a Windows port to the current WSL IP (WSL IP changes after restarts).`}</code></pre>
+              </div>
+            </div>
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3 text-warning">Permission Errors with npm</h3>
+              <p class="text-default-700 dark:text-default-500 mb-3">
+                Run PowerShell as Administrator or use:
+              </p>
+              <div class="rounded-lg bg-content2 p-4">
+                <pre
+                  class="text-sm overflow-x-auto"><code>npm config set prefix "%APPDATA%\\npm"
+# Add %APPDATA%\\npm to your PATH</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="bg-content1/50">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl font-bold mb-8">Best Practices for Windows</h2>
+
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Use WSL2 for Better Performance</h3>
+              <p class="text-default-700 dark:text-default-500">
+                WSL2 provides better performance and compatibility with Linux-based tools. It's the
+                recommended approach for development.
+              </p>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Use Windows Terminal</h3>
+              <p class="text-default-700 dark:text-default-500">
+                Install Windows Terminal from Microsoft Store for a better command-line experience
+                with tabs and customization.
+              </p>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Keep Node.js Updated</h3>
+              <p class="text-default-700 dark:text-default-500">
+                Regularly update Node.js to get the latest features and security fixes:
+              </p>
+              <div class="mt-3 rounded-lg bg-content2 p-3">
+                <pre class="text-sm"><code>choco upgrade nodejs-lts</code></pre>
+              </div>
+            </div>
+
+            <div class="p-6 rounded-xl bg-content1 border border-divider">
+              <h3 class="text-xl font-bold mb-3">Secure Your Configuration</h3>
+              <p class="text-default-700 dark:text-default-500">
+                Store sensitive tokens in environment variables. Use Windows Environment Variables
+                or a <code class="text-primary">.env</code> file.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <Section py="py-8" containerClass="text-center">
+        <h2 class="text-3xl md:text-4xl font-bold mb-6">Next Steps</h2>
+        <p class="text-default-800 dark:text-default-600 max-w-2xl mx-auto text-lg mb-8">
+          Configure your AI assistant and start using OpenClaw on Windows
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a
+            href="/tools/config-generator"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors font-semibold"
+          >
+            Configuration Generator
+          </a>
+          <a
+            href="/resources"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+          >
+            Browse Guides
+          </a>
+          <a
+            href="/troubleshooting"
+            class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-content1 border border-divider hover:bg-content2 transition-colors font-semibold"
+          >
+            Troubleshooting
+          </a>
+        </div>
+      </Section>
+    </div>
+  </div>
+</BaseLayout>

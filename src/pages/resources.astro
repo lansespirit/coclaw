@@ -1,0 +1,532 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/layout/Section.astro';
+import { BlogCard } from '../components/BlogCard';
+import { GuideCard } from '../components/GuideCard';
+import { FAQAccordion } from '../components/FAQAccordion';
+import { UserStoryCard } from '../components/UserStoryCard';
+import { VideoGallery } from '../components/VideoGallery';
+import { ResourceSearchInput } from '../components/ResourceSearchInput';
+import { Button, Chip } from '@heroui/react';
+
+// Mock data for Blog & Articles
+const blogPosts = [
+  {
+    title: "Getting Started with OpenClaw: A Complete Beginner's Guide",
+    excerpt:
+      'Learn how to set up OpenClaw from scratch, configure your first channel, and start using your personal AI assistant in under 15 minutes.',
+    author: 'Sarah Chen',
+    keywords: ['beginner', 'setup'],
+    category: 'Tutorial',
+    href: '/blog/getting-started-guide',
+  },
+  {
+    title: '5 Essential Security Best Practices for OpenClaw',
+    excerpt:
+      'Protect your OpenClaw installation with these critical security configurations, including DM pairing, sandboxing, and token management.',
+    author: 'Michael Rodriguez',
+    keywords: ['security', 'best practices'],
+    category: 'Security',
+    href: '/blog/security-best-practices',
+  },
+  {
+    title: 'How to Optimize OpenClaw Token Usage and Reduce Costs',
+    excerpt:
+      'Discover practical strategies to minimize API token consumption while maintaining full functionality of your OpenClaw assistant.',
+    author: 'Emily Watson',
+    keywords: ['optimization', 'cost'],
+    category: 'Optimization',
+    href: '/blog/optimize-token-usage',
+  },
+];
+
+// Mock data for Guides & Tutorials
+const guides = [
+  {
+    title: 'Installing OpenClaw on macOS',
+    description:
+      'Step-by-step installation guide for macOS users, including prerequisites, troubleshooting, and first-time configuration.',
+    difficulty: 'Beginner' as const,
+    platforms: ['macOS', 'Apple Silicon', 'Intel'],
+    href: '/guides/install-macos',
+  },
+  {
+    title: 'Setting Up Telegram Integration',
+    description:
+      'Complete guide to connecting OpenClaw with Telegram, including bot creation, webhook configuration, and testing.',
+    difficulty: 'Beginner' as const,
+    platforms: ['Telegram', 'Cross-platform'],
+    href: '/guides/telegram-setup',
+  },
+  {
+    title: 'Multi-Agent Routing Configuration',
+    description:
+      'Advanced guide for setting up workspace isolation, session management, and routing between multiple AI agents.',
+    difficulty: 'Advanced' as const,
+    platforms: ['All platforms'],
+    href: '/guides/multi-agent-routing',
+  },
+];
+
+// Mock data for Videos
+const videos = [
+  {
+    videoId: 'dQw4w9WgXcQ',
+    title: 'Install OpenClaw (macOS)',
+    category: 'Installation',
+    duration: '3:45',
+  },
+  {
+    videoId: 'dQw4w9WgXcQ',
+    title: 'WhatsApp Setup',
+    category: 'Integration',
+    duration: '4:20',
+  },
+  {
+    videoId: 'dQw4w9WgXcQ',
+    title: 'Security Deep Dive',
+    category: 'Security',
+    duration: '7:15',
+  },
+  {
+    videoId: 'dQw4w9WgXcQ',
+    title: 'Multi-Agent Routing',
+    category: 'Advanced',
+    duration: '6:30',
+  },
+  {
+    videoId: 'dQw4w9WgXcQ',
+    title: 'Custom Tool Building',
+    category: 'Tutorial',
+    duration: '12:00',
+  },
+  {
+    videoId: 'dQw4w9WgXcQ',
+    title: 'Docker Deployment',
+    category: 'Setup',
+    duration: '5:10',
+  },
+];
+
+// Mock data for FAQs
+const faqs = [
+  {
+    question: 'What are the system requirements for OpenClaw?',
+    answer:
+      'OpenClaw requires Node.js 22.12.0 or higher, at least 4GB of RAM, and works on macOS, Linux, and Windows.',
+  },
+  {
+    question: 'How much does it cost to run OpenClaw?',
+    answer:
+      'OpenClaw itself is free and open-source. You only pay for the AI API usage (Anthropic, OpenAI, etc.).',
+  },
+  {
+    question: 'Can I use OpenClaw with multiple messaging platforms?',
+    answer:
+      'Absolutely! OpenClaw supports WhatsApp, Telegram, Slack, Discord, Signal, iMessage, and more.',
+  },
+  {
+    question: 'How do I upgrade to the latest version?',
+    answer:
+      'Just run `npm install -g openclaw@latest` in your terminal. All your configurations will be preserved automatically.',
+  },
+  {
+    question: 'Does it support self-hosted LLMs like Llama 3?',
+    answer:
+      'Yes! OpenClaw integrates seamlessly with Ollama, enabling you to run local models without any API costs.',
+  },
+  {
+    question: 'Can I custom the bot response behavior?',
+    answer:
+      'Absolutely. You can define system prompts, personality traits, and custom tools in the JSON configuration files.',
+  },
+  {
+    question: 'Is there a mobile app for administration?',
+    answer:
+      "While we don't have a native app yet, the web interface is fully responsive and can be added to your home screen.",
+  },
+];
+
+// Mock data for User Stories
+const userStories = [
+  {
+    name: 'Alex Thompson',
+    role: 'Full-stack Developer',
+    quote:
+      "OpenClaw transformed my workflow. I use it to automate code reviews and manage my calendar across Slack and Telegram. It's the glue that holds my tools together.",
+    href: '/stories/alex-thompson',
+  },
+  {
+    name: 'Maria Garcia',
+    role: 'Security Analyst',
+    quote:
+      'As someone who values data privacy, OpenClaw is perfect. I have full control over my data and conversations. The DM pairing feature is a genius security addition.',
+    href: '/stories/maria-garcia',
+  },
+  {
+    name: 'David Kim',
+    role: 'Creative Director',
+    quote:
+      'I use OpenClaw to bridge the gap between my design team on Discord and our project management on Slack. It’s saved us hours of copy-pasting every week.',
+    href: '/stories/david-kim',
+  },
+];
+---
+
+<BaseLayout
+  title="Resources - OpenClaw Guides & Tutorials"
+  description="Everything you need to master OpenClaw: guides, tutorials, videos, and community insights."
+>
+  <div class="bg-background min-h-screen relative selection:bg-primary/20">
+    <!-- Decorative Background Elements -->
+    <div
+      class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] -z-10 animate-pulse"
+    >
+    </div>
+    <div
+      class="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[100px] -z-10 animate-float-slow"
+    >
+    </div>
+
+    <!-- Hero Section -->
+    <Section py="pt-32 pb-16" containerClass="text-center relative">
+      <div class="max-w-4xl mx-auto">
+        <div
+          class="inline-flex items-center gap-2 px-3 py-1 mb-6 text-xs font-semibold rounded-full bg-primary/10 text-primary border border-primary/20 backdrop-blur-md"
+        >
+          <span class="flex h-2 w-2 rounded-full bg-primary animate-ping"></span>
+          NEW RESOURCE UPDATED
+        </div>
+        <h1 class="text-5xl md:text-7xl font-extrabold mb-8 tracking-tight text-gradient">
+          Master Your AI Workflow
+        </h1>
+        <p
+          class="text-xl text-default-800 dark:text-default-600 mb-12 max-w-2xl mx-auto leading-relaxed"
+        >
+          The central hub for all OpenClaw documentation, guides, and community-driven tutorials.
+        </p>
+
+        <!-- Search Pill -->
+        <div class="max-w-xl mx-auto relative group">
+          <ResourceSearchInput client:load />
+          <div
+            class="absolute inset-0 -z-10 bg-gradient-to-r from-primary/20 to-purple-500/20 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity rounded-full"
+          >
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <!-- Featured Bento Section -->
+    <Section py="py-12">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+        <!-- Large Featured Card -->
+        <div class="lg:col-span-8 flex flex-col">
+          <div
+            class="m-card-glass p-8 h-full flex flex-col justify-end min-h-[400px] relative overflow-hidden group"
+          >
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10"
+            >
+            </div>
+            <img
+              src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=1200"
+              class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
+            />
+            <div class="relative z-20">
+              <Chip color="primary" variant="shadow" size="sm" className="mb-4">
+                FEATURED GUIDE
+              </Chip>
+              <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
+                The Ultimate Multi-Agent Architecture Guide for 2024
+              </h2>
+              <p class="text-white/80 text-lg mb-6 max-w-xl">
+                Learn how to scale your OpenClaw instance to handle hundreds of concurrent AI tasks
+                across multiple channels.
+              </p>
+              <Button
+                color="default"
+                radius="full"
+                variant="solid"
+                className="font-bold bg-white text-black border-none"
+              >
+                Read Masterclass
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side Cards Column -->
+        <div class="lg:col-span-4 flex flex-col gap-6 text-foreground">
+          <!-- Video Mini Card -->
+          <div
+            class="m-card-surface p-6 flex-1 flex flex-col justify-between group cursor-pointer relative overflow-hidden"
+          >
+            <div
+              class="absolute -top-12 -right-12 w-32 h-32 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/20 transition-all"
+            >
+            </div>
+            <div class="relative z-10">
+              <div
+                class="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-4"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"
+                  ><path
+                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+                  ></path></svg
+                >
+              </div>
+              <h3 class="text-xl font-bold mb-2">New: Quick Setup Video</h3>
+              <p class="text-sm text-default-600 dark:text-default-500">
+                Go from 0 to 1 in under 3 minutes with our latest video.
+              </p>
+            </div>
+            <span
+              class="text-primary text-sm font-semibold mt-4 inline-flex items-center gap-1 group-hover:gap-2 transition-all"
+            >
+              Watch Now <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"></path></svg
+              >
+            </span>
+          </div>
+
+          <!-- Community Card -->
+          <div
+            class="m-card-surface p-6 flex-1 flex flex-col justify-between group cursor-pointer relative overflow-hidden"
+          >
+            <div
+              class="absolute -bottom-12 -left-12 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all"
+            >
+            </div>
+            <div class="relative z-10">
+              <div
+                class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 mb-4"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  ></path></svg
+                >
+              </div>
+              <h3 class="text-xl font-bold mb-2">Join the Community</h3>
+              <p class="text-sm text-default-600 dark:text-default-500">
+                Share your setup and learn from 50k+ active users.
+              </p>
+            </div>
+            <span
+              class="text-primary text-sm font-semibold mt-4 inline-flex items-center gap-1 group-hover:gap-2 transition-all"
+            >
+              Join Discord <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"></path></svg
+              >
+            </span>
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <!-- Main Content Sections -->
+    <Section py="py-20">
+      <!-- Blog & Articles Section -->
+      <div class="mb-24">
+        <div class="flex items-end justify-between mb-12">
+          <div>
+            <h2 class="text-4xl font-bold mb-3">Blog & Insights</h2>
+            <p class="text-lg text-default-600 dark:text-default-500">
+              Expert advice on AI automation and self-hosting.
+            </p>
+          </div>
+          <a
+            href="/blog"
+            class="hidden md:flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all underline underline-offset-4"
+          >
+            View All Posts
+          </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {blogPosts.map((post) => <BlogCard {...post} client:load />)}
+        </div>
+      </div>
+
+      <!-- Guides & Tutorials Section -->
+      <div>
+        <div class="flex items-end justify-between mb-12">
+          <div>
+            <h2 class="text-4xl font-bold mb-3">Technical Guides</h2>
+            <p class="text-lg text-default-600 dark:text-default-500">
+              Deep dives into configuration and integrations.
+            </p>
+          </div>
+          <a
+            href="/guides"
+            class="hidden md:flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all underline underline-offset-4"
+          >
+            Browse Full Library
+          </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {guides.map((guide) => <GuideCard {...guide} client:load />)}
+        </div>
+      </div>
+    </Section>
+
+    <!-- Video Tutorials Section (Horizontal Scroll with Lightbox) -->
+    <Section py="py-24" class="bg-content1/20 border-y border-divider/50 overflow-hidden">
+      <VideoGallery videos={videos} client:load />
+    </Section>
+
+    <!-- Redesigned Support & Stories Section -->
+    <Section py="py-24">
+      <div class="flex flex-col lg:flex-row gap-20">
+        <!-- FAQs (Sticky Sidebar Style) -->
+        <div class="lg:w-1/2">
+          <div class="mb-12">
+            <div
+              class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path></svg
+              >
+            </div>
+            <h2 class="text-4xl md:text-5xl font-black tracking-tight mb-4">FAQ</h2>
+            <p class="text-xl text-default-600 dark:text-default-500">
+              Quick answers to the most common questions.
+            </p>
+          </div>
+
+          <FAQAccordion faqs={faqs} client:load />
+
+          <div class="mt-12 p-8 rounded-3xl bg-primary/5 border border-primary/10">
+            <h4 class="text-lg font-bold mb-2">Can't find your answer?</h4>
+            <p class="text-default-600 mb-6">
+              Check our extended database with over 200 searchable solutions.
+            </p>
+            <Button
+              as="a"
+              href="/troubleshooting"
+              color="primary"
+              variant="flat"
+              radius="full"
+              className="font-bold"
+            >
+              Open Troubleshooting Hub
+            </Button>
+          </div>
+        </div>
+
+        <!-- User Stories (Feature Wall) -->
+        <div class="lg:w-1/2">
+          <div class="mb-12">
+            <div
+              class="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary mb-6"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path></svg
+              >
+            </div>
+            <h2 class="text-4xl md:text-5xl font-black tracking-tight mb-4">User Stories</h2>
+            <p class="text-xl text-default-600 dark:text-default-500">
+              Join 50,000+ happy users globally.
+            </p>
+          </div>
+          <div class="grid grid-cols-1 gap-6">
+            {userStories.map((story) => <UserStoryCard {...story} client:load />)}
+          </div>
+
+          <div class="mt-8 text-center lg:text-left">
+            <a
+              href="/stories"
+              class="text-primary font-bold inline-flex items-center gap-2 hover:gap-3 transition-all"
+            >
+              Read all successful stories <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                ><path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 5l7 7-7 7"></path></svg
+              >
+            </a>
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <!-- CTA Section -->
+    <Section
+      containerClass="text-center py-20 bg-gradient-to-tr from-primary/10 via-background to-secondary/10 rounded-[48px] border border-divider/50 shadow-2xl mb-24 relative overflow-hidden"
+      py="py-0"
+    >
+      <div class="absolute inset-0 bg-grid-white/5 mask-image-gradient-b"></div>
+      <div class="relative z-10">
+        <h2 class="text-4xl md:text-6xl font-black mb-8 tracking-tighter">Still have questions?</h2>
+        <p class="text-xl text-default-800 dark:text-default-600 max-w-2xl mx-auto mb-12">
+          Our community of developers and power users is here to help. Join our Slack or forum for
+          real-time support.
+        </p>
+        <div class="flex flex-wrap justify-center gap-6">
+          <Button
+            size="lg"
+            radius="full"
+            color="primary"
+            className="font-bold px-10 shadow-xl shadow-primary/20 h-14"
+          >
+            Visit Community Forum
+          </Button>
+          <Button
+            size="lg"
+            radius="full"
+            variant="bordered"
+            className="font-bold px-10 h-14 border-2"
+          >
+            Chat on Discord
+          </Button>
+        </div>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>
+
+<style>
+  .animate-float-slow {
+    animation: float 10s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-30px);
+    }
+  }
+</style>
