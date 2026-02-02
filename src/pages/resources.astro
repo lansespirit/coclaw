@@ -62,8 +62,58 @@ const guides = guideEntries
     href: `/guides/${entry.slug}`,
   }));
 
-// Video library: intentionally empty until we have curated, verified content.
-const videos: { videoId: string; title: string; category: string; duration: string }[] = [];
+const videos: { videoId: string; title: string; category: string; duration: string }[] = [
+  {
+    videoId: 'a63dUwXUgDo',
+    title: 'ClawdBot Full Tutorial for Beginners: How to Use & Set up ClawdBot (Openclaw)',
+    category: 'Beginner',
+    duration: '14:53',
+  },
+  {
+    videoId: '4evf5YqVzOM',
+    title: 'Master OpenClaw/Clawdbot in 35 minutes',
+    category: 'Crash Course',
+    duration: '35:26',
+  },
+  {
+    videoId: 'V6Mp0fUh-OM',
+    title: 'Run AI CoWork Locally with OpenClaw & Ollama (Complete Setup)',
+    category: 'Local Setup',
+    duration: '5:46',
+  },
+  {
+    videoId: 'qePhufA1hSE',
+    title: "I use Clawdbot (OpenClaw) on a Raspberry Pi - it's Crazy Good!",
+    category: 'Hardware',
+    duration: '16:53',
+  },
+  {
+    videoId: 'QW-PFjF2aEo',
+    title: 'The Most INSANE Use Cases for OpenClaw x MiniMax (How To Use OpenClaw Like a Pro)',
+    category: 'Use Cases',
+    duration: '16:25',
+  },
+  {
+    videoId: 'ExzAiMjT6jg',
+    title: 'How to SAFELY Run OpenClaw with Kimi-K2.5 & LOCAL AI (Clawdbot)',
+    category: 'Safety',
+    duration: '12:59',
+  },
+  {
+    videoId: 'ssYt09bCgUY',
+    title: 'The wild rise of OpenClaw...',
+    category: 'Story',
+    duration: '5:19',
+  },
+  {
+    videoId: 'AcwK1Uuwc0U',
+    title: "How OpenClaw's Creator Uses AI to Run His Life in 40 Minutes | Peter Steinberger",
+    category: 'Interview',
+    duration: '37:44',
+  },
+];
+
+const quickSetupVideo = videos.find((v) => v.videoId === 'V6Mp0fUh-OM') ?? videos[0];
 
 // Mock data for FAQs
 const faqs = [
@@ -229,8 +279,12 @@ const userStories = storyEntries
         <!-- Side Cards Column -->
         <div class="lg:col-span-4 flex flex-col gap-6 text-foreground">
           <!-- Video Mini Card -->
-          <div
-            class="m-card-surface p-6 flex-1 flex flex-col justify-between group cursor-pointer relative overflow-hidden"
+          <a
+            class="m-card-surface p-6 flex-1 flex flex-col justify-between group relative overflow-hidden"
+            href={`https://www.youtube.com/watch?v=${quickSetupVideo.videoId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Watch video: ${quickSetupVideo.title}`}
           >
             <div
               class="absolute -top-12 -right-12 w-32 h-32 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/20 transition-all"
@@ -242,9 +296,9 @@ const userStories = storyEntries
               >
                 <IconPlaySolid className="w-5 h-5" aria-hidden="true" />
               </div>
-              <h3 class="text-xl font-bold mb-2">New: Quick Setup Video</h3>
+              <h3 class="text-xl font-bold mb-2">Start Here: Local Setup</h3>
               <p class="text-sm text-default-600 dark:text-default-500">
-                Go from 0 to 1 in under 3 minutes with our latest video.
+                Complete Ollama setup in {quickSetupVideo.duration}.
               </p>
             </div>
             <span
@@ -252,11 +306,15 @@ const userStories = storyEntries
             >
               Watch Now <IconChevronRight className="w-4 h-4" aria-hidden="true" />
             </span>
-          </div>
+          </a>
 
           <!-- Community Card -->
-          <div
-            class="m-card-surface p-6 flex-1 flex flex-col justify-between group cursor-pointer relative overflow-hidden"
+          <a
+            class="m-card-surface p-6 flex-1 flex flex-col justify-between group relative overflow-hidden"
+            href="https://discord.gg/clawd"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Join the Discord community"
           >
             <div
               class="absolute -bottom-12 -left-12 w-32 h-32 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all"
@@ -278,7 +336,7 @@ const userStories = storyEntries
             >
               Join Discord <IconChevronRight className="w-4 h-4" aria-hidden="true" />
             </span>
-          </div>
+          </a>
         </div>
       </div>
     </Section>
@@ -332,7 +390,10 @@ const userStories = storyEntries
     <Section py="py-24" class="bg-content1/20 border-y border-divider/50 overflow-hidden">
       {
         videos.length > 0 ? (
-          <VideoGallery videos={videos} client:load />
+          <>
+            <div id="video-library" class="sr-only" aria-hidden="true"></div>
+            <VideoGallery videos={videos} client:load />
+          </>
         ) : (
           <div class="site-container">
             <div class="max-w-4xl mx-auto text-center">
