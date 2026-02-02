@@ -43,6 +43,100 @@ function asInt(value: string, fallback: number): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
+type ChannelKind = 'telegram' | 'whatsapp' | 'discord' | 'slack';
+
+function DmPolicyLabel({
+  title,
+  badge,
+  tooltip,
+}: {
+  title: string;
+  badge?: { text: string; tone: 'primary' | 'warning' };
+  tooltip: string;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2 w-full">
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="text-sm font-semibold truncate">{title}</span>
+        {badge && (
+          <span
+            className={[
+              'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold border',
+              badge.tone === 'primary'
+                ? 'text-primary border-primary/40 bg-primary/10'
+                : 'text-warning border-warning/40 bg-warning/10',
+            ].join(' ')}
+          >
+            {badge.text}
+          </span>
+        )}
+      </div>
+      <Tooltip content={tooltip}>
+        <span className="inline-flex items-center text-default-500 cursor-help">
+          <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+        </span>
+      </Tooltip>
+    </div>
+  );
+}
+
+function dmPolicyCopy(
+  channel: ChannelKind,
+  policy: DmPolicy
+): {
+  title: string;
+  shortHint: string;
+  tooltip: string;
+  badge?: { text: string; tone: 'primary' | 'warning' };
+} {
+  switch (policy) {
+    case 'pairing':
+      return {
+        title: 'pairing',
+        shortHint: 'Approve unknown senders.',
+        tooltip:
+          'Default secure mode. Unknown senders receive a pairing code and messages are ignored until you approve them.',
+        badge: { text: 'Recommended', tone: 'primary' },
+      };
+    case 'allowlist': {
+      const allowFromHint =
+        channel === 'whatsapp'
+          ? 'E.164 numbers in allowFrom.'
+          : channel === 'telegram'
+            ? 'Sender IDs/usernames in allowFrom.'
+            : 'User IDs in dm.allowFrom.';
+      return {
+        title: 'allowlist',
+        shortHint: `Only allow ${allowFromHint}`,
+        tooltip:
+          channel === 'telegram'
+            ? 'Only allow direct messages from senders listed in channels.telegram.allowFrom.'
+            : channel === 'whatsapp'
+              ? 'Only allow direct messages from numbers listed in channels.whatsapp.allowFrom (E.164 format).'
+              : channel === 'discord'
+                ? 'Only allow DMs from user IDs listed in channels.discord.dm.allowFrom.'
+                : 'Only allow DMs from user IDs listed in channels.slack.dm.allowFrom.',
+      };
+    }
+    case 'open':
+      return {
+        title: 'open',
+        shortHint: 'Anyone who can DM the account can trigger the agent.',
+        tooltip:
+          channel === 'telegram'
+            ? 'Opens inbound Telegram DMs. OpenClaw requires allowFrom to include "*" for dmPolicy="open".'
+            : 'High risk. Anyone who can DM this bot/account can trigger the agent. Use allowlists and Safe Mode unless you fully understand the exposure.',
+        badge: { text: 'Risky', tone: 'warning' },
+      };
+    case 'disabled':
+      return {
+        title: 'disabled',
+        shortHint: 'Ignore inbound DMs.',
+        tooltip: 'Disable inbound DMs entirely for this channel.',
+      };
+  }
+}
+
 function downloadTextFile(filename: string, content: string) {
   const blob = new Blob([content], { type: 'application/json;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -55,12 +149,7 @@ function downloadTextFile(filename: string, content: string) {
   URL.revokeObjectURL(url);
 }
 
-const dmPolicyOptions: Array<{ key: DmPolicy; label: string; hint: string }> = [
-  { key: 'pairing', label: 'pairing (recommended)', hint: 'Unknown senders must be approved.' },
-  { key: 'allowlist', label: 'allowlist', hint: 'Only allow explicit identities (allowFrom).' },
-  { key: 'open', label: 'open', hint: 'Allow anyone who can DM the bot/account.' },
-  { key: 'disabled', label: 'disabled', hint: 'Ignore inbound DMs.' },
-];
+const dmPolicyKeys: DmPolicy[] = ['pairing', 'allowlist', 'open', 'disabled'];
 
 const bindOptions: Array<{ key: GatewayBindMode; label: string; hint: string }> = [
   { key: 'loopback', label: 'loopback', hint: 'Local-only (127.0.0.1).' },
@@ -333,8 +422,8 @@ export default function OpenClawConfigGenerator() {
                         }}
                         variant="bordered"
                       >
-                        <SelectItem key="openai-completions">openai-completions</SelectItem>
                         <SelectItem key="openai-responses">openai-responses</SelectItem>
+                        <SelectItem key="openai-completions">openai-completions</SelectItem>
                         <SelectItem key="anthropic-messages">anthropic-messages</SelectItem>
                       </Select>
                     </div>
@@ -355,7 +444,7 @@ export default function OpenClawConfigGenerator() {
                     {state.secretsMode === 'inline' ? (
                       <Input
                         label="apiKey"
-                        placeholder="LITELLM_KEY"
+                        placeholder="YOUR_API_KEY"
                         value={state.ai.custom.apiKey}
                         onValueChange={(v) =>
                           setState((s) => ({
@@ -673,8 +762,25 @@ export default function OpenClawConfigGenerator() {
                       <h3 className="font-bold">Telegram</h3>
                     </div>
 
+                    {state.channels.telegram.dmPolicy === 'open' && (
+                      <Alert
+                        color="warning"
+                        title='Telegram DM policy is "open"'
+                        description='Anyone can DM your bot and trigger the agent. OpenClaw requires allowFrom to include "*".'
+                      />
+                    )}
+
                     <RadioGroup
-                      label="DM policy"
+                      label={
+                        <span className="inline-flex items-center gap-1">
+                          DM policy
+                          <Tooltip content="Controls inbound Telegram DMs (channels.telegram.dmPolicy).">
+                            <span className="inline-flex items-center text-default-500 cursor-help">
+                              <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                            </span>
+                          </Tooltip>
+                        </span>
+                      }
                       value={state.channels.telegram.dmPolicy}
                       onValueChange={(v) =>
                         setState((s) => ({
@@ -686,12 +792,34 @@ export default function OpenClawConfigGenerator() {
                         }))
                       }
                       orientation="horizontal"
+                      classNames={{
+                        wrapper: 'grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4',
+                      }}
                     >
-                      {dmPolicyOptions.map((o) => (
-                        <Radio key={o.key} value={o.key} description={o.hint}>
-                          {o.label}
-                        </Radio>
-                      ))}
+                      {dmPolicyKeys.map((key) => {
+                        const copy = dmPolicyCopy('telegram', key);
+                        return (
+                          <Radio
+                            key={key}
+                            value={key}
+                            description={
+                              <span className="text-xs text-default-500 leading-snug">
+                                {copy.shortHint}
+                              </span>
+                            }
+                            classNames={{
+                              labelWrapper: 'w-full',
+                              description: 'text-xs',
+                            }}
+                          >
+                            <DmPolicyLabel
+                              title={copy.title}
+                              badge={copy.badge}
+                              tooltip={copy.tooltip}
+                            />
+                          </Radio>
+                        );
+                      })}
                     </RadioGroup>
 
                     {state.secretsMode === 'inline' ? (
@@ -718,22 +846,46 @@ export default function OpenClawConfigGenerator() {
                       />
                     )}
 
-                    <Textarea
-                      label="allowFrom (optional)"
-                      placeholder={'tg:123456789\n*  (required for dmPolicy="open")'}
-                      value={state.channels.telegram.allowFromRaw}
-                      onValueChange={(v) =>
-                        setState((s) => ({
-                          ...s,
-                          channels: {
-                            ...s.channels,
-                            telegram: { ...s.channels.telegram, allowFromRaw: v },
-                          },
-                        }))
-                      }
-                      variant="bordered"
-                      minRows={3}
-                    />
+                    <div className="space-y-1">
+                      <Textarea
+                        label={
+                          <span className="inline-flex items-center gap-1">
+                            allowFrom
+                            <Tooltip content='Optional allowlist for Telegram DMs. For dmPolicy="open", include "*".'>
+                              <span className="inline-flex items-center text-default-500 cursor-help">
+                                <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                              </span>
+                            </Tooltip>
+                          </span>
+                        }
+                        placeholder={'tg:123456789\n*'}
+                        value={state.channels.telegram.allowFromRaw}
+                        onValueChange={(v) =>
+                          setState((s) => ({
+                            ...s,
+                            channels: {
+                              ...s.channels,
+                              telegram: { ...s.channels.telegram, allowFromRaw: v },
+                            },
+                          }))
+                        }
+                        variant="bordered"
+                        minRows={3}
+                      />
+                      {state.channels.telegram.dmPolicy === 'open' && (
+                        <p className="text-xs text-warning">
+                          Required: include <Code className="px-1 py-0.5">*</Code> in allowFrom for
+                          dmPolicy=&quot;open&quot;.
+                        </p>
+                      )}
+                      {state.channels.telegram.dmPolicy === 'allowlist' &&
+                        !state.channels.telegram.allowFromRaw.trim() && (
+                          <p className="text-xs text-default-500">
+                            Tip: add one or more sender identities (e.g.{' '}
+                            <Code className="px-1 py-0.5">tg:123</Code>).
+                          </p>
+                        )}
+                    </div>
                   </div>
                 )}
 
@@ -744,8 +896,25 @@ export default function OpenClawConfigGenerator() {
                       <h3 className="font-bold">WhatsApp</h3>
                     </div>
 
+                    {state.channels.whatsapp.dmPolicy === 'open' && (
+                      <Alert
+                        color="warning"
+                        title='WhatsApp DM policy is "open"'
+                        description="Anyone who can DM this number can trigger the agent. Use allowlists unless you fully trust the exposure."
+                      />
+                    )}
+
                     <RadioGroup
-                      label="DM policy"
+                      label={
+                        <span className="inline-flex items-center gap-1">
+                          DM policy
+                          <Tooltip content="Controls inbound WhatsApp DMs (channels.whatsapp.dmPolicy).">
+                            <span className="inline-flex items-center text-default-500 cursor-help">
+                              <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                            </span>
+                          </Tooltip>
+                        </span>
+                      }
                       value={state.channels.whatsapp.dmPolicy}
                       onValueChange={(v) =>
                         setState((s) => ({
@@ -757,30 +926,70 @@ export default function OpenClawConfigGenerator() {
                         }))
                       }
                       orientation="horizontal"
+                      classNames={{
+                        wrapper: 'grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4',
+                      }}
                     >
-                      {dmPolicyOptions.map((o) => (
-                        <Radio key={o.key} value={o.key} description={o.hint}>
-                          {o.label}
-                        </Radio>
-                      ))}
+                      {dmPolicyKeys.map((key) => {
+                        const copy = dmPolicyCopy('whatsapp', key);
+                        return (
+                          <Radio
+                            key={key}
+                            value={key}
+                            description={
+                              <span className="text-xs text-default-500 leading-snug">
+                                {copy.shortHint}
+                              </span>
+                            }
+                            classNames={{
+                              labelWrapper: 'w-full',
+                              description: 'text-xs',
+                            }}
+                          >
+                            <DmPolicyLabel
+                              title={copy.title}
+                              badge={copy.badge}
+                              tooltip={copy.tooltip}
+                            />
+                          </Radio>
+                        );
+                      })}
                     </RadioGroup>
 
-                    <Textarea
-                      label="allowFrom (E.164 numbers; optional)"
-                      placeholder={'+15551234567\n+15557654321'}
-                      value={state.channels.whatsapp.allowFromRaw}
-                      onValueChange={(v) =>
-                        setState((s) => ({
-                          ...s,
-                          channels: {
-                            ...s.channels,
-                            whatsapp: { ...s.channels.whatsapp, allowFromRaw: v },
-                          },
-                        }))
-                      }
-                      variant="bordered"
-                      minRows={3}
-                    />
+                    <div className="space-y-1">
+                      <Textarea
+                        label={
+                          <span className="inline-flex items-center gap-1">
+                            allowFrom
+                            <Tooltip content="WhatsApp allowlist (E.164). Required when dmPolicy=allowlist.">
+                              <span className="inline-flex items-center text-default-500 cursor-help">
+                                <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                              </span>
+                            </Tooltip>
+                          </span>
+                        }
+                        placeholder={'+15551234567\n+15557654321'}
+                        value={state.channels.whatsapp.allowFromRaw}
+                        onValueChange={(v) =>
+                          setState((s) => ({
+                            ...s,
+                            channels: {
+                              ...s.channels,
+                              whatsapp: { ...s.channels.whatsapp, allowFromRaw: v },
+                            },
+                          }))
+                        }
+                        variant="bordered"
+                        minRows={3}
+                      />
+                      {state.channels.whatsapp.dmPolicy === 'allowlist' &&
+                        !state.channels.whatsapp.allowFromRaw.trim() && (
+                          <p className="text-xs text-warning">
+                            Required for dmPolicy=&quot;allowlist&quot; (example:{' '}
+                            <Code className="px-1 py-0.5">+15551234567</Code>).
+                          </p>
+                        )}
+                    </div>
                   </div>
                 )}
 
@@ -791,8 +1000,25 @@ export default function OpenClawConfigGenerator() {
                       <h3 className="font-bold">Discord</h3>
                     </div>
 
+                    {state.channels.discord.dmPolicy === 'open' && (
+                      <Alert
+                        color="warning"
+                        title='Discord DM policy is "open"'
+                        description="Anyone can DM the bot and trigger the agent. Consider allowlist or pairing for safety."
+                      />
+                    )}
+
                     <RadioGroup
-                      label="DM policy (channels.discord.dm.policy)"
+                      label={
+                        <span className="inline-flex items-center gap-1">
+                          DM policy
+                          <Tooltip content="Controls inbound Discord DMs (channels.discord.dm.policy).">
+                            <span className="inline-flex items-center text-default-500 cursor-help">
+                              <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                            </span>
+                          </Tooltip>
+                        </span>
+                      }
                       value={state.channels.discord.dmPolicy}
                       onValueChange={(v) =>
                         setState((s) => ({
@@ -804,12 +1030,34 @@ export default function OpenClawConfigGenerator() {
                         }))
                       }
                       orientation="horizontal"
+                      classNames={{
+                        wrapper: 'grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4',
+                      }}
                     >
-                      {dmPolicyOptions.map((o) => (
-                        <Radio key={o.key} value={o.key} description={o.hint}>
-                          {o.label}
-                        </Radio>
-                      ))}
+                      {dmPolicyKeys.map((key) => {
+                        const copy = dmPolicyCopy('discord', key);
+                        return (
+                          <Radio
+                            key={key}
+                            value={key}
+                            description={
+                              <span className="text-xs text-default-500 leading-snug">
+                                {copy.shortHint}
+                              </span>
+                            }
+                            classNames={{
+                              labelWrapper: 'w-full',
+                              description: 'text-xs',
+                            }}
+                          >
+                            <DmPolicyLabel
+                              title={copy.title}
+                              badge={copy.badge}
+                              tooltip={copy.tooltip}
+                            />
+                          </Radio>
+                        );
+                      })}
                     </RadioGroup>
 
                     {state.secretsMode === 'inline' ? (
@@ -836,22 +1084,39 @@ export default function OpenClawConfigGenerator() {
                       />
                     )}
 
-                    <Textarea
-                      label="dm.allowFrom (optional; user IDs)"
-                      placeholder={'123456789012345678\n987654321098765432'}
-                      value={state.channels.discord.allowFromRaw}
-                      onValueChange={(v) =>
-                        setState((s) => ({
-                          ...s,
-                          channels: {
-                            ...s.channels,
-                            discord: { ...s.channels.discord, allowFromRaw: v },
-                          },
-                        }))
-                      }
-                      variant="bordered"
-                      minRows={3}
-                    />
+                    <div className="space-y-1">
+                      <Textarea
+                        label={
+                          <span className="inline-flex items-center gap-1">
+                            dm.allowFrom
+                            <Tooltip content="Optional DM allowlist (Discord user IDs). Required when dmPolicy=allowlist.">
+                              <span className="inline-flex items-center text-default-500 cursor-help">
+                                <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                              </span>
+                            </Tooltip>
+                          </span>
+                        }
+                        placeholder={'123456789012345678\n987654321098765432'}
+                        value={state.channels.discord.allowFromRaw}
+                        onValueChange={(v) =>
+                          setState((s) => ({
+                            ...s,
+                            channels: {
+                              ...s.channels,
+                              discord: { ...s.channels.discord, allowFromRaw: v },
+                            },
+                          }))
+                        }
+                        variant="bordered"
+                        minRows={3}
+                      />
+                      {state.channels.discord.dmPolicy === 'allowlist' &&
+                        !state.channels.discord.allowFromRaw.trim() && (
+                          <p className="text-xs text-warning">
+                            Required for dmPolicy=&quot;allowlist&quot; (Discord user IDs).
+                          </p>
+                        )}
+                    </div>
                   </div>
                 )}
 
@@ -862,8 +1127,25 @@ export default function OpenClawConfigGenerator() {
                       <h3 className="font-bold">Slack</h3>
                     </div>
 
+                    {state.channels.slack.dmPolicy === 'open' && (
+                      <Alert
+                        color="warning"
+                        title='Slack DM policy is "open"'
+                        description="Anyone in the workspace can DM the bot and trigger the agent. Consider allowlist or pairing for safety."
+                      />
+                    )}
+
                     <RadioGroup
-                      label="DM policy (channels.slack.dm.policy)"
+                      label={
+                        <span className="inline-flex items-center gap-1">
+                          DM policy
+                          <Tooltip content="Controls inbound Slack DMs (channels.slack.dm.policy).">
+                            <span className="inline-flex items-center text-default-500 cursor-help">
+                              <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                            </span>
+                          </Tooltip>
+                        </span>
+                      }
                       value={state.channels.slack.dmPolicy}
                       onValueChange={(v) =>
                         setState((s) => ({
@@ -875,12 +1157,34 @@ export default function OpenClawConfigGenerator() {
                         }))
                       }
                       orientation="horizontal"
+                      classNames={{
+                        wrapper: 'grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4',
+                      }}
                     >
-                      {dmPolicyOptions.map((o) => (
-                        <Radio key={o.key} value={o.key} description={o.hint}>
-                          {o.label}
-                        </Radio>
-                      ))}
+                      {dmPolicyKeys.map((key) => {
+                        const copy = dmPolicyCopy('slack', key);
+                        return (
+                          <Radio
+                            key={key}
+                            value={key}
+                            description={
+                              <span className="text-xs text-default-500 leading-snug">
+                                {copy.shortHint}
+                              </span>
+                            }
+                            classNames={{
+                              labelWrapper: 'w-full',
+                              description: 'text-xs',
+                            }}
+                          >
+                            <DmPolicyLabel
+                              title={copy.title}
+                              badge={copy.badge}
+                              tooltip={copy.tooltip}
+                            />
+                          </Radio>
+                        );
+                      })}
                     </RadioGroup>
 
                     {state.secretsMode === 'inline' ? (
@@ -924,22 +1228,39 @@ export default function OpenClawConfigGenerator() {
                       />
                     )}
 
-                    <Textarea
-                      label="dm.allowFrom (optional; user IDs)"
-                      placeholder={'U012ABCDEF\nU045GHIJKL'}
-                      value={state.channels.slack.allowFromRaw}
-                      onValueChange={(v) =>
-                        setState((s) => ({
-                          ...s,
-                          channels: {
-                            ...s.channels,
-                            slack: { ...s.channels.slack, allowFromRaw: v },
-                          },
-                        }))
-                      }
-                      variant="bordered"
-                      minRows={3}
-                    />
+                    <div className="space-y-1">
+                      <Textarea
+                        label={
+                          <span className="inline-flex items-center gap-1">
+                            dm.allowFrom
+                            <Tooltip content="Optional DM allowlist (Slack user IDs). Required when dmPolicy=allowlist.">
+                              <span className="inline-flex items-center text-default-500 cursor-help">
+                                <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                              </span>
+                            </Tooltip>
+                          </span>
+                        }
+                        placeholder={'U012ABCDEF\nU045GHIJKL'}
+                        value={state.channels.slack.allowFromRaw}
+                        onValueChange={(v) =>
+                          setState((s) => ({
+                            ...s,
+                            channels: {
+                              ...s.channels,
+                              slack: { ...s.channels.slack, allowFromRaw: v },
+                            },
+                          }))
+                        }
+                        variant="bordered"
+                        minRows={3}
+                      />
+                      {state.channels.slack.dmPolicy === 'allowlist' &&
+                        !state.channels.slack.allowFromRaw.trim() && (
+                          <p className="text-xs text-warning">
+                            Required for dmPolicy=&quot;allowlist&quot; (Slack user IDs).
+                          </p>
+                        )}
+                    </div>
                   </div>
                 )}
               </CardBody>
