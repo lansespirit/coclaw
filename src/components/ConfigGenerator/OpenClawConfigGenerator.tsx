@@ -854,47 +854,51 @@ export default function OpenClawConfigGenerator() {
                       />
                     )}
 
-                    <div className="space-y-1">
-                      <Textarea
-                        label={
-                          <span className="inline-flex items-center gap-1">
-                            allowFrom
-                            <Tooltip content='Optional allowlist for Telegram DMs. For dmPolicy="open", include "*".'>
-                              <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
-                                <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
-                              </span>
-                            </Tooltip>
-                          </span>
-                        }
-                        classNames={{ label: 'pointer-events-auto' }}
-                        placeholder={'tg:123456789\n*'}
-                        value={state.channels.telegram.allowFromRaw}
-                        onValueChange={(v) =>
-                          setState((s) => ({
-                            ...s,
-                            channels: {
-                              ...s.channels,
-                              telegram: { ...s.channels.telegram, allowFromRaw: v },
-                            },
-                          }))
-                        }
-                        variant="bordered"
-                        minRows={3}
-                      />
-                      {state.channels.telegram.dmPolicy === 'open' && (
-                        <p className="text-xs text-warning">
-                          Required: include <Code className="px-1 py-0.5">*</Code> in allowFrom for
-                          dmPolicy=&quot;open&quot;.
-                        </p>
-                      )}
-                      {state.channels.telegram.dmPolicy === 'allowlist' &&
-                        !state.channels.telegram.allowFromRaw.trim() && (
-                          <p className="text-xs text-default-500">
-                            Tip: add one or more sender identities (e.g.{' '}
-                            <Code className="px-1 py-0.5">tg:123</Code>).
+                    {(state.channels.telegram.dmPolicy === 'allowlist' ||
+                      state.channels.telegram.dmPolicy === 'open' ||
+                      !!state.channels.telegram.allowFromRaw.trim()) && (
+                      <div className="space-y-1">
+                        <Textarea
+                          label={
+                            <span className="inline-flex items-center gap-1">
+                              allowFrom
+                              <Tooltip content='Optional allowlist for Telegram DMs. For dmPolicy="open", include "*".'>
+                                <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
+                                  <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                                </span>
+                              </Tooltip>
+                            </span>
+                          }
+                          classNames={{ label: 'pointer-events-auto' }}
+                          placeholder={'tg:123456789\n*'}
+                          value={state.channels.telegram.allowFromRaw}
+                          onValueChange={(v) =>
+                            setState((s) => ({
+                              ...s,
+                              channels: {
+                                ...s.channels,
+                                telegram: { ...s.channels.telegram, allowFromRaw: v },
+                              },
+                            }))
+                          }
+                          variant="bordered"
+                          minRows={3}
+                        />
+                        {state.channels.telegram.dmPolicy === 'open' && (
+                          <p className="text-xs text-warning">
+                            Required: include <Code className="px-1 py-0.5">*</Code> in allowFrom
+                            for dmPolicy=&quot;open&quot;.
                           </p>
                         )}
-                    </div>
+                        {state.channels.telegram.dmPolicy === 'allowlist' &&
+                          !state.channels.telegram.allowFromRaw.trim() && (
+                            <p className="text-xs text-warning">
+                              Required for dmPolicy=&quot;allowlist&quot; (example:{' '}
+                              <Code className="px-1 py-0.5">tg:123</Code>).
+                            </p>
+                          )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -961,41 +965,44 @@ export default function OpenClawConfigGenerator() {
                       })}
                     </RadioGroup>
 
-                    <div className="space-y-1">
-                      <Textarea
-                        label={
-                          <span className="inline-flex items-center gap-1">
-                            allowFrom
-                            <Tooltip content="WhatsApp allowlist (E.164). Required when dmPolicy=allowlist.">
-                              <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
-                                <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
-                              </span>
-                            </Tooltip>
-                          </span>
-                        }
-                        classNames={{ label: 'pointer-events-auto' }}
-                        placeholder={'+15551234567\n+15557654321'}
-                        value={state.channels.whatsapp.allowFromRaw}
-                        onValueChange={(v) =>
-                          setState((s) => ({
-                            ...s,
-                            channels: {
-                              ...s.channels,
-                              whatsapp: { ...s.channels.whatsapp, allowFromRaw: v },
-                            },
-                          }))
-                        }
-                        variant="bordered"
-                        minRows={3}
-                      />
-                      {state.channels.whatsapp.dmPolicy === 'allowlist' &&
-                        !state.channels.whatsapp.allowFromRaw.trim() && (
-                          <p className="text-xs text-warning">
-                            Required for dmPolicy=&quot;allowlist&quot; (example:{' '}
-                            <Code className="px-1 py-0.5">+15551234567</Code>).
-                          </p>
-                        )}
-                    </div>
+                    {(state.channels.whatsapp.dmPolicy === 'allowlist' ||
+                      !!state.channels.whatsapp.allowFromRaw.trim()) && (
+                      <div className="space-y-1">
+                        <Textarea
+                          label={
+                            <span className="inline-flex items-center gap-1">
+                              allowFrom
+                              <Tooltip content="WhatsApp allowlist (E.164). Required when dmPolicy=allowlist.">
+                                <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
+                                  <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                                </span>
+                              </Tooltip>
+                            </span>
+                          }
+                          classNames={{ label: 'pointer-events-auto' }}
+                          placeholder={'+15551234567\n+15557654321'}
+                          value={state.channels.whatsapp.allowFromRaw}
+                          onValueChange={(v) =>
+                            setState((s) => ({
+                              ...s,
+                              channels: {
+                                ...s.channels,
+                                whatsapp: { ...s.channels.whatsapp, allowFromRaw: v },
+                              },
+                            }))
+                          }
+                          variant="bordered"
+                          minRows={3}
+                        />
+                        {state.channels.whatsapp.dmPolicy === 'allowlist' &&
+                          !state.channels.whatsapp.allowFromRaw.trim() && (
+                            <p className="text-xs text-warning">
+                              Required for dmPolicy=&quot;allowlist&quot; (example:{' '}
+                              <Code className="px-1 py-0.5">+15551234567</Code>).
+                            </p>
+                          )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1086,40 +1093,43 @@ export default function OpenClawConfigGenerator() {
                       />
                     )}
 
-                    <div className="space-y-1">
-                      <Textarea
-                        label={
-                          <span className="inline-flex items-center gap-1">
-                            dm.allowFrom
-                            <Tooltip content="Optional DM allowlist (Discord user IDs). Required when dmPolicy=allowlist.">
-                              <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
-                                <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
-                              </span>
-                            </Tooltip>
-                          </span>
-                        }
-                        classNames={{ label: 'pointer-events-auto' }}
-                        placeholder={'123456789012345678\n987654321098765432'}
-                        value={state.channels.discord.allowFromRaw}
-                        onValueChange={(v) =>
-                          setState((s) => ({
-                            ...s,
-                            channels: {
-                              ...s.channels,
-                              discord: { ...s.channels.discord, allowFromRaw: v },
-                            },
-                          }))
-                        }
-                        variant="bordered"
-                        minRows={3}
-                      />
-                      {state.channels.discord.dmPolicy === 'allowlist' &&
-                        !state.channels.discord.allowFromRaw.trim() && (
-                          <p className="text-xs text-warning">
-                            Required for dmPolicy=&quot;allowlist&quot; (Discord user IDs).
-                          </p>
-                        )}
-                    </div>
+                    {(state.channels.discord.dmPolicy === 'allowlist' ||
+                      !!state.channels.discord.allowFromRaw.trim()) && (
+                      <div className="space-y-1">
+                        <Textarea
+                          label={
+                            <span className="inline-flex items-center gap-1">
+                              dm.allowFrom
+                              <Tooltip content="Optional DM allowlist (Discord user IDs). Required when dmPolicy=allowlist.">
+                                <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
+                                  <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                                </span>
+                              </Tooltip>
+                            </span>
+                          }
+                          classNames={{ label: 'pointer-events-auto' }}
+                          placeholder={'123456789012345678\n987654321098765432'}
+                          value={state.channels.discord.allowFromRaw}
+                          onValueChange={(v) =>
+                            setState((s) => ({
+                              ...s,
+                              channels: {
+                                ...s.channels,
+                                discord: { ...s.channels.discord, allowFromRaw: v },
+                              },
+                            }))
+                          }
+                          variant="bordered"
+                          minRows={3}
+                        />
+                        {state.channels.discord.dmPolicy === 'allowlist' &&
+                          !state.channels.discord.allowFromRaw.trim() && (
+                            <p className="text-xs text-warning">
+                              Required for dmPolicy=&quot;allowlist&quot; (Discord user IDs).
+                            </p>
+                          )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1227,40 +1237,43 @@ export default function OpenClawConfigGenerator() {
                       />
                     )}
 
-                    <div className="space-y-1">
-                      <Textarea
-                        label={
-                          <span className="inline-flex items-center gap-1">
-                            dm.allowFrom
-                            <Tooltip content="Optional DM allowlist (Slack user IDs). Required when dmPolicy=allowlist.">
-                              <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
-                                <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
-                              </span>
-                            </Tooltip>
-                          </span>
-                        }
-                        classNames={{ label: 'pointer-events-auto' }}
-                        placeholder={'U012ABCDEF\nU045GHIJKL'}
-                        value={state.channels.slack.allowFromRaw}
-                        onValueChange={(v) =>
-                          setState((s) => ({
-                            ...s,
-                            channels: {
-                              ...s.channels,
-                              slack: { ...s.channels.slack, allowFromRaw: v },
-                            },
-                          }))
-                        }
-                        variant="bordered"
-                        minRows={3}
-                      />
-                      {state.channels.slack.dmPolicy === 'allowlist' &&
-                        !state.channels.slack.allowFromRaw.trim() && (
-                          <p className="text-xs text-warning">
-                            Required for dmPolicy=&quot;allowlist&quot; (Slack user IDs).
-                          </p>
-                        )}
-                    </div>
+                    {(state.channels.slack.dmPolicy === 'allowlist' ||
+                      !!state.channels.slack.allowFromRaw.trim()) && (
+                      <div className="space-y-1">
+                        <Textarea
+                          label={
+                            <span className="inline-flex items-center gap-1">
+                              dm.allowFrom
+                              <Tooltip content="Optional DM allowlist (Slack user IDs). Required when dmPolicy=allowlist.">
+                                <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
+                                  <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                                </span>
+                              </Tooltip>
+                            </span>
+                          }
+                          classNames={{ label: 'pointer-events-auto' }}
+                          placeholder={'U012ABCDEF\nU045GHIJKL'}
+                          value={state.channels.slack.allowFromRaw}
+                          onValueChange={(v) =>
+                            setState((s) => ({
+                              ...s,
+                              channels: {
+                                ...s.channels,
+                                slack: { ...s.channels.slack, allowFromRaw: v },
+                              },
+                            }))
+                          }
+                          variant="bordered"
+                          minRows={3}
+                        />
+                        {state.channels.slack.dmPolicy === 'allowlist' &&
+                          !state.channels.slack.allowFromRaw.trim() && (
+                            <p className="text-xs text-warning">
+                              Required for dmPolicy=&quot;allowlist&quot; (Slack user IDs).
+                            </p>
+                          )}
+                      </div>
+                    )}
                   </div>
                 )}
               </CardBody>
