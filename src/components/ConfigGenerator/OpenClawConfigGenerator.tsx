@@ -14,6 +14,7 @@ import {
   SelectItem,
   Switch,
   Textarea,
+  Tooltip,
 } from '@heroui/react';
 import { useMemo, useState } from 'react';
 import {
@@ -29,6 +30,7 @@ import {
   IconCopy,
   IconDiscord,
   IconDocumentText,
+  IconInfoSolid,
   IconLockClosed,
   IconSlack,
   IconTelegram,
@@ -175,15 +177,31 @@ export default function OpenClawConfigGenerator() {
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="grid sm:grid-cols-2 gap-4 items-center">
                   <Switch
                     isSelected={state.safeMode}
                     onValueChange={(v) => setState((s) => ({ ...s, safeMode: v }))}
                   >
-                    Safe Mode (recommended)
+                    <span className="inline-flex items-center gap-1">
+                      Safe Mode
+                      <Tooltip content="Recommended: sandbox non-main sessions + safer tool defaults.">
+                        <span className="inline-flex items-center text-default-500 cursor-help">
+                          <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                        </span>
+                      </Tooltip>
+                    </span>
                   </Switch>
                   <Select
-                    label="Secrets"
+                    label={
+                      <span className="inline-flex items-center gap-1">
+                        Secrets
+                        <Tooltip content="Prefer env vars or ${ENV_VAR} substitution to keep keys out of JSON.">
+                          <span className="inline-flex items-center text-default-500 cursor-help">
+                            <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                          </span>
+                        </Tooltip>
+                      </span>
+                    }
                     selectedKeys={[state.secretsMode]}
                     onSelectionChange={(keys) => {
                       if (keys === 'all') return;
@@ -192,10 +210,19 @@ export default function OpenClawConfigGenerator() {
                       setState((s) => ({ ...s, secretsMode: mode }));
                     }}
                     variant="bordered"
-                    className="sm:max-w-[260px]"
                   >
-                    <SelectItem key="env">Keep secrets out of JSON (env vars)</SelectItem>
-                    <SelectItem key="inline">Inline secrets into JSON</SelectItem>
+                    <SelectItem
+                      key="env"
+                      description="Recommended. Use env vars and keep openclaw.json clean."
+                    >
+                      Env vars
+                    </SelectItem>
+                    <SelectItem
+                      key="inline"
+                      description="Not recommended. Writes secrets directly into JSON."
+                    >
+                      Inline in JSON
+                    </SelectItem>
                   </Select>
                 </div>
 
@@ -215,13 +242,21 @@ export default function OpenClawConfigGenerator() {
                 <div>
                   <h2 className="text-xl font-bold">AI Providers</h2>
                   <p className="text-sm text-default-700 dark:text-default-500">
-                    Use a built-in provider model id, or define a custom provider with a base URL
-                    and API key.
+                    Use a built-in model id, or define a custom provider (baseUrl + apiKey).
                   </p>
                 </div>
 
                 <Select
-                  label="Mode"
+                  label={
+                    <span className="inline-flex items-center gap-1">
+                      Mode
+                      <Tooltip content="Built-in: only pick a model id. Custom: generate models.providers with baseUrl + apiKey.">
+                        <span className="inline-flex items-center text-default-500 cursor-help">
+                          <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                        </span>
+                      </Tooltip>
+                    </span>
+                  }
                   selectedKeys={[state.ai.mode]}
                   onSelectionChange={(keys) => {
                     if (keys === 'all') return;
@@ -232,12 +267,19 @@ export default function OpenClawConfigGenerator() {
                     setState((s) => ({ ...s, ai: { ...s.ai, mode } }));
                   }}
                   variant="bordered"
-                  className="sm:max-w-[360px]"
                 >
-                  <SelectItem key="built-in">
-                    Built-in provider (enter model id like anthropic/claude-opus-4-5)
+                  <SelectItem
+                    key="built-in"
+                    description="Enter a model id like anthropic/claude-opus-4-5; keys are usually env vars."
+                  >
+                    Built-in
                   </SelectItem>
-                  <SelectItem key="custom">Custom provider (baseUrl + apiKey)</SelectItem>
+                  <SelectItem
+                    key="custom"
+                    description="Generate models.providers with your baseUrl and apiKey (${ENV_VAR} supported)."
+                  >
+                    Custom baseUrl
+                  </SelectItem>
                 </Select>
 
                 {state.ai.mode === 'built-in' ? (
