@@ -79,7 +79,7 @@ function DmPolicyLabel({
       <Tooltip content={tooltip}>
         <button
           type="button"
-          tabIndex={-1}
+          tabIndex={0}
           aria-label="More info"
           onPointerDown={stop}
           onClick={stop}
@@ -814,22 +814,16 @@ export default function OpenClawConfigGenerator() {
                           <Radio
                             key={key}
                             value={key}
-                            description={
-                              <span className="text-xs text-default-500 leading-snug">
-                                {copy.shortHint}
-                              </span>
-                            }
                             classNames={{
                               base: 'group',
                               label: 'pointer-events-auto',
                               labelWrapper: 'w-full pointer-events-auto',
-                              description: 'text-xs pointer-events-auto',
                             }}
                           >
                             <DmPolicyLabel
                               title={copy.title}
                               badge={copy.badge}
-                              tooltip={copy.tooltip}
+                              tooltip={`${copy.shortHint} ${copy.tooltip}`}
                             />
                           </Radio>
                         );
@@ -951,22 +945,16 @@ export default function OpenClawConfigGenerator() {
                           <Radio
                             key={key}
                             value={key}
-                            description={
-                              <span className="text-xs text-default-500 leading-snug">
-                                {copy.shortHint}
-                              </span>
-                            }
                             classNames={{
                               base: 'group',
                               label: 'pointer-events-auto',
                               labelWrapper: 'w-full pointer-events-auto',
-                              description: 'text-xs pointer-events-auto',
                             }}
                           >
                             <DmPolicyLabel
                               title={copy.title}
                               badge={copy.badge}
-                              tooltip={copy.tooltip}
+                              tooltip={`${copy.shortHint} ${copy.tooltip}`}
                             />
                           </Radio>
                         );
@@ -1058,22 +1046,16 @@ export default function OpenClawConfigGenerator() {
                           <Radio
                             key={key}
                             value={key}
-                            description={
-                              <span className="text-xs text-default-500 leading-snug">
-                                {copy.shortHint}
-                              </span>
-                            }
                             classNames={{
                               base: 'group',
                               label: 'pointer-events-auto',
                               labelWrapper: 'w-full pointer-events-auto',
-                              description: 'text-xs pointer-events-auto',
                             }}
                           >
                             <DmPolicyLabel
                               title={copy.title}
                               badge={copy.badge}
-                              tooltip={copy.tooltip}
+                              tooltip={`${copy.shortHint} ${copy.tooltip}`}
                             />
                           </Radio>
                         );
@@ -1188,22 +1170,16 @@ export default function OpenClawConfigGenerator() {
                           <Radio
                             key={key}
                             value={key}
-                            description={
-                              <span className="text-xs text-default-500 leading-snug">
-                                {copy.shortHint}
-                              </span>
-                            }
                             classNames={{
                               base: 'group',
                               label: 'pointer-events-auto',
                               labelWrapper: 'w-full pointer-events-auto',
-                              description: 'text-xs pointer-events-auto',
                             }}
                           >
                             <DmPolicyLabel
                               title={copy.title}
                               badge={copy.badge}
-                              tooltip={copy.tooltip}
+                              tooltip={`${copy.shortHint} ${copy.tooltip}`}
                             />
                           </Radio>
                         );
