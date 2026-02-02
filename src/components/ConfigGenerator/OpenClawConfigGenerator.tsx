@@ -54,6 +54,11 @@ function DmPolicyLabel({
   badge?: { text: string; tone: 'primary' | 'warning' };
   tooltip: string;
 }) {
+  const stop = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   return (
     <div className="flex items-center justify-between gap-2 w-full">
       <div className="flex items-center gap-2 min-w-0">
@@ -61,7 +66,7 @@ function DmPolicyLabel({
         {badge && (
           <span
             className={[
-              'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold border',
+              'shrink-0 rounded-md px-1.5 py-[2px] text-[9px] leading-none font-semibold border',
               badge.tone === 'primary'
                 ? 'text-primary border-primary/40 bg-primary/10'
                 : 'text-warning border-warning/40 bg-warning/10',
@@ -72,9 +77,16 @@ function DmPolicyLabel({
         )}
       </div>
       <Tooltip content={tooltip}>
-        <span className="inline-flex items-center text-default-500 cursor-help">
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label="More info"
+          onPointerDown={stop}
+          onClick={stop}
+          className="inline-flex items-center text-default-500 cursor-help opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto group-focus-within:pointer-events-auto"
+        >
           <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
-        </span>
+        </button>
       </Tooltip>
     </div>
   );
@@ -808,8 +820,10 @@ export default function OpenClawConfigGenerator() {
                               </span>
                             }
                             classNames={{
-                              labelWrapper: 'w-full',
-                              description: 'text-xs',
+                              base: 'group',
+                              label: 'pointer-events-auto',
+                              labelWrapper: 'w-full pointer-events-auto',
+                              description: 'text-xs pointer-events-auto',
                             }}
                           >
                             <DmPolicyLabel
@@ -852,12 +866,13 @@ export default function OpenClawConfigGenerator() {
                           <span className="inline-flex items-center gap-1">
                             allowFrom
                             <Tooltip content='Optional allowlist for Telegram DMs. For dmPolicy="open", include "*".'>
-                              <span className="inline-flex items-center text-default-500 cursor-help">
+                              <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                 <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                               </span>
                             </Tooltip>
                           </span>
                         }
+                        classNames={{ label: 'pointer-events-auto' }}
                         placeholder={'tg:123456789\n*'}
                         value={state.channels.telegram.allowFromRaw}
                         onValueChange={(v) =>
@@ -942,8 +957,10 @@ export default function OpenClawConfigGenerator() {
                               </span>
                             }
                             classNames={{
-                              labelWrapper: 'w-full',
-                              description: 'text-xs',
+                              base: 'group',
+                              label: 'pointer-events-auto',
+                              labelWrapper: 'w-full pointer-events-auto',
+                              description: 'text-xs pointer-events-auto',
                             }}
                           >
                             <DmPolicyLabel
@@ -962,12 +979,13 @@ export default function OpenClawConfigGenerator() {
                           <span className="inline-flex items-center gap-1">
                             allowFrom
                             <Tooltip content="WhatsApp allowlist (E.164). Required when dmPolicy=allowlist.">
-                              <span className="inline-flex items-center text-default-500 cursor-help">
+                              <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                 <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                               </span>
                             </Tooltip>
                           </span>
                         }
+                        classNames={{ label: 'pointer-events-auto' }}
                         placeholder={'+15551234567\n+15557654321'}
                         value={state.channels.whatsapp.allowFromRaw}
                         onValueChange={(v) =>
@@ -1046,8 +1064,10 @@ export default function OpenClawConfigGenerator() {
                               </span>
                             }
                             classNames={{
-                              labelWrapper: 'w-full',
-                              description: 'text-xs',
+                              base: 'group',
+                              label: 'pointer-events-auto',
+                              labelWrapper: 'w-full pointer-events-auto',
+                              description: 'text-xs pointer-events-auto',
                             }}
                           >
                             <DmPolicyLabel
@@ -1090,12 +1110,13 @@ export default function OpenClawConfigGenerator() {
                           <span className="inline-flex items-center gap-1">
                             dm.allowFrom
                             <Tooltip content="Optional DM allowlist (Discord user IDs). Required when dmPolicy=allowlist.">
-                              <span className="inline-flex items-center text-default-500 cursor-help">
+                              <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                 <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                               </span>
                             </Tooltip>
                           </span>
                         }
+                        classNames={{ label: 'pointer-events-auto' }}
                         placeholder={'123456789012345678\n987654321098765432'}
                         value={state.channels.discord.allowFromRaw}
                         onValueChange={(v) =>
@@ -1173,8 +1194,10 @@ export default function OpenClawConfigGenerator() {
                               </span>
                             }
                             classNames={{
-                              labelWrapper: 'w-full',
-                              description: 'text-xs',
+                              base: 'group',
+                              label: 'pointer-events-auto',
+                              labelWrapper: 'w-full pointer-events-auto',
+                              description: 'text-xs pointer-events-auto',
                             }}
                           >
                             <DmPolicyLabel
@@ -1234,12 +1257,13 @@ export default function OpenClawConfigGenerator() {
                           <span className="inline-flex items-center gap-1">
                             dm.allowFrom
                             <Tooltip content="Optional DM allowlist (Slack user IDs). Required when dmPolicy=allowlist.">
-                              <span className="inline-flex items-center text-default-500 cursor-help">
+                              <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                 <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                               </span>
                             </Tooltip>
                           </span>
                         }
+                        classNames={{ label: 'pointer-events-auto' }}
                         placeholder={'U012ABCDEF\nU045GHIJKL'}
                         value={state.channels.slack.allowFromRaw}
                         onValueChange={(v) =>
