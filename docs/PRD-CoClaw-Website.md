@@ -854,7 +854,7 @@ src/
     ├── index.astro              # URL: /
     ├── [...slug].astro          # Dynamic routes (no /docs/ prefix)
     └── tools/
-        └── config-generator.astro # URL: /tools/config-generator
+        └── openclaw-config-generator.astro # URL: /openclaw-config-generator
 ```
 
 **URL Structure Philosophy:**

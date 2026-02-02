@@ -4,59 +4,27 @@ import Section from '../../components/layout/Section.astro';
 ---
 
 <BaseLayout
-  title="OpenClaw Config Generator (Roadmap) + Secure Config Checklist | CoClaw"
-  description="Visual config generator is in development. Use this secure checklist and links to official docs to create a safe OpenClaw configuration today."
+  title="OpenClaw Config Generator | CoClaw"
+  description="This page moved. Use the new OpenClaw Config Generator to build openclaw.json in your browser."
   keywords="OpenClaw config generator, OpenClaw configuration, openclaw.json, OpenClaw allowlist, OpenClaw security"
 >
+  <Fragment slot="head">
+    <meta http-equiv="refresh" content="0; url=/openclaw-config-generator" />
+    <link rel="canonical" href="/openclaw-config-generator" />
+  </Fragment>
+
   <Section containerClass="max-w-3xl">
-    <h1 class="text-4xl md:text-5xl font-bold mb-6">Visual Config Generator</h1>
+    <h1 class="text-4xl md:text-5xl font-bold mb-6">Config Generator moved</h1>
     <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed mb-8">
-      The no-code OpenClaw configuration generator is under development. In the meantime, use the
-      secure checklist below and the official docs to build your configuration safely.
+      This page is now <a class="text-primary hover:underline" href="/openclaw-config-generator"
+        >/openclaw-config-generator</a
+      >.
     </p>
-
-    <div class="rounded-2xl border border-divider bg-content1 p-6 mb-10">
-      <h2 class="text-2xl font-bold mb-4">Secure Config Checklist</h2>
-      <ol class="list-decimal pl-6 space-y-3 text-default-800 dark:text-default-600">
-        <li>
-          Locate your config file (commonly <code>~/.openclaw/openclaw.json</code> after onboarding).
-        </li>
-        <li>
-          Set a conservative DM policy for messaging channels (start with an <strong
-            >allowlist</strong
-          >).
-        </li>
-        <li>Restrict who can control the agent: add your number/user IDs to the allowlist.</li>
-        <li>Keep tools locked down: only allowlist the tools you actually need for that agent.</li>
-        <li>
-          Test changes in a non-production environment before enabling on your primary account.
-        </li>
-      </ol>
-    </div>
-
-    <div class="flex flex-col sm:flex-row gap-4">
-      <a
-        class="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-6 py-3 font-semibold"
-        href="https://github.com/openclaw/openclaw"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        OpenClaw on GitHub
-      </a>
-      <a
-        class="inline-flex items-center justify-center rounded-full border border-divider bg-content1 px-6 py-3 font-semibold text-foreground"
-        href="https://docs.openclaw.ai"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Official Docs
-      </a>
-      <a
-        class="inline-flex items-center justify-center rounded-full border border-divider bg-content1 px-6 py-3 font-semibold text-foreground"
-        href="/getting-started"
-      >
-        Getting Started
-      </a>
-    </div>
+    <a
+      class="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-6 py-3 font-semibold"
+      href="/openclaw-config-generator"
+    >
+      Go to Config Generator →
+    </a>
   </Section>
 </BaseLayout>

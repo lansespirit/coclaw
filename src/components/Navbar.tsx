@@ -72,7 +72,7 @@ export const Navbar = () => {
             <Button
               as={Link}
               color="primary"
-              href="/tools/config-generator"
+              href="/openclaw-config-generator"
               variant="solid"
               radius="full"
               className="hidden sm:inline-flex font-semibold px-6"
@@ -102,7 +102,7 @@ export const Navbar = () => {
             <Button
               as={Link}
               color="primary"
-              href="/tools/config-generator"
+              href="/openclaw-config-generator"
               variant="solid"
               className="w-full mt-4"
             >

@@ -51,8 +51,11 @@ export { default as IconShieldCheckSolid } from '~icons/heroicons-solid/shield-c
 export { default as IconSparkles } from '~icons/heroicons-outline/sparkles';
 export { default as IconSun } from '~icons/heroicons-outline/sun';
 export { default as IconTranslate } from '~icons/heroicons-outline/translate';
+export { default as IconTelegram } from '~icons/simple-icons/telegram';
 export { default as IconUserGroup } from '~icons/heroicons-outline/user-group';
 export { default as IconWarning } from '~icons/heroicons-outline/exclamation';
+export { default as IconWhatsApp } from '~icons/simple-icons/whatsapp';
+export { default as IconSlack } from '~icons/simple-icons/slack';
 export { default as IconVultr } from '~icons/simple-icons/vultr';
 export { default as IconVideoCamera } from '~icons/heroicons-outline/video-camera';
 export { default as IconWindows } from '~icons/simple-icons/windows';

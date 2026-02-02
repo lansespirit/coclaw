@@ -80,6 +80,9 @@ wrangler.toml.local
 .claude/
 .agent/
 
+# Local reference repos (cloned for offline source analysis)
+.ref/
+
 # Husky (keep the directory but ignore generated files)
 .husky/_/
 

@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/layout/Section.astro';
+import OpenClawConfigGenerator from '../components/ConfigGenerator/OpenClawConfigGenerator';
+---
+
+<BaseLayout
+  title="OpenClaw Config Generator | CoClaw"
+  description="Generate a secure OpenClaw configuration (openclaw.json) visually. Runs 100% client-side."
+  keywords="OpenClaw config generator, openclaw.json, OpenClaw configuration, allowlist, dmPolicy, sandbox"
+>
+  <Section containerClass="max-w-6xl">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">OpenClaw Config Generator</h1>
+    <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed mb-8 max-w-3xl">
+      Build a safer <code class="text-primary">openclaw.json</code> without hand-editing JSON. This tool
+      runs entirely in your browser.
+    </p>
+
+    <OpenClawConfigGenerator client:load />
+  </Section>
+</BaseLayout>

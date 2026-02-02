@@ -299,7 +299,7 @@ export default function QuickInstallTabs() {
         <div className="space-y-2 text-default-700 dark:text-default-500">
           <p>
             📝{' '}
-            <a href="/tools/config-generator" className="text-primary hover:underline">
+            <a href="/openclaw-config-generator" className="text-primary hover:underline">
               Use the Configuration Generator
             </a>{' '}
             to set up your channels
