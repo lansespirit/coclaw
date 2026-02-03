@@ -24,8 +24,8 @@ import {
   <div
     class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
   >
-    <!-- Hero Section -->
-    <Section containerClass="text-center pt-24 pb-12">
+    <!-- Hero + Search -->
+    <Section py="pt-24 pb-14" containerClass="text-center">
       <h1
         class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent"
       >
@@ -34,11 +34,8 @@ import {
       <p class="text-xl text-default-800 dark:text-default-600 max-w-3xl mx-auto">
         Find solutions to common OpenClaw issues and get back up and running quickly
       </p>
-    </Section>
 
-    <!-- Search Bar Section -->
-    <Section>
-      <div class="max-w-3xl mx-auto">
+      <div class="mt-10 max-w-3xl mx-auto">
         <div class="relative">
           <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <IconSearch className="w-5 h-5 text-default-500" aria-hidden="true" />
@@ -56,7 +53,7 @@ import {
     </Section>
 
     <!-- Issue Categories -->
-    <Section containerClass="mt-16">
+    <Section py="pt-10 pb-16">
       <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center">Browse by Category</h2>
       <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Installation Issues -->
@@ -170,7 +167,7 @@ import {
     </Section>
 
     <!-- Common Issues -->
-    <Section containerClass="mt-16">
+    <Section py="py-16">
       <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center">Most Common Issues</h2>
       <div class="max-w-4xl mx-auto space-y-4">
         <!-- Issue 1 -->
@@ -303,7 +300,7 @@ import {
     </Section>
 
     <!-- Community Support Section -->
-    <Section containerClass="mt-16 text-center">
+    <Section py="pt-12 pb-20" containerClass="text-center">
       <h2 class="text-3xl md:text-4xl font-bold mb-6">Still Need Help?</h2>
       <p class="text-default-800 dark:text-default-600 max-w-2xl mx-auto text-lg mb-8">
         Can't find a solution? Our community is here to help you troubleshoot your issue
