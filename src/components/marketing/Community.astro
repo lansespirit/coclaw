@@ -4,17 +4,15 @@ import Section from '../layout/Section.astro';
 import CommunityBackground from './backgrounds/CommunityBackground.astro';
 import {
   IconArrowTopRightOnSquare,
-  IconBookOpen,
   IconChat,
-  IconCog,
   IconDiscord,
   IconGithub,
 } from '../icons';
 ---
 
 <Section class="overflow-hidden" containerClass="relative z-10">
-  <div class="flex flex-col md:flex-row gap-12 items-center mb-32">
-    <div class="flex-1 space-y-8">
+  <div class="flex flex-col items-center text-center mb-20">
+    <div class="max-w-3xl space-y-8">
       <h2 class="text-4xl md:text-6xl font-bold tracking-tight">
         Join the <br />
         OpenClaw <span
@@ -23,74 +21,24 @@ import {
         >
       </h2>
       <p class="text-xl text-default-800 dark:text-default-600 max-w-lg">
-        123,000+ developers building the future of personal AI
+        157k stars on GitHub — and growing
       </p>
       <div class="flex gap-4">
         <Button
           as={Link}
-          href="/getting-started"
+          href="https://forum.coclaw.com"
+          target="_blank"
+          rel="noopener noreferrer"
           color="secondary"
           radius="full"
           size="lg"
           className="font-semibold px-8"
           client:visible
         >
-          Get Started &rarr;
-        </Button>
-        <Button
-          as={Link}
-          href="https://github.com/openclaw/openclaw"
-          target="_blank"
-          rel="noopener noreferrer"
-          variant="bordered"
-          radius="full"
-          size="lg"
-          className="font-semibold px-8"
-          client:visible
-        >
-          <IconGithub className="w-5 h-5 mr-2" aria-hidden="true" />
-          Github
+          Join the Forum &rarr;
         </Button>
       </div>
     </div>
-
-    <div class="flex-1 flex gap-6 w-full">
-      <div
-        class="m-card-surface m-card-hover-border m-card-hover-lift p-6 flex-1 cursor-pointer group"
-      >
-        <div
-          class="w-10 h-10 rounded-full bg-pink-500/10 text-pink-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
-        >
-          <IconBookOpen className="w-5 h-5" aria-hidden="true" />
-        </div>
-        <h3 class="font-bold text-foreground mb-2">Getting Started</h3>
-        <p class="text-default-800 dark:text-default-600 text-sm">
-          Install your personal AI assistant in minutes with step-by-step tutorials for macOS,
-          Linux, Windows, and more.
-        </p>
-      </div>
-      <div
-        class="m-card-surface m-card-hover-border m-card-hover-lift p-6 flex-1 cursor-pointer group"
-      >
-        <div
-          class="w-10 h-10 rounded-full bg-purple-500/10 text-purple-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
-        >
-          <IconCog className="w-5 h-5" aria-hidden="true" />
-        </div>
-        <h3 class="font-bold text-foreground mb-2">Visual Config Generator</h3>
-        <p class="text-default-800 dark:text-default-600 text-sm">
-          Create secure OpenClaw configurations in minutes with our no-code tool. Platform-specific,
-          security-first, and beginner-friendly.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <div class="text-center mb-12">
-    <h2 class="text-4xl md:text-5xl font-bold mb-4">Community</h2>
-    <p class="text-default-800 dark:text-default-600">
-      Get involved in our community. Everyone is welcome!
-    </p>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -15,9 +15,8 @@ import { IconArrowDown, IconCheck, IconInfoSolid, IconShieldCheckSolid } from '.
         <span class="text-green-500">Messaging Apps</span>
       </h2>
       <p class="text-xl text-default-800 dark:text-default-600">
-        OpenClaw seamlessly integrates with 10+ messaging platforms, bringing AI assistance to
-        wherever you communicate. Set up WhatsApp, Telegram, Discord, Slack, and more in minutes
-        with our step-by-step guides.
+        OpenClaw works with the messaging apps you already use, bringing AI help to wherever you
+        chat. Set up WhatsApp, Telegram, Discord, Slack, and more with step-by-step guides.
       </p>
     </div>
 
@@ -142,9 +141,10 @@ import { IconArrowDown, IconCheck, IconInfoSolid, IconShieldCheckSolid } from '.
         <span class="text-orange-500">on Your Device</span>
       </h2>
       <p class="text-xl text-default-800 dark:text-default-600">
-        OpenClaw runs entirely on your hardware—Mac, Linux, Windows, or even Raspberry Pi. No cloud
-        dependencies, no data sharing, complete control. DM pairing and sandboxing ensure security
-        by default.
+        OpenClaw runs on your own computer or server—Mac, Linux, Windows, or even Raspberry Pi. Use
+        Claude/GPT or local models: you choose. CoClaw is a community site and never needs access
+        to your chats. Safer defaults (like one-time approvals for new chats) help keep things
+        under your control.
       </p>
     </div>
 
@@ -233,13 +233,12 @@ import { IconArrowDown, IconCheck, IconInfoSolid, IconShieldCheckSolid } from '.
           <span class="text-zinc-500"># Install OpenClaw</span><br />
           <span class="text-purple-400">npm</span>
           <span class="text-white">install -g openclaw@latest</span><br /><br />
-          <span class="text-zinc-500"># Onboard with automatic daemon setup</span><br />
+          <span class="text-zinc-500"># Run the guided setup</span><br />
           <span class="text-purple-400">openclaw</span>
-          <span class="text-white">onboard --install-daemon</span><br /><br />
-          <span class="text-zinc-500"># Connect your first channel (WhatsApp)</span><br />
-          <span class="text-purple-400">openclaw</span>
-          <span class="text-white">channels login</span><br /><br />
-          <span class="text-zinc-500"># Start chatting with your AI assistant!</span><br />
+          <span class="text-white">onboard</span><br /><br />
+          <span class="text-zinc-500"># Follow the prompts to connect WhatsApp/Telegram/etc.</span
+          ><br /><br />
+          <span class="text-zinc-500"># Start chatting with your assistant</span><br />
           <span class="text-green-400"># Gateway runs locally on ws://127.0.0.1:18789</span>
         </div>
       </div>
