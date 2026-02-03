@@ -35,15 +35,21 @@ if (!issue) {
     <div class="hidden" data-pagefind-filter="type:issue"></div>
     <div class="hidden" data-pagefind-meta="title">{issue.title}</div>
     <div class="hidden" data-pagefind-meta="issue_number">{issue.number}</div>
-    {(issue.taxonomy?.channels ?? []).map((c) => (
-      <div class="hidden" data-pagefind-filter={`channel:${c}`}></div>
-    ))}
-    {(issue.taxonomy?.platforms ?? []).map((p) => (
-      <div class="hidden" data-pagefind-filter={`platform:${p}`}></div>
-    ))}
-    {(issue.taxonomy?.components ?? []).map((c) => (
-      <div class="hidden" data-pagefind-filter={`component:${c}`}></div>
-    ))}
+    {
+      (issue.taxonomy?.channels ?? []).map((c) => (
+        <div class="hidden" data-pagefind-filter={`channel:${c}`} />
+      ))
+    }
+    {
+      (issue.taxonomy?.platforms ?? []).map((p) => (
+        <div class="hidden" data-pagefind-filter={`platform:${p}`} />
+      ))
+    }
+    {
+      (issue.taxonomy?.components ?? []).map((c) => (
+        <div class="hidden" data-pagefind-filter={`component:${c}`} />
+      ))
+    }
     <Section py="pt-24 pb-10">
       <div class="max-w-4xl mx-auto">
         <div class="flex items-center gap-3 text-sm text-default-600">
@@ -72,40 +78,44 @@ if (!issue) {
 
         <h1 class="mt-4 text-3xl md:text-4xl font-bold text-foreground">{issue.title}</h1>
 
-        {issue.labels?.length ? (
-          <div class="mt-4 flex flex-wrap gap-2">
-            {issue.labels.map((l) => (
-              <span
-                class="inline-flex items-center rounded-full border border-divider bg-content2 px-3 py-1 text-xs text-default-700"
-                data-pagefind-filter={`label:${labelToFilterValue(l)}`}
-              >
-                {l}
-              </span>
-            ))}
-          </div>
-        ) : null}
+        {
+          issue.labels?.length ? (
+            <div class="mt-4 flex flex-wrap gap-2">
+              {issue.labels.map((l) => (
+                <span
+                  class="inline-flex items-center rounded-full border border-divider bg-content2 px-3 py-1 text-xs text-default-700"
+                  data-pagefind-filter={`label:${labelToFilterValue(l)}`}
+                >
+                  {l}
+                </span>
+              ))}
+            </div>
+          ) : null
+        }
 
-        {(issue.taxonomy?.channels?.length ||
-          issue.taxonomy?.platforms?.length ||
-          issue.taxonomy?.components?.length) && (
-          <div class="mt-3 flex flex-wrap gap-2">
-            {(issue.taxonomy?.channels ?? []).map((c) => (
-              <span class="inline-flex items-center rounded-full border border-divider bg-content2 px-3 py-1 text-xs text-default-700">
-                channel:{c}
-              </span>
-            ))}
-            {(issue.taxonomy?.platforms ?? []).map((p) => (
-              <span class="inline-flex items-center rounded-full border border-divider bg-content2 px-3 py-1 text-xs text-default-700">
-                platform:{p}
-              </span>
-            ))}
-            {(issue.taxonomy?.components ?? []).map((c) => (
-              <span class="inline-flex items-center rounded-full border border-divider bg-content2 px-3 py-1 text-xs text-default-700">
-                component:{c}
-              </span>
-            ))}
-          </div>
-        )}
+        {
+          (issue.taxonomy?.channels?.length ||
+            issue.taxonomy?.platforms?.length ||
+            issue.taxonomy?.components?.length) && (
+            <div class="mt-3 flex flex-wrap gap-2">
+              {(issue.taxonomy?.channels ?? []).map((c) => (
+                <span class="inline-flex items-center rounded-full border border-divider bg-content2 px-3 py-1 text-xs text-default-700">
+                  channel:{c}
+                </span>
+              ))}
+              {(issue.taxonomy?.platforms ?? []).map((p) => (
+                <span class="inline-flex items-center rounded-full border border-divider bg-content2 px-3 py-1 text-xs text-default-700">
+                  platform:{p}
+                </span>
+              ))}
+              {(issue.taxonomy?.components ?? []).map((c) => (
+                <span class="inline-flex items-center rounded-full border border-divider bg-content2 px-3 py-1 text-xs text-default-700">
+                  component:{c}
+                </span>
+              ))}
+            </div>
+          )
+        }
 
         <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-default-600">
           <div class="rounded-xl border border-divider bg-content1 p-4">
@@ -128,9 +138,9 @@ if (!issue) {
       <div class="max-w-4xl mx-auto">
         <div class="rounded-2xl border border-divider bg-content1 p-6">
           <h2 class="text-lg font-semibold mb-3">Issue description</h2>
-          <pre class="whitespace-pre-wrap break-words text-sm text-default-800 dark:text-default-600">
-{issue.body || 'No description provided.'}</pre
-          >
+          <pre
+            class="whitespace-pre-wrap break-words text-sm text-default-800 dark:text-default-600">
+{issue.body || 'No description provided.'}</pre>
         </div>
 
         <div class="mt-6 rounded-2xl border border-divider bg-content1 p-6">

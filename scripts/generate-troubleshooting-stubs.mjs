@@ -83,7 +83,10 @@ async function main() {
     const slug = `github-issue-${number}-${safeFilename(title)}`;
 
     const labels = Array.isArray(issue.labels)
-      ? issue.labels.map(String).map((l) => l.trim()).filter(Boolean)
+      ? issue.labels
+          .map(String)
+          .map((l) => l.trim())
+          .filter(Boolean)
       : [];
 
     const channels = Array.isArray(issue.taxonomy?.channels) ? issue.taxonomy.channels : [];
@@ -98,7 +101,8 @@ async function main() {
 
     const description = `Real user-reported issue (#${number}) from GitHub: ${title}`.slice(0, 180);
 
-    const frontmatter = `---\n` +
+    const frontmatter =
+      `---\n` +
       `title: "${escapeYamlString(title)}"\n` +
       `description: "${escapeYamlString(description)}"\n` +
       `kind: "case"\n` +

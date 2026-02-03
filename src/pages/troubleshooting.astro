@@ -29,16 +29,36 @@ const featuredSolutions = [...solutions]
   }));
 
 const channels = Array.from(
-  new Set(solutions.flatMap((e) => e.data.channel ?? []).map((v) => v.trim()).filter(Boolean))
+  new Set(
+    solutions
+      .flatMap((e) => e.data.channel ?? [])
+      .map((v) => v.trim())
+      .filter(Boolean)
+  )
 ).sort((a, b) => a.localeCompare(b));
 const os = Array.from(
-  new Set(solutions.flatMap((e) => e.data.os ?? []).map((v) => v.trim()).filter(Boolean))
+  new Set(
+    solutions
+      .flatMap((e) => e.data.os ?? [])
+      .map((v) => v.trim())
+      .filter(Boolean)
+  )
 ).sort((a, b) => a.localeCompare(b));
 const components = Array.from(
-  new Set(solutions.map((e) => e.data.component ?? '').map((v) => v.trim()).filter(Boolean))
+  new Set(
+    solutions
+      .map((e) => e.data.component ?? '')
+      .map((v) => v.trim())
+      .filter(Boolean)
+  )
 ).sort((a, b) => a.localeCompare(b));
 const severities = Array.from(
-  new Set(solutions.map((e) => e.data.severity ?? '').map((v) => v.trim()).filter(Boolean))
+  new Set(
+    solutions
+      .map((e) => e.data.severity ?? '')
+      .map((v) => v.trim())
+      .filter(Boolean)
+  )
 ).sort((a, b) => a.localeCompare(b));
 ---
 
@@ -237,7 +257,8 @@ const severities = Array.from(
             <div class="flex-1">
               <h3 class="text-lg font-semibold mb-2">Telegram: Bot API requests failing</h3>
               <p class="text-default-700 dark:text-default-500 mb-3">
-                Common causes include outbound network/DNS issues to Telegram, or missing token configuration.
+                Common causes include outbound network/DNS issues to Telegram, or missing token
+                configuration.
               </p>
               <a
                 href="/troubleshooting/solutions/telegram-setmycommands-failed"
@@ -293,7 +314,10 @@ const severities = Array.from(
                 This usually occurs when trying to install globally without proper permissions. Use
                 sudo or configure npm prefix.
               </p>
-              <a href="/troubleshooting/solutions/npm-eacces-global-install" class="text-primary hover:underline text-sm font-medium">
+              <a
+                href="/troubleshooting/solutions/npm-eacces-global-install"
+                class="text-primary hover:underline text-sm font-medium"
+              >
                 View solution →
               </a>
             </div>
@@ -311,9 +335,12 @@ const severities = Array.from(
               </div>
             </div>
             <div class="flex-1">
-              <h3 class="text-lg font-semibold mb-2">Control UI: disconnected (1008): pairing required</h3>
+              <h3 class="text-lg font-semibold mb-2">
+                Control UI: disconnected (1008): pairing required
+              </h3>
               <p class="text-default-700 dark:text-default-500 mb-3">
-                First-time remote connections require one-time device approval. Approve the device, then reload.
+                First-time remote connections require one-time device approval. Approve the device,
+                then reload.
               </p>
               <a
                 href="/troubleshooting/solutions/control-ui-pairing-required"
@@ -331,20 +358,26 @@ const severities = Array.from(
     <Section py="pt-4 pb-20">
       <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center">Featured Solutions</h2>
       <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-4">
-        {featuredSolutions.map((c) => (
-          <a
-            href={c.href}
-            class="rounded-xl border border-divider bg-content1 p-6 hover:border-primary/40 transition-colors"
-          >
-            <h3 class="font-semibold text-foreground mb-2">{c.title}</h3>
-            <p class="text-sm text-default-700 dark:text-default-500 line-clamp-2">{c.description}</p>
-            <div class="mt-4 text-sm font-medium text-primary">Read →</div>
-          </a>
-        ))}
+        {
+          featuredSolutions.map((c) => (
+            <a
+              href={c.href}
+              class="rounded-xl border border-divider bg-content1 p-6 hover:border-primary/40 transition-colors"
+            >
+              <h3 class="font-semibold text-foreground mb-2">{c.title}</h3>
+              <p class="text-sm text-default-700 dark:text-default-500 line-clamp-2">
+                {c.description}
+              </p>
+              <div class="mt-4 text-sm font-medium text-primary">Read →</div>
+            </a>
+          ))
+        }
       </div>
       <div class="mt-6 text-center text-sm text-default-600">
         Need more? Browse{' '}
-        <a class="text-primary hover:underline" href="/troubleshooting/solutions">all solutions</a>{' '}
+        <a class="text-primary hover:underline" href="/troubleshooting/solutions">all solutions</a>{
+          ' '
+        }
         or ask for help below.
       </div>
     </Section>

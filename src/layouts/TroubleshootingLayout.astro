@@ -45,17 +45,17 @@ const errorSignatures = (frontmatter.errorSignatures ?? []).filter(Boolean);
     <!-- Pagefind filters/meta -->
     <div class="hidden" data-pagefind-filter="type:troubleshooting"></div>
     <div class="hidden" data-pagefind-filter={`kind:${kind}`}></div>
-    {component ? <div class="hidden" data-pagefind-filter={`component:${component}`}></div> : null}
-    {severity ? <div class="hidden" data-pagefind-filter={`severity:${severity}`}></div> : null}
-    {channels.map((c) => (
-      <div class="hidden" data-pagefind-filter={`channel:${c}`}></div>
-    ))}
-    {os.map((o) => (
-      <div class="hidden" data-pagefind-filter={`os:${o}`}></div>
-    ))}
-    {errorSignatures.map((s) => (
-      <div class="hidden" data-pagefind-meta="error_signature">{s}</div>
-    ))}
+    {component ? <div class="hidden" data-pagefind-filter={`component:${component}`} /> : null}
+    {severity ? <div class="hidden" data-pagefind-filter={`severity:${severity}`} /> : null}
+    {channels.map((c) => <div class="hidden" data-pagefind-filter={`channel:${c}`} />)}
+    {os.map((o) => <div class="hidden" data-pagefind-filter={`os:${o}`} />)}
+    {
+      errorSignatures.map((s) => (
+        <div class="hidden" data-pagefind-meta="error_signature">
+          {s}
+        </div>
+      ))
+    }
 
     <article class="prose prose-lg dark:prose-invert">
       <header class="mb-8">
@@ -70,29 +70,37 @@ const errorSignatures = (frontmatter.errorSignatures ?? []).filter(Boolean);
             {kind}
           </span>
 
-          {component ? (
-            <span class="px-3 py-1 bg-blue-500/10 text-blue-700 dark:text-blue-300 rounded-full text-sm">
-              {component}
-            </span>
-          ) : null}
+          {
+            component ? (
+              <span class="px-3 py-1 bg-blue-500/10 text-blue-700 dark:text-blue-300 rounded-full text-sm">
+                {component}
+              </span>
+            ) : null
+          }
 
-          {severity ? (
-            <span class="px-3 py-1 bg-red-500/10 text-red-700 dark:text-red-300 rounded-full text-sm">
-              {severity}
-            </span>
-          ) : null}
+          {
+            severity ? (
+              <span class="px-3 py-1 bg-red-500/10 text-red-700 dark:text-red-300 rounded-full text-sm">
+                {severity}
+              </span>
+            ) : null
+          }
 
-          {os.map((o) => (
-            <span class="px-3 py-1 bg-purple-500/10 text-purple-700 dark:text-purple-300 rounded-full text-sm">
-              {o}
-            </span>
-          ))}
+          {
+            os.map((o) => (
+              <span class="px-3 py-1 bg-purple-500/10 text-purple-700 dark:text-purple-300 rounded-full text-sm">
+                {o}
+              </span>
+            ))
+          }
 
-          {channels.map((c) => (
-            <span class="px-3 py-1 bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 rounded-full text-sm">
-              {c}
-            </span>
-          ))}
+          {
+            channels.map((c) => (
+              <span class="px-3 py-1 bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 rounded-full text-sm">
+                {c}
+              </span>
+            ))
+          }
         </div>
 
         <h1 class="text-4xl font-bold mb-4">{frontmatter.title}</h1>
@@ -112,29 +120,29 @@ const errorSignatures = (frontmatter.errorSignatures ?? []).filter(Boolean);
                 : 'Unknown date'
             }
           </time>
-          {hasValidLastUpdated &&
-            hasValidPublishDate &&
-            lastUpdated.getTime() !== publishDate.getTime() && (
-              <>
-                <span>•</span>
-                <span>
-                  Updated{' '}
-                  {lastUpdated.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </span>
-              </>
-            )}
+          {
+            hasValidLastUpdated &&
+              hasValidPublishDate &&
+              lastUpdated.getTime() !== publishDate.getTime() && (
+                <>
+                  <span>•</span>
+                  <span>
+                    Updated{' '}
+                    {lastUpdated.toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </>
+              )
+          }
         </div>
       </header>
 
       {
         errorSignatures.length ? (
-          <div class="hidden">
-            Error signatures: {errorSignatures.join(' | ')}
-          </div>
+          <div class="hidden">Error signatures: {errorSignatures.join(' | ')}</div>
         ) : null
       }
 
@@ -145,7 +153,8 @@ const errorSignatures = (frontmatter.errorSignatures ?? []).filter(Boolean);
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="text-sm text-default-600">
           Want to explore more? Browse{' '}
-          <a class="text-primary hover:underline" href="/troubleshooting/solutions">all solutions</a>{' '}
+          <a class="text-primary hover:underline" href="/troubleshooting/solutions">all solutions</a
+          >{' '}
           or ask in the{' '}
           <a
             class="text-primary hover:underline"

@@ -10,16 +10,36 @@ const solutions = troubleshootingEntries
   .sort((a, b) => b.data.lastUpdated.getTime() - a.data.lastUpdated.getTime());
 
 const channels = Array.from(
-  new Set(solutions.flatMap((e) => e.data.channel ?? []).map((v) => v.trim()).filter(Boolean))
+  new Set(
+    solutions
+      .flatMap((e) => e.data.channel ?? [])
+      .map((v) => v.trim())
+      .filter(Boolean)
+  )
 ).sort((a, b) => a.localeCompare(b));
 const os = Array.from(
-  new Set(solutions.flatMap((e) => e.data.os ?? []).map((v) => v.trim()).filter(Boolean))
+  new Set(
+    solutions
+      .flatMap((e) => e.data.os ?? [])
+      .map((v) => v.trim())
+      .filter(Boolean)
+  )
 ).sort((a, b) => a.localeCompare(b));
 const components = Array.from(
-  new Set(solutions.map((e) => e.data.component ?? '').map((v) => v.trim()).filter(Boolean))
+  new Set(
+    solutions
+      .map((e) => e.data.component ?? '')
+      .map((v) => v.trim())
+      .filter(Boolean)
+  )
 ).sort((a, b) => a.localeCompare(b));
 const severities = Array.from(
-  new Set(solutions.map((e) => e.data.severity ?? '').map((v) => v.trim()).filter(Boolean))
+  new Set(
+    solutions
+      .map((e) => e.data.severity ?? '')
+      .map((v) => v.trim())
+      .filter(Boolean)
+  )
 ).sort((a, b) => a.localeCompare(b));
 
 const initialQuery = Astro.url.searchParams.get('q') ?? '';
@@ -97,51 +117,61 @@ const filteredCards = cards.filter((c) => {
       <div class="max-w-5xl mx-auto">
         <div class="flex items-center justify-between gap-4 mb-6">
           <div class="text-sm text-default-600">
-            Showing <span class="font-semibold text-foreground">{filteredCards.length}</span> curated solutions.
+            Showing <span class="font-semibold text-foreground">{filteredCards.length}</span> curated
+            solutions.
           </div>
-          {(filterChannel !== 'all' ||
-            filterOs !== 'all' ||
-            filterComponent !== 'all' ||
-            filterSeverity !== 'all') && (
-            <a href="/troubleshooting/solutions" class="text-sm font-semibold text-primary hover:underline">
-              Clear filters
-            </a>
-          )}
+          {
+            (filterChannel !== 'all' ||
+              filterOs !== 'all' ||
+              filterComponent !== 'all' ||
+              filterSeverity !== 'all') && (
+              <a
+                href="/troubleshooting/solutions"
+                class="text-sm font-semibold text-primary hover:underline"
+              >
+                Clear filters
+              </a>
+            )
+          }
         </div>
 
         <div class="grid md:grid-cols-2 gap-4">
-          {filteredCards.map((c) => (
-            <a
-              href={c.href}
-              class="rounded-xl border border-divider bg-content1 p-6 hover:border-primary/40 transition-colors"
-            >
-              <div class="flex flex-wrap gap-2 mb-3">
-                {c.component ? (
-                  <span class="px-2 py-0.5 rounded-full text-xs border border-divider bg-content2 text-default-700">
-                    {c.component}
-                  </span>
-                ) : null}
-                {c.severity ? (
-                  <span class="px-2 py-0.5 rounded-full text-xs border border-divider bg-content2 text-default-700">
-                    {c.severity}
-                  </span>
-                ) : null}
-                {c.os.map((o) => (
-                  <span class="px-2 py-0.5 rounded-full text-xs border border-divider bg-content2 text-default-700">
-                    {o}
-                  </span>
-                ))}
-                {c.channel.map((ch) => (
-                  <span class="px-2 py-0.5 rounded-full text-xs border border-divider bg-content2 text-default-700">
-                    {ch}
-                  </span>
-                ))}
-              </div>
-              <h2 class="font-semibold text-foreground mb-2">{c.title}</h2>
-              <p class="text-sm text-default-700 dark:text-default-500 line-clamp-2">{c.description}</p>
-              <div class="mt-4 text-sm font-medium text-primary">Read →</div>
-            </a>
-          ))}
+          {
+            filteredCards.map((c) => (
+              <a
+                href={c.href}
+                class="rounded-xl border border-divider bg-content1 p-6 hover:border-primary/40 transition-colors"
+              >
+                <div class="flex flex-wrap gap-2 mb-3">
+                  {c.component ? (
+                    <span class="px-2 py-0.5 rounded-full text-xs border border-divider bg-content2 text-default-700">
+                      {c.component}
+                    </span>
+                  ) : null}
+                  {c.severity ? (
+                    <span class="px-2 py-0.5 rounded-full text-xs border border-divider bg-content2 text-default-700">
+                      {c.severity}
+                    </span>
+                  ) : null}
+                  {c.os.map((o) => (
+                    <span class="px-2 py-0.5 rounded-full text-xs border border-divider bg-content2 text-default-700">
+                      {o}
+                    </span>
+                  ))}
+                  {c.channel.map((ch) => (
+                    <span class="px-2 py-0.5 rounded-full text-xs border border-divider bg-content2 text-default-700">
+                      {ch}
+                    </span>
+                  ))}
+                </div>
+                <h2 class="font-semibold text-foreground mb-2">{c.title}</h2>
+                <p class="text-sm text-default-700 dark:text-default-500 line-clamp-2">
+                  {c.description}
+                </p>
+                <div class="mt-4 text-sm font-medium text-primary">Read →</div>
+              </a>
+            ))
+          }
         </div>
       </div>
     </Section>

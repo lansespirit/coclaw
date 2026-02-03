@@ -209,9 +209,11 @@ export function TroubleshootingSearch({
       ) : null}
 
       <div className="text-sm text-default-600">
-        Tip: paste the exact error line (for example: <code className="px-2 py-1 rounded bg-content2">EACCES</code>,{' '}
+        Tip: paste the exact error line (for example:{' '}
+        <code className="px-2 py-1 rounded bg-content2">EACCES</code>,{' '}
         <code className="px-2 py-1 rounded bg-content2">unauthorized</code>,{' '}
-        <code className="px-2 py-1 rounded bg-content2">EADDRINUSE</code>) and then narrow down using filters.
+        <code className="px-2 py-1 rounded bg-content2">EADDRINUSE</code>) and then narrow down
+        using filters.
       </div>
 
       {results && query.trim() ? (

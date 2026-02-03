@@ -4,150 +4,48 @@
   "total": 500,
   "top": {
     "channels": [
-      [
-        "telegram",
-        97
-      ],
-      [
-        "whatsapp",
-        36
-      ],
-      [
-        "discord",
-        34
-      ],
-      [
-        "signal",
-        21
-      ],
-      [
-        "slack",
-        16
-      ],
-      [
-        "imessage",
-        9
-      ]
+      ["telegram", 97],
+      ["whatsapp", 36],
+      ["discord", 34],
+      ["signal", 21],
+      ["slack", 16],
+      ["imessage", 9]
     ],
     "platforms": [
-      [
-        "linux",
-        132
-      ],
-      [
-        "macos",
-        121
-      ],
-      [
-        "docker",
-        56
-      ],
-      [
-        "windows",
-        41
-      ]
+      ["linux", 132],
+      ["macos", 121],
+      ["docker", 56],
+      ["windows", 41]
     ],
     "components": [
-      [
-        "config",
-        310
-      ],
-      [
-        "gateway",
-        200
-      ],
-      [
-        "websocket",
-        185
-      ],
-      [
-        "web-ui",
-        62
-      ],
-      [
-        "tui",
-        13
-      ],
-      [
-        "onboarding",
-        12
-      ]
+      ["config", 310],
+      ["gateway", 200],
+      ["websocket", 185],
+      ["web-ui", 62],
+      ["tui", 13],
+      ["onboarding", 12]
     ],
     "labels": [
-      [
-        "bug",
-        136
-      ],
-      [
-        "enhancement",
-        39
-      ],
-      [
-        "r: moltbook",
-        7
-      ],
-      [
-        "r: support",
-        5
-      ],
-      [
-        "help wanted",
-        2
-      ],
-      [
-        "maintainer",
-        1
-      ],
-      [
-        "extensions: diagnostics-otel",
-        1
-      ]
+      ["bug", 136],
+      ["enhancement", 39],
+      ["r: moltbook", 7],
+      ["r: support", 5],
+      ["help wanted", 2],
+      ["maintainer", 1],
+      ["extensions: diagnostics-otel", 1]
     ],
     "signatures": [
-      [
-        "model",
-        94
-      ],
-      [
-        "docker",
-        56
-      ],
-      [
-        "windows",
-        41
-      ],
-      [
-        "oauth",
-        23
-      ],
-      [
-        "eacces",
-        12
-      ],
-      [
-        "unauthorized",
-        9
-      ],
-      [
-        "pairing_required",
-        3
-      ],
-      [
-        "setmycommands",
-        1
-      ],
-      [
-        "device_identity_required",
-        0
-      ],
-      [
-        "eaddrinuse",
-        0
-      ],
-      [
-        "enotfound",
-        0
-      ]
+      ["model", 94],
+      ["docker", 56],
+      ["windows", 41],
+      ["oauth", 23],
+      ["eacces", 12],
+      ["unauthorized", 9],
+      ["pairing_required", 3],
+      ["setmycommands", 1],
+      ["device_identity_required", 0],
+      ["eaddrinuse", 0],
+      ["enotfound", 0]
     ]
   },
   "signatures": {

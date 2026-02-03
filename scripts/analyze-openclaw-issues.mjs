@@ -75,15 +75,47 @@ async function main() {
   }
 
   const patterns = [
-    { id: 'unauthorized', title: 'Unauthorized / token mismatch (Control UI)', re: /(unauthorized|token missing|gateway token missing|tokenized link)/i },
-    { id: 'pairing_required', title: 'Control UI: pairing required (1008)', re: /(pairing required|disconnected \\(1008\\): pairing required)/i },
-    { id: 'device_identity_required', title: 'Control UI: device identity required (1008)', re: /(device identity required|disconnected \\(1008\\): device identity required)/i },
-    { id: 'eacces', title: 'EACCES / permission denied (npm/global install)', re: /(\\bEACCES\\b|permission denied|npm install -g)/i },
-    { id: 'eaddrinuse', title: 'EADDRINUSE / GatewayLockError (port already used)', re: /(\\bEADDRINUSE\\b|GatewayLockError|already listening)/i },
+    {
+      id: 'unauthorized',
+      title: 'Unauthorized / token mismatch (Control UI)',
+      re: /(unauthorized|token missing|gateway token missing|tokenized link)/i,
+    },
+    {
+      id: 'pairing_required',
+      title: 'Control UI: pairing required (1008)',
+      re: /(pairing required|disconnected \\(1008\\): pairing required)/i,
+    },
+    {
+      id: 'device_identity_required',
+      title: 'Control UI: device identity required (1008)',
+      re: /(device identity required|disconnected \\(1008\\): device identity required)/i,
+    },
+    {
+      id: 'eacces',
+      title: 'EACCES / permission denied (npm/global install)',
+      re: /(\\bEACCES\\b|permission denied|npm install -g)/i,
+    },
+    {
+      id: 'eaddrinuse',
+      title: 'EADDRINUSE / GatewayLockError (port already used)',
+      re: /(\\bEADDRINUSE\\b|GatewayLockError|already listening)/i,
+    },
     { id: 'setmycommands', title: 'Telegram setMyCommands failed', re: /(setMyCommands failed)/i },
-    { id: 'enotfound', title: 'ENOTFOUND / DNS resolution failures', re: /(\\bENOTFOUND\\b|getaddrinfo)/i },
-    { id: 'oauth', title: 'OAuth/Auth flows failing', re: /(oauth|refresh token|re-authenticate|login)/i },
-    { id: 'model', title: 'Model resolution / providers / "all models failed"', re: /(all models failed|model not allowed|openrouter|anthropic|openai)/i },
+    {
+      id: 'enotfound',
+      title: 'ENOTFOUND / DNS resolution failures',
+      re: /(\\bENOTFOUND\\b|getaddrinfo)/i,
+    },
+    {
+      id: 'oauth',
+      title: 'OAuth/Auth flows failing',
+      re: /(oauth|refresh token|re-authenticate|login)/i,
+    },
+    {
+      id: 'model',
+      title: 'Model resolution / providers / "all models failed"',
+      re: /(all models failed|model not allowed|openrouter|anthropic|openai)/i,
+    },
     { id: 'windows', title: 'Windows install/runtime issues', re: /(windows|win11|win10|wsl)/i },
     { id: 'docker', title: 'Docker deployment issues', re: /(docker|docker-compose|container)/i },
   ];

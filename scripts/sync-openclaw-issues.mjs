@@ -127,9 +127,7 @@ async function loadChannelTaxonomyFromRef() {
     const src = await fs.readFile(registryFile, 'utf8');
 
     // Parse CHAT_CHANNEL_ORDER = [ "telegram", ... ] as const;
-    const orderMatch = src.match(
-      /CHAT_CHANNEL_ORDER\s*=\s*\[([\s\S]*?)\]\s*as\s*const\s*;/m
-    );
+    const orderMatch = src.match(/CHAT_CHANNEL_ORDER\s*=\s*\[([\s\S]*?)\]\s*as\s*const\s*;/m);
     const orderRaw = orderMatch?.[1] ?? '';
     const ids = [...orderRaw.matchAll(/["']([a-z0-9-]+)["']/g)].map((m) => m[1]);
 
@@ -187,7 +185,10 @@ function detectChannels(text, taxonomy) {
 
   // Direct hits
   for (const id of taxonomy.ids) {
-    const re = new RegExp(`(^|[^a-z0-9])${id.replace(/[-/\\\\^$*+?.()|[\\]{}]/g, '\\\\$&')}([^a-z0-9]|$)`, 'i');
+    const re = new RegExp(
+      `(^|[^a-z0-9])${id.replace(/[-/\\\\^$*+?.()|[\\]{}]/g, '\\\\$&')}([^a-z0-9]|$)`,
+      'i'
+    );
     if (re.test(t)) out.push(id);
   }
 
@@ -265,7 +266,10 @@ async function main() {
     for (const item of json) {
       if (item?.pull_request) continue;
       const normalized = normalizeIssue(item);
-      normalized.taxonomy.channels = detectChannels(`${normalized.title}\n${normalized.body}`, channelTaxonomy);
+      normalized.taxonomy.channels = detectChannels(
+        `${normalized.title}\n${normalized.body}`,
+        channelTaxonomy
+      );
       normalized._commentsUrl = item.comments_url;
       out.push(normalized);
       if (out.length >= MAX) break;
