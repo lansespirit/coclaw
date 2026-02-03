@@ -1,0 +1,70 @@
+---
+title: "[Bug]: Audio-only messages on Telegram not triggering agent response"
+description: "Real user-reported issue (#1989) from GitHub: [Bug]: Audio-only messages on Telegram not triggering agent response"
+kind: "case"
+draft: true
+component: "gateway"
+related:
+  githubIssues:
+    - 1989
+os:
+  - "linux"
+channel:
+  - "telegram"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#1989](https://github.com/openclaw/openclaw/issues/1989)
+- State: `open`
+- Comments: `8`
+
+## What users report
+
+```
+## Summary
+Audio-only voice messages sent via Telegram do not trigger the Clawdbot agent to process or respond. The agent only responds when text content is present alongside the audio file.
+
+## Steps to reproduce
+1. Send a voice message (audio-only .ogg file) via Telegram to Clawdbot
+2. Wait for agent response
+3. Observe: No response from agent
+4. Send the same audio file with text (e.g., "?" + voice message)
+5. Observe: Agent responds immediately with transcription and answer
+
+## Expected behavior
+The agent should automatically detect voice message attachments and:
+1. Trigger Whisper transcription
+2. Process the transcribed text
+3. Generate and send a response
+
+This should work the same as text-only messages or mixed media messages.
+
+## Actual behavior
+- Voice-only messages are received but ignored by the agent
+- No transcription attempt is made
+- No response is sent to the user
+- The message appears in logs/history but doesn't trigger message handler
+- Only when text accompanies the audio does the agent process it
+
+## Environment
+- Clawdbot version: 2026.1.24-2
+- OS: Linux 6.8.0-90-generic (x64)
+- Install method: Clawdbot Gateway (Tailscale bound)
+- Channel: Telegram
+- Skill: op
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

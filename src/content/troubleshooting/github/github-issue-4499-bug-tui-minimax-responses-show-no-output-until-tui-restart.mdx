@@ -1,0 +1,74 @@
+---
+title: "bug(tui): MiniMax responses show '(no output)' until TUI restart"
+description: "Real user-reported issue (#4499) from GitHub: bug(tui): MiniMax responses show '(no output)' until TUI restart"
+kind: "case"
+draft: true
+component: "tui"
+related:
+  githubIssues:
+    - 4499
+channel:
+  - "telegram"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#4499](https://github.com/openclaw/openclaw/issues/4499)
+- State: `open`
+- Comments: `8`
+
+## What users report
+
+```
+## Description
+
+When using MiniMax models (e.g., `minimax-cn/MiniMax-M2.1`) in the TUI, responses display as `(no output)` even though the model returns content successfully. The same responses display correctly in Telegram.
+
+## Steps to Reproduce
+
+1. Configure MiniMax as a provider with valid API key
+2. Set model to `minimax-cn/MiniMax-M2.1` (via `/model m2cn` or config)
+3. Send a message in the TUI
+4. Observe: TUI shows `(no output)`
+5. Check Telegram: Same message displays correctly
+6. Restart TUI
+7. Observe: Now historical responses display correctly
+
+## Expected Behavior
+
+MiniMax responses should render immediately in the TUI without requiring a restart.
+
+## Actual Behavior
+
+- TUI shows `(no output)` for MiniMax responses
+- Telegram renders the same responses correctly
+- Restarting TUI fixes the display issue retroactively
+
+## Possible Cause
+
+The TUI may be expecting Anthropic-specific response format or handling streaming differently for non-Anthropic providers. MiniMax uses an Anthropic-compatible API but may have slight format differences in the response structure.
+
+From session logs, MiniMax returns:
+```json
+{
+  "thinking": "...",
+  "text": "..."
+}
+```
+
+The TUI might not b
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

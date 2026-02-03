@@ -1,0 +1,58 @@
+---
+title: "Installer fails: 'spawn git ENOENT' (Git missing)"
+description: "Fix OpenClaw install/update failures caused by missing Git (common on fresh Windows/Linux machines)."
+kind: "solution"
+component: "install"
+severity: "medium"
+os:
+  - "windows"
+  - "linux"
+  - "macos"
+channel: []
+errorSignatures:
+  - "spawn git ENOENT"
+  - "git: command not found"
+keywords:
+  - "install"
+  - "git"
+  - "enoent"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/install/installer"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Install or update fails with:
+  - `spawn git ENOENT`
+  - `git: command not found`
+
+## Cause
+
+Git is missing (or not on PATH). Some install/update flows need Git even if you chose an npm-based install (dependencies or optional paths may invoke Git).
+
+## Fix
+
+### Windows
+
+- Install **Git for Windows**, then reopen PowerShell.
+
+### Linux
+
+- Install Git using your package manager (for example, `apt`, `dnf`, `pacman`), then reopen your shell.
+
+### macOS
+
+- Install Git (Xcode Command Line Tools) or via Homebrew.
+
+Then rerun the installer or the command that failed.
+
+## Verify
+
+- `git --version` works in a fresh terminal.
+- Re-running the installer/update succeeds.
+

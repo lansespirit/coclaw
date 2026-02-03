@@ -1,0 +1,73 @@
+---
+title: "WhatsApp: channels login fails (408 Request Time-out / WebSocket Error)"
+description: "Fix WhatsApp QR login failures caused by restricted networks, proxies without WebSocket support, or running the login on the wrong machine."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "windows"
+  - "linux"
+  - "macos"
+channel:
+  - "whatsapp"
+errorSignatures:
+  - "Waiting for WhatsApp connection"
+  - "WhatsApp Web connection ended before fully opening"
+  - "status=408"
+  - "WebSocket Error"
+keywords:
+  - "whatsapp"
+  - "login"
+  - "qr"
+  - "proxy"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/whatsapp"
+    - "https://docs.openclaw.ai/channels/troubleshooting"
+  githubIssues:
+    - 7885
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- `openclaw channels login` waits, then fails with something like:
+  - `WhatsApp Web connection ended before fully opening. status=408 Request Time-out WebSocket Error ()`
+- You can open `https://web.whatsapp.com` in a browser, but OpenClaw login still times out.
+
+## Cause
+
+WhatsApp login uses a long-lived WhatsApp Web connection. It can fail when:
+
+- Your network blocks WhatsApp WebSocket traffic.
+- You are behind a proxy/VPN that does not support WebSockets reliably.
+- You are running the login command on a different machine than the gateway (or the gateway’s environment does not have the same proxy settings).
+
+## Fix
+
+### 1) Run login on the gateway host (recommended)
+
+Run `openclaw channels login` on the same machine that runs the gateway.
+
+If your gateway runs on a VPS/Docker/WSL2, run the login there (that’s where the WhatsApp session is created and stored).
+
+### 2) If you use a proxy, ensure it supports WebSockets and is applied to the gateway
+
+- Make sure your proxy supports **WebSocket** connections.
+- If the gateway runs as a background service, set proxy environment variables in `~/.openclaw/.env` on the gateway host and restart the gateway (setting it only in your interactive shell may not affect the service).
+
+### 3) If you’re on a restricted network
+
+Fastest workaround:
+
+- Run the gateway on a host that can reach WhatsApp (for example, a VPS), or
+- Use a VPN/egress path that allows WhatsApp Web connections.
+
+## Verify
+
+- `openclaw channels login` shows a QR and completes successfully.
+- `openclaw channels status --probe` reports WhatsApp linked/healthy.
+

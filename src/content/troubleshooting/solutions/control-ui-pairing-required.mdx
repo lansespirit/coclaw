@@ -1,0 +1,87 @@
+---
+title: "Control UI: disconnected (1008): pairing required"
+description: "Fix Control UI disconnects caused by device pairing. Approve the browser/device once, then reconnect (common on remote hosts and Docker)."
+kind: "solution"
+component: "web-ui"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "disconnected (1008): pairing required"
+  - "pairing required"
+  - "1008"
+keywords:
+  - "control ui"
+  - "dashboard"
+  - "pairing"
+  - "devices"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/web/control-ui"
+    - "https://docs.openclaw.ai/cli/devices"
+  githubIssues:
+    - 6959
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- The Control UI connects, then shows: **“disconnected (1008): pairing required”**.
+- You can open the page (`http://<host>:18789/`), but the WebSocket disconnects immediately.
+- This often happens when opening the UI from a different machine (LAN/tailnet) or via a reverse proxy.
+
+## Cause
+
+OpenClaw requires a **one-time device pairing approval** the first time a new browser/device connects to the gateway.
+
+Common triggers:
+
+- You are connecting remotely (LAN/tailnet/VPS/Docker host).
+- You switched browsers, used a new browser profile, or cleared browser storage (new device id).
+- You are using plain HTTP on a remote host and the browser blocks WebCrypto (pairing identity can’t be established).
+
+## Fix
+
+### 1) Approve the pending device request
+
+On the **gateway host**, list pending requests:
+
+```bash
+openclaw devices list
+```
+
+Approve the request:
+
+```bash
+openclaw devices approve <requestId>
+```
+
+Then reload the Control UI page and reconnect.
+
+### 2) If you’re remote, prefer a secure access path
+
+Recommended options:
+
+- Use an SSH tunnel and open locally:
+  - `ssh -N -L 18789:127.0.0.1:18789 user@host`
+  - Open `http://127.0.0.1:18789/`
+- Or expose the UI via HTTPS (for example, Tailscale Serve).
+
+### 3) If you must use plain HTTP remotely
+
+If you’re on a trusted network and understand the trade-offs, you can allow insecure auth for the Control UI and rely on token-only auth. See the Control UI docs linked above for the exact config option.
+
+## Verify
+
+- The Control UI stays connected (no immediate 1008 disconnect).
+- `openclaw devices list` shows your browser/device as approved.
+
+## Related
+
+- If the UI says “unauthorized” (not pairing), use the dedicated auth solution page.

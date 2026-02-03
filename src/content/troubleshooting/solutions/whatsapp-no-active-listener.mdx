@@ -1,0 +1,92 @@
+---
+title: "WhatsApp: 'No active WhatsApp Web listener' when sending messages"
+description: "Fix outbound WhatsApp send failures by ensuring the gateway process is running and owns the WhatsApp Web socket (restart, re-link, and check runtime)."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "whatsapp"
+errorSignatures:
+  - "No active WhatsApp Web listener"
+  - "Timed out waiting for WhatsApp QR"
+keywords:
+  - "whatsapp"
+  - "listener"
+  - "baileys"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/whatsapp"
+  githubIssues:
+    - 7833
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Sending a message fails with: **`Error: No active WhatsApp Web listener`**
+- `openclaw channels login` reports success, but WhatsApp still doesn't work.
+- QR login may hang with **“Timed out waiting for WhatsApp QR”**.
+
+## Cause
+
+WhatsApp in OpenClaw requires an **active gateway process** holding a live WhatsApp Web socket.
+If the gateway is stopped, crashed, or the WhatsApp socket failed to start, outbound sends fail fast.
+
+Common causes:
+
+- The gateway is not running (or restarted and never reconnected).
+- WhatsApp credentials are logged out/corrupted.
+- Unsupported runtime (WhatsApp requires Node; Bun is unsupported).
+
+## Fix
+
+### 1) Confirm the gateway is running
+
+On the gateway host:
+
+```bash
+openclaw gateway status
+openclaw channels status --probe
+```
+
+### 2) Restart the gateway (often enough)
+
+```bash
+openclaw gateway restart
+```
+
+Then re-check:
+
+```bash
+openclaw channels status --probe
+```
+
+### 3) If WhatsApp is logged out, re-link
+
+```bash
+openclaw channels logout
+openclaw channels login
+```
+
+### 4) Ensure the gateway uses Node (not Bun)
+
+If you previously installed/runs the gateway with Bun, run:
+
+```bash
+openclaw doctor
+```
+
+Then restart the gateway.
+
+## Verify
+
+- `openclaw channels status --probe` shows WhatsApp linked and active.
+- Outbound sends succeed (no listener error).
+

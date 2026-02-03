@@ -1,0 +1,70 @@
+---
+title: "Docker: 'This version of Antigravity is no longer supported' (update required)"
+description: "When Antigravity rejects requests with an update-required message, upgrade OpenClaw (or rebuild your Docker image) and re-authenticate."
+kind: "solution"
+component: "docker"
+severity: "medium"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel: []
+errorSignatures:
+  - "This version of Antigravity is no longer supported"
+  - "Antigravity"
+  - "Please update to receive the latest features"
+keywords:
+  - "docker"
+  - "antigravity"
+  - "google"
+  - "oauth"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/concepts/model-providers"
+    - "https://docs.openclaw.ai/install/updating"
+  githubIssues:
+    - 4111
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Gateway logs or the Control UI show an error like:
+  - **“This version of Antigravity is no longer supported. Please update to receive the latest features!”**
+- Requests routed through `google-antigravity/...` stop working (suddenly or after a long time).
+
+## Cause
+
+Antigravity is a hosted bridge and it can enforce minimum client versions. If your OpenClaw Docker image is older (or your gateway has cached older plugin/client code), Antigravity may refuse requests.
+
+## Fix
+
+### 1) Update OpenClaw in your Docker deployment
+
+If you run from an OpenClaw repo checkout:
+
+1. Pull the latest OpenClaw changes.
+2. Rebuild the Docker image.
+3. Restart the gateway container.
+
+If you used `docker-setup.sh`, the simplest path is to rerun it from a fresh checkout (it rebuilds and restarts).
+
+### 2) Re-authenticate if needed
+
+Some updates require re-auth (or your token expired). After updating, rerun your provider auth flow (for example, via `openclaw onboard` on the gateway host/container).
+
+### 3) Temporary workaround: switch providers/models
+
+If you need to stay online while debugging:
+
+- Switch the primary model away from `google-antigravity/...` to another configured provider, or
+- Add a fallback model from a different provider.
+
+## Verify
+
+- A test message succeeds and gateway logs no longer show the Antigravity update warning.
+- `openclaw models status --probe` succeeds for your configured model(s).
+

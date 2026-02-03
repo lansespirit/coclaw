@@ -1,0 +1,73 @@
+---
+title: "Node.js version mismatch (OpenClaw requires Node 22+)"
+description: "Fix install/runtime failures caused by old Node.js versions by upgrading to Node 22 LTS and ensuring your shell/service uses the same Node."
+kind: "solution"
+component: "install"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "Node.js"
+  - "requires Node"
+keywords:
+  - "node"
+  - "node 22"
+  - "lts"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/install/installer"
+    - "https://docs.openclaw.ai/install/node"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Installer refuses to proceed because Node is too old.
+- Running the gateway/CLI fails with errors that imply unsupported Node features.
+
+## Cause
+
+OpenClaw requires **Node.js 22+**. Many machines have an older system Node, or multiple Node installs (brew + nvm + system package manager). The gateway service may also run with a different PATH than your interactive shell.
+
+## Fix
+
+### 1) Check your current Node
+
+```bash
+node --version
+```
+
+If it’s below 22, upgrade.
+
+### 2) Upgrade Node (pick one method)
+
+- macOS: Homebrew (`brew install node`) or a version manager
+- Linux: NodeSource or a version manager that can install Node 22
+- Windows: official installer or `winget`
+
+### 3) Confirm the service sees the right Node
+
+After upgrading, open a new terminal and re-check:
+
+```bash
+node --version
+openclaw --help
+```
+
+If the CLI uses Node 22 but the background service doesn’t, you likely have a PATH mismatch (launchd/systemd environment). Run:
+
+```bash
+openclaw doctor
+```
+
+## Verify
+
+```bash
+openclaw status
+```
+

@@ -1,0 +1,60 @@
+---
+title: "Gateway won't start: 'refusing to bind ... without auth'"
+description: "Fix gateway startup failures when binding to LAN/tailnet without token/password auth configured."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel: []
+errorSignatures:
+  - "refusing to bind gateway"
+  - "without auth"
+  - "OPENCLAW_GATEWAY_TOKEN"
+  - "OPENCLAW_GATEWAY_PASSWORD"
+keywords:
+  - "gateway"
+  - "bind"
+  - "auth"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/gateway/troubleshooting"
+    - "https://docs.openclaw.ai/gateway/authentication"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Gateway immediately exits and logs show:
+  - `refusing to bind gateway to <host>:18789 without auth (...)`
+- `openclaw gateway status` shows the service restarting/crashing.
+
+## Cause
+
+When the gateway binds to a non-loopback interface (LAN/tailnet/custom), OpenClaw requires auth to be configured (token or password). This prevents exposing an unauthenticated gateway on the network.
+
+## Fix
+
+### 1) Set gateway auth (token or password)
+
+Simplest: token auth.
+
+- Set `gateway.auth.mode` to `token`
+- Set `gateway.auth.token` (or `OPENCLAW_GATEWAY_TOKEN`)
+
+Then restart the gateway.
+
+### 2) Or bind only to loopback (local-only)
+
+If you do not need LAN access, bind to loopback (127.0.0.1) and use SSH tunnel / local access.
+
+## Verify
+
+- `openclaw gateway status` shows running.
+- You can open the Control UI and it stays connected.
+

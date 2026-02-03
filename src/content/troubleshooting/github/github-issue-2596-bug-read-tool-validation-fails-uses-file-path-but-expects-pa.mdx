@@ -1,0 +1,70 @@
+---
+title: "[Bug]: read tool validation fails - uses \"file_path\" but expects \"path\" parameter"
+description: "Real user-reported issue (#2596) from GitHub: [Bug]: read tool validation fails - uses \"file_path\" but expects \"path\" parameter"
+kind: "case"
+draft: true
+component: "websocket"
+related:
+  githubIssues:
+    - 2596
+os:
+  - "windows"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#2596](https://github.com/openclaw/openclaw/issues/2596)
+- State: `open`
+- Comments: `15`
+
+## What users report
+
+```
+Summary
+
+   When the agent attempts to read a file using the read tool, it passes the parameter as file_path, but the
+   tool schema expects path. This causes validation to fail with "must have required property 'path'".
+
+   Steps to reproduce
+   1. Create a custom skill with a Python script (e.g., fetch_news.py)
+   2. Ask the agent to read the script file to understand or modify it
+   3. Agent calls read tool with {"file_path": "C:\\path\\to\\file.py"}
+   4. Validation fails
+
+   Expected behavior
+
+   The agent should use the correct parameter name (path) when calling the read tool, or the tool schema
+   should accept file_path as an alias.
+
+   Actual behavior
+
+   The agent consistently uses file_path instead of path, causing the read operation to fail every time:
+
+     Validation failed for tool "read":
+       - path: must have required property 'path'
+     Received arguments:
+     {
+       "file_path": "C:\Users\linys\clawd\skills\x_ai_tech_news\fetch_news.py"
+     }
+
+   The agent retried multiple times with the same incorrect parameter name.
+
+   Environment
+   •  Clawdbot version: 2026.1.24-3
+   •  OS: Windows 10 (Build 26200)
+   •  Install method: npm (global install via npm in
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

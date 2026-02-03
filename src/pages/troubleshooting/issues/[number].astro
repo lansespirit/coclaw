@@ -1,0 +1,147 @@
+---
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Section from '../../../components/layout/Section.astro';
+import {
+  findIssueByNumber,
+  getOpenClawIssuesDataset,
+  labelToFilterValue,
+} from '../../../lib/openclaw-issues';
+
+export const getStaticPaths = (async () => {
+  const dataset = getOpenClawIssuesDataset();
+  return dataset.issues.map((issue) => ({
+    params: { number: String(issue.number) },
+    props: { issueNumber: issue.number },
+  }));
+}) satisfies GetStaticPaths;
+
+const issueNumber = Astro.props.issueNumber as number;
+const issue = findIssueByNumber(issueNumber);
+
+if (!issue) {
+  // Shouldn't happen since static paths are derived from the dataset.
+  throw new Error(`Missing issue ${issueNumber} in dataset`);
+}
+---
+
+<BaseLayout
+  title={`#${issue.number} ${issue.title} - OpenClaw Issue`}
+  description={`OpenClaw GitHub issue #${issue.number}: ${issue.title}`}
+  keywords={`OpenClaw issue, OpenClaw error, ${issue.labels.join(', ')}`}
+  robots="noindex, nofollow"
+>
+  <div class="bg-background min-h-screen overflow-x-hidden relative selection:bg-primary/20">
+    <div class="hidden" data-pagefind-filter="type:issue"></div>
+    <div class="hidden" data-pagefind-meta="title">{issue.title}</div>
+    <div class="hidden" data-pagefind-meta="issue_number">{issue.number}</div>
+    {(issue.taxonomy?.channels ?? []).map((c) => (
+      <div class="hidden" data-pagefind-filter={`channel:${c}`}></div>
+    ))}
+    {(issue.taxonomy?.platforms ?? []).map((p) => (
+      <div class="hidden" data-pagefind-filter={`platform:${p}`}></div>
+    ))}
+    {(issue.taxonomy?.components ?? []).map((c) => (
+      <div class="hidden" data-pagefind-filter={`component:${c}`}></div>
+    ))}
+    <Section py="pt-24 pb-10">
+      <div class="max-w-4xl mx-auto">
+        <div class="flex items-center gap-3 text-sm text-default-600">
+          <a href="/troubleshooting/issues" class="hover:underline">← Back to issues</a>
+          <span>•</span>
+          <a href={issue.htmlUrl} target="_blank" rel="noopener noreferrer" class="hover:underline">
+            View on GitHub
+          </a>
+        </div>
+
+        <div class="mt-6 flex items-center gap-2">
+          <span
+            class={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+              issue.state === 'open'
+                ? 'bg-emerald-500/10 text-emerald-600'
+                : 'bg-default-500/10 text-default-600'
+            }`}
+            data-pagefind-filter={`state:${issue.state}`}
+          >
+            {issue.state}
+          </span>
+          <span class="text-sm text-default-500">#{issue.number}</span>
+          <span class="text-sm text-default-500">{issue.comments} comments</span>
+          {issue.author ? <span class="text-sm text-default-500">by {issue.author}</span> : null}
+        </div>
+
+        <h1 class="mt-4 text-3xl md:text-4xl font-bold text-foreground">{issue.title}</h1>
+
+        {issue.labels?.length ? (
+          <div class="mt-4 flex flex-wrap gap-2">
+            {issue.labels.map((l) => (
+              <span
+                class="inline-flex items-center rounded-full border border-divider bg-content2 px-3 py-1 text-xs text-default-700"
+                data-pagefind-filter={`label:${labelToFilterValue(l)}`}
+              >
+                {l}
+              </span>
+            ))}
+          </div>
+        ) : null}
+
+        {(issue.taxonomy?.channels?.length ||
+          issue.taxonomy?.platforms?.length ||
+          issue.taxonomy?.components?.length) && (
+          <div class="mt-3 flex flex-wrap gap-2">
+            {(issue.taxonomy?.channels ?? []).map((c) => (
+              <span class="inline-flex items-center rounded-full border border-divider bg-content2 px-3 py-1 text-xs text-default-700">
+                channel:{c}
+              </span>
+            ))}
+            {(issue.taxonomy?.platforms ?? []).map((p) => (
+              <span class="inline-flex items-center rounded-full border border-divider bg-content2 px-3 py-1 text-xs text-default-700">
+                platform:{p}
+              </span>
+            ))}
+            {(issue.taxonomy?.components ?? []).map((c) => (
+              <span class="inline-flex items-center rounded-full border border-divider bg-content2 px-3 py-1 text-xs text-default-700">
+                component:{c}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-default-600">
+          <div class="rounded-xl border border-divider bg-content1 p-4">
+            <div class="text-xs text-default-500">Created</div>
+            <div class="font-medium text-foreground">
+              {new Date(issue.createdAt).toLocaleString('en-US')}
+            </div>
+          </div>
+          <div class="rounded-xl border border-divider bg-content1 p-4">
+            <div class="text-xs text-default-500">Last updated</div>
+            <div class="font-medium text-foreground">
+              {new Date(issue.updatedAt).toLocaleString('en-US')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="pb-20">
+      <div class="max-w-4xl mx-auto">
+        <div class="rounded-2xl border border-divider bg-content1 p-6">
+          <h2 class="text-lg font-semibold mb-3">Issue description</h2>
+          <pre class="whitespace-pre-wrap break-words text-sm text-default-800 dark:text-default-600">
+{issue.body || 'No description provided.'}</pre
+          >
+        </div>
+
+        <div class="mt-6 rounded-2xl border border-divider bg-content1 p-6">
+          <h2 class="text-lg font-semibold mb-2">How to use this for troubleshooting</h2>
+          <ol class="list-decimal pl-5 text-sm text-default-700 dark:text-default-500 space-y-2">
+            <li>Compare error text/logs with your own environment.</li>
+            <li>Check labels for the affected channel/component.</li>
+            <li>Open the GitHub thread to find confirmed fixes and workarounds.</li>
+          </ol>
+        </div>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>

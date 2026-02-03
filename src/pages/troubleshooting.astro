@@ -1,6 +1,8 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/layout/Section.astro';
+import { TroubleshootingSearch } from '../components/troubleshooting/TroubleshootingSearch';
 
 import {
   IconChat,
@@ -11,14 +13,38 @@ import {
   IconDiscord,
   IconGithub,
   IconLockClosed,
-  IconSearch,
   IconWarning,
 } from '../components/icons';
+
+const troubleshootingEntries = await getCollection('troubleshooting', ({ data }) => !data.draft);
+const solutions = troubleshootingEntries.filter((e) => e.data.kind === 'solution');
+
+const featuredSolutions = [...solutions]
+  .sort((a, b) => b.data.lastUpdated.getTime() - a.data.lastUpdated.getTime())
+  .slice(0, 8)
+  .map((entry) => ({
+    title: entry.data.title,
+    description: entry.data.description,
+    href: `/troubleshooting/${entry.slug}`,
+  }));
+
+const channels = Array.from(
+  new Set(solutions.flatMap((e) => e.data.channel ?? []).map((v) => v.trim()).filter(Boolean))
+).sort((a, b) => a.localeCompare(b));
+const os = Array.from(
+  new Set(solutions.flatMap((e) => e.data.os ?? []).map((v) => v.trim()).filter(Boolean))
+).sort((a, b) => a.localeCompare(b));
+const components = Array.from(
+  new Set(solutions.map((e) => e.data.component ?? '').map((v) => v.trim()).filter(Boolean))
+).sort((a, b) => a.localeCompare(b));
+const severities = Array.from(
+  new Set(solutions.map((e) => e.data.severity ?? '').map((v) => v.trim()).filter(Boolean))
+).sort((a, b) => a.localeCompare(b));
 ---
 
 <BaseLayout
-  title="Troubleshooting - OpenClaw Issues & Solutions"
-  description="Find solutions to common OpenClaw issues. Search our troubleshooting database for installation errors, channel integration problems, and configuration issues."
+  title="Troubleshooting - OpenClaw Solutions"
+  description="Find step-by-step solutions to common OpenClaw problems. Search our troubleshooting database for installation errors, channel integration issues, and configuration fixes."
   keywords="OpenClaw troubleshooting, OpenClaw errors, OpenClaw issues, OpenClaw problems, OpenClaw help, OpenClaw support"
 >
   <div
@@ -35,30 +61,31 @@ import {
         Find solutions to common OpenClaw issues and get back up and running quickly
       </p>
 
-      <div class="mt-10 max-w-3xl mx-auto">
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <IconSearch className="w-5 h-5 text-default-500" aria-hidden="true" />
-          </div>
-          <input
-            type="search"
-            placeholder="Search for errors, issues, or keywords..."
-            class="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-divider bg-content1 text-foreground placeholder:text-default-500 focus:border-primary focus:outline-none transition-colors text-lg"
-          />
-        </div>
-        <p class="text-sm text-default-600 mt-3 text-center">
-          Try searching for "Node.js version", "Telegram webhook", or "permission denied"
+      <div class="mt-10 max-w-4xl mx-auto text-left">
+        <TroubleshootingSearch
+          channels={channels}
+          os={os}
+          components={components}
+          severities={severities}
+          client:load
+        />
+        <p class="text-sm text-default-600 mt-4 text-center">
+          Prefer browsing? See{' '}
+          <a class="text-primary hover:underline font-medium" href="/troubleshooting/solutions">
+            all solutions
+          </a>
+          .
         </p>
       </div>
     </Section>
 
-    <!-- Issue Categories -->
+    <!-- Solution Categories -->
     <Section py="pt-10 pb-16">
-      <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center">Browse by Category</h2>
+      <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center">Browse Solutions by Category</h2>
       <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Installation Issues -->
+        <!-- Install & Setup -->
         <a
-          href="/getting-started"
+          href="/troubleshooting/solutions?component=install"
           class="group relative overflow-hidden rounded-2xl border border-divider bg-content1 p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1"
         >
           <div class="mb-4">
@@ -69,13 +96,13 @@ import {
             </div>
           </div>
           <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-            Installation Issues
+            Install & Setup
           </h3>
           <p class="text-default-700 dark:text-default-500 text-sm mb-4">
-            Node.js errors, dependency conflicts, permission problems
+            Node version, PATH, permission errors, CLI not found
           </p>
           <div class="flex items-center text-primary text-sm font-medium">
-            <span>View issues</span>
+            <span>View solutions</span>
             <IconChevronRight
               className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
               aria-hidden="true"
@@ -83,9 +110,9 @@ import {
           </div>
         </a>
 
-        <!-- Channel Integration -->
+        <!-- Channels -->
         <a
-          href="/guides"
+          href="/troubleshooting/solutions?component=channel"
           class="group relative overflow-hidden rounded-2xl border border-divider bg-content1 p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1"
         >
           <div class="mb-4">
@@ -96,13 +123,13 @@ import {
             </div>
           </div>
           <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-            Channel Integration
+            Channels
           </h3>
           <p class="text-default-700 dark:text-default-500 text-sm mb-4">
-            Telegram, WhatsApp, Slack, Discord connection issues
+            Telegram/WhatsApp/Discord/Slack message and connection issues
           </p>
           <div class="flex items-center text-primary text-sm font-medium">
-            <span>View issues</span>
+            <span>View solutions</span>
             <IconChevronRight
               className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
               aria-hidden="true"
@@ -110,9 +137,9 @@ import {
           </div>
         </a>
 
-        <!-- Configuration Errors -->
+        <!-- Config -->
         <a
-          href="/openclaw-config-generator"
+          href="/troubleshooting/solutions?component=config"
           class="group relative overflow-hidden rounded-2xl border border-divider bg-content1 p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1"
         >
           <div class="mb-4">
@@ -123,13 +150,13 @@ import {
             </div>
           </div>
           <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-            Configuration Errors
+            Configuration
           </h3>
           <p class="text-default-700 dark:text-default-500 text-sm mb-4">
-            JSON syntax, API keys, gateway connection problems
+            JSON5/schema validation, wrong types, missing keys
           </p>
           <div class="flex items-center text-primary text-sm font-medium">
-            <span>View issues</span>
+            <span>View solutions</span>
             <IconChevronRight
               className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
               aria-hidden="true"
@@ -137,26 +164,26 @@ import {
           </div>
         </a>
 
-        <!-- Platform-Specific -->
+        <!-- Models & Auth -->
         <a
-          href="/getting-started"
+          href="/troubleshooting/solutions?component=model"
           class="group relative overflow-hidden rounded-2xl border border-divider bg-content1 p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1"
         >
           <div class="mb-4">
             <div
-              class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center"
+              class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center"
             >
-              <IconDesktop className="w-6 h-6 text-white" aria-hidden="true" />
+              <IconCodeBracket className="w-6 h-6 text-white" aria-hidden="true" />
             </div>
           </div>
           <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-            Platform-Specific
+            Models & Auth
           </h3>
           <p class="text-default-700 dark:text-default-500 text-sm mb-4">
-            macOS, Linux, Windows, ARM64 compatibility issues
+            “All models failed”, billing/rate limits, OAuth/setup-token issues
           </p>
           <div class="flex items-center text-primary text-sm font-medium">
-            <span>View issues</span>
+            <span>View solutions</span>
             <IconChevronRight
               className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
               aria-hidden="true"
@@ -187,7 +214,10 @@ import {
                   class="px-2 py-1 rounded bg-content2 text-sm">node --version</code
                 >
               </p>
-              <a href="/getting-started" class="text-primary hover:underline text-sm font-medium">
+              <a
+                href="/troubleshooting/solutions/node-version-mismatch"
+                class="text-primary hover:underline text-sm font-medium"
+              >
                 View solution →
               </a>
             </div>
@@ -205,13 +235,12 @@ import {
               </div>
             </div>
             <div class="flex-1">
-              <h3 class="text-lg font-semibold mb-2">Telegram webhook failed to connect</h3>
+              <h3 class="text-lg font-semibold mb-2">Telegram: Bot API requests failing</h3>
               <p class="text-default-700 dark:text-default-500 mb-3">
-                Common causes include incorrect bot token, network issues, or webhook URL
-                configuration problems.
+                Common causes include outbound network/DNS issues to Telegram, or missing token configuration.
               </p>
               <a
-                href="/getting-started/quick-start"
+                href="/troubleshooting/solutions/telegram-setmycommands-failed"
                 class="text-primary hover:underline text-sm font-medium"
               >
                 View solution →
@@ -237,7 +266,7 @@ import {
                 strings.
               </p>
               <a
-                href="/guides/whatsapp-setup"
+                href="/troubleshooting/solutions/config-validation-failed"
                 class="text-primary hover:underline text-sm font-medium"
               >
                 View solution →
@@ -264,10 +293,7 @@ import {
                 This usually occurs when trying to install globally without proper permissions. Use
                 sudo or configure npm prefix.
               </p>
-              <a
-                href="/openclaw-config-generator"
-                class="text-primary hover:underline text-sm font-medium"
-              >
+              <a href="/troubleshooting/solutions/npm-eacces-global-install" class="text-primary hover:underline text-sm font-medium">
                 View solution →
               </a>
             </div>
@@ -285,17 +311,41 @@ import {
               </div>
             </div>
             <div class="flex-1">
-              <h3 class="text-lg font-semibold mb-2">macOS Sequoia compatibility issues</h3>
+              <h3 class="text-lg font-semibold mb-2">Control UI: disconnected (1008): pairing required</h3>
               <p class="text-default-700 dark:text-default-500 mb-3">
-                Some users on macOS Sequoia experience issues with certain Node.js versions or
-                system permissions.
+                First-time remote connections require one-time device approval. Approve the device, then reload.
               </p>
-              <a href="/getting-started" class="text-primary hover:underline text-sm font-medium">
+              <a
+                href="/troubleshooting/solutions/control-ui-pairing-required"
+                class="text-primary hover:underline text-sm font-medium"
+              >
                 View solution →
               </a>
             </div>
           </div>
         </div>
+      </div>
+    </Section>
+
+    <!-- Featured Solutions -->
+    <Section py="pt-4 pb-20">
+      <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center">Featured Solutions</h2>
+      <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-4">
+        {featuredSolutions.map((c) => (
+          <a
+            href={c.href}
+            class="rounded-xl border border-divider bg-content1 p-6 hover:border-primary/40 transition-colors"
+          >
+            <h3 class="font-semibold text-foreground mb-2">{c.title}</h3>
+            <p class="text-sm text-default-700 dark:text-default-500 line-clamp-2">{c.description}</p>
+            <div class="mt-4 text-sm font-medium text-primary">Read →</div>
+          </a>
+        ))}
+      </div>
+      <div class="mt-6 text-center text-sm text-default-600">
+        Need more? Browse{' '}
+        <a class="text-primary hover:underline" href="/troubleshooting/solutions">all solutions</a>{' '}
+        or ask for help below.
       </div>
     </Section>
 

@@ -1,0 +1,76 @@
+---
+title: "iMessage self-chat creates echo loop despite v2026.1.22 fixes"
+description: "Real user-reported issue (#1649) from GitHub: iMessage self-chat creates echo loop despite v2026.1.22 fixes"
+kind: "case"
+draft: true
+component: "config"
+related:
+  githubIssues:
+    - 1649
+os:
+  - "macos"
+channel:
+  - "signal"
+  - "imessage"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#1649](https://github.com/openclaw/openclaw/issues/1649)
+- State: `closed`
+- Comments: `11`
+
+## What users report
+
+```
+## Bug Description
+Message echo loop occurs when user messages themselves via iMessage, despite fixes in v2026.1.10-1.16 (#655, #659, #1031, #1080).
+
+## Environment
+- **Clawdbot version:** v2026.1.22 (now updated to v2026.1.23-1)
+- **OS:** macOS
+- **imsg CLI:** Installed and configured
+
+## Configuration
+```json
+"imessage": {
+  "enabled": true,
+  "cliPath": "imsg",
+  "dmPolicy": "allowlist",
+  "groupPolicy": "allowlist",
+  "allowFrom": ["<user's own phone number>"]
+}
+```
+
+**Critical detail:** User's own phone number is in the `allowFrom` list, creating a self-chat scenario.
+
+## Reproduction Steps
+1. Configure iMessage provider with user's own number in `allowFrom`
+2. Send a message to yourself via iMessage
+3. Clawdbot processes the message and sends a response
+4. Clawdbot echoes its own response back as a new "incoming" message
+5. Loop continues indefinitely
+
+## Expected Behavior
+Deduplication logic should prevent Claude's own responses from being processed as new incoming messages, even in self-chat scenarios.
+
+## Actual Behavior
+Each outbound message from Claude is echoed back as an incoming message, triggering a new API call. Loop continues until manually stopped.
+
+## Evidence
+Se
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

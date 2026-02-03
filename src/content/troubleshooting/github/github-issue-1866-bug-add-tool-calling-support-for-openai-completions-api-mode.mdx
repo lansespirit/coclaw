@@ -1,0 +1,63 @@
+---
+title: "[Bug]: Add tool calling support for `openai-completions` API mode"
+description: "Real user-reported issue (#1866) from GitHub: [Bug]: Add tool calling support for `openai-completions` API mode"
+kind: "case"
+draft: true
+component: "config"
+related:
+  githubIssues:
+    - 1866
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#1866](https://github.com/openclaw/openclaw/issues/1866)
+- State: `open`
+- Comments: `12`
+
+## What users report
+
+```
+### Problem
+When using a local vLLM server with `api: "openai-completions"`, Clawdbot doesn't send tool definitions to the model, so tool calling never works. The model just responds with text instead of making tool calls.
+
+### Environment
+- Clawdbot: 2026.1.23-1
+- vLLM: latest (vllm/vllm-openai:latest)
+- Model: Qwen/Qwen2.5-7B-Instruct-AWQ with `--enable-auto-tool-choice --tool-call-parser hermes`
+
+### Evidence
+vLLM's `/v1/chat/completions` endpoint **does support tools** when called directly:
+```bash
+curl -s http://localhost:8001/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model":"Qwen/Qwen2.5-7B-Instruct-AWQ",
+    "messages":[{"role":"user","content":"Call ping with ok=true"}],
+    "tools":[{"type":"function","function":{"name":"ping","parameters":{"type":"object","properties":{"ok":{"type":"boolean"}}}}}],
+    "tool_choice":"auto"
+  }' | jq '.choices[0].message.tool_calls'
+
+# Returns:
+[{"id":"chatcmpl-tool-xxx","type":"function","function":{"name":"ping","arguments":"{\"ok\": true}"}}]
+```
+
+But Clawdbot with `api: "openai-completions"` never sends tools, so the model just replies with text.
+
+### Request
+Add an option to send tools with `openai-com
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

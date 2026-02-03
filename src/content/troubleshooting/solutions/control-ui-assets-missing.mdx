@@ -1,0 +1,60 @@
+---
+title: "Control UI assets missing"
+description: "Fix 'Control UI assets not found' by building UI assets (pnpm ui:build) or running openclaw doctor UI repair when sources are present."
+kind: "solution"
+component: "web-ui"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "Control UI assets not found"
+  - "A2UI assets not found"
+keywords:
+  - "ui"
+  - "control ui"
+  - "a2ui"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/start/wizard"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Logs say “Control UI assets not found”.
+- The UI doesn’t load, or certain UI pages 404.
+
+## Cause
+
+The gateway can run without UI assets, but the web UI needs a built `dist/control-ui/` bundle. In slim/docker-like environments, UI source files may not even be present, so auto-building is skipped.
+
+## Fix
+
+### Option A: Let doctor guide the fix (recommended)
+
+```bash
+openclaw doctor
+```
+
+If it offers to build UI assets, accept.
+
+### Option B: Build UI assets manually (source checkout)
+
+From the OpenClaw repo root:
+
+```bash
+pnpm ui:build
+```
+
+Then restart the gateway (or rerun onboarding if you’re in the wizard flow).
+
+## Verify
+
+- Re-open the dashboard/control UI and confirm pages load.
+- `openclaw status --deep` succeeds.
+

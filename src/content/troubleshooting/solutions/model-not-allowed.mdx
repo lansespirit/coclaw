@@ -1,0 +1,53 @@
+---
+title: "/model says 'model not allowed'"
+description: "Fix 'model not allowed' by updating or clearing the agents.defaults.models allowlist, then selecting an allowed model."
+kind: "solution"
+component: "model"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "model not allowed"
+keywords:
+  - "allowlist"
+  - "models"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/help/troubleshooting"
+    - "https://docs.openclaw.ai/concepts/models"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- In chat, `/model <something>` returns: `Model "provider/model" is not allowed`.
+- It can feel like the bot “didn’t respond” because the selection fails before a normal reply.
+
+## Cause
+
+`agents.defaults.models` is configured as an **allowlist**. When it’s non-empty, only those models can be selected.
+
+## Fix
+
+Check the allowlist:
+
+```bash
+openclaw config get agents.defaults.models
+```
+
+Then do one of:
+
+- Add the model you want to the allowlist (recommended for safety), or
+- Clear/remove `agents.defaults.models` to disable allowlisting, or
+- Pick a model that is already in the allowlist (`/model list`).
+
+## Verify
+
+- Re-run `/model list` and confirm the target model is selectable.
+- Send a message; it uses the expected model.
+

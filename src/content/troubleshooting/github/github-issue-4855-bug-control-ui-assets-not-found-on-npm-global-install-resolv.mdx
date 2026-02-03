@@ -1,0 +1,64 @@
+---
+title: "[Bug]: Control UI assets not found on npm global install (resolveControlUiDistIndexPath fails)"
+description: "Real user-reported issue (#4855) from GitHub: [Bug]: Control UI assets not found on npm global install (resolveControlUiDistIndexPath fails)"
+kind: "case"
+draft: true
+component: "gateway"
+related:
+  githubIssues:
+    - 4855
+os:
+  - "macos"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#4855](https://github.com/openclaw/openclaw/issues/4855)
+- State: `open`
+- Comments: `11`
+
+## What users report
+
+```
+## Summary
+
+Control UI fails to load with "Missing Control UI assets. Build them with `pnpm ui:build`" when OpenClaw is installed via `npm install -g openclaw`, even though the assets are correctly included in the package.
+
+## Steps to reproduce
+
+1. Install OpenClaw globally: `npm install -g openclaw@2026.1.29`
+2. Start the gateway: `openclaw gateway`
+3. Access `http://127.0.0.1:18789/`
+4. Error message appears: "Missing Control UI assets. Build them with `pnpm ui:build` (auto-installs UI deps)."
+
+## Expected behavior
+
+The Control UI should load normally since `dist/control-ui/index.html` and all assets are present in the npm package.
+
+## Actual behavior
+
+The UI asset detection fails and suggests running `pnpm ui:build`, which is impossible because the build scripts aren't included in the npm package.
+
+## Root Cause
+
+`resolveControlUiDistIndexPath()` in `src/infra/control-ui-assets.ts` assumes `process.argv[1]` points to a file inside `dist/`:
+
+```javascript
+const distDir = path.dirname(normalized);
+if (path.basename(distDir) !== "dist") return null;
+```
+
+When installed via npm global, `process.argv[1]` is `/path/to/node_modules/openclaw/openclaw.mjs` (package root), not inside `di
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

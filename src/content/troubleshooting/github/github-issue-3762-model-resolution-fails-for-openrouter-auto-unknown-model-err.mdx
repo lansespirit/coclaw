@@ -1,0 +1,66 @@
+---
+title: "Model resolution fails for openrouter/auto - Unknown model error"
+description: "Real user-reported issue (#3762) from GitHub: Model resolution fails for openrouter/auto - Unknown model error"
+kind: "case"
+draft: true
+related:
+  githubIssues:
+    - 3762
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#3762](https://github.com/openclaw/openclaw/issues/3762)
+- State: `open`
+- Comments: `6`
+
+## What users report
+
+```
+## Description
+
+When using `openrouter/auto` as the default model, messages fail with:
+
+```
+Error: Unknown model: openrouter/auto
+```
+
+## Root Cause
+
+Model ref parsing mismatch between Clawdbot and pi-ai:
+
+1. **pi-ai stores the model** under `modelRegistry["openrouter"]["openrouter/auto"]`
+2. **Clawdbot's `parseModelRef()`** splits at first `/` → `provider="openrouter", model="auto"`
+3. **Lookup fails**: `getModel("openrouter", "auto")` returns undefined
+
+## Expected Behavior
+
+`openrouter/auto` should work. OpenRouter's API accepts `model: "openrouter/auto"` for their auto-routing.
+
+## Workaround
+
+Use a specific model instead of `openrouter/auto` as default.
+
+## Environment
+
+- Clawdbot: 2026.1.24-3
+- Node: v22.22.0
+
+## Suggested Fix
+
+Handle special case where model ID includes provider prefix (like `openrouter/auto`).
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

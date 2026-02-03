@@ -1,0 +1,72 @@
+---
+title: "Telegram: bot shows connected but receives no messages"
+description: "Fix Telegram bots that start successfully but don't receive updates by checking privacy mode, webhook/polling conflicts, and network reachability."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel:
+  - "telegram"
+errorSignatures:
+  - "connected successfully but receives no messages"
+  - "polling not working"
+keywords:
+  - "telegram"
+  - "privacy mode"
+  - "webhook"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/telegram"
+  githubIssues:
+    - 4942
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Telegram token is configured and the gateway reports Telegram as started/connected.
+- But the bot never receives messages (DM or group), even though Telegram shows them delivered.
+
+## Cause
+
+Common causes:
+
+- Telegram **privacy mode** prevents group messages unless the bot is mentioned (depends on how you use it).
+- A **webhook/polling conflict** (another bot framework/webhook is registered for the same token).
+- Network/DNS restrictions prevent long-polling from working reliably on the gateway host.
+
+## Fix
+
+### 1) Probe channel status from the gateway
+
+On the gateway host:
+
+```bash
+openclaw channels status --probe
+```
+
+### 2) Check group behavior (mentions/privacy mode)
+
+In groups, try mentioning the bot explicitly.
+
+If you need the bot to react without mentions, adjust your group activation/rules (and consider allowlists to avoid spam).
+
+### 3) Ensure the token is not used elsewhere
+
+If you previously used the same bot token with another framework that set a webhook, remove it (or create a new bot token dedicated to OpenClaw).
+
+### 4) If you're on a restricted network
+
+Run the gateway on a host that can reliably reach Telegram (VPS), or use an egress path that allows Telegram connections, then restart the gateway.
+
+## Verify
+
+- Sending a DM triggers a response.
+- In a group, mentioning the bot triggers a response (and your desired activation mode works).
+

@@ -1,0 +1,92 @@
+---
+title: "Moonshot (Kimi): API works in browser but OpenClaw keeps failing (wrong endpoint)"
+description: "Fix Moonshot/Kimi model failures by using the correct baseUrl for your region (api.moonshot.ai vs api.moonshot.cn), and ensuring MOONSHOT_API_KEY is set on the gateway host."
+kind: "solution"
+component: "model"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "moonshot"
+  - "kimi"
+  - "api.moonshot.cn"
+keywords:
+  - "moonshot"
+  - "kimi"
+  - "china"
+  - "baseUrl"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/providers/moonshot"
+    - "https://docs.openclaw.ai/gateway/configuration"
+  githubIssues:
+    - 3475
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Moonshot/Kimi models time out, fail intermittently, or never return (while direct API calls seem fine).
+- `openclaw models status --probe` fails for `moonshot/...`.
+
+## Cause
+
+Most often:
+
+- The gateway is using the wrong Moonshot endpoint for your network/region, or
+- `MOONSHOT_API_KEY` is set on your laptop but not on the **gateway host** (VPS/Docker).
+
+Moonshot supports multiple endpoints:
+
+- International: `https://api.moonshot.ai/v1`
+- China: `https://api.moonshot.cn/v1`
+
+If your gateway host can only reach one of them reliably, the other will fail.
+
+## Fix
+
+### 1) Ensure the key exists on the gateway host
+
+Run on the gateway host:
+
+```bash
+openclaw models status
+```
+
+If Moonshot shows as unauthenticated/missing, set `MOONSHOT_API_KEY` on the gateway host and restart the gateway.
+
+### 2) Set the correct baseUrl for your region
+
+Use `openclaw configure` (Model/auth → Moonshot) or set it in config:
+
+```json5
+{
+  models: {
+    providers: {
+      moonshot: {
+        baseUrl: "https://api.moonshot.cn/v1",
+      },
+    },
+  },
+}
+```
+
+Then restart the gateway.
+
+### 3) Probe again
+
+```bash
+openclaw models status --probe
+```
+
+## Verify
+
+- Probes succeed for `moonshot/...`.
+- A test chat returns normally and logs show successful Moonshot requests.
+

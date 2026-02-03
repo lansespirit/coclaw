@@ -1,0 +1,59 @@
+---
+title: "Signal: group sends fail ('Group not found') due to case-sensitive group IDs"
+description: "Fix Signal group targeting failures by preserving the exact group ID casing and upgrading if your version lowercases base64 IDs."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "signal"
+errorSignatures:
+  - "Group not found"
+  - "signal:group:"
+keywords:
+  - "signal"
+  - "group"
+  - "base64"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/signal"
+  githubIssues:
+    - 7354
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Proactive sends to a Signal group fail with **“Group not found”**.
+- DMs work, and replying inside the group can still work, but scripted sends (CLI/tool/cron) to the group fail.
+
+## Cause
+
+Signal group IDs are base64 and **case-sensitive**.
+Some versions or tooling can accidentally lowercase the group id, which breaks targeting.
+
+## Fix
+
+### 1) Copy the group id exactly (preserve casing)
+
+When you store or paste a group id, keep it exactly as provided by OpenClaw / signal-cli (do not lowercase it).
+
+### 2) Prefer replying in-thread while you recover
+
+If you can still reply to a message inside the group, do that first (the session already knows the correct group id).
+
+### 3) Upgrade OpenClaw if you suspect an old normalization bug
+
+If your version lowercases group IDs, upgrade OpenClaw to the latest version and restart the gateway.
+
+## Verify
+
+- A test send to `signal:group:<groupId>` succeeds.
+- The group receives the message.
+

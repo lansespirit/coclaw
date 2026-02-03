@@ -1,0 +1,94 @@
+---
+title: "Control UI shows 'unauthorized' / keeps reconnecting"
+description: "Fix OpenClaw dashboard/control UI auth errors (unauthorized, 1008, reconnect loop) by aligning gateway token/password and reachability."
+kind: "solution"
+component: "web-ui"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "unauthorized"
+  - "token missing"
+keywords:
+  - "dashboard"
+  - "control ui"
+  - "gateway auth"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/web/dashboard"
+    - "https://docs.openclaw.ai/help/faq"
+  githubIssues: []
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- The Control UI says **"unauthorized"**, or it connects then immediately disconnects / reconnects.
+- You open `http://127.0.0.1:18789/` and see **unauthorized**.
+- You see close code **1008**.
+
+## Cause
+
+The gateway has auth enabled (`gateway.auth.*`), but the browser UI is not sending the **same token/password** that the gateway expects.
+
+Common causes:
+
+- You opened the UI without the one-time `?token=...` link.
+- Your browser cached an old token in localStorage.
+- Your gateway token is being overridden by an environment variable (e.g. `OPENCLAW_GATEWAY_TOKEN`).
+- You are connecting to a remote host without an SSH tunnel / tailnet bind, so you are not actually reaching the gateway you think you are.
+
+## Fix
+
+### 1) Get a fresh tokenized link (fastest)
+
+```bash
+openclaw dashboard
+```
+
+Open the URL it prints (it should include `?token=...`).
+
+### 2) Verify the gateway is reachable
+
+```bash
+openclaw status
+```
+
+If the gateway is remote, tunnel it first:
+
+```bash
+ssh -N -L 18789:127.0.0.1:18789 user@host
+```
+
+Then open:
+
+- `http://127.0.0.1:18789/?token=...`
+
+### 3) Ensure gateway token matches what UI uses
+
+- The gateway token source is `gateway.auth.token` (or `OPENCLAW_GATEWAY_TOKEN`).
+- In the Control UI settings, paste the exact same token.
+
+If you suspect an env override, run:
+
+```bash
+openclaw doctor
+```
+
+Look for notes about launchd/systemd environment overrides.
+
+## Verify
+
+- Reload the Control UI; it should stay connected.
+- `openclaw status --deep` succeeds.
+
+## Related
+
+- GitHub issues: search for similar reports (for example: `unauthorized 1008`).
+- Docs: Dashboard auth notes and Control UI auth troubleshooting (see links above).

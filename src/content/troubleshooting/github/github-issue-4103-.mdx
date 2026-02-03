@@ -1,0 +1,102 @@
+---
+title: "接入企业微信，保姆级教程"
+description: "Real user-reported issue (#4103) from GitHub: 接入企业微信，保姆级教程"
+kind: "case"
+draft: true
+component: "gateway"
+related:
+  githubIssues:
+    - 4103
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "r: support"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#4103](https://github.com/openclaw/openclaw/issues/4103)
+- State: `closed`
+- Comments: `7`
+
+## What users report
+
+```
+# Clawdbot 企业微信（WeCom）Channel 插件
+
+维护者：YanHaidao（VX：YanHaidao）
+
+状态：支持企业微信智能机器人（API 模式）加密回调 + 被动回复（stream）。
+
+## 联系我
+
+微信交流群（扫码入群）：
+
+![企业微信交流群](https://cdn.jsdelivr.net/npm/@yanhaidao/wecom@latest/assets/link-me.jpg)
+
+## 安装
+
+### 从 npm 安装
+```bash
+clawdbot plugins install @yanhaidao/wecom
+clawdbot plugins enable wecom
+clawdbot gateway restart
+```
+
+## 配置结构参考
+
+```json5
+{
+  channels: {
+    wecom: {
+      enabled: true,
+      webhookPath: "/wecom",
+      token: "YOUR_TOKEN",
+      encodingAESKey: "YOUR_ENCODING_AES_KEY",
+      receiveId: "YOUR_RECEIVE_ID",
+      dm: { policy: "pairing" }
+    }
+  }
+}
+```
+
+## 接入企业微信
+
+### 搭建企微 Bot（API 模式）
+
+1. 登录企业微信管理后台  
+进入「安全与管理」→「管理工具」→「智能机器人」：`https://work.weixin.qq.com/wework_admin/frame#/manageTools`
+
+2. 创建机器人（务必选择 API 模式）  
+创建机器人时需要填写回调 URL（公网可访问的 HTTPS 地址），例如：`https://example.com/wecom`
+
+3. 记录机器人配置  
+在机器人详情里找到并保存以下信息，后续会写入 Clawdbot 配置：
+- Token
+- EncodingAESKey
+- ReceiveId（如果你的机器人/回调配置需要校验的话）
+
+## 快速开始
+
+1. 启用插件
+```bash
+clawdbot plugins enable wecom
+```
+
+2. 配置企业微信机器人（必需）
+```bash
+clawdbot config set channels.wecom.enabled true
+clawdbot config set channels.wecom.webhookPath "/wecom"
+clawdbot config set channels.wecom.token "YOUR_TOKEN"
+clawdbot config set ch
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

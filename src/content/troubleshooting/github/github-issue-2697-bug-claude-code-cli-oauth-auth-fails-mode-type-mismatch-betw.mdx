@@ -1,0 +1,62 @@
+---
+title: "[Bug]: Claude Code CLI OAuth auth fails - mode/type mismatch between config files"
+description: "Real user-reported issue (#2697) from GitHub: [Bug]: Claude Code CLI OAuth auth fails - mode/type mismatch between config files"
+kind: "case"
+draft: true
+component: "gateway"
+related:
+  githubIssues:
+    - 2697
+os:
+  - "macos"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#2697](https://github.com/openclaw/openclaw/issues/2697)
+- State: `open`
+- Comments: `25`
+
+## What users report
+
+```
+## Summary
+Clawdbot fails to authenticate with Claude Max subscription via Claude Code CLI OAuth. Returns 401 "Invalid bearer token" despite successful `claude login`.
+
+## Steps to reproduce
+1. Run `clawdbot configure`, select Model → Anthropic → "Anthropic token (Claude Code CLI)"
+2. Complete the wizard (Keychain prompt, etc.)
+3. Restart gateway and send a message
+4. Get 401 error
+
+## Expected behavior
+Clawdbot uses Claude Code OAuth credentials to authenticate with Anthropic API.
+
+## Actual behavior
+401 "Invalid bearer token" or "No API key found for provider anthropic" errors.
+
+## Root cause
+Mismatch between config files:
+- `~/.clawdbot/clawdbot.json` has profile `anthropic:anthropic_api` with `mode: "token"` (should be `oauth`)
+- `~/.clawdbot/agents/main/agent/auth-profiles.json` has profile `anthropic:claude-cli` with `type: "oauth"` but `lastGood` points to wrong profile
+
+The wizard sets `mode: "token"` but Claude CLI stores OAuth credentials. Profile names also don't match between files.
+
+## Workaround
+1. `clawdbot config set auth.profiles.anthropic:anthropic_api.mode "oauth"`
+2. Update auth-profiles.json to use matching profile name `anthropic:anthropic_api` with `type: "oa
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

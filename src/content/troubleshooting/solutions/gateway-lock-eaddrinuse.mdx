@@ -1,0 +1,73 @@
+---
+title: "Gateway fails to start: EADDRINUSE / another gateway instance is already listening"
+description: "Fix OpenClaw gateway port conflicts (EADDRINUSE) by stopping the other process or choosing a new gateway port/profile."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "EADDRINUSE"
+  - "GatewayLockError"
+  - "another gateway instance is already listening"
+keywords:
+  - "port"
+  - "18789"
+  - "gateway"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/gateway/gateway-lock"
+    - "https://docs.openclaw.ai/help/faq"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Gateway startup fails with `EADDRINUSE`.
+- You see `GatewayLockError("another gateway instance is already listening on ws://127.0.0.1:18789")`.
+
+## Cause
+
+The gateway enforces single-instance by binding its WebSocket/HTTP port early. If something already uses the port (another gateway instance or any other process), startup fails.
+
+## Fix
+
+### Option A: Stop the other gateway instance
+
+Run:
+
+```bash
+openclaw gateway status
+```
+
+If you have multiple installs (e.g. macOS app + CLI), stop the one you don’t want running.
+
+### Option B: Use a different port
+
+```bash
+openclaw gateway --port 18790
+```
+
+For a permanent change, set `gateway.port` in your config (or `OPENCLAW_GATEWAY_PORT`).
+
+### Option C: If you actually need multiple gateways
+
+Only do this when you need real isolation/redundancy. You must isolate:
+
+- config path
+- state dir / profile
+- gateway port
+
+## Verify
+
+```bash
+openclaw status
+```
+
+Open `http://127.0.0.1:<port>/` (and use `openclaw dashboard` for the tokenized link if needed).
+

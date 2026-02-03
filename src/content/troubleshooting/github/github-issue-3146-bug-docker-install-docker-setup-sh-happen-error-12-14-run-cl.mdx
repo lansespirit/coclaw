@@ -1,0 +1,72 @@
+---
+title: "[Bug]: docker install \"./docker-setup.sh\" happen => ERROR [12/14] RUN CLAWDBOT_A2UI_SKIP_MISSING=1 pnpm build"
+description: "Real user-reported issue (#3146) from GitHub: [Bug]: docker install \"./docker-setup.sh\" happen => ERROR [12/14] RUN CLAWDBOT_A2UI_SKIP_MISSING=1 pnpm build"
+kind: "case"
+draft: true
+component: "config"
+related:
+  githubIssues:
+    - 3146
+os:
+  - "linux"
+  - "docker"
+channel:
+  - "discord"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+  - "r: support"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#3146](https://github.com/openclaw/openclaw/issues/3146)
+- State: `closed`
+- Comments: `9`
+
+## What users report
+
+```
+## Summary
+What went wrong?
+
+## Steps to reproduce
+1. Git clone repo to my ubuntu server
+2. run "./docker-setup.sh
+
+## Expected behavior
+What did you expect to happen?
+
+Install success, i can use "docker ps" to see my moltbot run
+
+## Actual behavior
+What actually happened?
+
+=> ERROR [12/14] RUN CLAWDBOT_A2UI_SKIP_MISSING=1 pnpm build
+
+## Environment
+- Clawdbot version:Clawdbot 2026.1.24
+- OS:Ubuntu 24.04
+- Install method (pnpm/npx/docker/etc):docker
+
+## Logs or screenshots
+Paste relevant logs or add screenshots (redact secrets).
+
+```
+name@myubuntu:~/docker/moltbot$ sudo ./docker-setup.sh
+==> Building Docker image: moltbot:local
+[+] Building 52.9s (16/18)                                                                                                                                                                                                        docker:default
+ => [internal] load build definition from Dockerfile                                                                                                                                                                                        0.0s
+ => => transferring dockerfile: 1.18kB                                            
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

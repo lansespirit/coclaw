@@ -1,0 +1,82 @@
+---
+title: "Signal: signal-cli not found / daemon won't start"
+description: "Fix Signal channel startup by installing signal-cli + Java, setting cliPath, and increasing startup timeout or using an external daemon (httpUrl)."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel:
+  - "signal"
+errorSignatures:
+  - "signal-cli"
+  - "command not found"
+keywords:
+  - "signal"
+  - "signal-cli"
+  - "java"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/signal"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Signal channel fails to start.
+- Logs indicate `signal-cli` is missing, not executable, or the daemon never becomes ready.
+
+## Cause
+
+OpenClaw's Signal integration depends on **signal-cli** (and a working Java runtime).
+If `signal-cli` is not installed, not on PATH, or is slow to start, the gateway cannot connect to the Signal daemon.
+
+## Fix
+
+### 1) Install signal-cli (and Java) on the gateway host
+
+Install signal-cli using your OS package manager or the official distribution for your platform, and ensure Java is available.
+
+### 2) Point OpenClaw at the correct cli path
+
+Set `channels.signal.cliPath` if `signal-cli` isn’t on PATH:
+
+```json5
+{
+  channels: {
+    signal: {
+      cliPath: "/full/path/to/signal-cli",
+    },
+  },
+}
+```
+
+Restart the gateway.
+
+### 3) If startup is slow, increase timeout or use an external daemon
+
+Option A: increase `channels.signal.startupTimeoutMs`.
+
+Option B (recommended on slow machines): run the daemon yourself and set `channels.signal.httpUrl`, disabling autostart:
+
+```json5
+{
+  channels: {
+    signal: {
+      httpUrl: "http://127.0.0.1:8080",
+      autoStart: false,
+    },
+  },
+}
+```
+
+## Verify
+
+- `openclaw channels status --probe` shows Signal healthy.
+- Sending a DM to the Signal bot number triggers a reply.
+

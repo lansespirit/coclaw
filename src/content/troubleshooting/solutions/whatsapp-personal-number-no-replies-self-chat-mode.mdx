@@ -1,0 +1,65 @@
+---
+title: "WhatsApp: using your personal number and the bot won't reply"
+description: "If you're running OpenClaw on your personal WhatsApp number, enable self-chat mode and test using 'Message yourself' to avoid loop protection and policy blocks."
+kind: "solution"
+component: "channel"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "whatsapp"
+errorSignatures:
+  - "selfChatMode"
+keywords:
+  - "whatsapp"
+  - "self chat"
+  - "allowlist"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/whatsapp"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- You linked WhatsApp successfully, but when you message from your own personal account, the bot doesn’t respond.
+- You are running OpenClaw on the same number you normally use.
+
+## Cause
+
+Running a bot on your **personal** WhatsApp number is a supported fallback, but it needs extra configuration so OpenClaw can distinguish “self-chat” testing from normal DMs and avoid loop/spam behaviors.
+
+## Fix
+
+### 1) Enable self-chat mode for personal-number setups
+
+In your config:
+
+```json5
+{
+  channels: {
+    whatsapp: {
+      selfChatMode: true,
+    },
+  },
+}
+```
+
+### 2) Test using “Message yourself”
+
+In WhatsApp, use the built-in “Message yourself” chat for testing (recommended) so you don’t accidentally spam contacts during setup.
+
+### 3) Ensure DM policy allows your number
+
+If you use allowlists, add your own E.164 number to `channels.whatsapp.allowFrom`.
+
+## Verify
+
+- Sending a message in “Message yourself” triggers a reply.
+- `openclaw channels status --probe` shows WhatsApp healthy.
+

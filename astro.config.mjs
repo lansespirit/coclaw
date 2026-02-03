@@ -17,6 +17,13 @@ export default defineConfig({
     sitemap({
       changefreq: 'weekly',
       priority: 0.7,
+      filter: (page) => {
+        const pathname = page.startsWith('http') ? new URL(page).pathname : page;
+        return (
+          !pathname.startsWith('/troubleshooting/issues') &&
+          !pathname.startsWith('/troubleshooting/github')
+        );
+      },
     }),
   ],
 

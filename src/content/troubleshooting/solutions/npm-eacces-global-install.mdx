@@ -1,0 +1,65 @@
+---
+title: "npm install -g fails with EACCES / permission denied"
+description: "Fix global install permission errors on Linux/macOS by switching npm's global prefix to a user-writable directory (avoid sudo)."
+kind: "solution"
+component: "install"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+errorSignatures:
+  - "EACCES"
+  - "permission denied"
+  - "mkdir"
+keywords:
+  - "npm"
+  - "pnpm"
+  - "global install"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/install/node"
+    - "https://docs.openclaw.ai/install/installer"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- `npm install -g openclaw@latest` fails with `EACCES` / `permission denied`.
+- Errors mention `mkdir` in a root-owned directory (common on Linux).
+
+## Cause
+
+Your npm global prefix points to a directory that requires root permissions, so global installs fail unless you use `sudo` (not recommended).
+
+## Fix
+
+Switch npm’s global prefix to a user-writable directory:
+
+```bash
+mkdir -p "$HOME/.npm-global"
+npm config set prefix "$HOME/.npm-global"
+export PATH="$HOME/.npm-global/bin:$PATH"
+```
+
+Persist the `export PATH=...` line in your shell startup file (zsh: `~/.zshrc`, bash: `~/.bashrc`), then open a new terminal.
+
+Now retry:
+
+```bash
+npm install -g openclaw@latest
+```
+
+## Verify
+
+```bash
+command -v openclaw
+openclaw --help
+```
+
+## Related
+
+- If you then get `openclaw: command not found`, your PATH still doesn’t include the global bin dir (see the related install/PATH article).
+

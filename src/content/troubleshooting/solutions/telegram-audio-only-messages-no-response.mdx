@@ -1,0 +1,88 @@
+---
+title: "Telegram: voice/audio-only messages don't trigger a response"
+description: "Fix Telegram voice notes that are ignored by enabling inbound audio transcription (tools.media.audio) and ensuring media limits allow downloading/transcribing."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel:
+  - "telegram"
+errorSignatures:
+  - "Audio-only messages"
+  - "voice message"
+keywords:
+  - "telegram"
+  - "voice"
+  - "transcription"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/nodes/audio"
+    - "https://docs.openclaw.ai/nodes/media-understanding"
+    - "https://docs.openclaw.ai/channels/telegram"
+  githubIssues:
+    - 1989
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Sending a Telegram voice note (audio-only) produces **no reply**.
+- If you add any text (for example, `?` + voice note), the bot replies and the transcription works.
+
+## Cause
+
+Audio-only messages need a transcription step to produce a usable text prompt.
+If inbound audio transcription is disabled (or blocked by limits/scope), the gateway may treat the message as “no text”, so it never triggers a normal reply flow.
+
+## Fix
+
+### 1) Enable inbound audio transcription (recommended)
+
+In your config, enable `tools.media.audio` and pick a provider (or let auto-detection work).
+
+Example (OpenAI transcription):
+
+```json5
+{
+  tools: {
+    media: {
+      audio: {
+        enabled: true,
+        models: [{ provider: "openai", model: "gpt-4o-mini-transcribe" }],
+      },
+    },
+  },
+}
+```
+
+Restart the gateway after changes.
+
+### 2) Ensure media limits allow voice notes
+
+- Telegram media cap: `channels.telegram.mediaMaxMb` (default 5MB)
+- Audio transcription cap: `tools.media.audio.maxBytes` (default 20MB)
+
+If your voice notes are larger than the Telegram cap, they may never be downloaded/transcribed.
+
+### 3) Probe and check logs
+
+On the gateway host:
+
+```bash
+openclaw channels status --probe
+openclaw logs --follow
+```
+
+Look for audio transcription messages (or errors about media size/timeout/auth).
+
+## Verify
+
+- Send an audio-only voice note; the bot replies with the transcript-based answer.
+- The logs show an audio transcription decision/output.
+

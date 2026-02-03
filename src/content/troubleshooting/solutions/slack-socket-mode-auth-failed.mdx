@@ -1,0 +1,79 @@
+---
+title: "Slack: socket mode connection/auth fails (xapp/xoxb tokens)"
+description: "Fix Slack socket mode issues by validating xapp/xoxb tokens, enabling socket mode, and reinstalling the app with correct scopes/events."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "slack"
+errorSignatures:
+  - "invalid_auth"
+  - "not_authed"
+  - "xapp-"
+  - "xoxb-"
+keywords:
+  - "slack"
+  - "socket mode"
+  - "token"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/slack"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Slack stays disconnected, or Slack events never arrive.
+- Logs mention auth problems such as `invalid_auth` / `not_authed`.
+- You’re using Socket Mode but messages never trigger the bot.
+
+## Cause
+
+Slack Socket Mode requires **two** tokens:
+
+- App token: `xapp-...` (must include `connections:write`)
+- Bot token: `xoxb-...`
+
+Connection/auth fails when:
+
+- One token is missing/wrong, or swapped (xapp vs xoxb).
+- Socket Mode is not enabled in the Slack app.
+- The app was not reinstalled after changing scopes/events.
+
+## Fix
+
+### 1) Validate you have both tokens configured
+
+In `channels.slack` config (or env vars), ensure both are set:
+
+- `SLACK_APP_TOKEN` = `xapp-...`
+- `SLACK_BOT_TOKEN` = `xoxb-...`
+
+Restart the gateway after changes.
+
+### 2) Recreate/reinstall tokens in Slack
+
+In Slack Developer Portal:
+
+1. Enable **Socket Mode**.
+2. Create an App-Level Token with scope `connections:write` (xapp).
+3. Install the app to your workspace to generate the Bot token (xoxb).
+
+If you changed scopes/events, **reinstall** the app.
+
+### 3) Invite the bot to the target channel(s)
+
+Even with correct tokens, Slack won’t deliver channel messages unless the bot is in the channel.
+
+## Verify
+
+- `openclaw channels status --probe` shows Slack connected.
+- Mentioning the bot or sending a DM triggers a response.
+

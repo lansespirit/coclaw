@@ -54,6 +54,56 @@ const docsCollection = defineCollection({
   }),
 });
 
+const troubleshootingCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    slug: z.string().optional(),
+
+    // Core classification (solution vs case)
+    kind: z.enum(['solution', 'case']).default('solution'),
+
+    // Troubleshooting facets (used for filters + chips)
+    component: z.string().optional(),
+    severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
+    os: z.array(z.string()).optional(),
+    channel: z.array(z.string()).optional(),
+
+    // Search helpers
+    errorSignatures: z.array(z.string()).optional(),
+    affectedVersions: z.array(z.string()).optional(),
+
+    // SEO + content metadata
+    keywords: z.array(z.string()).optional(),
+    author: z.string().default('CoClaw Team'),
+    publishDate: z.date(),
+    lastUpdated: z.date(),
+
+    // Cross-linking
+    related: z
+      .object({
+        guides: z.array(z.string()).optional(),
+        docs: z.array(z.string()).optional(),
+        githubIssues: z.array(z.number()).optional(),
+        external: z
+          .array(
+            z.object({
+              label: z.string(),
+              url: z.string().url(),
+            })
+          )
+          .optional(),
+      })
+      .optional(),
+
+    // Content status
+    draft: z.boolean().default(false),
+    archived: z.boolean().default(false),
+    needsReview: z.boolean().default(false),
+  }),
+});
+
 const storiesCollection = defineCollection({
   type: 'content',
   schema: z.object({
@@ -105,7 +155,7 @@ const guidesCollection = defineCollection({
 export const collections = {
   'getting-started': docsCollection,
   channels: docsCollection,
-  troubleshooting: docsCollection,
+  troubleshooting: troubleshootingCollection,
   guides: guidesCollection,
   blog: docsCollection,
   templates: docsCollection,

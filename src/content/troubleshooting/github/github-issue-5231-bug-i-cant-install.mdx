@@ -1,0 +1,79 @@
+---
+title: "[Bug]:  i cant install"
+description: "Real user-reported issue (#5231) from GitHub: [Bug]:  i cant install"
+kind: "case"
+draft: true
+component: "websocket"
+related:
+  githubIssues:
+    - 5231
+os:
+  - "windows"
+  - "docker"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#5231](https://github.com/openclaw/openclaw/issues/5231)
+- State: `open`
+- Comments: `8`
+
+## What users report
+
+```
+## Summary
+What went wrong?
+ PS C:\Users\rudyl> npm i -g openclaw
+npm error code ENOENT
+npm error syscall spawn git
+npm error path git
+npm error errno -4058
+npm error enoent An unknown git error occurred
+npm error enoent This is related to npm not being able to find a file.
+npm error enoent
+npm error A complete log of this run can be found in: C:\Users\rudyl\AppData\Local\npm-cache\_logs\2026-01-31T07_03_40_175Z-debug-0.log
+PS C:\Users\rudyl> iwr -useb https://openclaw.ai/install.ps1 | iex
+
+  OpenClaw Installer
+
+[OK] Windows detected
+[OK] Node.js v24.13.0 found
+[*] Installing OpenClaw (openclaw@latest)...
+node.exe : npm error code ENOENT
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm error code ENOENT:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+## Steps to reproduce
+1. Open Powershell or Terminal on Windows Pro Insider Preview
+2. Use any of the install script
+3. Fail
+
+## Expected behavior
+What did you expect to happen?
+
+Install
+
+## Actual behavior
+What actually happened?
+
+Failed
+
+## E
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

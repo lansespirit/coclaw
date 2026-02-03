@@ -1,0 +1,60 @@
+---
+title: "Windows: 'openclaw' is not recognized after install"
+description: "Fix Windows PATH issues after installing OpenClaw globally (npm prefix not on PATH, terminal not restarted, or multiple Node installs)."
+kind: "solution"
+component: "install"
+severity: "high"
+os:
+  - "windows"
+channel: []
+errorSignatures:
+  - "is not recognized as an internal or external command"
+keywords:
+  - "windows"
+  - "PATH"
+  - "npm"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/install/installer"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- PowerShell shows:
+  - `'openclaw' is not recognized as an internal or external command`
+- You just installed OpenClaw, but the command isn't available.
+
+## Cause
+
+On Windows, global npm installs place executables into a global bin folder (commonly `%AppData%\\npm`).
+If that folder is not on PATH (or you haven't restarted the terminal), `openclaw` won't be found.
+
+## Fix
+
+### 1) Restart PowerShell/Windows Terminal
+
+Close all terminals and reopen one (PATH changes don't always apply to existing shells).
+
+### 2) Find your npm global prefix
+
+```powershell
+npm config get prefix
+```
+
+Your global bin folder is usually `<prefix>\\bin` (or `%AppData%\\npm` depending on Node setup).
+
+### 3) Add the global bin folder to PATH
+
+Add it via Windows Environment Variables UI, then reopen the terminal.
+
+## Verify
+
+```powershell
+where openclaw
+openclaw --help
+```
+

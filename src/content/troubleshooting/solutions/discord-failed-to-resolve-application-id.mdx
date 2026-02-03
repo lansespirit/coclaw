@@ -1,0 +1,78 @@
+---
+title: "Discord: 'Failed to resolve Discord application id'"
+description: "Fix Discord startup failures by verifying the bot token and ensuring the gateway host can reach discord.com API endpoints (common in restricted networks)."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "discord"
+errorSignatures:
+  - "Failed to resolve Discord application id"
+  - "discord.com/api"
+keywords:
+  - "discord"
+  - "token"
+  - "network"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/discord"
+  githubIssues:
+    - 4772
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Gateway startup logs include: **“Failed to resolve Discord application id”**.
+- Discord channel never becomes healthy/connected.
+
+## Cause
+
+OpenClaw calls the Discord API (`discord.com/api/...`) on startup to discover your bot/application metadata.
+This fails when:
+
+- The bot token is missing/invalid, or
+- The gateway host cannot reach Discord (DNS, firewall, network restrictions, geo-blocking).
+
+## Fix
+
+### 1) Verify your Discord bot token is set correctly
+
+Make sure you configured the token in one place:
+
+- Env: `DISCORD_BOT_TOKEN=...`, or
+- Config: `channels.discord.token: "..."`.
+
+Then restart the gateway.
+
+### 2) Probe channel connectivity from OpenClaw
+
+On the gateway host:
+
+```bash
+openclaw channels status --probe
+```
+
+If the probe fails for Discord, continue to the network checks below.
+
+### 3) Check if the gateway host can reach Discord API
+
+If you are on a restricted network (common on some ISPs/regions), the most reliable fix is:
+
+- run the gateway on a VPS or machine that can reach Discord, or
+- use a network path that can reach Discord (VPN / egress proxy at the OS level).
+
+Then restart the gateway and re-run the probe.
+
+## Verify
+
+- `openclaw channels status --probe` reports Discord as reachable.
+- The Discord channel connects and starts receiving messages.
+

@@ -1,0 +1,76 @@
+---
+title: "Discord: bot is online but doesn't reply in server channels"
+description: "Fix Discord guild non-responses by checking channel permissions, invite status, mention/allowlist rules, and Message Content Intent."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "discord"
+errorSignatures:
+  - "bot connects but never replies"
+keywords:
+  - "discord"
+  - "guild"
+  - "permissions"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/discord"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- The Discord bot appears online, but it never replies in a server channel.
+- DMs may work, but guild channels are silent.
+
+## Cause
+
+Usually one of:
+
+- The bot is missing channel permissions (View Channel / Send Messages / Read Message History).
+- The bot is not actually in that channel/server (or can’t see the channel).
+- Your config requires mentions, but you’re not mentioning the bot.
+- Message Content Intent is disabled (see the dedicated intents solution if you see “Used disallowed intents”).
+
+## Fix
+
+### 1) Confirm OpenClaw sees Discord as healthy
+
+On the gateway host:
+
+```bash
+openclaw channels status --probe
+```
+
+### 2) Verify bot permissions in the target channel
+
+In Discord, ensure the bot role has at least:
+
+- View Channel
+- Send Messages
+- Read Message History
+
+If you’re using private channels, explicitly grant access.
+
+### 3) Mention the bot (quick sanity test)
+
+In a guild channel, send a message that mentions the bot (`@YourBot hello`).
+
+If replies only work when mentioned, adjust your config to allow always-on replies in that channel (or keep mention-only to avoid spam).
+
+### 4) If you use allowlists, confirm your user/channel is allowed
+
+If `channels.discord.guilds` is configured, any channel/user not allowed there can be silently ignored.
+
+## Verify
+
+- Mentioning the bot in the channel triggers a reply.
+- `openclaw channels status --probe` shows Discord healthy.
+

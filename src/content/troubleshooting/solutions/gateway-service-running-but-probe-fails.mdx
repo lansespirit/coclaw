@@ -1,0 +1,81 @@
+---
+title: "Gateway: service says running but the CLI/UI can't connect (probe fails)"
+description: "Fix 'running but unreachable' gateway states by checking you're probing the right URL, confirming the port is listening, and aligning auth/bind settings."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel: []
+errorSignatures:
+  - "RPC probe fails"
+  - "connect ECONNREFUSED"
+  - "WebSocket"
+keywords:
+  - "gateway"
+  - "probe"
+  - "service"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/gateway/troubleshooting"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- `openclaw gateway status` says the service is running, but:
+  - the Control UI won't connect, or
+  - `openclaw status --deep` / `openclaw channels status --probe` can't reach the gateway.
+
+## Cause
+
+Most common causes:
+
+- You're probing the **wrong gateway** (for example, your CLI is in remote mode, or using a different profile/state dir).
+- The gateway process is running but **not listening** on the expected port (bind/auth mismatch, crash loop, refused bind).
+- Firewall / network path prevents reachability from your client.
+
+## Fix
+
+### 1) Confirm what the CLI is trying to reach
+
+Run:
+
+```bash
+openclaw gateway status
+```
+
+Pay attention to the printed probe target / URL and whether you’re in local vs remote mode.
+
+### 2) Verify the gateway is actually listening
+
+If the gateway is local to the machine you're on, try opening the Control UI locally:
+
+- `http://127.0.0.1:18789/`
+
+If that works but remote doesn’t, it’s almost always bind/firewall/auth.
+
+### 3) Check for bind/auth mismatch
+
+If you bind to LAN/tailnet, ensure auth is set (token/password). If you see “refusing to bind … without auth”, fix auth and restart.
+
+### 4) Repair service/profile mismatches
+
+If you changed install method (npm ↔ git), profile, or config location, rewrite the service:
+
+```bash
+openclaw gateway install --force
+```
+
+Then restart and re-probe.
+
+## Verify
+
+- `openclaw status --deep` succeeds.
+- Control UI stays connected and `openclaw channels status --probe` works.
+

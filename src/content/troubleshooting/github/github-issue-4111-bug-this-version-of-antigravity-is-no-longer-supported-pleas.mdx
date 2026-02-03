@@ -1,0 +1,61 @@
+---
+title: "[Bug]:This version of Antigravity is no longer supported. Please update to receive the latest features!"
+description: "Real user-reported issue (#4111) from GitHub: [Bug]:This version of Antigravity is no longer supported. Please update to receive the latest features!"
+kind: "case"
+draft: true
+related:
+  githubIssues:
+    - 4111
+os:
+  - "linux"
+  - "docker"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#4111](https://github.com/openclaw/openclaw/issues/4111)
+- State: `open`
+- Comments: `51`
+
+## What users report
+
+```
+Summary
+The bot fails to generate responses and returns a "This version of Antigravity is no longer supported" error. This indicates the local google-antigravity provider or the bot instance is outdated and being rejected by the upstream API.
+
+Steps to reproduce
+Start the Molt bot instance.
+
+Send a message or command to the bot to trigger a response (e.g., in a DM or channel).
+
+Wait for the response.
+
+Expected behavior
+The bot should process the prompt and reply with generated text/content.
+
+Actual behavior
+The bot does not reply with content. Instead, the logs (or the bot's error reply) show the message: This version of Antigravity is no longer supported. Please update to receive the latest features!
+
+Environment
+Clawdbot/Moltbot version: (Run moltbot version or clawdbot version and paste here, e.g., v0.9.1)
+
+OS: ARCH Linux
+
+Install method: (e.g., Docker, npm install, git clone)
+
+<img width="1202" height="442" alt="Image" src="https://github.com/user-attachments/assets/cbbf0772-4d7e-4016-83a0-45e44781d306" />
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

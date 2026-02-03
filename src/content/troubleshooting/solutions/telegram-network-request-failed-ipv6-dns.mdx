@@ -1,0 +1,74 @@
+---
+title: "Telegram: network request failed (sendMessage/sendChatAction) due to IPv6/DNS"
+description: "Fix Telegram API failures by addressing IPv6-first DNS on hosts without IPv6 egress, or by fixing outbound DNS/HTTPS reachability to api.telegram.org."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel:
+  - "telegram"
+errorSignatures:
+  - "HttpError: Network request for 'sendMessage' failed"
+  - "HttpError: Network request for 'sendChatAction' failed"
+  - "api.telegram.org"
+keywords:
+  - "telegram"
+  - "ipv6"
+  - "dns"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/troubleshooting"
+    - "https://docs.openclaw.ai/channels/telegram"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Gateway logs show errors like:
+  - `HttpError: Network request for 'sendMessage' failed`
+  - `HttpError: Network request for 'sendChatAction' failed`
+- `setMyCommands` may also fail on startup.
+
+## Cause
+
+Most often:
+
+- `api.telegram.org` resolves to IPv6 first, but your host has **no IPv6 egress**, or
+- outbound DNS/HTTPS to `api.telegram.org` is blocked/restricted on the gateway host.
+
+## Fix
+
+### 1) Probe Telegram from OpenClaw
+
+On the gateway host:
+
+```bash
+openclaw channels status --probe
+```
+
+If Telegram probes fail, continue below.
+
+### 2) If your host does not support IPv6, force IPv4 (common on VPS)
+
+Options (pick one that matches your environment):
+
+- Enable IPv6 on the host/network, or
+- Configure the host to prefer IPv4 / disable IPv6 DNS resolution for this environment.
+
+Then restart the gateway.
+
+### 3) If you're on a restricted network
+
+Run the gateway on a host with reliable egress to Telegram (VPS), or use a network path that can reach `api.telegram.org`.
+
+## Verify
+
+- `openclaw channels status --probe` reports Telegram healthy.
+- A test Telegram message triggers a response.
+

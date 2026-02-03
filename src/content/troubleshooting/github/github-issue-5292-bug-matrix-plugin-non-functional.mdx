@@ -1,0 +1,70 @@
+---
+title: "[Bug]: Matrix plugin non-functional"
+description: "Real user-reported issue (#5292) from GitHub: [Bug]: Matrix plugin non-functional"
+kind: "case"
+draft: true
+component: "gateway"
+related:
+  githubIssues:
+    - 5292
+os:
+  - "linux"
+  - "docker"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#5292](https://github.com/openclaw/openclaw/issues/5292)
+- State: `open`
+- Comments: `6`
+
+## What users report
+
+```
+## Summary
+What went wrong?
+The Matrix plugin does not work.
+
+## Steps to reproduce
+1. Install the Matrix plugin as described as the docs
+2. Run `MATRIX_ACCESS_TOKEN=[...] MATRIX_HOMESERVER=https://[...] openclaw gateway`
+3. Observe the logs being spammed with a warning and more importantly this:
+```
+08:41:52 [gateway] [plugins] failed to load plugin: Error: Cannot find module '@vector-im/matrix-bot-sdk'
+Require stack:
+- /home/nyx/.openclaw/extensions/matrix/src/matrix/client/config.ts (plugin=matrix, source=/home/nyx/.openclaw/extensions/matrix/index.ts)
+```
+
+## Expected behavior
+What did you expect to happen?
+Matrix plugin to work properly
+
+## Actual behavior
+What actually happened?
+Does not connect to matrix (the admin api says it has no devices)
+
+## Environment
+- Clawdbot version: `2026.1.29`
+- OS: Arch Linux
+- Install method (pnpm/npx/docker/etc): `npm`
+
+## Logs or screenshots
+Paste relevant logs or add screenshots (redact secrets).
+```
+Config warnings:\n- plugins.entries.matrix: plugin matrix: duplicate plugin id detected; later plugin may be overridden (/usr/lib/node_modules/openclaw/extensions/matrix/index.ts)
+Config warnings:\n- plugins.entries.matrix: plugin matrix: dupli
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+import { IssuesExplorer } from '../../components/troubleshooting/IssuesExplorer';
+import { getOpenClawIssuesDataset } from '../../lib/openclaw-issues';
+
+const dataset = getOpenClawIssuesDataset();
+const initialQuery = Astro.url.searchParams.get('q') ?? '';
+const issuePreviews = dataset.issues.map((i) => ({
+  number: i.number,
+  title: i.title,
+  bodyPreview: (i.body ?? '').slice(0, 600),
+  state: i.state,
+  comments: i.comments,
+  updatedAt: i.updatedAt,
+  labels: i.labels ?? [],
+  channels: i.taxonomy?.channels ?? [],
+  platforms: i.taxonomy?.platforms ?? [],
+  components: i.taxonomy?.components ?? [],
+}));
+---
+
+<BaseLayout
+  title="OpenClaw GitHub Issues Explorer - Troubleshooting"
+  description="Search real OpenClaw GitHub issues to find similar errors, environment details, and proven workarounds."
+  keywords="OpenClaw issues, OpenClaw GitHub, OpenClaw troubleshooting, OpenClaw errors"
+  robots="noindex, nofollow"
+>
+  <div class="bg-background min-h-screen overflow-x-hidden relative selection:bg-primary/20">
+    <Section py="pt-24 pb-12" containerClass="text-center">
+      <h1
+        class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent"
+      >
+        GitHub Issues Explorer
+      </h1>
+      <p class="text-lg text-default-800 dark:text-default-600 max-w-3xl mx-auto">
+        Browse and search real user-reported problems from <code class="px-2 py-1 rounded bg-content2 text-sm"
+          >{dataset.repo}</code
+        >. Great for finding matching errors and environment-specific fixes.
+      </p>
+      <p class="text-sm text-default-600 mt-4">
+        Dataset fetched at: <span class="font-medium text-foreground">{dataset.fetchedAt}</span>
+      </p>
+    </Section>
+
+    <Section py="pb-20">
+      <IssuesExplorer issues={issuePreviews} initialQuery={initialQuery} client:load />
+    </Section>
+  </div>
+</BaseLayout>

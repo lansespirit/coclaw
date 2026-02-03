@@ -1,0 +1,81 @@
+---
+title: "Webchat UI fails to authenticate: 'gateway token missing' even with token in URL"
+description: "Real user-reported issue (#1690) from GitHub: Webchat UI fails to authenticate: 'gateway token missing' even with token in URL"
+kind: "case"
+draft: true
+component: "gateway"
+related:
+  githubIssues:
+    - 1690
+os:
+  - "macos"
+channel:
+  - "whatsapp"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#1690](https://github.com/openclaw/openclaw/issues/1690)
+- State: `closed`
+- Comments: `10`
+
+## What users report
+
+```
+## Bug Description
+
+The webchat/dashboard UI fails to connect to the gateway websocket with the error:
+
+```
+disconnected (1008): unauthorized: gateway token missing (set gateway.remote.token to match gateway.auth.token)
+```
+
+## Environment
+- macOS 26.2 (arm64)
+- Node 25.2.1
+- Clawdbot version: 2026.1.22
+- Gateway bound to loopback (127.0.0.1:18789)
+- Auth mode: token
+
+## Configuration
+```json
+{
+  "gateway": {
+    "mode": "local",
+    "auth": {
+      "mode": "token",
+      "token": "<redacted>"
+    },
+    "port": 18789,
+    "bind": "loopback",
+    "remote": {
+      "token": "<redacted>"  // Added this to match auth.token, still fails
+    }
+  }
+}
+```
+
+## Steps to Reproduce
+1. Configure gateway with `auth.mode: "token"` and set a token
+2. Run `clawdbot gateway start`
+3. Run `clawdbot dashboard` (or open `http://127.0.0.1:18789/chat?token=<token>`)
+4. Dashboard UI loads but websocket connection fails with unauthorized error
+
+## What I Tried
+- Adding token to URL query string: `?token=xxx` — doesn't work
+- Running `clawdbot dashboard` which should provide tokenized URL — doesn't work
+- Adding `gateway.remote.token` to config to match `gateway.auth.token` — doesn't work
+- Setting `gatewa
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

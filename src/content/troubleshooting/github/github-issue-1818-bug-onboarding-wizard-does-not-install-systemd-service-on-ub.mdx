@@ -1,0 +1,61 @@
+---
+title: "[Bug]: Onboarding wizard does not install Systemd service on Ubuntu 22.04"
+description: "Real user-reported issue (#1818) from GitHub: [Bug]: Onboarding wizard does not install Systemd service on Ubuntu 22.04"
+kind: "case"
+draft: true
+component: "gateway"
+related:
+  githubIssues:
+    - 1818
+os:
+  - "linux"
+  - "docker"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#1818](https://github.com/openclaw/openclaw/issues/1818)
+- State: `open`
+- Comments: `16`
+
+## What users report
+
+```
+## Summary
+The onboarding wizard does not install a Systemd service in Ubuntu. During the Systemd step, it prints: Systemd user services are unavailable. Skipping lingering checks and service install.
+
+This is because the **isSystemdUserServiceAvailable** function is throwing this error:
+
+`Failed to connect to bus: $DBUS_SESSION_BUS_ADDRESS and $XDG_RUNTIME_DIR not defined (consider using --machine=<user>@.host --user to connect to bus of other user)`
+
+## Steps to reproduce
+Just run the onboarding wizard on Ubuntu 22.04.
+
+## Expected behavior
+Systemd is obviously installed on my OS.
+
+## Actual behavior
+`Gateway service check failed: Error: systemctl --user unavailable: Failed to connect to bus: $DBUS_SESSION_BUS_ADDRESS and $XDG_RUNTIME_DIR not defined (consider using --machine=<user>@.host --user to connect to bus of other user)`
+
+## Environment
+- Clawdbot version: 2026.1.23-1
+- OS: Ubuntu 22.04
+- Install method (pnpm/npx/docker/etc): npm
+
+## Logs or screenshots
+`Gateway service check failed: Error: systemctl --user unavailable: Failed to connect to bus: $DBUS_SESSION_BUS_ADDRESS and $XDG_RUNTIME_DIR not defined (consider using --machine=<user>@.host --user to connect to bus of ot
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

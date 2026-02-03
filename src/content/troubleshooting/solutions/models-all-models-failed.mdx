@@ -1,0 +1,119 @@
+---
+title: "Model/auth failures: rate limit, billing, or 'all models failed'"
+description: "Debug OpenClaw model failures by checking provider auth status, probing profiles, switching models/fallbacks, and verifying provider/model refs."
+kind: "solution"
+component: "model"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "all models failed"
+  - "No API key found"
+  - "rate limit"
+  - "billing"
+keywords:
+  - "models"
+  - "auth"
+  - "openrouter"
+  - "fallbacks"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/cli/models"
+    - "https://docs.openclaw.ai/gateway/troubleshooting"
+    - "https://docs.openclaw.ai/concepts/models"
+    - "https://docs.openclaw.ai/concepts/oauth"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Messages fail with “all models failed”.
+- Provider errors like 401/403 (auth), 429 (rate limit), or billing/credits issues.
+- Logs show “No API key found for provider …”.
+
+## Cause
+
+Usually one of:
+
+- Missing/expired credentials for the selected provider (auth profiles are **per agent**).
+- You are using a model ref that OpenClaw can’t resolve (wrong provider prefix, wrong model id).
+- The provider is rate-limiting or billing is blocked.
+- Your configured primary model is down and you have no fallbacks.
+
+## Fix
+
+### 1) Get a fast view of model + auth state
+
+```bash
+openclaw models status
+```
+
+If you’re using multiple agents, inspect the specific agent:
+
+```bash
+openclaw models status --agent <agentId>
+```
+
+### 2) Run live probes (real requests)
+
+```bash
+openclaw models status --probe
+```
+
+Probes may consume tokens and can trigger rate limits, but they quickly tell you if auth works.
+
+### 3) Fix missing auth for a provider
+
+Common options:
+
+```bash
+openclaw models auth login --provider <id>
+openclaw models auth paste-token --provider <id>
+openclaw models auth setup-token --provider anthropic
+```
+
+Then re-check:
+
+```bash
+openclaw models status
+```
+
+### 4) Verify model refs (provider prefix matters)
+
+Model refs are parsed by splitting on the **first** `/`. If the model id itself contains `/`
+(OpenRouter-style), you must include the provider prefix.
+
+Example:
+
+- Correct: `openrouter/moonshotai/kimi-k2`
+- Wrong (ambiguous): `moonshotai/kimi-k2`
+
+Set a known-good model:
+
+```bash
+openclaw models set openrouter/anthropic/claude-sonnet-4-5
+openclaw models status
+```
+
+### 5) Add fallbacks (recommended)
+
+```bash
+openclaw models fallbacks add <provider/model>
+openclaw models fallbacks list
+```
+
+## Verify
+
+- `openclaw models status --probe` shows your default/fallback models are reachable.
+- Sending a test message succeeds and the gateway logs show a successful model call.
+
+## Related
+
+- If `/model` says “model not allowed”, that’s an allowlist problem: see the dedicated solution page.
+

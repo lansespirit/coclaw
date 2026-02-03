@@ -1,0 +1,71 @@
+---
+title: "Windows (WSL2): gateway service install fails (systemd not enabled)"
+description: "Fix WSL2 gateway daemon install issues by enabling systemd in /etc/wsl.conf, shutting down WSL, and retrying openclaw gateway install."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "windows"
+errorSignatures:
+  - "systemd"
+  - "gateway install"
+keywords:
+  - "wsl2"
+  - "systemd"
+  - "windows"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/platforms/windows"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- On Windows you installed OpenClaw inside WSL2, but `openclaw onboard --install-daemon` (or `openclaw gateway install`) fails.
+- systemd user services aren’t available.
+
+## Cause
+
+OpenClaw recommends Windows usage via **WSL2**, and gateway daemon install relies on **systemd** inside the WSL distro. systemd is not enabled by default on some installs.
+
+## Fix
+
+Inside WSL:
+
+```bash
+sudo tee /etc/wsl.conf >/dev/null <<'EOF'
+[boot]
+systemd=true
+EOF
+```
+
+Then from Windows PowerShell:
+
+```powershell
+wsl --shutdown
+```
+
+Re-open your WSL distro and verify:
+
+```bash
+systemctl --user status
+```
+
+Now retry:
+
+```bash
+openclaw gateway install
+# or
+openclaw onboard --install-daemon
+```
+
+## Verify
+
+```bash
+openclaw gateway status
+openclaw status
+```
+

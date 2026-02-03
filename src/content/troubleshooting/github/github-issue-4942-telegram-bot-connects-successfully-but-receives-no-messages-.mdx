@@ -1,0 +1,72 @@
+---
+title: "Telegram bot connects successfully but receives no messages (polling not working)"
+description: "Real user-reported issue (#4942) from GitHub: Telegram bot connects successfully but receives no messages (polling not working)"
+kind: "case"
+draft: true
+component: "gateway"
+related:
+  githubIssues:
+    - 4942
+os:
+  - "linux"
+channel:
+  - "telegram"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#4942](https://github.com/openclaw/openclaw/issues/4942)
+- State: `closed`
+- Comments: `8`
+
+## What users report
+
+```
+## Description
+Telegram bot connects to the gateway without errors, but does not receive any messages sent to it. The bot appears online on Telegram and `getMe` API calls succeed, but messages never reach the OpenClaw gateway.
+
+## Environment
+- **OpenClaw Version**: 2026.1.29 (6522de6)
+- **OS**: Ubuntu 20.04 (Focal)
+- **Node Version**: 24.13.0 (via nvm)
+- **Installation Method**: Cloned from GitHub, built with pnpm
+- **Gateway Mode**: Local (loopback only, port 18789)
+
+## Steps to Reproduce
+1. Installed OpenClaw from source: `git clone https://github.com/openclaw/openclaw.git`
+2. Built with: `pnpm install && pnpm ui:build && pnpm build`
+3. Ran onboarding: `pnpm openclaw onboard --install-daemon`
+4. Created Telegram bot via @BotFather, obtained token
+5. Added token to `~/.openclaw/openclaw.json`:
+```json
+{
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "botToken": "TOKEN_HERE"
+    }
+  }
+}
+```
+6. Started gateway: `pnpm openclaw gateway start`
+7. Sent messages to the bot on Telegram - **no response, no logs showing message receipt**
+
+## Expected Behavior
+Messages sent to the Telegram bot should:
+1. Appear in gateway logs
+2. Trigger pairing flow (if dmPolicy is "pairing
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

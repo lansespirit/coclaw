@@ -1,0 +1,92 @@
+---
+title: "TUI: '(no output)' or no response after sending a message"
+description: "If the OpenClaw TUI shows '(no output)' or appears stuck, check connection status, gateway logs, model auth, delivery toggle, and restart the TUI/session."
+kind: "solution"
+component: "tui"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "(no output)"
+keywords:
+  - "tui"
+  - "no output"
+  - "streaming"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/tui"
+    - "https://docs.openclaw.ai/cli/models"
+  githubIssues:
+    - 4499
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- After you send a message in `openclaw tui`, the assistant reply is blank or shows **“(no output)”**.
+- The UI looks idle, but you never get a response.
+- This can be intermittent or only happen with certain models/providers.
+
+## Cause
+
+Most common causes:
+
+- The TUI is connected, but the gateway run failed (provider auth, rate limit, model mismatch).
+- The gateway is still busy, stalled, or disconnected.
+- Delivery is off (you expected a reply in a chat channel, but the TUI is only showing local chat).
+- A provider streaming edge case (some providers/models have had TUI rendering bugs).
+
+## Fix
+
+### 1) Confirm the TUI is connected and the run state is sane
+
+In the TUI:
+
+- Run `/status`
+- If it shows disconnected, reconnect with the correct `--url/--token/--password`.
+
+### 2) Check gateway logs (most actionable)
+
+On the gateway host:
+
+```bash
+openclaw logs --follow
+```
+
+If you see auth or model errors, fix those first (then retry).
+
+### 3) Sanity-check model/auth
+
+On the gateway host:
+
+```bash
+openclaw models status
+openclaw models status --probe
+```
+
+### 4) If you expected messages to be delivered to a channel
+
+Turn on delivery:
+
+- `/deliver on` (or start with `openclaw tui --deliver`)
+
+### 5) Reset the session / restart the TUI
+
+In the TUI:
+
+- `/reset` (new clean session), or
+- exit and rerun `openclaw tui`.
+
+If the issue only happens with one provider/model, switch models temporarily and update OpenClaw to the latest version.
+
+## Verify
+
+- A new message returns a normal assistant response in the TUI.
+- Gateway logs show a successful model call.
+

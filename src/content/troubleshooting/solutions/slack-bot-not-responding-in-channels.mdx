@@ -1,0 +1,64 @@
+---
+title: "Slack: bot doesn't respond in channels (but DMs work)"
+description: "Fix Slack channel non-responses by inviting the app to the channel, checking mention/allowlist rules, and verifying events/scopes."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "slack"
+errorSignatures:
+  - "Slack connected"
+keywords:
+  - "slack"
+  - "invite"
+  - "app_mention"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/slack"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Slack DMs to the bot work, but messages in a channel never trigger a reply.
+- Slack appears connected/healthy, but nothing happens in public/private channels.
+
+## Cause
+
+Most common causes:
+
+- The bot/app is **not a member** of the target channel.
+- Your config requires **mentions**, but you are not mentioning the bot.
+- The Slack app is missing required **events/scopes** (or wasn’t reinstalled after changes).
+
+## Fix
+
+### 1) Invite the app to the channel
+
+In Slack, invite the bot/app to the channel you want it to read.
+
+### 2) Mention the bot (quick test)
+
+Send a message that explicitly mentions the bot (this avoids “silent” configs that only activate on mentions).
+
+### 3) Validate your Slack app configuration
+
+In Slack Developer Portal:
+
+- Ensure Events are enabled and include `app_mention` and `message.*` events.
+- If you changed scopes/events, **reinstall** the app to the workspace.
+
+Then restart the gateway.
+
+## Verify
+
+- Mentioning the bot in a channel produces a reply.
+- `openclaw channels status --probe` shows Slack healthy.
+

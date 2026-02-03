@@ -1,0 +1,149 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+import { TroubleshootingSearch } from '../../components/troubleshooting/TroubleshootingSearch';
+
+const troubleshootingEntries = await getCollection('troubleshooting', ({ data }) => !data.draft);
+const solutions = troubleshootingEntries
+  .filter((e) => e.data.kind === 'solution')
+  .sort((a, b) => b.data.lastUpdated.getTime() - a.data.lastUpdated.getTime());
+
+const channels = Array.from(
+  new Set(solutions.flatMap((e) => e.data.channel ?? []).map((v) => v.trim()).filter(Boolean))
+).sort((a, b) => a.localeCompare(b));
+const os = Array.from(
+  new Set(solutions.flatMap((e) => e.data.os ?? []).map((v) => v.trim()).filter(Boolean))
+).sort((a, b) => a.localeCompare(b));
+const components = Array.from(
+  new Set(solutions.map((e) => e.data.component ?? '').map((v) => v.trim()).filter(Boolean))
+).sort((a, b) => a.localeCompare(b));
+const severities = Array.from(
+  new Set(solutions.map((e) => e.data.severity ?? '').map((v) => v.trim()).filter(Boolean))
+).sort((a, b) => a.localeCompare(b));
+
+const initialQuery = Astro.url.searchParams.get('q') ?? '';
+const initialChannel = Astro.url.searchParams.get('channel') ?? 'all';
+const initialOs = Astro.url.searchParams.get('os') ?? 'all';
+const initialComponent = Astro.url.searchParams.get('component') ?? 'all';
+const initialSeverity = Astro.url.searchParams.get('severity') ?? 'all';
+
+const cards = solutions.map((entry) => ({
+  title: entry.data.title,
+  description: entry.data.description,
+  href: `/troubleshooting/${entry.slug}`,
+  component: entry.data.component ?? null,
+  severity: entry.data.severity ?? null,
+  os: entry.data.os ?? [],
+  channel: entry.data.channel ?? [],
+}));
+
+const normalizeFilter = (raw: string, allowed: string[]) => {
+  const v = (raw ?? '').trim();
+  if (!v || v === 'all') return 'all';
+  return allowed.includes(v) ? v : 'all';
+};
+
+const filterChannel = normalizeFilter(initialChannel, channels);
+const filterOs = normalizeFilter(initialOs, os);
+const filterComponent = normalizeFilter(initialComponent, components);
+const filterSeverity = normalizeFilter(initialSeverity, severities);
+
+const filteredCards = cards.filter((c) => {
+  if (filterChannel !== 'all' && !c.channel.includes(filterChannel)) return false;
+  if (filterOs !== 'all' && !c.os.includes(filterOs)) return false;
+  if (filterComponent !== 'all' && c.component !== filterComponent) return false;
+  if (filterSeverity !== 'all' && c.severity !== filterSeverity) return false;
+  return true;
+});
+---
+
+<BaseLayout
+  title="All Troubleshooting Solutions - CoClaw"
+  description="Browse all curated troubleshooting solutions for OpenClaw: installation, configuration, channels, models, gateway, and more."
+  keywords="OpenClaw troubleshooting solutions, OpenClaw fixes, OpenClaw help"
+>
+  <div class="bg-background min-h-screen overflow-x-hidden relative selection:bg-primary/20">
+    <Section py="pt-24 pb-12" containerClass="text-center">
+      <h1
+        class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent"
+      >
+        All Solutions
+      </h1>
+      <p class="text-lg text-default-800 dark:text-default-600 max-w-3xl mx-auto">
+        Curated, step-by-step fixes (not raw issue threads). Search by error text, then filter by
+        platform, channel, component, or severity.
+      </p>
+    </Section>
+
+    <Section py="pb-10">
+      <div class="max-w-5xl mx-auto">
+        <TroubleshootingSearch
+          channels={channels}
+          os={os}
+          components={components}
+          severities={severities}
+          initialQuery={initialQuery}
+          initialChannel={initialChannel}
+          initialOs={initialOs}
+          initialComponent={initialComponent}
+          initialSeverity={initialSeverity}
+          client:load
+        />
+      </div>
+    </Section>
+
+    <Section py="pb-20">
+      <div class="max-w-5xl mx-auto">
+        <div class="flex items-center justify-between gap-4 mb-6">
+          <div class="text-sm text-default-600">
+            Showing <span class="font-semibold text-foreground">{filteredCards.length}</span> curated solutions.
+          </div>
+          {(filterChannel !== 'all' ||
+            filterOs !== 'all' ||
+            filterComponent !== 'all' ||
+            filterSeverity !== 'all') && (
+            <a href="/troubleshooting/solutions" class="text-sm font-semibold text-primary hover:underline">
+              Clear filters
+            </a>
+          )}
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-4">
+          {filteredCards.map((c) => (
+            <a
+              href={c.href}
+              class="rounded-xl border border-divider bg-content1 p-6 hover:border-primary/40 transition-colors"
+            >
+              <div class="flex flex-wrap gap-2 mb-3">
+                {c.component ? (
+                  <span class="px-2 py-0.5 rounded-full text-xs border border-divider bg-content2 text-default-700">
+                    {c.component}
+                  </span>
+                ) : null}
+                {c.severity ? (
+                  <span class="px-2 py-0.5 rounded-full text-xs border border-divider bg-content2 text-default-700">
+                    {c.severity}
+                  </span>
+                ) : null}
+                {c.os.map((o) => (
+                  <span class="px-2 py-0.5 rounded-full text-xs border border-divider bg-content2 text-default-700">
+                    {o}
+                  </span>
+                ))}
+                {c.channel.map((ch) => (
+                  <span class="px-2 py-0.5 rounded-full text-xs border border-divider bg-content2 text-default-700">
+                    {ch}
+                  </span>
+                ))}
+              </div>
+              <h2 class="font-semibold text-foreground mb-2">{c.title}</h2>
+              <p class="text-sm text-default-700 dark:text-default-500 line-clamp-2">{c.description}</p>
+              <div class="mt-4 text-sm font-medium text-primary">Read →</div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>

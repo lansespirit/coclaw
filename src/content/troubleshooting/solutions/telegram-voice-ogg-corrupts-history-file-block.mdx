@@ -1,0 +1,95 @@
+---
+title: "Telegram: voice .ogg turns into garbage <file> block in history"
+description: "Mitigate Telegram voice note history corruption by ensuring audio transcription runs (skipping file blocks for audio) and tightening file MIME allowlists."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel:
+  - "telegram"
+errorSignatures:
+  - "<file"
+  - "text/tab-separated-values"
+  - "binary garbage"
+keywords:
+  - "telegram"
+  - "ogg"
+  - "history"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/nodes/audio"
+    - "https://docs.openclaw.ai/nodes/media-understanding"
+  githubIssues:
+    - 6081
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- You send a Telegram voice note (`.ogg`).
+- The live reply looks fine, but later (reopen session in TUI/Web UI) the old user message contains:
+  - a `<file ...>` block with **binary garbage**, sometimes marked as `text/tab-separated-values`.
+- The corrupted content persists in session history and can pollute downstream summaries/memory.
+
+## Cause
+
+When audio transcription does not run (or fails), OpenClaw may fall back to extracting text-like “file blocks” from attachments. Some `.ogg` data can look “text-like” by heuristics and gets incorrectly treated as text.
+
+## Fix
+
+### 1) Make sure audio transcription runs for voice notes (recommended)
+
+Enable inbound audio transcription so audio attachments are handled as audio (and skipped for file extraction):
+
+```json5
+{
+  tools: {
+    media: {
+      audio: {
+        enabled: true,
+        models: [{ provider: "openai", model: "gpt-4o-mini-transcribe" }],
+      },
+    },
+  },
+}
+```
+
+Restart the gateway and retest.
+
+### 2) Tighten the file MIME allowlist (mitigation)
+
+If you don’t need automatic `<file>` block extraction, explicitly set a conservative `allowedMimes` list so accidental “text guessing” is less likely:
+
+```json5
+{
+  gateway: {
+    http: {
+      endpoints: {
+        responses: {
+          files: {
+            allowedMimes: ["text/plain", "text/markdown", "application/json"],
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+Restart the gateway.
+
+### 3) Clean up already-corrupted sessions
+
+If a session history is already corrupted, create a fresh session (or reset) to avoid re-injecting the garbage content into future context/memory.
+
+## Verify
+
+- New voice notes do not produce `<file>` garbage blocks in history.
+- Reopening the session shows a clean transcript-based user message.
+

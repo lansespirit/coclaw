@@ -1,0 +1,83 @@
+---
+title: "[Bug]: Telegram Voice `.ogg` Misclassified as Text"
+description: "Real user-reported issue (#6081) from GitHub: [Bug]: Telegram Voice `.ogg` Misclassified as Text"
+kind: "case"
+draft: true
+component: "tui"
+related:
+  githubIssues:
+    - 6081
+os:
+  - "docker"
+channel:
+  - "telegram"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#6081](https://github.com/openclaw/openclaw/issues/6081)
+- State: `open`
+- Comments: `7`
+
+## What users report
+
+```
+# 🐛 OpenClaw Bug Report – Telegram Voice `.ogg` Misclassified as Text
+
+## Summary
+
+Telegram voice messages (`.ogg` / Opus) may be misclassified as text during media understanding. This results in raw binary garbage being injected into the conversation as a `<file>` block, which is **persisted to session history** and reappears when reopening the session.
+
+Live responses appear clean, but historical data becomes corrupted.
+
+---
+
+## Symptoms
+
+* User sends a Telegram voice message (`.ogg`)
+* **Live response**:
+
+  * Whisper transcription is correct ✅
+  * No visible garbage
+* User closes and reopens the session (TUI or Web UI)
+* The **previous user message** now contains an extra block:
+
+```xml
+<file name="..." mime="text/tab-separated-values">
+  …binary garbage…
+</file>
+```
+
+This contaminates:
+
+* Session history (`.jsonl`)
+* Memory files generated later from those sessions
+
+---
+
+## Root Cause
+
+In `dist/media-understanding/apply.js`, the function `extractFileBlocks()` attempts heuristic text detection on **all attachments**, including audio:
+
+* `resolveUtf16Charset()`
+* `looksLikeUtf8Text()`
+* `decodeTextSample()` + `guessDelimitedMime()`
+
+Binary audio data may:
+
+* Decode into byte pat
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

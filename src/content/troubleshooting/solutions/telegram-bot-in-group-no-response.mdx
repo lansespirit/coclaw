@@ -1,0 +1,109 @@
+---
+title: "Telegram: bot is in a group but never responds"
+description: "Fix Telegram group response issues caused by allowlist/groups config, requireMention, or Telegram privacy mode/admin permissions."
+kind: "solution"
+component: "channel"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "telegram"
+errorSignatures:
+  - "Bot sees mentions but not normal messages"
+  - "bot never responds"
+keywords:
+  - "telegram"
+  - "requireMention"
+  - "privacy mode"
+  - "groups allowlist"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/telegram"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- The bot is added to a Telegram group, but never replies.
+- It replies in DMs, but not in groups.
+- It only replies when you mention it (or not even then).
+
+## Cause
+
+Common causes fall into two buckets:
+
+### A) Telegram-side
+
+- Telegram privacy mode is ON (bot only receives mentions), or
+- the bot is not an admin (so it can’t see all messages depending on group settings).
+
+### B) OpenClaw-side configuration
+
+- You configured `channels.telegram.groups` as an allowlist but did not include the current group id (and didn’t include `"*"`).
+- The group is configured with `requireMention: true` and you are not mentioning the bot.
+
+## Fix
+
+### 1) Quick test: mention the bot
+
+In the group:
+
+- `@your_bot hello`
+
+If it only replies to mentions, you’re in mention-only mode (either Telegram privacy mode or `requireMention`).
+
+### 2) Confirm allowlist/group id
+
+Find the group chat id safely by checking gateway logs:
+
+```bash
+openclaw logs --follow
+```
+
+Look for `chat.id` after sending a message in the group.
+
+Then configure:
+
+```json5
+{
+  channels: {
+    telegram: {
+      groups: {
+        "-1001234567890": { requireMention: false }
+      }
+    }
+  }
+}
+```
+
+Important: once you set `channels.telegram.groups`, it becomes an **allowlist**. If you want to allow all groups:
+
+```json5
+{
+  channels: {
+    telegram: {
+      groups: {
+        "*": { requireMention: false }
+      }
+    }
+  }
+}
+```
+
+### 3) Fix Telegram privacy mode / permissions
+
+If you need the bot to receive non-mention messages:
+
+- disable privacy mode in BotFather (and re-add bot), or
+- grant the bot admin rights (depending on group requirements).
+
+## Verify
+
+- Send a non-mention message; bot replies (if configured).
+- `openclaw channels status --probe` shows Telegram healthy.
+

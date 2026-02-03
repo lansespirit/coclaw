@@ -1,0 +1,87 @@
+---
+title: "Discord integration fails in China: \"Failed to resolve Discord application id\""
+description: "Real user-reported issue (#4772) from GitHub: Discord integration fails in China: \"Failed to resolve Discord application id\""
+kind: "case"
+draft: true
+component: "gateway"
+related:
+  githubIssues:
+    - 4772
+os:
+  - "macos"
+channel:
+  - "telegram"
+  - "discord"
+  - "signal"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#4772](https://github.com/openclaw/openclaw/issues/4772)
+- State: `open`
+- Comments: `6`
+
+## What users report
+
+```
+# Discord Integration Fails in China with "Failed to resolve Discord application id"
+
+## Environment
+- **OpenClaw Version**: 2026.1.29
+- **Node.js Version**: v22.14.0
+- **OS**: macOS (Darwin 25.2.0 arm64)
+- **Location**: China (behind GFW)
+- **Network**: Direct connection (no proxy for Discord domains)
+
+## Problem Description
+
+Discord bot integration consistently fails with error:
+```
+[discord] [default] channel exited: Failed to resolve Discord application id
+```
+
+The Discord provider starts but immediately exits within ~250ms, unable to fetch the application ID from Discord API.
+
+## Steps to Reproduce
+
+1. Create Discord bot with valid token in Discord Developer Portal
+2. Enable required intents (Message Content Intent, Server Members Intent)
+3. Configure OpenClaw with:
+```json
+{
+  "channels": {
+    "discord": {
+      "enabled": true,
+      "token": "VALID_BOT_TOKEN",
+      "groupPolicy": "open",
+      "dm": {
+        "enabled": true,
+        "policy": "open",
+        "allowFrom": ["*"]
+      }
+    }
+  }
+}
+```
+4. Start OpenClaw Gateway
+5. Discord provider fails immediately
+
+## Root Cause Analysis
+
+### Issue 1: Network Timeout (Primary)
+The `fetchDiscordApplicationId()` function in
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

@@ -1,0 +1,65 @@
+---
+title: "Feature: Strip raw audio attachment after successful transcription"
+description: "Real user-reported issue (#4197) from GitHub: Feature: Strip raw audio attachment after successful transcription"
+kind: "case"
+draft: true
+component: "config"
+related:
+  githubIssues:
+    - 4197
+channel:
+  - "telegram"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "enhancement"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#4197](https://github.com/openclaw/openclaw/issues/4197)
+- State: `closed`
+- Comments: `9`
+
+## What users report
+
+```
+## Problem
+
+When audio understanding (transcription) succeeds, Moltbot correctly:
+1. Replaces `Body` with an `[Audio]` block containing the transcript
+2. Sets `{{Transcript}}` for command parsing
+
+However, the **raw audio binary file is still passed as an attachment** to the model alongside the transcript. This means every voice message includes both:
+- ✅ The useful transcript text
+- ❌ The raw OGG/Opus binary blob in a `<file>` block
+
+From the docs: *"Attachments are still passed to models even when understanding is disabled."*
+
+There is currently **no config option** to strip the raw attachment after a successful transcription.
+
+## Impact
+
+### Token waste per message
+A typical 10-second Telegram voice message (~15-20KB OGG) generates a `<file>` block like:
+```
+<file name="file_49---xxxx.ogg" mime="text/plain">
+杏卧Ȁ    ៥뎫  䰁㲹ጁ灏獵效摡āĸ뮀  伀杧S    ꬗Ƴ...
+[~500-2000 lines of binary garbage characters]
+</file>
+```
+This binary data is **completely useless** to the model — it cannot interpret raw OGG/Opus bytes — yet it consumes **hundreds to thousands of tokens** per message.
+
+### Long voice messages are effectively broken
+Longer voice messages (30s+, 1min+) produce proportionally larger bina
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

@@ -1,0 +1,81 @@
+---
+title: "Linux: gateway doesn't stay running (systemd service not installed)"
+description: "If the gateway only runs in the foreground or stops after you close SSH, install/repair the systemd service and enable user lingering."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "linux"
+channel: []
+errorSignatures:
+  - "systemctl --user"
+  - "openclaw-gateway.service"
+keywords:
+  - "systemd"
+  - "gateway"
+  - "daemon"
+  - "ubuntu"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/gateway"
+    - "https://docs.openclaw.ai/platforms/linux"
+    - "https://docs.openclaw.ai/install/updating"
+  githubIssues:
+    - 1818
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- The gateway works while the terminal is open, but stops when you exit (or after SSH disconnects).
+- `systemctl --user status openclaw-gateway.service` says the unit does not exist.
+- `openclaw gateway status` shows not running after reboot.
+
+## Cause
+
+The gateway is running in the foreground, but the systemd (user) service was not installed/enabled (or it points at an old OpenClaw install path).
+
+## Fix
+
+### 1) Install (or reinstall) the gateway service
+
+On the gateway host:
+
+```bash
+openclaw gateway install
+```
+
+If you recently switched install methods (npm ↔ git) or profiles, force a rewrite:
+
+```bash
+openclaw gateway install --force
+```
+
+### 2) Check the service status
+
+```bash
+systemctl --user status openclaw-gateway.service
+```
+
+Restart if needed:
+
+```bash
+systemctl --user restart openclaw-gateway.service
+```
+
+### 3) Keep the gateway running after logout (recommended on servers)
+
+Enable systemd user lingering:
+
+```bash
+loginctl enable-linger "$USER"
+```
+
+## Verify
+
+- `openclaw gateway status` shows running.
+- After logging out and back in (or after reboot), the gateway is still running.
+

@@ -1,0 +1,378 @@
+{
+  "repo": "openclaw/openclaw",
+  "fetchedAt": "2026-02-03T11:15:47.623Z",
+  "total": 500,
+  "top": {
+    "channels": [
+      [
+        "telegram",
+        97
+      ],
+      [
+        "whatsapp",
+        36
+      ],
+      [
+        "discord",
+        34
+      ],
+      [
+        "signal",
+        21
+      ],
+      [
+        "slack",
+        16
+      ],
+      [
+        "imessage",
+        9
+      ]
+    ],
+    "platforms": [
+      [
+        "linux",
+        132
+      ],
+      [
+        "macos",
+        121
+      ],
+      [
+        "docker",
+        56
+      ],
+      [
+        "windows",
+        41
+      ]
+    ],
+    "components": [
+      [
+        "config",
+        310
+      ],
+      [
+        "gateway",
+        200
+      ],
+      [
+        "websocket",
+        185
+      ],
+      [
+        "web-ui",
+        62
+      ],
+      [
+        "tui",
+        13
+      ],
+      [
+        "onboarding",
+        12
+      ]
+    ],
+    "labels": [
+      [
+        "bug",
+        136
+      ],
+      [
+        "enhancement",
+        39
+      ],
+      [
+        "r: moltbook",
+        7
+      ],
+      [
+        "r: support",
+        5
+      ],
+      [
+        "help wanted",
+        2
+      ],
+      [
+        "maintainer",
+        1
+      ],
+      [
+        "extensions: diagnostics-otel",
+        1
+      ]
+    ],
+    "signatures": [
+      [
+        "model",
+        94
+      ],
+      [
+        "docker",
+        56
+      ],
+      [
+        "windows",
+        41
+      ],
+      [
+        "oauth",
+        23
+      ],
+      [
+        "eacces",
+        12
+      ],
+      [
+        "unauthorized",
+        9
+      ],
+      [
+        "pairing_required",
+        3
+      ],
+      [
+        "setmycommands",
+        1
+      ],
+      [
+        "device_identity_required",
+        0
+      ],
+      [
+        "eaddrinuse",
+        0
+      ],
+      [
+        "enotfound",
+        0
+      ]
+    ]
+  },
+  "signatures": {
+    "unauthorized": [
+      {
+        "number": 1690,
+        "title": "Webchat UI fails to authenticate: 'gateway token missing' even with token in URL",
+        "comments": 10,
+        "state": "closed"
+      },
+      {
+        "number": 5483,
+        "title": "clawhub CLI: Token authentication fails with \"Unauthorized\" error, cannot delete skill",
+        "comments": 5,
+        "state": "closed"
+      },
+      {
+        "number": 6959,
+        "title": "Fix \"disconnected (1008): pairing required\" Error in OpenClaw Docker",
+        "comments": 2,
+        "state": "open"
+      },
+      {
+        "number": 7903,
+        "title": "Critical: Self-talk detection runs AFTER tool execution, allowing unauthorized actions",
+        "comments": 0,
+        "state": "open"
+      },
+      {
+        "number": 7749,
+        "title": "openclaw dashboard doesn't include token in URL",
+        "comments": 0,
+        "state": "open"
+      }
+    ],
+    "pairing_required": [
+      {
+        "number": 6959,
+        "title": "Fix \"disconnected (1008): pairing required\" Error in OpenClaw Docker",
+        "comments": 2,
+        "state": "open"
+      },
+      {
+        "number": 7715,
+        "title": "Feature: hot-reload device pairing approvals without gateway restart",
+        "comments": 0,
+        "state": "open"
+      },
+      {
+        "number": 7384,
+        "title": "WebGUI/WebSocket always disconnected (1008): pairing required despite trustedProxies set in 2026.x",
+        "comments": 0,
+        "state": "open"
+      }
+    ],
+    "device_identity_required": [],
+    "eacces": [
+      {
+        "number": 2596,
+        "title": "[Bug]: read tool validation fails - uses \"file_path\" but expects \"path\" parameter",
+        "comments": 15,
+        "state": "open"
+      },
+      {
+        "number": 4855,
+        "title": "[Bug]: Control UI assets not found on npm global install (resolveControlUiDistIndexPath fails)",
+        "comments": 11,
+        "state": "open"
+      },
+      {
+        "number": 5434,
+        "title": "Error: EACCES: permission denied, open '/home/node/.openclaw/openclaw.json.7.2ede223b-aa90-4aa5-8f0d-97049696b626.tmp'",
+        "comments": 8,
+        "state": "open"
+      },
+      {
+        "number": 5571,
+        "title": "Dashboard: Logo image broken/missing, causing header layout issues",
+        "comments": 2,
+        "state": "closed"
+      },
+      {
+        "number": 4585,
+        "title": "google-gemini-cli provider: client_secret missing error with Gemini CLI OAuth",
+        "comments": 1,
+        "state": "open"
+      }
+    ],
+    "eaddrinuse": [],
+    "setmycommands": [
+      {
+        "number": 7511,
+        "title": "Teltelegram provider crashes gateway on startup (unhandled fetch rejection + setMyCommands failure) + OpenAI key not loading after OAuth success",
+        "comments": 0,
+        "state": "open"
+      }
+    ],
+    "enotfound": [],
+    "oauth": [
+      {
+        "number": 2697,
+        "title": "[Bug]: Claude Code CLI OAuth auth fails - mode/type mismatch between config files",
+        "comments": 25,
+        "state": "open"
+      },
+      {
+        "number": 4772,
+        "title": "Discord integration fails in China: \"Failed to resolve Discord application id\"",
+        "comments": 6,
+        "state": "open"
+      },
+      {
+        "number": 6732,
+        "title": "[Bug]: Anthropic (claude) token authentication misverifcation",
+        "comments": 5,
+        "state": "open"
+      },
+      {
+        "number": 5483,
+        "title": "clawhub CLI: Token authentication fails with \"Unauthorized\" error, cannot delete skill",
+        "comments": 5,
+        "state": "closed"
+      },
+      {
+        "number": 6823,
+        "title": "Feature Request: Execution Guardrails for Tool Safety",
+        "comments": 3,
+        "state": "open"
+      }
+    ],
+    "model": [
+      {
+        "number": 2697,
+        "title": "[Bug]: Claude Code CLI OAuth auth fails - mode/type mismatch between config files",
+        "comments": 25,
+        "state": "open"
+      },
+      {
+        "number": 1866,
+        "title": "[Bug]: Add tool calling support for `openai-completions` API mode",
+        "comments": 12,
+        "state": "open"
+      },
+      {
+        "number": 2315,
+        "title": "Venice AI provider returns empty responses (no API calls made)",
+        "comments": 11,
+        "state": "open"
+      },
+      {
+        "number": 3475,
+        "title": "[Bug]: Kimi/Moonshot OpenAI-compatible models fail silently (direct API works, Clawdbot hangs)",
+        "comments": 11,
+        "state": "open"
+      },
+      {
+        "number": 4499,
+        "title": "bug(tui): MiniMax responses show '(no output)' until TUI restart",
+        "comments": 8,
+        "state": "open"
+      }
+    ],
+    "windows": [
+      {
+        "number": 75,
+        "title": "Linux/Windows Clawdbot Apps",
+        "comments": 16,
+        "state": "open"
+      },
+      {
+        "number": 2596,
+        "title": "[Bug]: read tool validation fails - uses \"file_path\" but expects \"path\" parameter",
+        "comments": 15,
+        "state": "open"
+      },
+      {
+        "number": 5231,
+        "title": "[Bug]:  i cant install",
+        "comments": 8,
+        "state": "open"
+      },
+      {
+        "number": 6834,
+        "title": "[Bug]: Windows 11 installation update failed",
+        "comments": 6,
+        "state": "closed"
+      },
+      {
+        "number": 5483,
+        "title": "clawhub CLI: Token authentication fails with \"Unauthorized\" error, cannot delete skill",
+        "comments": 5,
+        "state": "closed"
+      }
+    ],
+    "docker": [
+      {
+        "number": 4111,
+        "title": "[Bug]:This version of Antigravity is no longer supported. Please update to receive the latest features!",
+        "comments": 51,
+        "state": "open"
+      },
+      {
+        "number": 1818,
+        "title": "[Bug]: Onboarding wizard does not install Systemd service on Ubuntu 22.04",
+        "comments": 16,
+        "state": "open"
+      },
+      {
+        "number": 3146,
+        "title": "[Bug]: docker install \"./docker-setup.sh\" happen => ERROR [12/14] RUN CLAWDBOT_A2UI_SKIP_MISSING=1 pnpm build",
+        "comments": 9,
+        "state": "closed"
+      },
+      {
+        "number": 5434,
+        "title": "Error: EACCES: permission denied, open '/home/node/.openclaw/openclaw.json.7.2ede223b-aa90-4aa5-8f0d-97049696b626.tmp'",
+        "comments": 8,
+        "state": "open"
+      },
+      {
+        "number": 5231,
+        "title": "[Bug]:  i cant install",
+        "comments": 8,
+        "state": "open"
+      }
+    ]
+  }
+}

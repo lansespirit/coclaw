@@ -1,0 +1,80 @@
+---
+title: "Telegram: 'setMyCommands failed' / Bot API requests fail"
+description: "Fix Telegram Bot API failures caused by outbound HTTPS/DNS/IPv6 issues to api.telegram.org (common on restricted VPS or proxies)."
+kind: "solution"
+component: "channel"
+severity: "medium"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel:
+  - "telegram"
+errorSignatures:
+  - "setMyCommands failed"
+  - "sendMessage"
+  - "sendChatAction"
+  - "ENOTFOUND"
+keywords:
+  - "telegram"
+  - "dns"
+  - "ipv6"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/telegram"
+    - "https://docs.openclaw.ai/channels/troubleshooting"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Logs show `setMyCommands failed`.
+- Bot can’t send messages (`sendMessage` failures) or keeps timing out.
+
+## Cause
+
+The gateway host cannot reliably reach Telegram Bot API (`api.telegram.org`) due to:
+
+- outbound HTTPS blocked (firewall / corporate proxy)
+- DNS resolution issues
+- broken IPv6 egress (AAAA resolves first, but IPv6 routing is broken)
+
+## Fix
+
+### 1) Run channel probes
+
+```bash
+openclaw channels status
+openclaw channels status --probe
+openclaw channels logs --channel telegram
+```
+
+### 2) Check DNS and IPv6
+
+```bash
+dig +short api.telegram.org A
+dig +short api.telegram.org AAAA
+```
+
+If AAAA exists but your host has no working IPv6 egress:
+
+- fix IPv6 routing, or
+- prefer IPv4 at the OS layer (system-level setting), or
+- disable IPv6 egress on the host if you know what you’re doing.
+
+### 3) If you are behind a proxy
+
+Ensure the host can make outbound HTTPS calls to `api.telegram.org` (and that DNS is not intercepted).
+
+## Verify
+
+- `openclaw channels status --probe` reports Telegram healthy.
+- The bot can send a message and register commands successfully.
+
+## Related
+
+- If the bot “sees mentions but not normal messages” in groups, that’s usually Telegram privacy mode / requireMention settings (separate troubleshooting article).
+

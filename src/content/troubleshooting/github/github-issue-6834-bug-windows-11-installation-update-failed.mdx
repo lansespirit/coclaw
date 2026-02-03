@@ -1,0 +1,62 @@
+---
+title: "[Bug]: Windows 11 installation update failed"
+description: "Real user-reported issue (#6834) from GitHub: [Bug]: Windows 11 installation update failed"
+kind: "case"
+draft: true
+component: "websocket"
+related:
+  githubIssues:
+    - 6834
+os:
+  - "windows"
+  - "docker"
+channel:
+  - "signal"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#6834](https://github.com/openclaw/openclaw/issues/6834)
+- State: `closed`
+- Comments: `6`
+
+## What users report
+
+```
+## Summary
+
+Windows 11 installation update failed ...
+
+4508 info run protobufjs@7.5.4 postinstall node_modules/openclaw/node_modules/protobufjs node scripts/postinstall
+4509 info run protobufjs@6.8.8 postinstall node_modules/openclaw/node_modules/libsignal/node_modules/protobufjs node scripts/postinstall
+4510 info run protobufjs@7.5.4 postinstall { code: 0, signal: null }
+4511 info run protobufjs@6.8.8 postinstall { code: 0, signal: null }
+4512 info run node-llama-cpp@3.15.1 postinstall { code: 1, signal: null }
+4513 info run openclaw@2026.1.30 postinstall { code: 0, signal: null }
+4514 warn cleanup Failed to remove some directories [
+4514 warn cleanup   [
+4514 warn cleanup     '\\\\?\\C:\\Users\\Administrator\\AppData\\Roaming\\npm\\node_modules\\openclaw',
+4514 warn cleanup     [Error: EBUSY: resource busy or locked, rmdir 'C:\Users\Administrator\AppData\Roaming\npm\node_modules\openclaw'] {
+4514 warn cleanup       errno: -4082,
+4514 warn cleanup       code: 'EBUSY',
+4514 warn cleanup       syscall: 'rmdir',
+4514 warn cleanup       path: 'C:\\Users\\Administrator\\AppData\\Roaming\\npm\\node_modules\\openclaw'
+4514 warn cleanup     }
+4514 warn cleanup   ],
+4514 warn cleanup   [
+4
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

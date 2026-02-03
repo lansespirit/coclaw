@@ -1,0 +1,76 @@
+---
+title: "openclaw: command not found"
+description: "Fix PATH issues that cause the OpenClaw CLI to be missing after install (wrong shell, npm prefix not on PATH, multiple Node installs)."
+kind: "solution"
+component: "install"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "command not found"
+  - "openclaw: command not found"
+keywords:
+  - "PATH"
+  - "npm prefix"
+  - "zsh"
+  - "bash"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/install/node"
+    - "https://docs.openclaw.ai/help/troubleshooting"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- You installed OpenClaw, but your shell says `openclaw: command not found`.
+
+## Cause
+
+Almost always a Node/npm PATH problem:
+
+- npm global bin directory is not on PATH
+- you’re in a different shell than you configured (`zsh` vs `bash`)
+- multiple Node installs exist and the service/terminal is using a different PATH
+
+## Fix
+
+### 1) Confirm where npm installs global binaries
+
+```bash
+npm prefix -g
+```
+
+Your global bin directory is typically `<prefix>/bin`. Ensure it’s on PATH.
+
+### 2) Add it to your shell
+
+Example:
+
+```bash
+export PATH="/path/from/npm/prefix/bin:$PATH"
+```
+
+Persist in:
+
+- zsh: `~/.zshrc`
+- bash: `~/.bashrc`
+
+Then open a new terminal.
+
+### 3) Recheck
+
+```bash
+command -v openclaw
+openclaw --help
+```
+
+## Verify
+
+`openclaw --help` prints usage, and `openclaw status` runs (even if gateway isn’t configured yet).
+

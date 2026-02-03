@@ -1,0 +1,88 @@
+---
+title: "Venice AI provider returns empty responses (no API calls made)"
+description: "Real user-reported issue (#2315) from GitHub: Venice AI provider returns empty responses (no API calls made)"
+kind: "case"
+draft: true
+component: "gateway"
+related:
+  githubIssues:
+    - 2315
+os:
+  - "linux"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#2315](https://github.com/openclaw/openclaw/issues/2315)
+- State: `open`
+- Comments: `11`
+
+## What users report
+
+```
+## Bug Report
+
+**Clawdbot version:** 2026.1.24-3
+
+**Issue:** Venice AI provider configured correctly but produces empty responses. No API calls are being made to Venice endpoint.
+
+### Configuration
+
+```json
+{
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "venice": {
+        "baseUrl": "https://api.venice.ai/api/v1",
+        "apiKey": "VENICE-INFERENCE-KEY-***",
+        "auth": "api-key",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "llama-3.3-70b",
+            "name": "Llama 3.3 70B",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {"input": 0, "output": 0, "cacheRead": 0, "cacheWrite": 0},
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "anthropic/claude-sonnet-4-5",
+        "fallbacks": ["venice/deepseek-v3.2", "venice/llama-3.3-70b"]
+      }
+    }
+  }
+}
+```
+
+### Expected Behavior
+Venice models should make API calls and return completions.
+
+### Actual Behavior
+- Agent runs complete in ~650ms
+- No HTTP requests logged to Venice API
+- No errors in logs
+- Empty respon
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

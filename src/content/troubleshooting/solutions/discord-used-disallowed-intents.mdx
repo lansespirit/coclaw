@@ -1,0 +1,63 @@
+---
+title: "Discord: 'Used disallowed intents' / bot connects but doesn't respond"
+description: "Fix Discord bots that connect but don't receive messages by enabling privileged intents (Message Content, Server Members) and reinstalling/restarting."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "discord"
+errorSignatures:
+  - "Used disallowed intents"
+keywords:
+  - "discord"
+  - "intents"
+  - "message content intent"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/discord"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Discord channel shows connected, but the bot never replies in guild channels.
+- Logs show **“Used disallowed intents”** (or similar intent-related errors).
+
+## Cause
+
+Discord blocks “privileged intents” unless you explicitly enable them in the Developer Portal.
+Without these intents, your bot may connect but won’t receive the message events OpenClaw needs.
+
+## Fix
+
+### 1) Enable privileged intents in the Discord Developer Portal
+
+In your Discord application:
+
+- Bot → Privileged Gateway Intents → enable:
+  - **Message Content Intent** (required for most guild message text)
+  - **Server Members Intent** (recommended; required for some lookups/allowlist matching)
+
+### 2) Restart the gateway
+
+After changing intents, restart OpenClaw so it reconnects with the new permissions.
+
+### 3) Verify guild/channel access rules
+
+If your config requires mentions or uses allowlists, make sure:
+
+- you are mentioning the bot, and/or
+- your user/channel is allowed in `channels.discord.guilds`.
+
+## Verify
+
+- Mention the bot in a channel it can read; it replies.
+- `openclaw channels status --probe` shows Discord healthy.
+

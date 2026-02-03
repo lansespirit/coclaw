@@ -1,0 +1,90 @@
+---
+title: "Docker: EACCES permission denied writing ~/.openclaw (openclaw.json.*.tmp)"
+description: "Fix Docker permission errors when the gateway container can't write to the bind-mounted ~/.openclaw directory (common when host UID/GID != 1000)."
+kind: "solution"
+component: "docker"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel: []
+errorSignatures:
+  - "EACCES: permission denied"
+  - "/home/node/.openclaw"
+  - "openclaw.json"
+keywords:
+  - "docker"
+  - "permissions"
+  - "openclaw.json"
+  - "uid"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/install/docker"
+  githubIssues:
+    - 5434
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Docker logs show errors like:
+  - `EACCES: permission denied, open '/home/node/.openclaw/openclaw.json.<...>.tmp'`
+- The gateway starts but can't save config, auth profiles, or sessions.
+
+## Cause
+
+The official Docker image runs as a non-root `node` user (uid **1000**) for safety.
+When you bind-mount your host `~/.openclaw` into `/home/node/.openclaw`, the container user must have write permissions.
+
+This fails most often on Linux when:
+
+- your host user is **not** uid 1000, and the directory is only writable by your host uid, or
+- the directory/file is owned by root from a previous run.
+
+## Fix
+
+### 1) Confirm which host directories are mounted
+
+If you used `docker-setup.sh`, it typically mounts:
+
+- `OPENCLAW_CONFIG_DIR` → `/home/node/.openclaw`
+- `OPENCLAW_WORKSPACE_DIR` → `/home/node/.openclaw/workspace`
+
+### 2) Linux: make the mount writable by uid 1000 (quickest)
+
+On the host:
+
+```bash
+sudo chown -R 1000:1000 "${OPENCLAW_CONFIG_DIR:-$HOME/.openclaw}"
+sudo chown -R 1000:1000 "${OPENCLAW_WORKSPACE_DIR:-$HOME/.openclaw/workspace}"
+```
+
+Then restart the containers:
+
+```bash
+docker compose restart
+```
+
+### 3) Alternative: run the container as your host user (advanced)
+
+If you prefer matching the host uid/gid instead of changing ownership, set the compose `user:` to your uid/gid (security trade-offs vary by host).
+
+Example (`docker-compose.override.yml`):
+
+```yaml
+services:
+  openclaw-gateway:
+    user: "${UID}:${GID}"
+  openclaw-cli:
+    user: "${UID}:${GID}"
+```
+
+## Verify
+
+- Restarted gateway can write config (no new `EACCES` lines in `docker compose logs`).
+- Control UI can save settings and the gateway persists sessions under the mounted directory.
+

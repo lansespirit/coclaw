@@ -1,0 +1,89 @@
+---
+title: "Docker: docker-setup.sh or image build fails"
+description: "Fix common Docker onboarding/build failures by rebuilding with correct deps, adding apt packages, checking Docker Desktop file sharing, and reading compose logs."
+kind: "solution"
+component: "docker"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "docker-setup.sh"
+  - "pnpm build"
+  - "docker build"
+keywords:
+  - "docker"
+  - "compose"
+  - "OPENCLAW_DOCKER_APT_PACKAGES"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/install/docker"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- `./docker-setup.sh` fails during `docker build` or `pnpm build`.
+- The container starts but the gateway crashes immediately.
+- You mounted extra paths but the container can’t see them (macOS/Windows).
+
+## Cause
+
+Common causes:
+
+- Missing system packages in the image for your workload (media tools, build tooling, etc.)
+- Docker Desktop file sharing not enabled for the host path you mounted (macOS/Windows)
+- Stale image layers / partial build artifacts
+- Not enough disk space for images and build caches
+
+## Fix
+
+### 1) Start from the supported flow
+
+From the OpenClaw repo root:
+
+```bash
+./docker-setup.sh
+```
+
+### 2) Inspect logs (best signal)
+
+```bash
+docker compose logs -f openclaw-gateway
+```
+
+### 3) If you need extra system packages, install them during build
+
+Set `OPENCLAW_DOCKER_APT_PACKAGES`, then rerun `docker-setup.sh`:
+
+```bash
+export OPENCLAW_DOCKER_APT_PACKAGES="ffmpeg build-essential"
+./docker-setup.sh
+```
+
+### 4) If you use extra mounts (macOS/Windows), ensure paths are shared
+
+If you set `OPENCLAW_EXTRA_MOUNTS`, Docker Desktop must be allowed to access those host paths.
+
+After changing mounts, rerun:
+
+```bash
+./docker-setup.sh
+```
+
+### 5) Rebuild cleanly if the image is stale
+
+```bash
+docker compose down
+docker build --no-cache -t openclaw:local -f Dockerfile .
+docker compose up -d openclaw-gateway
+```
+
+## Verify
+
+- `docker compose exec openclaw-gateway node dist/index.js health --token "$OPENCLAW_GATEWAY_TOKEN"`
+- Open `http://127.0.0.1:18789/` and paste the token into Control UI settings.

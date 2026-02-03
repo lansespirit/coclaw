@@ -1,0 +1,69 @@
+---
+title: "Gateway: CLI/UI is probing the wrong machine (local vs remote mode mismatch)"
+description: "Fix confusing 'gateway unreachable' states by aligning gateway.mode, gateway.remote.url, profiles/state dirs, and the URL you probe."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel: []
+errorSignatures:
+  - "probe target"
+  - "gateway.remote.url"
+keywords:
+  - "gateway"
+  - "remote mode"
+  - "url"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/gateway/troubleshooting"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- The gateway is running, but `openclaw status --deep` or the Control UI can't connect.
+- You suspect you're connecting to one machine, but the CLI is probing a different URL.
+
+## Cause
+
+OpenClaw can run in local or remote mode. If you set `gateway.mode=remote`, your CLI defaults to using `gateway.remote.url`. Meanwhile your gateway service may still be running locally (or under a different profile/state dir), which creates “it’s running but unreachable” confusion.
+
+## Fix
+
+### 1) Ask OpenClaw what it is actually probing
+
+Run:
+
+```bash
+openclaw gateway status
+```
+
+Check the printed probe target / URL and confirm it matches where your gateway is running.
+
+### 2) If you want to use the local gateway
+
+Set the gateway mode back to local (in config), then restart the gateway.
+
+### 3) If you want to use a remote gateway
+
+Ensure `gateway.remote.url` is correct and reachable from your machine, and that the remote gateway auth token/password matches what your client uses.
+
+### 4) Avoid profile/state-dir mismatch
+
+If you run multiple profiles or moved your state directory, ensure both your service and your CLI are using the same profile/state dir. Rewriting the service can help:
+
+```bash
+openclaw gateway install --force
+```
+
+## Verify
+
+- `openclaw status --deep` succeeds against the expected gateway.
+- Opening the Control UI reaches the intended gateway host.
+

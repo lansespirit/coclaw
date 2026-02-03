@@ -1,0 +1,87 @@
+---
+title: "Venice AI: models unavailable or requests make no API calls"
+description: "Fix Venice provider issues by checking VENICE_API_KEY, network reachability to api.venice.ai, model refs, and credits/billing."
+kind: "solution"
+component: "model"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "venice"
+  - "VENICE_API_KEY"
+  - "api.venice.ai"
+keywords:
+  - "venice"
+  - "models"
+  - "auth"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/providers/venice"
+    - "https://docs.openclaw.ai/cli/models"
+  githubIssues:
+    - 2315
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- You select a `venice/...` model but responses are empty, fail quickly, or appear to do nothing.
+- `openclaw models list` doesn't show expected Venice models.
+- Logs mention missing Venice credentials or Venice API unreachable.
+
+## Cause
+
+Common causes:
+
+- `VENICE_API_KEY` is missing on the **gateway host** (not just your laptop).
+- The gateway can't reach `https://api.venice.ai/api/v1` (DNS/firewall/restricted network).
+- The model ref is wrong or no longer available in the Venice catalog.
+- Venice credits are exhausted or billing blocks the request.
+
+## Fix
+
+### 1) Confirm Venice is configured on the gateway host
+
+Run:
+
+```bash
+openclaw models status
+```
+
+If Venice isn't authenticated/configured, set `VENICE_API_KEY` on the gateway host and restart the gateway.
+
+### 2) Refresh model catalog and verify model refs
+
+```bash
+openclaw models list
+```
+
+Pick a model that exists in the list and set it explicitly:
+
+```bash
+openclaw models set venice/<modelId>
+```
+
+### 3) Probe with a real request
+
+```bash
+openclaw models status --probe
+```
+
+If probes fail, it's almost always credentials, reachability, or billing.
+
+### 4) Add a fallback model (recommended)
+
+If Venice is temporarily down or rate-limited, add a fallback from another provider so users aren't blocked.
+
+## Verify
+
+- `openclaw models status --probe` succeeds for the Venice model.
+- A test message returns a normal response and logs show a successful provider call.
+

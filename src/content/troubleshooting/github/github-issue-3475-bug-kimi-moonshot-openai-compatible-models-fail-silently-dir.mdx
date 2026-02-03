@@ -1,0 +1,78 @@
+---
+title: "[Bug]: Kimi/Moonshot OpenAI-compatible models fail silently (direct API works, Clawdbot hangs)"
+description: "Real user-reported issue (#3475) from GitHub: [Bug]: Kimi/Moonshot OpenAI-compatible models fail silently (direct API works, Clawdbot hangs)"
+kind: "case"
+draft: true
+component: "gateway"
+related:
+  githubIssues:
+    - 3475
+os:
+  - "linux"
+channel:
+  - "telegram"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#3475](https://github.com/openclaw/openclaw/issues/3475)
+- State: `open`
+- Comments: `11`
+
+## What users report
+
+```
+<pre><code class="language-markdown">## Summary
+Kimi models (both `moonshot` and `kimi-code` providers) configured as OpenAI-compatible endpoints fail silently in Clawdbot. Direct API calls via curl work perfectly, but Clawdbot never receives/processes responses.
+
+## Environment
+- Clawdbot version: 2026.1.24-3
+- OS: Ubuntu Linux
+- Channel: Telegram
+
+## Providers configured
+```json
+"moonshot": {
+  "baseUrl": "https://api.moonshot.ai/v1",
+  "api": "openai-completions"
+}
+"kimi-code": {
+  "baseUrl": "https://api.kimi.com/coding/v1", 
+  "api": "openai-completions"
+}
+</code></pre>
+<h2>Models tested</h2>
+<ul>
+<li><code>moonshot/kimi-k2.5</code></li>
+<li><code>moonshot/kimi-k2-0905-preview</code></li>
+<li><code>kimi-code/kimi-for-coding</code></li>
+<li><code>kimi-code/kimi-k2.5-thinking</code></li>
+</ul>
+<h2>Behavior</h2>
+
+Test | Result
+-- | --
+Direct curl to API | ✅ Works, returns response
+Subagent spawn | ❌ Hangs forever (startedAt set, never completes)
+Main session | ❌ Fails silently, falls back to next model
+
+<h2>Reproduction</h2>
+<ol>
+<li>Configure moonshot or kimi-code provider with valid API key</li>
+<li>Spawn subagent with <code>model: "moonshot/kimi-k2.5"</code></li>
+<li>Subagent 
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

@@ -1,0 +1,66 @@
+---
+title: "[Bug]: Unexpected high token consumption with Claude models"
+description: "Real user-reported issue (#2868) from GitHub: [Bug]: Unexpected high token consumption with Claude models"
+kind: "case"
+draft: true
+component: "gateway"
+related:
+  githubIssues:
+    - 2868
+os:
+  - "linux"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#2868](https://github.com/openclaw/openclaw/issues/2868)
+- State: `open`
+- Comments: `7`
+
+## What users report
+
+```
+<img width="521" height="273" alt="Image" src="https://github.com/user-attachments/assets/d448128f-7b22-43b4-8e85-0c390c6d929a" />
+
+<img width="732" height="255" alt="Image" src="https://github.com/user-attachments/assets/d804fb17-66d5-4a44-a94a-39492f6fcbc4" />
+
+## Summary
+Switching to Claude Sonnet model causes massive token consumption (~15% of session quota) 
+with no actual API calls or chat activity. Same operations with GLM result in ~1% usage.
+
+## Steps to reproduce
+1. Start session with GLM-4.7 (or any cheap model)
+2. Call `session_status --model anthropic/claude-sonnet-4-20250514`
+3. Check rate limit immediately after
+4. Observe 15% jump in session usage (59% → 74%)
+
+## Expected behavior
+Model switching should use minimal tokens for the status check only (~few hundred tokens).
+Should be consistent with other model switches (GLM, DeepSeek).
+
+## Actual behavior
+Single `session_status` call with Sonnet consumed ~15% of hourly quota.
+- Session context: 39k tokens
+- Only action: one status check
+- No chat messages sent/received
+- GLM same operation: +1% usage (normal)
+
+## Environment
+- Clawdbot version: 2026.1.24-3
+- OS: Linux 6.8.0-90-generic (x64)
+- Install method: npm (node 
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.

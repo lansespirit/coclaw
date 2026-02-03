@@ -1,0 +1,96 @@
+---
+title: "Gateway won't start: config validation failed / JSON5 parse error"
+description: "Fix gateway boot failures caused by invalid JSON5 syntax or schema validation errors (unknown keys, wrong types) using openclaw doctor and config tools."
+kind: "solution"
+component: "config"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "Failed to parse"
+  - "validation"
+  - "Unknown key"
+keywords:
+  - "json5"
+  - "schema"
+  - "doctor"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/gateway/configuration"
+    - "https://docs.openclaw.ai/gateway/configuration-examples"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Gateway refuses to start after editing `~/.openclaw/openclaw.json`.
+- The Control UI shows errors / gateway is down.
+- CLI commands that require a running gateway fail, but diagnostic commands still work.
+
+## Cause
+
+Two common failure modes:
+
+### A) JSON5 syntax error
+
+OpenClaw reads **JSON5** (comments + trailing commas allowed), but it still must be valid JSON5:
+
+- missing commas
+- unbalanced braces/brackets
+- unterminated strings
+
+### B) Schema validation error
+
+OpenClaw validates config strictly for safety:
+
+- unknown keys
+- wrong types (`allowFrom` must be an array, etc.)
+- invalid enum values
+
+## Fix
+
+### 1) Run doctor to see exact errors
+
+```bash
+openclaw doctor
+```
+
+### 2) If doctor suggests a safe fix/migration
+
+```bash
+openclaw doctor --fix
+```
+
+### 3) Revert to a known-good minimal config
+
+Start from a schema-aligned example and re-apply changes incrementally.
+
+Example minimal config (JSON5):
+
+```json5
+{
+  agent: { workspace: "~/.openclaw/workspace" },
+  channels: { whatsapp: { allowFrom: ["+15555550123"] } },
+}
+```
+
+### 4) Prefer `openclaw config` for small edits
+
+This avoids manual syntax mistakes:
+
+```bash
+openclaw config set agents.defaults.workspace "~/.openclaw/workspace"
+```
+
+## Verify
+
+```bash
+openclaw status
+openclaw logs --follow
+```
+

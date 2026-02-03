@@ -1,0 +1,60 @@
+---
+title: "OAuth token refresh failed (Anthropic Claude subscription)"
+description: "Fix expired Anthropic subscription auth by switching to a Claude Code setup-token and pasting it on the gateway host."
+kind: "solution"
+component: "model"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "OAuth token refresh failed"
+  - "refresh failed"
+keywords:
+  - "oauth"
+  - "setup-token"
+  - "anthropic"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/gateway/troubleshooting"
+    - "https://docs.openclaw.ai/gateway/authentication"
+    - "https://docs.openclaw.ai/concepts/oauth"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Logs or `openclaw models status` indicate an Anthropic OAuth token expired and refresh failed.
+- Model calls to Anthropic stop working even though they worked previously.
+
+## Cause
+
+If you’re using an Anthropic subscription flow (no API key), the stored OAuth token can expire or be invalidated. Refresh may fail due to provider-side token rotation or local auth state drift.
+
+## Fix (recommended)
+
+Use a **Claude Code setup-token** and paste it on the **gateway host**:
+
+```bash
+openclaw models auth setup-token --provider anthropic
+openclaw models status
+```
+
+If you generated a token elsewhere:
+
+```bash
+openclaw models auth paste-token --provider anthropic
+openclaw models status
+```
+
+## Verify
+
+```bash
+openclaw models status --probe
+```
+
+Then send a test message.

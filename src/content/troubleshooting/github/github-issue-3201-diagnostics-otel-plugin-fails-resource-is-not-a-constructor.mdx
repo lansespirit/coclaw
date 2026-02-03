@@ -1,0 +1,76 @@
+---
+title: "diagnostics-otel plugin fails: Resource is not a constructor"
+description: "Real user-reported issue (#3201) from GitHub: diagnostics-otel plugin fails: Resource is not a constructor"
+kind: "case"
+draft: true
+component: "gateway"
+related:
+  githubIssues:
+    - 3201
+os:
+  - "macos"
+publishDate: 2026-02-03
+lastUpdated: 2026-02-03
+author: "CoClaw Team"
+keywords:
+  - "bug"
+  - "extensions: diagnostics-otel"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+This page is an **auto-generated troubleshooting stub** created from a real GitHub issue.
+It is meant to be curated into a proper problem → cause → fix article.
+
+## Source
+- GitHub issue: [#3201](https://github.com/openclaw/openclaw/issues/3201)
+- State: `open`
+- Comments: `15`
+
+## What users report
+
+```
+## Description
+The `diagnostics-otel` plugin fails to load with:
+```
+plugin service failed (diagnostics-otel): TypeError: _resources.Resource is not a constructor
+```
+
+## Steps to Reproduce
+1. Enable the plugin:
+```json
+{
+  "plugins": {
+    "allow": ["diagnostics-otel"],
+    "entries": { "diagnostics-otel": { "enabled": true } }
+  },
+  "diagnostics": {
+    "enabled": true,
+    "otel": {
+      "enabled": true,
+      "endpoint": "http://127.0.0.1:4318"
+    }
+  }
+}
+```
+2. Restart gateway
+3. Check logs: `cat /tmp/clawdbot/clawdbot-*.log | grep otel`
+
+## Environment
+- Clawdbot version: 2026.1.24-3
+- Node: v25.4.0
+- OS: macOS 15.6 (arm64)
+
+## Expected
+Plugin loads and exports traces/metrics to OTEL collector.
+
+## Actual
+Plugin crashes on startup due to OpenTelemetry SDK version mismatch.
+
+Likely cause: The bundled @opentelemetry packages have breaking changes between versions. The plugin may need pinned versions or updated imports.
+```
+
+## Next diagnostic steps (recommended)
+1. Confirm your OpenClaw version and Node.js version.
+2. Capture gateway logs around the failure.
+3. Check network/DNS reachability for any external APIs involved.
+4. Compare your config with known-good examples in our Guides.
