@@ -1,0 +1,182 @@
+/* Content styling for Markdown/MDX-rendered HTML.
+ *
+ * Scope everything to `.c-content`/`.prose` so marketing/UI surfaces keep full control.
+ * We intentionally do NOT rely on `@tailwindcss/typography` so this repo has a stable
+ * baseline even without that plugin.
+ */
+
+@layer components {
+  :where(.c-content, .prose) {
+    /* Use HeroUI neutral scale:
+     * - Light body: default-800 (#656567-ish)
+     * - Dark body:  default-700 (#b2b2b5-ish) for readable contrast on black
+     */
+    @apply max-w-none text-default-800 dark:text-default-700;
+  }
+
+  :where(.c-content, .prose.prose-lg) {
+    @apply text-lg leading-8;
+  }
+
+  :where(.c-content, .prose) :where(h1) {
+    @apply text-4xl font-bold mb-6 text-foreground tracking-tight;
+  }
+
+  :where(.c-content, .prose) :where(h2) {
+    @apply text-3xl font-bold mt-10 mb-6 text-foreground tracking-tight;
+  }
+
+  :where(.c-content, .prose) :where(h3) {
+    @apply text-2xl font-semibold mt-8 mb-4 text-foreground tracking-tight;
+  }
+
+  :where(.c-content, .prose) :where(h4) {
+    @apply text-xl font-semibold mt-8 mb-3 text-foreground;
+  }
+
+  :where(.c-content, .prose) :where(p) {
+    @apply mb-6 leading-7;
+  }
+
+  :where(.c-content, .prose) :where(a) {
+    @apply text-primary hover:opacity-80 underline decoration-primary/30 underline-offset-4 transition-opacity;
+  }
+
+  :where(.c-content, .prose.prose-primary) :where(a) {
+    @apply decoration-primary/40;
+  }
+
+  /* Lists */
+  :where(.c-content, .prose) :where(ul) {
+    @apply mb-6 pl-6 list-disc list-outside;
+  }
+
+  :where(.c-content, .prose) :where(ol) {
+    @apply mb-6 pl-6 list-decimal list-outside;
+  }
+
+  :where(.c-content, .prose) :where(li) {
+    @apply mb-2 pl-1;
+  }
+
+  :where(.c-content, .prose) :where(ul ul, ul ol, ol ul, ol ol) {
+    @apply mt-2 mb-2;
+  }
+
+  /* Blockquote */
+  :where(.c-content, .prose) :where(blockquote) {
+    @apply my-8 rounded-r-xl border-l-4 border-primary/40 bg-content2/50 px-6 py-4 text-default-800 dark:text-default-700;
+  }
+
+  :where(.c-content, .prose) :where(blockquote > :first-child) {
+    @apply mt-0;
+  }
+
+  :where(.c-content, .prose) :where(blockquote > :last-child) {
+    @apply mb-0;
+  }
+
+  /* Horizontal rule */
+  :where(.c-content, .prose) :where(hr) {
+    @apply my-10 border-divider;
+  }
+
+  /* Inline code + code blocks */
+  :where(.c-content, .prose) :where(code):not(pre code) {
+    /* Match HeroUI <Code /> defaults (flat + radius sm) */
+    @apply bg-default-100 px-2 py-1 rounded-small text-small font-mono text-foreground-600;
+  }
+
+  :where(.c-content, .prose) :where(pre) {
+    /* Match HeroUI surface defaults (rounded-large + shadow-small + content1) */
+    @apply bg-content1 p-4 rounded-large overflow-x-auto mb-6 shadow-small;
+  }
+
+  :where(.c-content, .prose) :where(pre code) {
+    @apply bg-transparent p-0 text-small font-mono text-foreground;
+  }
+
+  /* Tables (Markdown) */
+  :where(.c-content, .prose) :where(table) {
+    /* Emulate HeroUI Table wrapper (shadow-small + bg-content1 + p-4 + overflow-auto) */
+    @apply my-8 w-full p-4 bg-content1 shadow-small rounded-large;
+    border-collapse: separate;
+    border-spacing: 0;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  :where(.c-content, .prose) :where(thead) {
+    @apply align-middle;
+  }
+
+  :where(.c-content, .prose) :where(th) {
+    @apply px-3 h-10 text-start align-middle bg-default-100 whitespace-nowrap text-foreground-500 text-tiny font-semibold first:rounded-s-lg last:rounded-e-lg;
+  }
+
+  :where(.c-content, .prose) :where(td) {
+    @apply py-2 px-3 align-middle whitespace-normal text-small font-normal text-foreground-600 border-b border-divider;
+  }
+
+  :where(.c-content, .prose) :where(tbody tr:hover td) {
+    @apply bg-default-100/60;
+  }
+
+  :where(.c-content, .prose) :where(tr:last-child td) {
+    @apply border-b-0;
+  }
+
+  /* Images / figures */
+  :where(.c-content, .prose) :where(img) {
+    @apply rounded-xl border border-divider;
+  }
+
+  :where(.c-content, .prose) :where(figure) {
+    @apply my-8;
+  }
+
+  :where(.c-content, .prose) :where(figcaption) {
+    @apply mt-3 text-sm text-default-600 dark:text-default-500;
+  }
+
+  /* Callouts / emphasis helpers */
+  :where(.c-content, .prose) :where(mark) {
+    @apply rounded bg-warning/20 px-1 text-foreground;
+  }
+
+  :where(.c-content, .prose) :where(kbd) {
+    @apply rounded-md border border-divider bg-content2 px-1.5 py-0.5 text-xs font-mono text-foreground shadow-sm;
+  }
+
+  /* Details */
+  :where(.c-content, .prose) :where(details) {
+    /* Similar to HeroUI Accordion "shadow" feel */
+    @apply my-6 rounded-medium bg-content1 shadow-small;
+  }
+
+  :where(.c-content, .prose) :where(summary) {
+    @apply cursor-pointer select-none px-4 py-4 font-semibold text-medium text-foreground;
+  }
+
+  :where(.c-content, .prose) :where(details[open] summary) {
+    @apply border-b border-divider;
+  }
+
+  :where(.c-content, .prose) :where(details > :not(summary)) {
+    @apply px-4 py-4;
+  }
+
+  /* Definition lists */
+  :where(.c-content, .prose) :where(dl) {
+    @apply my-6;
+  }
+
+  :where(.c-content, .prose) :where(dt) {
+    @apply font-semibold text-foreground;
+  }
+
+  :where(.c-content, .prose) :where(dd) {
+    @apply mt-1 mb-4 text-default-700 dark:text-default-600;
+  }
+}

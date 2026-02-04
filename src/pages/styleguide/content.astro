@@ -1,0 +1,120 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+---
+
+<BaseLayout
+  title="Content Styleguide (Dev) | CoClaw"
+  description="Visual baseline for Markdown content styles."
+  robots="noindex, nofollow"
+>
+  <div class="bg-background min-h-screen overflow-x-hidden relative">
+    <Section containerClass="max-w-4xl mx-auto pt-24 pb-12">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4">Content Styleguide</h1>
+      <p class="text-default-700 dark:text-default-500">
+        This page is a visual regression baseline for Markdown/MDX-rendered content.
+      </p>
+    </Section>
+
+    <Section containerClass="max-w-4xl mx-auto pb-24">
+      <article class="c-content prose prose-lg max-w-none">
+        <h2>Typography</h2>
+        <p>
+          Regular paragraph text with an <a href="#">inline link</a>, some <code>inline code</code>,
+          and a keyboard hint <kbd>Cmd</kbd> + <kbd>K</kbd>. Here is a <mark>highlight</mark>.
+        </p>
+        <p>
+          Another paragraph to show spacing and rhythm. Lorem ipsum dolor sit amet, consectetur
+          adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+        </p>
+
+        <h3>Blockquote</h3>
+        <blockquote>
+          <p>
+            “If content doesn’t look good by default, authors will fight the system with ad-hoc
+            classes everywhere.”
+          </p>
+          <p><strong>Goal:</strong> one container class; everything else is automatic.</p>
+        </blockquote>
+
+        <hr />
+
+        <h2>Lists</h2>
+        <h3>Unordered</h3>
+        <ul>
+          <li>First item</li>
+          <li>
+            Second item with nested list
+            <ul>
+              <li>Nested A</li>
+              <li>Nested B</li>
+            </ul>
+          </li>
+          <li>Third item</li>
+        </ul>
+
+        <h3>Ordered</h3>
+        <ol>
+          <li>Step one</li>
+          <li>Step two</li>
+          <li>
+            Step three with nested steps
+            <ol>
+              <li>Sub-step 3.1</li>
+              <li>Sub-step 3.2</li>
+            </ol>
+          </li>
+        </ol>
+
+        <h2>Code</h2>
+        <pre><code class="language-bash">pnpm dev
+pnpm build</code></pre>
+
+        <h2>Table</h2>
+        <p>Tables should be readable, theme-safe, and horizontally scrollable on small screens.</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>What It Does</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>.c-content</code></td>
+              <td>Scopes default content styles to Markdown output.</td>
+              <td>Prevents global tag styling from leaking into marketing UI.</td>
+            </tr>
+            <tr>
+              <td><code>table</code></td>
+              <td>Provides spacing, borders, zebra rows, and hover.</td>
+              <td>Also supports overflow scrolling on mobile.</td>
+            </tr>
+            <tr>
+              <td>VeryLongHeaderValueToTestOverflow</td>
+              <td>Ensures layout is resilient when content gets wide.</td>
+              <td>Scroll horizontally rather than breaking layout.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Details</h2>
+        <details>
+          <summary>Expandable section</summary>
+          <p>
+            Use <code>&lt;details&gt;</code> in Markdown for optional advanced notes without extra components.
+          </p>
+        </details>
+
+        <h2>Definition List</h2>
+        <dl>
+          <dt>Token</dt>
+          <dd>A semantic design variable that stays stable across light/dark themes.</dd>
+          <dt>Drift</dt>
+          <dd>When ad-hoc styles accumulate and pages slowly become inconsistent.</dd>
+        </dl>
+      </article>
+    </Section>
+  </div>
+</BaseLayout>

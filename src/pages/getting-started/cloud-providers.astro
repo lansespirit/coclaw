@@ -67,14 +67,12 @@ const structuredData = {
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(breadcrumbData)} />
 
-  <div
-    class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
-  >
+  <div class="bg-background min-h-screen overflow-x-hidden relative">
     <div class="flex flex-col gap-16 pb-16">
       <Section py="pt-24 pb-12" containerClass="text-center">
         <div class="flex justify-center mb-6">
           <div
-            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center"
+            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center"
           >
             <IconCloud className="w-12 h-12 text-white" aria-hidden="true" />
           </div>
@@ -101,11 +99,11 @@ const structuredData = {
 
           <div class="grid md:grid-cols-2 gap-6 mb-12">
             <div
-              class="p-6 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border-2 border-primary/30"
+              class="p-6 rounded-xl bg-gradient-to-br from-secondary-50 to-accent-50 dark:from-secondary/10 dark:to-accent/10 border-2 border-primary/30"
             >
               <div class="flex items-center gap-3 mb-4">
                 <div
-                  class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center"
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-secondary-500 to-secondary-700 flex items-center justify-center"
                 >
                   <IconFly className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
@@ -126,11 +124,11 @@ const structuredData = {
             </div>
 
             <div
-              class="p-6 rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/20 dark:to-cyan-950/20 border-2 border-primary/30"
+              class="p-6 rounded-xl bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary/10 dark:to-primary/10 border-2 border-primary/30"
             >
               <div class="flex items-center gap-3 mb-4">
                 <div
-                  class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center"
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center"
                 >
                   <IconRender className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
@@ -163,7 +161,7 @@ const structuredData = {
             >
               <div class="flex items-center gap-3 mb-4">
                 <div
-                  class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center"
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center"
                 >
                   <IconGoogleCloud className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
@@ -182,7 +180,7 @@ const structuredData = {
             >
               <div class="flex items-center gap-3 mb-4">
                 <div
-                  class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center"
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center"
                 >
                   <IconMicrosoftAzure className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
@@ -201,7 +199,7 @@ const structuredData = {
             >
               <div class="flex items-center gap-3 mb-4">
                 <div
-                  class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center"
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-secondary-500 to-secondary-700 flex items-center justify-center"
                 >
                   <IconHeroku className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
@@ -220,7 +218,7 @@ const structuredData = {
             >
               <div class="flex items-center gap-3 mb-4">
                 <div
-                  class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center"
+                  class="w-12 h-12 rounded-full bg-gradient-to-br from-accent-500 to-secondary-600 flex items-center justify-center"
                 >
                   <IconRailway className="w-6 h-6 text-white" aria-hidden="true" />
                 </div>
@@ -241,7 +239,7 @@ const structuredData = {
         <div class="max-w-4xl mx-auto">
           <div class="flex items-center gap-3 mb-8">
             <div
-              class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center"
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-secondary-500 to-secondary-700 flex items-center justify-center"
             >
               <IconFly className="w-6 h-6 text-white" aria-hidden="true" />
             </div>
@@ -341,7 +339,7 @@ flyctl secrets set ANTHROPIC_API_KEY=sk-ant-...`}</code></pre>
         <div class="max-w-4xl mx-auto">
           <div class="flex items-center gap-3 mb-8">
             <div
-              class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center"
+              class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center"
             >
               <IconRender className="w-6 h-6 text-white" aria-hidden="true" />
             </div>

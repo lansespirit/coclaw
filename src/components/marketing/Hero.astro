@@ -29,8 +29,8 @@ const {
             rel="noopener noreferrer"
             class="inline-flex items-center gap-2 px-3 py-1 mb-6 text-xs font-medium transition-colors border rounded-full text-default-800 dark:text-default-600 hover:text-foreground border-default-200/50 hover:bg-default-100/10 backdrop-blur-md group"
           >
-            <span class="text-orange-500 group-hover:animate-pulse">⭐</span>
-            <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+            <span class="text-warning-600 dark:text-warning group-hover:animate-pulse">⭐</span>
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-secondary-500">
               {badge}
             </span>
             <IconArrowUpRight
@@ -43,7 +43,7 @@ const {
 
       <!-- Main Heading -->
       <h1 class="text-5xl font-extrabold tracking-tight md:text-7xl mb-6 leading-[1.1]">
-        Meet <span class="text-pink-600">OpenClaw</span><br />
+        Meet <span class="text-accent-600 dark:text-accent">OpenClaw</span><br />
         Your Personal AI Assistant
       </h1>
 
@@ -95,7 +95,7 @@ const {
       <div class="absolute top-0 right-12 animate-float-slow z-30">
         <div class="m-card-glass w-[210px] rounded-[10px] p-3 border-default-200/50">
           <div
-            class="h-40 rounded-[8px] bg-gradient-to-b from-cyan-400 to-blue-600 relative overflow-hidden mb-3 group cursor-pointer shadow-inner"
+            class="h-40 rounded-[8px] bg-gradient-to-b from-primary-400 to-primary-600 relative overflow-hidden mb-3 group cursor-pointer shadow-inner"
           >
             <img
               src="/images/features/hero-chat.png"
@@ -112,7 +112,7 @@ const {
               <span class="w-2.5 h-2.5 rounded-full bg-default-200/50"></span>
               <span class="w-2.5 h-2.5 rounded-full bg-default-200/50"></span>
             </div>
-            <div class="w-10 h-5 bg-blue-500 rounded-full shadow-lg shadow-blue-500/20"></div>
+            <div class="w-10 h-5 bg-primary rounded-full shadow-lg shadow-primary/20"></div>
           </div>
         </div>
 
@@ -120,14 +120,12 @@ const {
         <div
           class="absolute -top-4 -right-16 m-pill-glass m-shadow-float p-1.5 flex items-center animate-float-delayed"
         >
-          <div
-            class="w-[72px] h-9 bg-blue-600 rounded-full flex items-center px-1.5 relative gap-3"
-          >
+          <div class="w-[72px] h-9 bg-primary rounded-full flex items-center px-1.5 relative gap-3">
             <IconMoon className="w-4 h-4 text-white/40" aria-hidden="true" />
             <div
               class="w-7 h-7 bg-white rounded-full shadow-md flex items-center justify-center translate-x-1"
             >
-              <IconSun className="w-4 h-4 text-blue-600" aria-hidden="true" />
+              <IconSun className="w-4 h-4 text-primary" aria-hidden="true" />
             </div>
           </div>
         </div>
@@ -151,7 +149,7 @@ const {
           <div class="flex items-start justify-between mb-4">
             <div class="flex gap-4">
               <div
-                class="w-12 h-12 rounded-full p-[2.5px] bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 shadow-lg shadow-pink-500/20"
+                class="w-12 h-12 rounded-full p-[2.5px] bg-gradient-to-tr from-warning-400 via-accent-500 to-secondary-600 shadow-lg shadow-accent/20"
               >
                 <div
                   class="w-full h-full rounded-full border-2 border-black overflow-hidden bg-black"
@@ -172,7 +170,7 @@ const {
               color="primary"
               size="sm"
               radius="full"
-              className="h-8 text-[12px] px-4 font-bold bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+              className="h-8 text-[12px] px-4 font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/20"
               client:visible>Follow</Button
             >
           </div>
@@ -207,7 +205,7 @@ const {
           <span class="text-default-600 dark:text-default-500">...</span>
           <span class="cursor-pointer hover:text-white">5</span>
           <span
-            class="bg-blue-600 text-white min-w-[28px] h-7 flex items-center justify-center rounded-full font-bold shadow-lg shadow-blue-500/20"
+            class="bg-primary text-primary-foreground min-w-[28px] h-7 flex items-center justify-center rounded-full font-bold shadow-lg shadow-primary/20"
             >6</span
           >
           <span class="cursor-pointer hover:text-white">7</span>
@@ -237,7 +235,7 @@ const {
             </div>
           </div>
           <span
-            class="absolute -top-6 left-24 text-purple-400 text-[11px] font-mono font-bold uppercase tracking-wider"
+            class="absolute -top-6 left-24 text-secondary-400 text-[11px] font-mono font-bold uppercase tracking-wider"
             >Input</span
           >
         </div>
@@ -247,7 +245,7 @@ const {
       <div class="absolute bottom-4 right-16 z-30 animate-float-slow">
         <div class="absolute -top-24 -left-32 flex flex-col items-end">
           <div
-            class="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[13px] font-bold px-5 py-2.5 rounded-full shadow-lg shadow-purple-500/30 whitespace-nowrap mb-2 relative"
+            class="bg-gradient-to-r from-secondary-500 to-accent-500 text-white text-[13px] font-bold px-5 py-2.5 rounded-full shadow-lg shadow-secondary/30 whitespace-nowrap mb-2 relative"
           >
             Self-hosted AI assistant
           </div>
@@ -274,7 +272,7 @@ const {
                 >Available soon.</span
               >
               <button
-                class="bg-blue-600/90 backdrop-blur-md hover:bg-blue-600 text-white text-[10px] h-7 px-3.5 rounded-full transition-all font-bold shadow-lg shadow-blue-500/20"
+                class="bg-primary/90 backdrop-blur-md hover:bg-primary text-primary-foreground text-[10px] h-7 px-3.5 rounded-full transition-all font-bold shadow-lg shadow-primary/20"
                 >Notify me</button
               >
             </div>

@@ -64,15 +64,13 @@ const breadcrumbData = {
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(breadcrumbData)} />
 
-  <div
-    class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
-  >
+  <div class="bg-background min-h-screen overflow-x-hidden relative">
     <div class="flex flex-col gap-16 pb-16">
       <!-- Hero Section -->
       <Section py="pt-24 pb-12" containerClass="text-center">
         <div class="flex justify-center mb-6">
           <div
-            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center"
+            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-default-700 to-default-900 flex items-center justify-center"
           >
             <IconApple className="w-12 h-12 text-white" aria-hidden="true" />
           </div>

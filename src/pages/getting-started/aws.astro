@@ -50,14 +50,12 @@ const structuredData = {
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(breadcrumbData)} />
 
-  <div
-    class="bg-background min-h-screen overflow-x-hidden relative selection:bg-pink-500/30 selection:text-pink-950 dark:selection:text-pink-200"
-  >
+  <div class="bg-background min-h-screen overflow-x-hidden relative">
     <div class="flex flex-col gap-16 pb-16">
       <Section py="pt-24 pb-12" containerClass="text-center">
         <div class="flex justify-center mb-6">
           <div
-            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center"
+            class="w-20 h-20 rounded-2xl bg-gradient-to-br from-warning-400 to-warning-600 flex items-center justify-center"
           >
             <IconAws className="w-12 h-12 text-white" aria-hidden="true" />
           </div>
@@ -80,7 +78,7 @@ const structuredData = {
               class="p-6 rounded-xl bg-content1 border-2 border-divider hover:border-primary/50 transition-all"
             >
               <div
-                class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center mb-4"
+                class="w-12 h-12 rounded-full bg-gradient-to-br from-warning-400 to-warning-600 flex items-center justify-center mb-4"
               >
                 <IconServer className="w-6 h-6 text-white" aria-hidden="true" />
               </div>
@@ -94,7 +92,7 @@ const structuredData = {
               class="p-6 rounded-xl bg-content1 border-2 border-divider hover:border-primary/50 transition-all"
             >
               <div
-                class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center mb-4"
+                class="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center mb-4"
               >
                 <IconBolt className="w-6 h-6 text-white" aria-hidden="true" />
               </div>
@@ -108,7 +106,7 @@ const structuredData = {
               class="p-6 rounded-xl bg-content1 border-2 border-divider hover:border-primary/50 transition-all"
             >
               <div
-                class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4"
+                class="w-12 h-12 rounded-full bg-gradient-to-br from-secondary-500 to-accent-600 flex items-center justify-center mb-4"
               >
                 <IconCollection className="w-6 h-6 text-white" aria-hidden="true" />
               </div>

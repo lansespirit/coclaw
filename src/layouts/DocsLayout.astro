@@ -31,32 +31,32 @@ const hasValidLastUpdated = !Number.isNaN(lastUpdated.getTime());
 
 <BaseLayout title={frontmatter.title} description={frontmatter.description}>
   <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <article class="prose prose-lg dark:prose-invert">
+    <article class="c-content prose prose-lg">
       <header class="mb-8">
         <div class="flex gap-2 mb-4">
           <span
-            class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+            class="px-3 py-1 rounded-full text-sm border border-primary/20 bg-primary/10 text-primary-700 dark:text-primary-300"
           >
             {frontmatter.category}
           </span>
           {
             frontmatter.difficulty && (
-              <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">
+              <span class="px-3 py-1 rounded-full text-sm border border-success/20 bg-success/10 text-success-700 dark:text-success-300">
                 {frontmatter.difficulty}
               </span>
             )
           }
           {
             frontmatter.estimatedTime && (
-              <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm">
+              <span class="px-3 py-1 rounded-full text-sm border border-secondary/20 bg-secondary/10 text-secondary-700 dark:text-secondary-300">
                 {frontmatter.estimatedTime}
               </span>
             )
           }
         </div>
         <h1 class="text-4xl font-bold mb-4">{frontmatter.title}</h1>
-        <p class="text-xl text-gray-600 dark:text-gray-400 mb-4">{frontmatter.description}</p>
-        <div class="flex gap-4 text-sm text-gray-500 dark:text-gray-400">
+        <p class="text-xl text-default-700 dark:text-default-500 mb-4">{frontmatter.description}</p>
+        <div class="flex gap-4 text-sm text-default-600 dark:text-default-500">
           <span>By {frontmatter.author || 'CoClaw Team'}</span>
           <span>•</span>
           <time datetime={hasValidPublishDate ? publishDate.toISOString() : undefined}>

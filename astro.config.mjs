@@ -20,6 +20,7 @@ export default defineConfig({
       filter: (page) => {
         const pathname = page.startsWith('http') ? new URL(page).pathname : page;
         return (
+          !pathname.startsWith('/styleguide') &&
           !pathname.startsWith('/troubleshooting/issues') &&
           !pathname.startsWith('/troubleshooting/github')
         );

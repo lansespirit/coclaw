@@ -1,7 +1,7 @@
 # CoClaw Design Specification
 
-**Version:** 1.0
-**Date:** 2026-01-30
+**Version:** 1.1
+**Date:** 2026-02-04
 **Based on:** HeroUI (NextUI) Design System
 **Framework:** Astro 5 + React + Tailwind CSS 4
 
@@ -84,10 +84,10 @@ CoClaw uses **HeroUI (NextUI) v2.8.8+** as the component foundation, built on:
 ### 2.2 Theme Configuration
 
 ```typescript
-// tailwind.config.ts
-import { heroui } from '@heroui/react';
+// tailwind.config.cjs
+const { heroui } = require('@heroui/theme');
 
-export default {
+module.exports = {
   content: [
     './src/**/*.{astro,html,js,jsx,md,mdx,ts,tsx}',
     './node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}',
@@ -104,11 +104,16 @@ export default {
         light: {
           colors: {
             primary: {
-              DEFAULT: '#0072F5',
+              DEFAULT: '#006FEE',
               foreground: '#FFFFFF',
             },
             secondary: {
               DEFAULT: '#7828C8',
+              foreground: '#FFFFFF',
+            },
+            // Brand accent used for marketing highlights (e.g. pink).
+            accent: {
+              DEFAULT: '#EC4899',
               foreground: '#FFFFFF',
             },
             success: {
@@ -124,17 +129,26 @@ export default {
               foreground: '#FFFFFF',
             },
             background: '#FFFFFF',
-            foreground: '#11181C',
+            // IMPORTANT: provide a ramp so utilities like `text-foreground-600` exist.
+            foreground: {
+              DEFAULT: '#000000',
+              500: 'rgb(0 0 0 / 0.5)',
+              600: 'rgb(0 0 0 / 0.6)',
+            },
           },
         },
         dark: {
           colors: {
             primary: {
-              DEFAULT: '#0072F5',
+              DEFAULT: '#006FEE',
               foreground: '#FFFFFF',
             },
             secondary: {
               DEFAULT: '#7828C8',
+              foreground: '#FFFFFF',
+            },
+            accent: {
+              DEFAULT: '#EC4899',
               foreground: '#FFFFFF',
             },
             success: {
@@ -150,7 +164,11 @@ export default {
               foreground: '#FFFFFF',
             },
             background: '#000000',
-            foreground: '#ECEDEE',
+            foreground: {
+              DEFAULT: '#FFFFFF',
+              500: 'rgb(255 255 255 / 0.5)',
+              600: 'rgb(255 255 255 / 0.6)',
+            },
           },
         },
       },
@@ -168,8 +186,8 @@ export default {
 **Primary Colors (Blue)**
 
 - Used for: Primary actions, links, focus states
-- Light mode: `#0072F5` (Blue 500)
-- Dark mode: `#0072F5` (Blue 500)
+- Light mode: `#006FEE` (Primary 500)
+- Dark mode: `#006FEE` (Primary 500)
 - Variants: 50, 100, 200, 300, 400, 500, 600, 700, 800, 900
 
 **Secondary Colors (Purple)**
@@ -177,6 +195,12 @@ export default {
 - Used for: Secondary actions, highlights, accents
 - Light mode: `#7828C8` (Purple 500)
 - Dark mode: `#7828C8` (Purple 500)
+
+**Accent Colors (Pink)**
+
+- Used for: Brand highlights, marketing accents, gradient washes
+- Light mode: `#EC4899` (Accent 500)
+- Dark mode: `#EC4899` (Accent 500)
 
 **Success (Green)**
 
@@ -241,19 +265,41 @@ Content4: #52525B (disabled states)
 **Hero Sections:**
 
 ```css
-/* Light mode */
-background: linear-gradient(to bottom, #eff6ff, #ffffff);
-
-/* Dark mode */
-background: linear-gradient(to bottom, #18181b, #09090b);
+/* Use semantic tokens, not hard-coded palette colors */
+background: linear-gradient(
+  to bottom,
+  rgb(var(--heroui-primary) / 0.12),
+  rgb(var(--heroui-background))
+);
 ```
 
 **Feature Cards:**
 
 ```css
-/* Accent gradient */
-background: linear-gradient(135deg, #0072f5, #7828c8);
+/* Accent gradient (token-based) */
+background: linear-gradient(135deg, rgb(var(--heroui-primary)), rgb(var(--heroui-secondary)));
 ```
+
+### 3.5 Token Governance (Required)
+
+To keep the UI consistent across light/dark themes, **UI code must use HeroUI semantic tokens**.
+
+**Allowed (preferred):**
+
+- `primary`, `secondary`, `accent`
+- `success`, `warning`, `danger`
+- `default` (neutral scale)
+- `background`, `foreground`
+- `content1..content4`, `divider`, `focus`, `overlay`
+
+**Disallowed in UI code (`src/`, excluding `src/content` and `src/data`):**
+
+- Tailwind palette classes such as `text-blue-500`, `bg-zinc-900`, `from-purple-500`, etc.
+
+**Enforcement**
+
+- See `docs/TOKENS.md`
+- Run `pnpm tokens:check` (fails CI/local if palette classes are introduced)
 
 ---
 
@@ -261,11 +307,18 @@ background: linear-gradient(135deg, #0072f5, #7828c8);
 
 ### 4.1 Font Stack
 
-**Primary Font: System Font Stack**
+**Primary Font: Inter + fallbacks**
 
 ```css
 font-family:
-  -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  'Inter',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  Roboto,
+  'Helvetica Neue',
+  Arial,
+  sans-serif;
 ```
 
 **Monospace Font: Code & Technical Content**
@@ -978,18 +1031,32 @@ const ConfigGenerator = lazy(() => import('./ConfigGenerator'));
 <div style={{ display: 'flex', padding: '24px' }}>
 ```
 
-**Custom styles when needed:**
+**Custom styles when needed (content system):**
 
 ```css
-/* src/styles/custom.css */
-.prose code {
-  @apply px-1.5 py-0.5 rounded bg-default-100 text-sm font-mono;
-}
-
-.prose pre {
-  @apply p-4 rounded-lg bg-default-50 overflow-x-auto;
+/* src/styles/content.css */
+.c-content :where(code):not(pre code) {
+  @apply bg-default-100 px-2 py-1 rounded-small text-small font-mono text-foreground-600;
 }
 ```
+
+### 10.6 Content Rendering (Markdown/MDX)
+
+Markdown content is rendered as plain HTML and must look correct without author-provided classes.
+
+- Content styling lives in `src/styles/content.css`
+- The baseline container class is `c-content` (usually combined with `prose`)
+- A visual regression page exists at `/styleguide/content` (not in sitemap, `noindex`)
+
+### 10.7 Token Governance Check
+
+Run:
+
+```bash
+pnpm tokens:check
+```
+
+This scans `src/` UI code and fails if Tailwind palette classes are found.
 
 ### 10.5 Testing Checklist
 

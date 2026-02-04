@@ -13,6 +13,7 @@
     "build": "astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
+    "tokens:check": "node scripts/check-tokens.mjs",
     "sync:issues": "node scripts/sync-openclaw-issues.mjs",
     "generate:troubleshooting-stubs": "node scripts/generate-troubleshooting-stubs.mjs",
     "analyze:issues": "node scripts/analyze-openclaw-issues.mjs",

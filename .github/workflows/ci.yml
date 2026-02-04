@@ -53,5 +53,8 @@ jobs:
       - name: Format check
         run: pnpm -s format:check
 
+      - name: Token check
+        run: pnpm -s tokens:check
+
       - name: Build
         run: pnpm -s build

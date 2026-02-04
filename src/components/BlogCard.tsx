@@ -23,7 +23,7 @@ export const BlogCard = ({
   return (
     <article className="group relative flex flex-col h-full overflow-hidden m-card-surface m-card-hover-border m-card-hover-lift p-0 transition-all duration-300">
       {/* Visual Accent */}
-      <div className="h-2 w-full bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 opacity-80" />
+      <div className="h-2 w-full bg-gradient-to-r from-accent-500 via-secondary-500 to-primary-700 opacity-80" />
 
       <div className="flex flex-col flex-1 p-6">
         <div className="flex items-center justify-between mb-4">

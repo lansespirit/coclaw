@@ -11,9 +11,9 @@ interface GuideCardProps {
 }
 
 const difficultyColors = {
-  Beginner: 'from-green-500 to-emerald-600',
-  Intermediate: 'from-yellow-400 to-orange-500',
-  Advanced: 'from-red-500 to-rose-600',
+  Beginner: 'from-success-500 to-success-600',
+  Intermediate: 'from-warning-400 to-warning-600',
+  Advanced: 'from-danger-500 to-danger-600',
 };
 
 const chipColors = {

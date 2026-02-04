@@ -1,5 +1,6 @@
 @config '../../tailwind.config.cjs';
 @import 'tailwindcss';
+@import './content.css';
 
 @theme {
   --font-sans:
@@ -11,6 +12,13 @@
 
 /* Custom global styles */
 @layer base {
+  :root {
+    /* Keep these aligned with `tailwind.config.cjs` theme colors. */
+    --coclaw-primary-500: #006fee;
+    --coclaw-secondary-500: #7828c8;
+    --coclaw-accent-500: #ec4899;
+  }
+
   html {
     scroll-behavior: smooth;
   }
@@ -21,11 +29,11 @@
   }
 
   ::selection {
-    background-color: rgb(0 114 245 / 0.25);
+    background-color: rgb(0 111 238 / 0.25);
   }
 
   .dark ::selection {
-    background-color: rgb(0 114 245 / 0.35);
+    background-color: rgb(0 111 238 / 0.35);
   }
 }
 
@@ -86,48 +94,6 @@
   .m-shadow-float {
     @apply shadow-xl;
   }
-}
-
-/* Typography Scale & Prose Overrides */
-.prose {
-  @apply max-w-none text-default-800 dark:text-default-600;
-}
-
-.prose h1 {
-  @apply text-4xl font-bold mb-6 text-foreground tracking-tight;
-}
-
-.prose h2 {
-  @apply text-3xl font-bold mt-10 mb-6 text-foreground tracking-tight;
-}
-
-.prose h3 {
-  @apply text-2xl font-semibold mt-8 mb-4 text-foreground tracking-tight;
-}
-
-.prose p {
-  @apply mb-6 leading-7;
-}
-
-.prose code {
-  @apply bg-default-100 px-1.5 py-0.5 rounded text-sm font-mono text-default-700;
-}
-
-.prose pre {
-  @apply bg-default-50 dark:bg-default-100/10 p-5 rounded-xl overflow-x-auto mb-6 border border-default-200 dark:border-default-100/10;
-}
-
-.prose a {
-  @apply text-primary hover:opacity-80 underline decoration-primary/30 underline-offset-4 transition-opacity;
-}
-
-.prose ul,
-.prose ol {
-  @apply mb-6 ml-6 list-outside;
-}
-
-.prose li {
-  @apply mb-2 pl-2;
 }
 
 /* Custom scrollbar */

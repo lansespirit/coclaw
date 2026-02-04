@@ -318,7 +318,7 @@ export function IssuesExplorer({ issues, initialQuery = '', initialState = 'all'
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
                           i.state === 'open'
-                            ? 'bg-emerald-500/10 text-emerald-600'
+                            ? 'bg-success/10 text-success-600 dark:text-success'
                             : 'bg-default-500/10 text-default-600'
                         }`}
                       >
