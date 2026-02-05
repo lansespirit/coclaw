@@ -1,6 +1,14 @@
-# CoClaw Website - Development Environment
+# CoClaw.com
 
-This is the CoClaw.com website built with Astro 5, following the technical specifications from the PRD.
+[![Website](https://img.shields.io/badge/coclaw.com-live-0ea5e9)](https://coclaw.com)
+[![CI](https://github.com/lansespirit/coclaw/actions/workflows/ci.yml/badge.svg)](https://github.com/lansespirit/coclaw/actions/workflows/ci.yml)
+
+CoClaw 是 **OpenClaw**（原 **ClawDBot**）的社区支持平台：教程、疑难排查与实用工具。  
+CoClaw is a community-driven support platform for **OpenClaw** (formerly **ClawDBot**) — guides, troubleshooting, and tools.
+
+Live site: https://coclaw.com
+
+If you want to help maintain CoClaw, please jump in with issues/PRs. Feature ideas and content improvements are especially welcome.
 
 ## Tech Stack
 
@@ -12,12 +20,33 @@ This is the CoClaw.com website built with Astro 5, following the technical speci
 - **Search**: Pagefind (client-side search)
 - **Content**: MDX with Content Collections
 
+## What’s In This Repo
+
+- **Guides & docs**: `src/content/**` (MDX)
+- **Troubleshooting KB**: `src/content/troubleshooting/**`
+- **Tools**: interactive pages in `src/pages/tools/**` (and related components in `src/components/**`)
+- **OpenClaw issue mirror (optional)**: `pnpm sync:issues` writes to `src/data/openclaw/openclaw-issues.json`
+
+## Contributing
+
+- **Feature requests / bugs**: open a GitHub Issue (include screenshots, URLs, repro steps)
+- **Docs/content**: edit or add MDX in `src/content/**`
+- **UI/UX**: Astro pages in `src/pages/**`, components in `src/components/**`
+- **Small PRs welcome**: typo fixes, clarity improvements, new screenshots, better examples
+- More details: see `CONTRIBUTING.md`
+
+Development notes:
+
+- Keep changes focused and easy to review
+- Run `pnpm lint` and `pnpm format:check` before opening a PR
+- If you’re adding content, keep URLs stable and titles/descriptions SEO-friendly
+
 ## Prerequisites
 
 - Node.js 22 or higher
 - pnpm (installed globally)
 
-## Getting Started
+## Local Development
 
 ### 1. Install Dependencies
 
@@ -39,10 +68,7 @@ The site will be available at `http://localhost:4321/`
 pnpm build
 ```
 
-This will:
-
-1. Build the Astro site to `dist/`
-2. Generate Pagefind search index
+This will build the Astro site to `dist/` and generate the Pagefind search index.
 
 ### 4. Preview Production Build
 
@@ -59,6 +85,8 @@ pnpm preview
 - `pnpm lint:fix` - Fix ESLint errors automatically
 - `pnpm format` - Format code with Prettier
 - `pnpm format:check` - Check code formatting
+- `pnpm tokens:check` - Validate required design tokens
+- `pnpm sync:issues` - (Optional) sync OpenClaw issues into local JSON for the site
 
 ## Project Structure
 
@@ -145,15 +173,6 @@ Content is organized with flat URLs (no `/docs/` prefix):
 - Node version: 22
 - Package manager: pnpm
 
-### Manual Deployment
-
-```bash
-# Build the site
-pnpm build
-
-# Deploy the dist/ folder to your hosting provider
-```
-
 ## Development Guidelines
 
 ### Code Quality
@@ -208,13 +227,13 @@ If port 4321 is in use:
 pnpm dev -- --port 3000
 ```
 
-## Next Steps
+## Roadmap / Help Wanted
 
-1. **Add Content**: Create documentation pages in `src/content/`
-2. **Build Components**: Develop the Configuration Generator in `src/components/ConfigGenerator/`
-3. **Customize Design**: Update Tailwind config and global styles
-4. **Add Features**: Implement search UI, navigation, and interactive elements
-5. **Deploy**: Connect to Cloudflare Pages for automatic deployment
+- Improve the OpenClaw config generator UX and add more presets/templates
+- Expand troubleshooting coverage with real-world fixes (logs + solutions)
+- Add more multilingual content (Chinese/English), and polish existing pages
+
+If you’re not sure where to start, open an issue with what you want to work on and we’ll help scope it.
 
 ## Resources
 

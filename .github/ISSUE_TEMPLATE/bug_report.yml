@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a problem with coclaw.com or this repo.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please include enough detail for us to reproduce.
+  - type: input
+    id: url
+    attributes:
+      label: Page URL
+      description: Where did you see the problem? (e.g. https://coclaw.com/...)
+      placeholder: https://coclaw.com/...
+    validations:
+      required: false
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: What happened?
+      description: What did you expect to happen, and what actually happened?
+      placeholder: Steps + expected vs actual.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Numbered steps we can follow to reproduce.
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. See ...
+    validations:
+      required: false
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots / logs
+      description: Drag-and-drop images or paste relevant logs.
+    validations:
+      required: false
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser/OS, device, and anything else relevant.
+      placeholder: "Chrome 121 on macOS 14; iPhone 15 iOS 17; etc."
+    validations:
+      required: false
+

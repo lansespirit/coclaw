@@ -1,0 +1,9 @@
+blank_issues_enabled: true
+contact_links:
+  - name: CoClaw Website
+    url: https://coclaw.com
+    about: Browse guides, troubleshooting, and tools.
+  - name: OpenClaw Repository
+    url: https://github.com/openclaw/openclaw
+    about: Issues about OpenClaw itself (not the CoClaw website) should go here.
+
