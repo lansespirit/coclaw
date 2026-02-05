@@ -3,7 +3,6 @@
 [![Website](https://img.shields.io/badge/coclaw.com-live-0ea5e9)](https://coclaw.com)
 [![CI](https://github.com/lansespirit/coclaw/actions/workflows/ci.yml/badge.svg)](https://github.com/lansespirit/coclaw/actions/workflows/ci.yml)
 
-CoClaw 是 **OpenClaw**（原 **ClawDBot**）的社区支持平台：教程、疑难排查与实用工具。  
 CoClaw is a community-driven support platform for **OpenClaw** (formerly **ClawDBot**) — guides, troubleshooting, and tools.
 
 Live site: https://coclaw.com
