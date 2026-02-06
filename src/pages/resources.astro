@@ -62,6 +62,21 @@ const guides = guideEntries
     href: `/guides/${entry.slug}`,
   }));
 
+const troubleshootingEntries = await getCollection('troubleshooting', ({ data }) => !data.draft);
+const troubleshootingSolutions = troubleshootingEntries
+  .filter((e) => e.data.kind === 'solution')
+  .sort((a, b) => b.data.lastUpdated.getTime() - a.data.lastUpdated.getTime())
+  .map((entry) => ({
+    title: entry.data.title,
+    description: entry.data.description,
+    href: `/troubleshooting/${entry.slug}`,
+    channel: entry.data.channel ?? [],
+    os: entry.data.os ?? [],
+    component: entry.data.component ?? null,
+    severity: entry.data.severity ?? null,
+    keywords: entry.data.errorSignatures ?? [],
+  }));
+
 const videos: { videoId: string; title: string; category: string; duration: string }[] = [
   {
     videoId: 'a63dUwXUgDo',
@@ -164,6 +179,50 @@ const userStories = storyEntries
     avatar: entry.data.image,
     href: `/stories/${entry.slug}`,
   }));
+
+const resourceSearchItems = [
+  ...blogEntries.map((entry) => ({
+    url: `/blog/${entry.slug}`,
+    title: entry.data.title,
+    description: entry.data.description,
+    type: 'blog',
+    keywords: entry.data.keywords ?? [],
+  })),
+  ...guideEntries.map((entry) => ({
+    url: `/guides/${entry.slug}`,
+    title: entry.data.title,
+    description: entry.data.description,
+    type: 'guide',
+    keywords: [],
+  })),
+  ...troubleshootingSolutions.map((s) => ({
+    url: s.href,
+    title: s.title,
+    description: s.description,
+    type: 'troubleshooting',
+    keywords: [
+      ...(s.keywords ?? []),
+      ...(s.channel ?? []),
+      ...(s.os ?? []),
+      ...(s.component ? [s.component] : []),
+      ...(s.severity ? [s.severity] : []),
+    ],
+  })),
+  ...storyEntries.map((entry) => ({
+    url: `/stories/${entry.slug}`,
+    title: entry.data.name,
+    description: entry.data.quote,
+    type: 'story',
+    keywords: entry.data.keywords ? [entry.data.keywords] : [],
+  })),
+  ...videos.map((v) => ({
+    url: `https://www.youtube.com/watch?v=${v.videoId}`,
+    title: v.title,
+    description: `${v.category} • ${v.duration}`,
+    type: 'video',
+    keywords: [v.category],
+  })),
+];
 ---
 
 <BaseLayout
@@ -196,7 +255,7 @@ const userStories = storyEntries
     </div>
 
     <!-- Hero Section -->
-    <Section py="pt-32 pb-16" containerClass="text-center relative">
+    <Section py="pt-32 pb-16" containerClass="text-center relative z-30">
       <div class="max-w-4xl mx-auto">
         <div
           class="inline-flex items-center gap-2 px-3 py-1 mb-6 text-xs font-semibold rounded-full bg-primary/10 text-primary border border-primary/20 backdrop-blur-md"
@@ -214,8 +273,8 @@ const userStories = storyEntries
         </p>
 
         <!-- Search Pill -->
-        <div class="max-w-xl mx-auto relative group">
-          <ResourceSearchInput client:load />
+        <div class="max-w-xl mx-auto relative z-40 group">
+          <ResourceSearchInput items={resourceSearchItems} client:load />
           <div
             class="absolute inset-0 -z-10 bg-gradient-to-r from-primary/20 to-secondary/20 blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity rounded-full"
           >

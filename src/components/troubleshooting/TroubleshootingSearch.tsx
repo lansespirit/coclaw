@@ -1,23 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { loadPagefind, type PagefindModule } from '../../lib/pagefind';
 
-type PagefindResultData = {
+type LocalSolution = {
   url: string;
-  excerpt?: string;
-  meta?: { title?: string };
-  content?: string;
-  filters?: Record<string, string[]>;
-};
-
-type PagefindSearchResult = {
-  id: string;
-  data: () => Promise<PagefindResultData>;
-};
-
-type Pagefind = {
-  search: (
-    query: string,
-    opts?: { filters?: Record<string, string | string[]> }
-  ) => Promise<{ results: PagefindSearchResult[] }>;
+  title: string;
+  description: string;
+  channel: string[];
+  os: string[];
+  component?: string | null;
+  severity?: string | null;
+  errorSignatures?: string[];
 };
 
 type Props = {
@@ -25,6 +17,7 @@ type Props = {
   os: string[];
   components: string[];
   severities: string[];
+  localIndex?: LocalSolution[];
   initialQuery?: string;
   initialChannel?: string;
   initialOs?: string;
@@ -37,6 +30,7 @@ export function TroubleshootingSearch({
   os,
   components,
   severities,
+  localIndex = [],
   initialQuery = '',
   initialChannel = 'all',
   initialOs = 'all',
@@ -55,7 +49,7 @@ export function TroubleshootingSearch({
   const [component, setComponent] = useState(normalizeInitial(initialComponent, components));
   const [severity, setSeverity] = useState(normalizeInitial(initialSeverity, severities));
 
-  const [pagefind, setPagefind] = useState<Pagefind | null>(null);
+  const [pagefind, setPagefind] = useState<PagefindModule | null>(null);
   const [results, setResults] = useState<
     | null
     | {
@@ -69,20 +63,13 @@ export function TroubleshootingSearch({
   const lastKeyRef = useRef<string>('');
 
   useEffect(() => {
-    const w = globalThis as typeof globalThis & { pagefind?: Pagefind };
-    if (w.pagefind) {
-      setPagefind(w.pagefind);
-      return;
-    }
-
-    const pagefindPath = '/pagefind/pagefind.js';
-    import(/* @vite-ignore */ pagefindPath)
-      .then(() => {
-        if (w.pagefind) setPagefind(w.pagefind);
-      })
-      .catch(() => {
-        // ignore - dev mode doesn't have Pagefind
-      });
+    let cancelled = false;
+    loadPagefind().then((mod) => {
+      if (!cancelled) setPagefind(mod);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const activeFilters = useMemo(() => {
@@ -98,8 +85,6 @@ export function TroubleshootingSearch({
   }, [channel, osValue, component, severity]);
 
   useEffect(() => {
-    if (!pagefind) return;
-
     const q = query.trim();
     if (!q) {
       setResults(null);
@@ -111,6 +96,59 @@ export function TroubleshootingSearch({
     lastKeyRef.current = key;
 
     let cancelled = false;
+
+    const runLocalSearch = () => {
+      const qLower = q.toLowerCase();
+      const terms = qLower.split(/\s+/).filter(Boolean);
+
+      const matchesQuery = (s: LocalSolution) => {
+        const haystack = [
+          s.title,
+          s.description,
+          ...(s.errorSignatures ?? []),
+          ...(s.channel ?? []),
+          ...(s.os ?? []),
+          s.component ?? '',
+          s.severity ?? '',
+        ]
+          .join(' ')
+          .toLowerCase();
+
+        return terms.every((t) => haystack.includes(t));
+      };
+
+      const rows = localIndex
+        .filter((s) => {
+          if (!matchesQuery(s)) return false;
+          if (channel !== 'all' && !s.channel.includes(channel)) return false;
+          if (osValue !== 'all' && !s.os.includes(osValue)) return false;
+          if (component !== 'all' && (s.component ?? '') !== component) return false;
+          if (severity !== 'all' && (s.severity ?? '') !== severity) return false;
+          return true;
+        })
+        .slice(0, 20)
+        .map((s) => ({
+          url: s.url,
+          title: s.title,
+          excerpt: s.description,
+          filters: {
+            type: ['troubleshooting'],
+            kind: ['solution'],
+            ...(s.component ? { component: [s.component] } : {}),
+            ...(s.severity ? { severity: [s.severity] } : {}),
+            ...(s.channel?.length ? { channel: s.channel } : {}),
+            ...(s.os?.length ? { os: s.os } : {}),
+          },
+        }));
+
+      setResults(rows);
+    };
+
+    if (!pagefind) {
+      runLocalSearch();
+      return;
+    }
+
     pagefind
       .search(q, { filters: activeFilters })
       .then(async ({ results }) => {
@@ -134,7 +172,7 @@ export function TroubleshootingSearch({
     return () => {
       cancelled = true;
     };
-  }, [pagefind, query, activeFilters, channel, osValue, component, severity]);
+  }, [pagefind, query, activeFilters, channel, osValue, component, severity, localIndex]);
 
   return (
     <div className="space-y-5">
@@ -203,8 +241,11 @@ export function TroubleshootingSearch({
 
       {!pagefind ? (
         <div className="text-sm text-default-600">
-          Search is available on the live site. If you’re previewing locally, you may need to build
-          once to generate the search index.
+          Search results may be limited right now. You can browse{' '}
+          <a className="text-primary hover:underline font-medium" href="/troubleshooting/solutions">
+            all solutions
+          </a>{' '}
+          and narrow down using the filters below.
         </div>
       ) : null}
 

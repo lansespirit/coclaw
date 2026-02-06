@@ -1,25 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { labelToFilterValue } from '../../lib/openclaw-issues';
-
-type Pagefind = {
-  search: (
-    query: string,
-    opts?: { filters?: Record<string, string | string[]> }
-  ) => Promise<{ results: PagefindSearchResult[] }>;
-};
-
-type PagefindResultData = {
-  url: string;
-  excerpt?: string;
-  meta?: { title?: string };
-  content?: string;
-  filters?: Record<string, string[]>;
-};
-
-type PagefindSearchResult = {
-  id: string;
-  data: () => Promise<PagefindResultData>;
-};
+import { loadPagefind, type PagefindModule } from '../../lib/pagefind';
 
 type IssuePreview = {
   number: number;
@@ -52,7 +33,7 @@ export function IssuesExplorer({ issues, initialQuery = '', initialState = 'all'
   const [platform, setPlatform] = useState<string>('all');
   const [component, setComponent] = useState<string>('all');
 
-  const [pagefind, setPagefind] = useState<Pagefind | null>(null);
+  const [pagefind, setPagefind] = useState<PagefindModule | null>(null);
   const [pagefindResults, setPagefindResults] = useState<
     | null
     | {
@@ -68,20 +49,13 @@ export function IssuesExplorer({ issues, initialQuery = '', initialState = 'all'
   useEffect(() => {
     // `pagefind.js` only exists after a full build (`pnpm build`).
     // In dev, we fall back to client-side searching the preview list.
-    const w = globalThis as typeof globalThis & { pagefind?: Pagefind };
-    if (w.pagefind) {
-      setPagefind(w.pagefind as Pagefind);
-      return;
-    }
-
-    const pagefindPath = '/pagefind/pagefind.js';
-    import(/* @vite-ignore */ pagefindPath)
-      .then(() => {
-        if (w.pagefind) setPagefind(w.pagefind as Pagefind);
-      })
-      .catch(() => {
-        // ignore - dev mode doesn't have Pagefind
-      });
+    let cancelled = false;
+    loadPagefind().then((mod) => {
+      if (!cancelled) setPagefind(mod);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const labelOptions = useMemo(() => {

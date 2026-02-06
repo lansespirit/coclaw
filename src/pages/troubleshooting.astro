@@ -60,6 +60,17 @@ const severities = Array.from(
       .filter(Boolean)
   )
 ).sort((a, b) => a.localeCompare(b));
+
+const localIndex = solutions.map((entry) => ({
+  url: `/troubleshooting/${entry.slug}`,
+  title: entry.data.title,
+  description: entry.data.description,
+  channel: entry.data.channel ?? [],
+  os: entry.data.os ?? [],
+  component: entry.data.component ?? null,
+  severity: entry.data.severity ?? null,
+  errorSignatures: entry.data.errorSignatures ?? [],
+}));
 ---
 
 <BaseLayout
@@ -85,6 +96,7 @@ const severities = Array.from(
           os={os}
           components={components}
           severities={severities}
+          localIndex={localIndex}
           client:load
         />
         <p class="text-sm text-default-600 mt-4 text-center">
