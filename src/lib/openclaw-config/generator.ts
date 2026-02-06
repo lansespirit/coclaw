@@ -1,5 +1,7 @@
 export type DmPolicy = 'pairing' | 'allowlist' | 'open' | 'disabled';
-export type GatewayBindMode = 'loopback' | 'lan' | 'tailnet' | 'custom';
+export type GroupPolicy = 'open' | 'allowlist' | 'disabled';
+export type GatewayBindMode = 'loopback' | 'auto' | 'lan' | 'tailnet' | 'custom';
+export type GatewayAuthMode = 'off' | 'token' | 'password';
 export type SecretsMode = 'env' | 'inline';
 export type ModelApi = 'openai-completions' | 'openai-responses' | 'anthropic-messages';
 
@@ -19,22 +21,41 @@ export type ChannelStateBase = {
 
 export type TelegramState = ChannelStateBase & {
   botToken: string;
+  groupPolicy: GroupPolicy;
+  groupAllowFromRaw: string;
+  groupIdsRaw: string;
+  groupRequireMention: boolean;
+  webhookUrl: string;
+  webhookSecret: string;
 };
 
 export type WhatsAppState = ChannelStateBase;
+export type WhatsAppStateAdvanced = ChannelStateBase & {
+  groupPolicy: GroupPolicy;
+  groupAllowFromRaw: string;
+  groupIdsRaw: string;
+  groupRequireMention: boolean;
+};
 
 export type DiscordState = ChannelStateBase & {
   token: string;
+  groupPolicy: GroupPolicy;
+  guildIdsRaw: string;
+  guildRequireMention: boolean;
 };
 
 export type SlackState = ChannelStateBase & {
   botToken: string;
   appToken: string;
+  groupPolicy: GroupPolicy;
+  channelIdsRaw: string;
+  channelRequireMention: boolean;
 };
 
 export type OpenClawConfigGeneratorState = {
   safeMode: boolean;
   secretsMode: SecretsMode;
+  modelFallbacksRaw?: string;
   ai: {
     mode: 'built-in' | 'custom';
     builtIn: {
@@ -61,10 +82,13 @@ export type OpenClawConfigGeneratorState = {
     port: number;
     bind: GatewayBindMode;
     customBindHost: string;
+    authMode: GatewayAuthMode;
+    authToken: string;
+    authPassword: string;
   };
   channels: {
     telegram: TelegramState;
-    whatsapp: WhatsAppState;
+    whatsapp: WhatsAppStateAdvanced;
     discord: DiscordState;
     slack: SlackState;
   };
@@ -136,6 +160,15 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
   const requiredEnvVars: string[] = [];
 
   const primaryModel = makePrimaryModelId(state);
+  const rawFallbacks = splitList(state.modelFallbacksRaw ?? '');
+  const fallbacks = rawFallbacks.filter((m) => m !== primaryModel);
+  if (rawFallbacks.some((m) => m === primaryModel)) {
+    issues.push({
+      level: 'info',
+      path: 'agents.defaults.model.fallbacks',
+      message: 'Fallbacks included the primary model; it will be ignored.',
+    });
+  }
 
   if (!primaryModel) {
     issues.push({
@@ -278,18 +311,86 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
 
   cfg.agents = {
     defaults: {
-      model: { primary: primaryModel },
+      model: { primary: primaryModel, ...(fallbacks.length ? { fallbacks } : {}) },
       ...(state.safeMode ? { sandbox: { mode: 'non-main' } } : {}),
     },
   };
 
-  cfg.gateway = {
+  const gatewayCfg: Record<string, unknown> = {
     port: state.gateway.port,
     bind: state.gateway.bind,
     ...(state.gateway.bind === 'custom' && state.gateway.customBindHost.trim()
       ? { customBindHost: state.gateway.customBindHost.trim() }
       : {}),
   };
+
+  const authMode = state.gateway.authMode;
+  const bindNeedsAuth =
+    state.gateway.bind === 'lan' ||
+    state.gateway.bind === 'tailnet' ||
+    state.gateway.bind === 'custom';
+
+  if (bindNeedsAuth && authMode === 'off') {
+    issues.push({
+      level: 'error',
+      path: 'gateway.auth',
+      message:
+        'Binding beyond loopback requires Gateway auth (set gateway.auth.token/password or OPENCLAW_GATEWAY_TOKEN/OPENCLAW_GATEWAY_PASSWORD).',
+    });
+  } else if (state.gateway.bind === 'auto' && authMode === 'off') {
+    issues.push({
+      level: 'warning',
+      path: 'gateway.auth',
+      message:
+        'bind="auto" usually binds to 127.0.0.1, but may fall back to 0.0.0.0. Configure gateway.auth.token/password to avoid startup failures on non-loopback binds.',
+    });
+  }
+
+  if (authMode !== 'off') {
+    const auth: Record<string, unknown> = { mode: authMode };
+    if (authMode === 'token') {
+      if (state.secretsMode === 'inline') {
+        const token = state.gateway.authToken.trim();
+        if (!token) {
+          issues.push({
+            level: 'error',
+            path: 'gateway.auth.token',
+            message: 'gateway.auth.mode="token" requires gateway.auth.token in inline mode.',
+          });
+        } else {
+          auth.token = token;
+        }
+      } else {
+        requiredEnvVars.push('OPENCLAW_GATEWAY_TOKEN');
+      }
+    } else if (authMode === 'password') {
+      if (state.secretsMode === 'inline') {
+        const password = state.gateway.authPassword.trim();
+        if (!password) {
+          issues.push({
+            level: 'error',
+            path: 'gateway.auth.password',
+            message: 'gateway.auth.mode="password" requires gateway.auth.password in inline mode.',
+          });
+        } else {
+          auth.password = password;
+        }
+      } else {
+        requiredEnvVars.push('OPENCLAW_GATEWAY_PASSWORD');
+      }
+    }
+    gatewayCfg.auth = auth;
+  }
+
+  cfg.gateway = gatewayCfg;
+
+  if (state.gateway.bind === 'custom' && !state.gateway.customBindHost.trim()) {
+    issues.push({
+      level: 'error',
+      path: 'gateway.customBindHost',
+      message: 'gateway.bind="custom" requires customBindHost.',
+    });
+  }
 
   if (state.safeMode) {
     cfg.tools = {
@@ -355,18 +456,58 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
   // Telegram
   if (state.channels.telegram.enabled) {
     const allowFrom = splitList(state.channels.telegram.allowFromRaw);
-    if (state.channels.telegram.dmPolicy === 'allowlist' && allowFrom.length === 0) {
-      issues.push({
-        level: 'error',
-        path: 'channels.telegram.allowFrom',
-        message: 'Telegram dmPolicy="allowlist" requires allowFrom entries.',
-      });
-    }
+    const groupAllowFrom = splitList(state.channels.telegram.groupAllowFromRaw);
+    const groupIds = splitList(state.channels.telegram.groupIdsRaw);
+    const groupPolicy = state.channels.telegram.groupPolicy;
+
     if (state.channels.telegram.dmPolicy === 'open' && !allowFrom.includes('*')) {
       issues.push({
         level: 'error',
         path: 'channels.telegram.allowFrom',
         message: 'Telegram dmPolicy="open" requires allowFrom to include "*".',
+      });
+    }
+    if (state.channels.telegram.dmPolicy === 'allowlist' && allowFrom.length === 0) {
+      issues.push({
+        level: 'info',
+        path: 'channels.telegram.allowFrom',
+        message:
+          'dmPolicy="allowlist" works without allowFrom, but new senders will be blocked unless already paired or explicitly allowlisted.',
+      });
+    }
+
+    if (groupPolicy === 'open') {
+      issues.push({
+        level: 'warning',
+        path: 'channels.telegram.groupPolicy',
+        message:
+          'groupPolicy="open" allows any sender in groups to reach the agent (mention-gating may still apply). Consider sandboxing (Safe Mode) + allowlists.',
+      });
+    } else if (groupPolicy === 'allowlist' && groupAllowFrom.length === 0) {
+      issues.push({
+        level: 'info',
+        path: 'channels.telegram.groupAllowFrom',
+        message:
+          'groupPolicy="allowlist" with no groupAllowFrom entries will block all group messages (DMs still work).',
+      });
+    }
+
+    if (state.channels.telegram.groupRequireMention === false && groupIds.length === 0) {
+      issues.push({
+        level: 'warning',
+        path: 'channels.telegram.groups',
+        message:
+          'Groups requireMention=false with no group allowlist means the bot may respond to all groups without mention-gating (high risk).',
+      });
+    }
+
+    const webhookUrl = state.channels.telegram.webhookUrl.trim();
+    const webhookSecret = state.channels.telegram.webhookSecret.trim();
+    if (webhookUrl && !webhookSecret) {
+      issues.push({
+        level: 'error',
+        path: 'channels.telegram.webhookSecret',
+        message: 'channels.telegram.webhookUrl requires channels.telegram.webhookSecret.',
       });
     }
 
@@ -375,6 +516,28 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
       dmPolicy: state.channels.telegram.dmPolicy,
       ...(allowFrom.length ? { allowFrom } : {}),
     };
+
+    if (groupPolicy !== 'allowlist') {
+      telegram.groupPolicy = groupPolicy;
+    }
+    if (groupAllowFrom.length > 0) {
+      telegram.groupAllowFrom = groupAllowFrom;
+    }
+
+    if (groupIds.length > 0) {
+      telegram.groups = Object.fromEntries(
+        groupIds.map((id) => [id, { requireMention: state.channels.telegram.groupRequireMention }])
+      );
+    } else if (state.channels.telegram.groupRequireMention === false) {
+      telegram.groups = { '*': { requireMention: false } };
+    }
+
+    if (webhookUrl) {
+      telegram.webhookUrl = webhookUrl;
+    }
+    if (webhookSecret) {
+      telegram.webhookSecret = webhookSecret;
+    }
 
     if (state.secretsMode === 'inline') {
       if (!state.channels.telegram.botToken.trim()) {
@@ -396,12 +559,15 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
   // WhatsApp
   if (state.channels.whatsapp.enabled) {
     const allowFrom = splitList(state.channels.whatsapp.allowFromRaw);
-    if (state.channels.whatsapp.dmPolicy === 'allowlist' && allowFrom.length === 0) {
+    const groupAllowFrom = splitList(state.channels.whatsapp.groupAllowFromRaw);
+    const groupIds = splitList(state.channels.whatsapp.groupIdsRaw);
+    const groupPolicy = state.channels.whatsapp.groupPolicy;
+
+    if (state.channels.whatsapp.dmPolicy === 'open' && !allowFrom.includes('*')) {
       issues.push({
         level: 'error',
         path: 'channels.whatsapp.allowFrom',
-        message:
-          'WhatsApp dmPolicy="allowlist" requires allowFrom entries (E.164, e.g. +15551234567).',
+        message: 'WhatsApp dmPolicy="open" requires allowFrom to include "*".',
       });
     }
     if (state.channels.whatsapp.dmPolicy === 'open') {
@@ -412,21 +578,73 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
           'WhatsApp dmPolicy="open" means anyone who can DM the number can control your agent.',
       });
     }
+    if (state.channels.whatsapp.dmPolicy === 'allowlist' && allowFrom.length === 0) {
+      issues.push({
+        level: 'info',
+        path: 'channels.whatsapp.allowFrom',
+        message:
+          'dmPolicy="allowlist" works without allowFrom, but new senders will be blocked unless already paired or explicitly allowlisted.',
+      });
+    }
 
-    channelsCfg.whatsapp = {
+    if (groupPolicy === 'open') {
+      issues.push({
+        level: 'warning',
+        path: 'channels.whatsapp.groupPolicy',
+        message:
+          'groupPolicy="open" allows any sender in groups to reach the agent (mention-gating may still apply). Consider sandboxing (Safe Mode) + allowlists.',
+      });
+    } else if (groupPolicy === 'allowlist' && groupAllowFrom.length === 0) {
+      issues.push({
+        level: 'info',
+        path: 'channels.whatsapp.groupAllowFrom',
+        message:
+          'groupPolicy="allowlist" with no groupAllowFrom entries will block all group messages (DMs still work).',
+      });
+    }
+
+    if (state.channels.whatsapp.groupRequireMention === false && groupIds.length === 0) {
+      issues.push({
+        level: 'warning',
+        path: 'channels.whatsapp.groups',
+        message:
+          'Groups requireMention=false with no group allowlist means the bot may respond to all groups without mention-gating (high risk).',
+      });
+    }
+
+    const whatsapp: Record<string, unknown> = {
       dmPolicy: state.channels.whatsapp.dmPolicy,
       ...(allowFrom.length ? { allowFrom } : {}),
     };
+
+    if (groupPolicy !== 'allowlist') {
+      whatsapp.groupPolicy = groupPolicy;
+    }
+    if (groupAllowFrom.length > 0) {
+      whatsapp.groupAllowFrom = groupAllowFrom;
+    }
+
+    if (groupIds.length > 0) {
+      whatsapp.groups = Object.fromEntries(
+        groupIds.map((id) => [id, { requireMention: state.channels.whatsapp.groupRequireMention }])
+      );
+    } else if (state.channels.whatsapp.groupRequireMention === false) {
+      whatsapp.groups = { '*': { requireMention: false } };
+    }
+
+    channelsCfg.whatsapp = whatsapp;
   }
 
   // Discord
   if (state.channels.discord.enabled) {
     const allowFrom = splitList(state.channels.discord.allowFromRaw);
-    if (state.channels.discord.dmPolicy === 'allowlist' && allowFrom.length === 0) {
+    const guildIds = splitList(state.channels.discord.guildIdsRaw);
+    const groupPolicy = state.channels.discord.groupPolicy;
+    if (state.channels.discord.dmPolicy === 'open' && !allowFrom.includes('*')) {
       issues.push({
         level: 'error',
         path: 'channels.discord.dm.allowFrom',
-        message: 'Discord dm.policy="allowlist" requires dm.allowFrom entries (user IDs).',
+        message: 'Discord dm.policy="open" requires dm.allowFrom to include "*".',
       });
     }
     if (state.channels.discord.dmPolicy === 'open') {
@@ -434,6 +652,39 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
         level: 'warning',
         path: 'channels.discord.dm.policy',
         message: 'Discord dm.policy="open" means anyone can DM your bot and trigger the agent.',
+      });
+    }
+    if (state.channels.discord.dmPolicy === 'allowlist' && allowFrom.length === 0) {
+      issues.push({
+        level: 'info',
+        path: 'channels.discord.dm.allowFrom',
+        message:
+          'dm.policy="allowlist" works without dm.allowFrom, but new senders will be blocked unless already paired or explicitly allowlisted.',
+      });
+    }
+
+    if (groupPolicy === 'open') {
+      issues.push({
+        level: 'warning',
+        path: 'channels.discord.groupPolicy',
+        message:
+          'groupPolicy="open" allows messages from any server/channel (mention-gating may still apply). Consider Safe Mode + explicit allowlists.',
+      });
+    } else if (groupPolicy === 'allowlist' && guildIds.length === 0) {
+      issues.push({
+        level: 'info',
+        path: 'channels.discord.guilds',
+        message:
+          'Discord groupPolicy="allowlist" with no guilds configured will block all server messages (DMs still work).',
+      });
+    }
+
+    if (guildIds.length > 0 && state.channels.discord.guildRequireMention === false) {
+      issues.push({
+        level: 'warning',
+        path: 'channels.discord.guilds.*.requireMention',
+        message:
+          'requireMention=false in Discord guilds can make the bot respond without @mention (higher risk).',
       });
     }
 
@@ -445,6 +696,19 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
         ...(allowFrom.length ? { allowFrom } : {}),
       },
     };
+
+    if (groupPolicy !== 'allowlist') {
+      discord.groupPolicy = groupPolicy;
+    }
+
+    if (guildIds.length > 0) {
+      discord.guilds = Object.fromEntries(
+        guildIds.map((id) => [
+          id,
+          state.channels.discord.guildRequireMention ? {} : { requireMention: false },
+        ])
+      );
+    }
 
     if (state.secretsMode === 'inline') {
       if (!state.channels.discord.token.trim()) {
@@ -466,11 +730,13 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
   // Slack
   if (state.channels.slack.enabled) {
     const allowFrom = splitList(state.channels.slack.allowFromRaw);
-    if (state.channels.slack.dmPolicy === 'allowlist' && allowFrom.length === 0) {
+    const channelIds = splitList(state.channels.slack.channelIdsRaw);
+    const groupPolicy = state.channels.slack.groupPolicy;
+    if (state.channels.slack.dmPolicy === 'open' && !allowFrom.includes('*')) {
       issues.push({
         level: 'error',
         path: 'channels.slack.dm.allowFrom',
-        message: 'Slack dm.policy="allowlist" requires dm.allowFrom entries (user IDs).',
+        message: 'Slack dm.policy="open" requires dm.allowFrom to include "*".',
       });
     }
     if (state.channels.slack.dmPolicy === 'open') {
@@ -479,6 +745,39 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
         path: 'channels.slack.dm.policy',
         message:
           'Slack dm.policy="open" means anyone in the workspace can DM your bot and trigger the agent.',
+      });
+    }
+    if (state.channels.slack.dmPolicy === 'allowlist' && allowFrom.length === 0) {
+      issues.push({
+        level: 'info',
+        path: 'channels.slack.dm.allowFrom',
+        message:
+          'dm.policy="allowlist" works without dm.allowFrom, but new senders will be blocked unless already paired or explicitly allowlisted.',
+      });
+    }
+
+    if (groupPolicy === 'open') {
+      issues.push({
+        level: 'warning',
+        path: 'channels.slack.groupPolicy',
+        message:
+          'groupPolicy="open" allows messages from any channel (mention-gating may still apply). Consider Safe Mode + explicit allowlists.',
+      });
+    } else if (groupPolicy === 'allowlist' && channelIds.length === 0) {
+      issues.push({
+        level: 'info',
+        path: 'channels.slack.channels',
+        message:
+          'Slack groupPolicy="allowlist" with no channels configured will block all channel messages (DMs still work).',
+      });
+    }
+
+    if (channelIds.length > 0 && state.channels.slack.channelRequireMention === false) {
+      issues.push({
+        level: 'warning',
+        path: 'channels.slack.channels.*.requireMention',
+        message:
+          'requireMention=false in Slack channels can make the bot respond without @mention (higher risk).',
       });
     }
 
@@ -490,6 +789,19 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
         ...(allowFrom.length ? { allowFrom } : {}),
       },
     };
+
+    if (groupPolicy !== 'allowlist') {
+      slack.groupPolicy = groupPolicy;
+    }
+
+    if (channelIds.length > 0) {
+      slack.channels = Object.fromEntries(
+        channelIds.map((id) => [
+          id,
+          state.channels.slack.channelRequireMention ? {} : { requireMention: false },
+        ])
+      );
+    }
 
     if (state.secretsMode === 'inline') {
       if (!state.channels.slack.botToken.trim()) {

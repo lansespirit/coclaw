@@ -17,6 +17,7 @@
     "sync:issues": "node scripts/sync-openclaw-issues.mjs",
     "generate:troubleshooting-stubs": "node scripts/generate-troubleshooting-stubs.mjs",
     "analyze:issues": "node scripts/analyze-openclaw-issues.mjs",
+    "test:config-generator": "tsx scripts/test-openclaw-config-generator.ts",
     "lint": "eslint . --ext .js,.ts,.astro",
     "lint:fix": "eslint . --ext .js,.ts,.astro --fix",
     "format": "prettier --write \"**/*.{js,mjs,cjs,ts,tsx,astro,json,md}\"",
@@ -54,6 +55,7 @@
     "pagefind": "^1.4.0",
     "prettier": "^3.8.1",
     "prettier-plugin-astro": "^0.14.1",
+    "tsx": "^4.19.2",
     "unplugin-icons": "^23.0.1"
   }
 }
