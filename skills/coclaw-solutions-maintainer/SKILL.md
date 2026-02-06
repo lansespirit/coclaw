@@ -60,6 +60,30 @@ gh issue comment <ISSUE_NUMBER> \
    - `pnpm build`
    - 自测 solution 页面渲染 + Pagefind 搜索（用 `errorSignatures` 的 token 搜索验证）
 
+## 任务完成后的 Git 操作（commit & push）
+
+每次完成一次“新增/更新 solutions +（可选）发 issue comment”的维护任务后，按以下顺序执行：
+
+1. 确认当前分支
+   - 若当前在 `main` / `master`，先切到新分支（遵循本仓库约定前缀 `codex/`）：
+
+```bash
+git switch -c codex/solutions-maintenance-<yyyymmdd>
+```
+
+2. 提交
+
+```bash
+git add -A
+git commit -m "docs(troubleshooting): update solutions from recent issues"
+```
+
+3. 推送
+
+```bash
+git push -u origin HEAD
+```
+
 ## 状态与“只分析新增”
 
 - triage 脚本以 issue `number` 去重：同一个 issue 昨天已经处理过，今天再次拉取不会重复出现在“新增列表”里。
