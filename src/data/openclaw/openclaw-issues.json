@@ -17,14 +17,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -41,9 +35,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway"
-        ]
+        "components": ["gateway"]
       }
     },
     {
@@ -59,14 +51,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -79,18 +65,11 @@
       "createdAt": "2026-02-01T14:01:40Z",
       "updatedAt": "2026-02-06T06:48:09Z",
       "author": "richydeeee",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -139,15 +118,9 @@
       "author": "Skipper-Assistant-1968",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "channels": ["discord"],
+        "platforms": ["linux"],
+        "components": ["config"]
       }
     },
     {
@@ -164,9 +137,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -183,10 +154,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "components": ["gateway", "websocket"]
       },
       "commentsData": [
         {
@@ -209,15 +177,10 @@
       "createdAt": "2026-02-06T02:14:13Z",
       "updatedAt": "2026-02-06T06:30:58Z",
       "author": "pisitl-ai",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows",
-          "linux"
-        ],
+        "platforms": ["windows", "linux"],
         "components": []
       },
       "commentsData": [
@@ -252,13 +215,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -273,16 +231,9 @@
       "author": "luyinjing6-sudo",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "channels": ["discord"],
+        "platforms": ["windows"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -312,20 +263,11 @@
       "createdAt": "2026-01-29T20:32:50Z",
       "updatedAt": "2026-02-06T06:25:51Z",
       "author": "FuseWeb",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -356,22 +298,11 @@
       "createdAt": "2026-01-30T17:00:51Z",
       "updatedAt": "2026-02-06T06:23:44Z",
       "author": "leonme",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "discord",
-          "signal"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram", "discord", "signal"],
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -482,14 +413,10 @@
       "createdAt": "2026-01-28T16:47:02Z",
       "updatedAt": "2026-02-06T06:22:47Z",
       "author": "sebslight",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
+        "platforms": ["linux"],
         "components": []
       },
       "commentsData": [
@@ -772,13 +699,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "web-ui"
-        ]
+        "platforms": ["docker"],
+        "components": ["gateway", "web-ui"]
       }
     },
     {
@@ -794,13 +716,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -816,13 +733,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -848,13 +760,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -871,11 +778,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -891,14 +794,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -911,9 +808,7 @@
       "createdAt": "2026-01-27T14:35:05Z",
       "updatedAt": "2026-02-06T06:18:52Z",
       "author": "cryozerolabs",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
@@ -969,11 +864,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -986,15 +877,11 @@
       "createdAt": "2026-02-06T06:09:42Z",
       "updatedAt": "2026-02-06T06:12:56Z",
       "author": "appcom2016",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway"
-        ]
+        "components": ["gateway"]
       }
     },
     {
@@ -1009,15 +896,9 @@
       "author": "spk-alex",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "signal"
-        ],
+        "channels": ["signal"],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -1030,14 +911,10 @@
       "createdAt": "2026-02-04T05:47:35Z",
       "updatedAt": "2026-02-06T06:06:28Z",
       "author": "jwangkun",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "docker"
-        ],
+        "platforms": ["docker"],
         "components": []
       },
       "commentsData": [
@@ -1225,12 +1102,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway"]
       }
     },
     {
@@ -1245,18 +1118,9 @@
       "author": "anvie",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
-        "platforms": [
-          "windows",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["whatsapp"],
+        "platforms": ["windows", "linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -1281,15 +1145,9 @@
       "author": "nu-gui",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp"
-        ],
+        "channels": ["telegram", "whatsapp"],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -1304,15 +1162,9 @@
       "author": "cjkrueger",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp",
-          "signal"
-        ],
+        "channels": ["telegram", "whatsapp", "signal"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -1343,21 +1195,11 @@
       "createdAt": "2026-02-05T14:12:51Z",
       "updatedAt": "2026-02-06T05:53:29Z",
       "author": "8294",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows",
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["windows", "linux", "docker"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -1384,10 +1226,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -1403,12 +1242,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["websocket"]
       }
     },
     {
@@ -1424,12 +1259,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["config"]
       }
     },
     {
@@ -1442,18 +1273,11 @@
       "createdAt": "2026-01-27T03:03:40Z",
       "updatedAt": "2026-02-06T05:46:24Z",
       "author": "nucreature",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -1582,9 +1406,7 @@
       "author": "spk-alex",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "signal"
-        ],
+        "channels": ["signal"],
         "platforms": [],
         "components": []
       },
@@ -1611,9 +1433,7 @@
       "author": "byloav",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
+        "channels": ["whatsapp"],
         "platforms": [],
         "components": []
       }
@@ -1628,9 +1448,7 @@
       "createdAt": "2026-02-06T05:35:36Z",
       "updatedAt": "2026-02-06T05:35:36Z",
       "author": "Lsgo",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
@@ -1651,11 +1469,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "web-ui",
-          "config"
-        ]
+        "components": ["gateway", "web-ui", "config"]
       }
     },
     {
@@ -1672,10 +1486,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -1745,10 +1556,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -1761,20 +1569,11 @@
       "createdAt": "2026-02-05T16:12:58Z",
       "updatedAt": "2026-02-06T05:27:07Z",
       "author": "ChingXX928",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["docker"],
+        "components": ["gateway", "web-ui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -1800,12 +1599,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway"]
       },
       "commentsData": [
         {
@@ -1895,16 +1690,9 @@
       "author": "sagasti",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "googlechat"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["googlechat"],
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -1930,13 +1718,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "websocket"]
       }
     },
     {
@@ -1951,18 +1734,9 @@
       "author": "vandencler",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "windows",
-          "docker"
-        ],
-        "components": [
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["windows", "docker"],
+        "components": ["web-ui", "config", "websocket"]
       }
     },
     {
@@ -1978,14 +1752,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "web-ui", "websocket"]
       }
     },
     {
@@ -2001,12 +1769,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -2037,21 +1801,11 @@
       "createdAt": "2026-01-31T23:32:55Z",
       "updatedAt": "2026-02-06T05:07:03Z",
       "author": "realQhimself",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -2133,14 +1887,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -2153,18 +1901,11 @@
       "createdAt": "2026-02-04T02:06:13Z",
       "updatedAt": "2026-02-06T05:00:43Z",
       "author": "lionlee0724",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -2197,16 +1938,9 @@
       "author": "ozoknar",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["gateway", "websocket"]
       }
     },
     {
@@ -2221,17 +1955,9 @@
       "author": "Shunamxiao",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram", "whatsapp"],
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -2247,13 +1973,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -2280,11 +2001,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "tui",
-          "config",
-          "websocket"
-        ]
+        "components": ["tui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -2310,13 +2027,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "websocket"]
       },
       "commentsData": [
         {
@@ -2347,18 +2059,11 @@
       "createdAt": "2026-02-06T04:25:24Z",
       "updatedAt": "2026-02-06T04:25:24Z",
       "author": "espaja",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "onboarding",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["onboarding", "websocket"]
       }
     },
     {
@@ -2371,18 +2076,11 @@
       "createdAt": "2026-02-06T04:24:46Z",
       "updatedAt": "2026-02-06T04:24:46Z",
       "author": "espaja",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "onboarding",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["onboarding", "websocket"]
       }
     },
     {
@@ -2397,16 +2095,9 @@
       "author": "rei-spirit",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "signal"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "channels": ["signal"],
+        "platforms": ["macos"],
+        "components": ["gateway", "websocket"]
       }
     },
     {
@@ -2419,20 +2110,11 @@
       "createdAt": "2026-01-24T22:33:33Z",
       "updatedAt": "2026-02-06T04:22:31Z",
       "author": "rohan-ixlayer",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "signal",
-          "imessage"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config"
-        ]
+        "channels": ["signal", "imessage"],
+        "platforms": ["macos"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -2643,12 +2325,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "web-ui",
-          "tui",
-          "websocket"
-        ]
+        "components": ["gateway", "web-ui", "tui", "websocket"]
       }
     },
     {
@@ -2661,9 +2338,7 @@
       "createdAt": "2026-01-26T06:36:12Z",
       "updatedAt": "2026-02-06T04:22:00Z",
       "author": "cloudcarver",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
@@ -2735,9 +2410,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "web-ui"
-        ]
+        "components": ["web-ui"]
       },
       "commentsData": [
         {
@@ -2762,15 +2435,9 @@
       "author": "farmautomated-hash",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["config"]
       }
     },
     {
@@ -2786,12 +2453,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway"]
       },
       "commentsData": [
         {
@@ -2822,15 +2485,10 @@
       "createdAt": "2026-02-05T09:27:41Z",
       "updatedAt": "2026-02-06T04:02:01Z",
       "author": "wh-zxt-01",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
+        "platforms": ["linux", "docker"],
         "components": []
       },
       "commentsData": [
@@ -2881,13 +2539,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "web-ui",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["web-ui", "websocket"]
       }
     },
     {
@@ -2903,13 +2556,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "web-ui"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "web-ui"]
       }
     },
     {
@@ -2922,18 +2570,11 @@
       "createdAt": "2026-02-06T03:54:00Z",
       "updatedAt": "2026-02-06T03:54:00Z",
       "author": "lllyys",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -2980,21 +2621,11 @@
       "createdAt": "2026-02-05T01:04:16Z",
       "updatedAt": "2026-02-06T03:50:48Z",
       "author": "pixelloop",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "macos",
-          "windows",
-          "linux"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "channels": ["discord"],
+        "platforms": ["macos", "windows", "linux"],
+        "components": ["websocket"]
       },
       "commentsData": [
         {
@@ -3083,10 +2714,7 @@
       "author": "duanxuan1230",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "discord"
-        ],
+        "channels": ["telegram", "discord"],
         "platforms": [],
         "components": []
       },
@@ -3114,14 +2742,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "web-ui", "websocket"]
       }
     },
     {
@@ -3136,18 +2758,9 @@
       "author": "hummbl-dev",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
-        "platforms": [
-          "macos",
-          "windows"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["whatsapp"],
+        "platforms": ["macos", "windows"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -3160,15 +2773,11 @@
       "createdAt": "2026-01-25T17:02:47Z",
       "updatedAt": "2026-02-06T03:43:47Z",
       "author": "sekharmalla",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -3315,10 +2924,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -3331,18 +2937,11 @@
       "createdAt": "2026-02-06T03:34:03Z",
       "updatedAt": "2026-02-06T03:35:31Z",
       "author": "HenryLoenwind",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "docker"
-        ],
-        "components": [
-          "web-ui",
-          "config"
-        ]
+        "platforms": ["docker"],
+        "components": ["web-ui", "config"]
       },
       "commentsData": [
         {
@@ -3368,12 +2967,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["config"]
       }
     },
     {
@@ -3389,12 +2984,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["config"]
       }
     },
     {
@@ -3410,13 +3001,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -3433,9 +3019,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -3451,13 +3035,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["config"]
       }
     },
     {
@@ -3474,9 +3053,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -3502,9 +3079,7 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
+        "platforms": ["macos"],
         "components": []
       }
     },
@@ -3518,18 +3093,11 @@
       "createdAt": "2026-02-06T03:17:52Z",
       "updatedAt": "2026-02-06T03:17:52Z",
       "author": "lllyys",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -3546,9 +3114,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "websocket"
-        ]
+        "components": ["websocket"]
       }
     },
     {
@@ -3564,12 +3130,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["websocket"]
       }
     },
     {
@@ -3584,9 +3146,7 @@
       "author": "Cosmo-DeBott",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
         "components": []
       }
@@ -3603,16 +3163,9 @@
       "author": "TeigenZhang",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "web-ui",
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["macos"],
+        "components": ["web-ui", "websocket"]
       },
       "commentsData": [
         {
@@ -3639,9 +3192,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -3654,20 +3205,11 @@
       "createdAt": "2026-02-06T03:11:12Z",
       "updatedAt": "2026-02-06T03:11:12Z",
       "author": "JAVA-LW",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "windows",
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos", "windows", "linux"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -3682,15 +3224,9 @@
       "author": "djryanmatthew",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["config"]
       }
     },
     {
@@ -3706,13 +3242,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -3735,18 +3266,11 @@
       "createdAt": "2026-02-06T03:00:30Z",
       "updatedAt": "2026-02-06T03:04:15Z",
       "author": "lllyys",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -3773,10 +3297,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -3789,19 +3310,11 @@
       "createdAt": "2026-01-30T21:26:03Z",
       "updatedAt": "2026-02-06T03:02:02Z",
       "author": "zevstravitz",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "slack"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "channels": ["slack"],
+        "platforms": ["linux"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -3828,9 +3341,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "websocket"
-        ]
+        "components": ["websocket"]
       }
     },
     {
@@ -3845,18 +3356,9 @@
       "author": "ilovechina666",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "channels": ["discord"],
+        "platforms": ["macos"],
+        "components": ["gateway", "web-ui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -3879,21 +3381,11 @@
       "createdAt": "2026-02-06T02:43:55Z",
       "updatedAt": "2026-02-06T02:43:55Z",
       "author": "zhurizeng",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "discord"
-        ],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram", "discord"],
+        "platforms": ["windows"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -3906,18 +3398,11 @@
       "createdAt": "2026-02-06T02:41:01Z",
       "updatedAt": "2026-02-06T02:41:01Z",
       "author": "babyfacehl",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -3934,10 +3419,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -3972,9 +3454,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -4026,9 +3506,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "web-ui"
-        ]
+        "components": ["web-ui"]
       }
     },
     {
@@ -4041,14 +3519,10 @@
       "createdAt": "2026-02-06T02:28:50Z",
       "updatedAt": "2026-02-06T02:28:50Z",
       "author": "elon-ren",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "docker"
-        ],
+        "platforms": ["docker"],
         "components": []
       }
     },
@@ -4062,23 +3536,11 @@
       "createdAt": "2026-02-03T21:12:56Z",
       "updatedAt": "2026-02-06T02:28:48Z",
       "author": "bluepointglobal-afk",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos",
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["macos", "linux", "docker"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -4112,14 +3574,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -4142,17 +3598,11 @@
       "createdAt": "2026-02-04T07:46:50Z",
       "updatedAt": "2026-02-06T02:25:43Z",
       "author": "darkchaox",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -4570,14 +4020,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -4590,15 +4034,11 @@
       "createdAt": "2026-02-06T02:22:03Z",
       "updatedAt": "2026-02-06T02:22:03Z",
       "author": "rivierer1",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -4614,13 +4054,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -4633,18 +4068,11 @@
       "createdAt": "2026-02-06T02:17:30Z",
       "updatedAt": "2026-02-06T02:17:30Z",
       "author": "CrimsonDevil333333",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -4660,14 +4088,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "onboarding"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "web-ui", "onboarding"]
       }
     },
     {
@@ -4683,9 +4105,7 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
+        "platforms": ["macos"],
         "components": []
       }
     },
@@ -4702,12 +4122,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway"]
       }
     },
     {
@@ -4723,14 +4139,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "web-ui", "websocket"]
       },
       "commentsData": [
         {
@@ -4772,15 +4182,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "web-ui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -4982,12 +4385,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["config"]
       }
     },
     {
@@ -5003,15 +4402,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux", "docker"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -5026,17 +4418,9 @@
       "author": "alvin-vip",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -5052,14 +4436,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -5074,13 +4452,9 @@
       "author": "dyoung522",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -5095,13 +4469,8 @@
       "author": "realsamrat",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "imessage"
-        ],
-        "platforms": [
-          "linux"
-        ],
+        "channels": ["telegram", "imessage"],
+        "platforms": ["linux"],
         "components": []
       }
     },
@@ -5117,17 +4486,9 @@
       "author": "realsamrat",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -5140,18 +4501,11 @@
       "createdAt": "2026-02-06T01:46:17Z",
       "updatedAt": "2026-02-06T01:46:17Z",
       "author": "hly3825",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -5164,20 +4518,11 @@
       "createdAt": "2026-02-06T01:36:26Z",
       "updatedAt": "2026-02-06T01:36:26Z",
       "author": "growbeyond22",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -5190,19 +4535,11 @@
       "createdAt": "2026-02-06T01:32:26Z",
       "updatedAt": "2026-02-06T01:32:26Z",
       "author": "cxxzsh",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
-        "channels": [
-          "discord",
-          "slack"
-        ],
+        "channels": ["discord", "slack"],
         "platforms": [],
-        "components": [
-          "web-ui",
-          "config"
-        ]
+        "components": ["web-ui", "config"]
       }
     },
     {
@@ -5218,13 +4555,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "tui",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["tui", "websocket"]
       }
     },
     {
@@ -5240,13 +4572,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -5261,11 +4588,7 @@
       "author": "tea24864",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp",
-          "discord"
-        ],
+        "channels": ["telegram", "whatsapp", "discord"],
         "platforms": [],
         "components": []
       },
@@ -5290,19 +4613,11 @@
       "createdAt": "2026-01-29T03:57:04Z",
       "updatedAt": "2026-02-06T01:22:10Z",
       "author": "0xrushi",
-      "labels": [
-        "r: support"
-      ],
+      "labels": ["r: support"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "gateway",
-          "onboarding",
-          "config"
-        ]
+        "components": ["gateway", "onboarding", "config"]
       },
       "commentsData": [
         {
@@ -5337,10 +4652,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -5353,16 +4665,11 @@
       "createdAt": "2026-01-28T11:52:33Z",
       "updatedAt": "2026-02-06T01:21:23Z",
       "author": "OmarAbuLayla",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -5393,23 +4700,11 @@
       "createdAt": "2026-02-06T01:17:27Z",
       "updatedAt": "2026-02-06T01:17:27Z",
       "author": "SoyunJu",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows",
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "tui",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["windows", "linux", "docker"],
+        "components": ["gateway", "web-ui", "tui", "config", "websocket"]
       }
     },
     {
@@ -5425,13 +4720,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -5446,16 +4736,9 @@
       "author": "pixelmeshco",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["docker"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -5470,15 +4753,9 @@
       "author": "idigit",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "channels": ["whatsapp"],
+        "platforms": ["macos"],
+        "components": ["gateway"]
       }
     },
     {
@@ -5494,14 +4771,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -5518,9 +4789,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -5543,17 +4812,11 @@
       "createdAt": "2026-02-01T14:55:54Z",
       "updatedAt": "2026-02-06T01:03:10Z",
       "author": "Aloira-ai",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "gateway"
-        ]
+        "components": ["gateway"]
       },
       "commentsData": [
         {
@@ -5588,9 +4851,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -5605,13 +4866,9 @@
       "author": "sebslight",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
+        "channels": ["discord"],
         "platforms": [],
-        "components": [
-          "websocket"
-        ]
+        "components": ["websocket"]
       },
       "commentsData": [
         {
@@ -5652,16 +4909,9 @@
       "author": "watari-ai",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "slack"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "web-ui",
-          "websocket"
-        ]
+        "channels": ["slack"],
+        "platforms": ["linux"],
+        "components": ["web-ui", "websocket"]
       }
     },
     {
@@ -5677,9 +4927,7 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
+        "platforms": ["linux"],
         "components": []
       }
     },
@@ -5697,9 +4945,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -5714,13 +4960,9 @@
       "author": "roblafave",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "slack"
-        ],
+        "channels": ["slack"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -5737,9 +4979,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -5756,11 +4996,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -5773,19 +5009,11 @@
       "createdAt": "2026-02-04T13:40:42Z",
       "updatedAt": "2026-02-06T00:35:40Z",
       "author": "cambosnet",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -5824,19 +5052,11 @@
       "createdAt": "2026-02-05T22:19:15Z",
       "updatedAt": "2026-02-06T00:29:08Z",
       "author": "piotrmasior",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "whatsapp",
-          "discord",
-          "slack"
-        ],
+        "channels": ["whatsapp", "discord", "slack"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -5849,15 +5069,11 @@
       "createdAt": "2026-01-28T16:04:19Z",
       "updatedAt": "2026-02-06T00:28:45Z",
       "author": "qdrddr",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway"
-        ]
+        "components": ["gateway"]
       },
       "commentsData": [
         {
@@ -5888,22 +5104,11 @@
       "createdAt": "2026-02-06T00:25:35Z",
       "updatedAt": "2026-02-06T00:25:35Z",
       "author": "Raytong-arch",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux", "docker"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -5916,19 +5121,11 @@
       "createdAt": "2026-02-01T19:23:18Z",
       "updatedAt": "2026-02-06T00:20:45Z",
       "author": "ryancnelson",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -5969,14 +5166,9 @@
       "author": "jzOcb",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -5993,11 +5185,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -6023,13 +5211,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["websocket"]
       },
       "commentsData": [
         {
@@ -6056,9 +5239,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -6083,17 +5264,9 @@
       "author": "AstridQing-AI",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos",
-          "windows",
-          "linux"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["macos", "windows", "linux"],
+        "components": ["websocket"]
       },
       "commentsData": [
         {
@@ -6132,18 +5305,11 @@
       "createdAt": "2026-02-05T14:35:09Z",
       "updatedAt": "2026-02-06T00:11:22Z",
       "author": "jorgerivero2005",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -6156,22 +5322,11 @@
       "createdAt": "2026-01-13T08:28:33Z",
       "updatedAt": "2026-02-06T00:11:09Z",
       "author": "ustun",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp"
-        ],
-        "platforms": [
-          "macos",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram", "whatsapp"],
+        "platforms": ["macos", "docker"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -6266,17 +5421,11 @@
       "createdAt": "2026-02-05T15:18:31Z",
       "updatedAt": "2026-02-06T00:10:55Z",
       "author": "Titicaca007",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -6299,19 +5448,11 @@
       "createdAt": "2026-01-31T15:19:27Z",
       "updatedAt": "2026-02-06T00:08:48Z",
       "author": "brezgis",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "channels": ["discord"],
+        "platforms": ["linux"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -6334,17 +5475,11 @@
       "createdAt": "2026-02-01T20:51:39Z",
       "updatedAt": "2026-02-06T00:06:40Z",
       "author": "drapermcp",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -6369,15 +5504,9 @@
       "author": "Littlericket",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
+        "channels": ["whatsapp"],
         "platforms": [],
-        "components": [
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "components": ["web-ui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -6403,12 +5532,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway"]
       },
       "commentsData": [
         {
@@ -6458,13 +5583,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -6490,13 +5610,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -6522,13 +5637,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -6553,13 +5663,9 @@
       "author": "schickling",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
+        "channels": ["discord"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -6572,18 +5678,11 @@
       "createdAt": "2026-02-05T17:56:48Z",
       "updatedAt": "2026-02-05T23:52:52Z",
       "author": "yetibob402",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "docker"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos", "docker"],
+        "components": ["config"]
       }
     },
     {
@@ -6598,16 +5697,9 @@
       "author": "fujiwara-tofu-shop",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -6641,14 +5733,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos", "docker"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -6673,16 +5759,9 @@
       "author": "RookDevNinja",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["discord"],
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -6695,17 +5774,11 @@
       "createdAt": "2026-02-05T23:40:05Z",
       "updatedAt": "2026-02-05T23:40:05Z",
       "author": "smturtle2",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["config"]
       }
     },
     {
@@ -6718,16 +5791,11 @@
       "createdAt": "2026-01-31T23:19:55Z",
       "updatedAt": "2026-02-05T23:36:50Z",
       "author": "zote",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -6766,17 +5834,11 @@
       "createdAt": "2026-02-03T10:15:23Z",
       "updatedAt": "2026-02-05T23:33:27Z",
       "author": "gamer-mitsuha",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
+        "channels": ["discord"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -6801,16 +5863,9 @@
       "author": "nikolasdehor",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["whatsapp"],
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -6835,17 +5890,9 @@
       "author": "nikolasdehor",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["whatsapp"],
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -6876,18 +5923,11 @@
       "createdAt": "2026-01-26T20:34:20Z",
       "updatedAt": "2026-02-05T23:21:06Z",
       "author": "profiluefter",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux", "docker"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -6978,11 +6018,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "onboarding",
-          "config",
-          "websocket"
-        ]
+        "components": ["onboarding", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -7008,13 +6044,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -7079,17 +6110,9 @@
       "author": "chrisagiddings",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "channels": ["discord"],
+        "platforms": ["macos"],
+        "components": ["web-ui", "config", "websocket"]
       }
     },
     {
@@ -7102,18 +6125,11 @@
       "createdAt": "2026-02-05T23:11:36Z",
       "updatedAt": "2026-02-05T23:11:36Z",
       "author": "GMgit1",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -7146,12 +6162,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["config"]
       }
     },
     {
@@ -7166,16 +6178,9 @@
       "author": "boke",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -7188,15 +6193,11 @@
       "createdAt": "2026-02-03T01:32:33Z",
       "updatedAt": "2026-02-05T23:07:55Z",
       "author": "joetomasone",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -7219,18 +6220,11 @@
       "createdAt": "2026-02-05T23:03:13Z",
       "updatedAt": "2026-02-05T23:03:13Z",
       "author": "tmusschoot",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux", "docker"],
+        "components": ["config"]
       }
     },
     {
@@ -7243,20 +6237,11 @@
       "createdAt": "2026-02-05T20:06:29Z",
       "updatedAt": "2026-02-05T23:01:09Z",
       "author": "matosonline",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["windows", "linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -7303,21 +6288,11 @@
       "createdAt": "2026-02-05T22:59:38Z",
       "updatedAt": "2026-02-05T22:59:38Z",
       "author": "ricksalvatore422",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "imessage"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "onboarding",
-          "websocket"
-        ]
+        "channels": ["imessage"],
+        "platforms": ["macos"],
+        "components": ["gateway", "onboarding", "websocket"]
       }
     },
     {
@@ -7332,22 +6307,9 @@
       "author": "echo931",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp",
-          "discord"
-        ],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "tui",
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram", "whatsapp", "discord"],
+        "platforms": ["macos", "linux"],
+        "components": ["gateway", "web-ui", "tui", "config", "websocket"]
       }
     },
     {
@@ -7360,15 +6322,11 @@
       "createdAt": "2026-02-05T22:50:53Z",
       "updatedAt": "2026-02-05T22:54:13Z",
       "author": "ga-it",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -7383,9 +6341,7 @@
       "author": "breaknbad",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
         "components": []
       },
@@ -7410,17 +6366,11 @@
       "createdAt": "2026-02-02T10:40:20Z",
       "updatedAt": "2026-02-05T22:49:36Z",
       "author": "agentmorpheus77",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -7459,16 +6409,11 @@
       "createdAt": "2026-02-04T12:15:16Z",
       "updatedAt": "2026-02-05T22:46:22Z",
       "author": "rezabaram",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -7491,20 +6436,11 @@
       "createdAt": "2026-01-30T09:46:14Z",
       "updatedAt": "2026-02-05T22:45:46Z",
       "author": "bamchi",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -7521,9 +6457,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -7549,13 +6483,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "platforms": ["windows"],
+        "components": ["gateway", "websocket"]
       },
       "commentsData": [
         {
@@ -7578,23 +6507,11 @@
       "createdAt": "2026-02-04T01:45:51Z",
       "updatedAt": "2026-02-05T22:39:10Z",
       "author": "rodbland2021",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "discord",
-          "slack"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "config"
-        ]
+        "channels": ["telegram", "discord", "slack"],
+        "platforms": ["linux"],
+        "components": ["gateway", "web-ui", "config"]
       },
       "commentsData": [
         {
@@ -7636,9 +6553,7 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
+        "platforms": ["macos"],
         "components": []
       }
     },
@@ -7652,20 +6567,11 @@
       "createdAt": "2026-02-05T06:25:14Z",
       "updatedAt": "2026-02-05T22:37:20Z",
       "author": "adampaulsen",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["discord"],
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -7733,13 +6639,9 @@
       "author": "pgrennin",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -7754,13 +6656,9 @@
       "author": "msqai",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -7818,13 +6716,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -7839,11 +6732,7 @@
       "author": "mcinteerj",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "discord",
-          "slack"
-        ],
+        "channels": ["telegram", "discord", "slack"],
         "platforms": [],
         "components": []
       }
@@ -7877,15 +6766,9 @@
       "author": "mcinteerj",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp",
-          "discord"
-        ],
+        "channels": ["telegram", "whatsapp", "discord"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -7900,16 +6783,9 @@
       "author": "MuhsinunC",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -7943,14 +6819,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -7973,18 +6843,11 @@
       "createdAt": "2026-02-04T08:14:56Z",
       "updatedAt": "2026-02-05T22:03:21Z",
       "author": "al-munazzim",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -8009,15 +6872,9 @@
       "author": "rsaisankalp",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "channels": ["whatsapp"],
+        "platforms": ["linux"],
+        "components": ["gateway"]
       },
       "commentsData": [
         {
@@ -8052,10 +6909,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -8078,18 +6932,11 @@
       "createdAt": "2026-02-05T18:57:16Z",
       "updatedAt": "2026-02-05T21:57:21Z",
       "author": "vincentkoc",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -8141,16 +6988,9 @@
       "author": "kj9kj9qv4m-bit",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["macos", "linux"],
+        "components": ["gateway"]
       },
       "commentsData": [
         {
@@ -8173,19 +7013,11 @@
       "createdAt": "2026-02-05T21:52:08Z",
       "updatedAt": "2026-02-05T21:52:08Z",
       "author": "amndopey",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "channels": ["discord"],
+        "platforms": ["linux"],
+        "components": ["websocket"]
       }
     },
     {
@@ -8201,12 +7033,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["config"]
       }
     },
     {
@@ -8219,21 +7047,11 @@
       "createdAt": "2026-02-03T04:38:33Z",
       "updatedAt": "2026-02-05T21:50:36Z",
       "author": "chelseasn0210",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "tui",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "web-ui", "tui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -8274,16 +7092,9 @@
       "author": "kj9kj9qv4m-bit",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["macos", "linux"],
+        "components": ["gateway"]
       }
     },
     {
@@ -8296,15 +7107,10 @@
       "createdAt": "2026-02-05T21:46:08Z",
       "updatedAt": "2026-02-05T21:46:08Z",
       "author": "vincentkoc",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "docker"
-        ],
+        "platforms": ["macos", "docker"],
         "components": []
       }
     },
@@ -8318,19 +7124,11 @@
       "createdAt": "2026-01-13T09:13:19Z",
       "updatedAt": "2026-02-05T21:44:56Z",
       "author": "bjesuiter",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "signal"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "channels": ["signal"],
+        "platforms": ["macos"],
+        "components": ["gateway"]
       },
       "commentsData": [
         {
@@ -8373,10 +7171,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -8389,21 +7184,11 @@
       "createdAt": "2026-01-28T02:36:28Z",
       "updatedAt": "2026-02-05T21:40:14Z",
       "author": "delonsp",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram", "whatsapp"],
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -8468,15 +7253,9 @@
       "author": "RonanCodes",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["websocket"]
       }
     },
     {
@@ -8489,18 +7268,11 @@
       "createdAt": "2026-02-05T21:39:40Z",
       "updatedAt": "2026-02-05T21:39:40Z",
       "author": "Kreijstal",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "onboarding"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "onboarding"]
       }
     },
     {
@@ -8515,15 +7287,9 @@
       "author": "AlexGn",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
+        "channels": ["discord"],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -8563,19 +7329,11 @@
       "createdAt": "2026-02-05T21:32:43Z",
       "updatedAt": "2026-02-05T21:32:43Z",
       "author": "pyxage",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -8588,21 +7346,11 @@
       "createdAt": "2026-02-05T21:12:35Z",
       "updatedAt": "2026-02-05T21:30:58Z",
       "author": "hobbesfurtado-prog",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp",
-          "imessage"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config"
-        ]
+        "channels": ["telegram", "whatsapp", "imessage"],
+        "platforms": ["macos"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -8628,13 +7376,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -8647,19 +7390,11 @@
       "createdAt": "2026-01-28T18:25:56Z",
       "updatedAt": "2026-02-05T21:15:30Z",
       "author": "Whisky-titan",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp",
-          "slack"
-        ],
+        "channels": ["telegram", "whatsapp", "slack"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -8698,20 +7433,11 @@
       "createdAt": "2026-02-05T11:25:57Z",
       "updatedAt": "2026-02-05T21:15:21Z",
       "author": "smturtle2",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["windows", "linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -8737,13 +7463,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -8768,18 +7489,9 @@
       "author": "Zeebo007",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
-        "platforms": [
-          "windows",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["whatsapp"],
+        "platforms": ["windows", "linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -8804,13 +7516,9 @@
       "author": "reverendrewind",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -8833,16 +7541,11 @@
       "createdAt": "2026-02-05T20:59:19Z",
       "updatedAt": "2026-02-05T21:12:15Z",
       "author": "Many0therFunctions",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -8858,12 +7561,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "web-ui"
-        ]
+        "platforms": ["macos"],
+        "components": ["web-ui"]
       }
     },
     {
@@ -8879,13 +7578,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -8898,15 +7592,11 @@
       "createdAt": "2026-02-05T18:21:27Z",
       "updatedAt": "2026-02-05T21:10:58Z",
       "author": "lightclient",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "websocket"
-        ]
+        "components": ["websocket"]
       },
       "commentsData": [
         {
@@ -9020,13 +7710,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -9057,20 +7742,11 @@
       "createdAt": "2026-01-01T16:55:34Z",
       "updatedAt": "2026-02-05T21:07:22Z",
       "author": "steipete",
-      "labels": [
-        "enhancement",
-        "help wanted"
-      ],
+      "labels": ["enhancement", "help wanted"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "windows",
-          "linux"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "platforms": ["macos", "windows", "linux"],
+        "components": ["websocket"]
       },
       "commentsData": [
         {
@@ -9207,15 +7883,9 @@
       "author": "adapepper",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "discord",
-          "slack"
-        ],
+        "channels": ["telegram", "discord", "slack"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -9228,19 +7898,11 @@
       "createdAt": "2026-02-01T14:42:14Z",
       "updatedAt": "2026-02-05T20:55:55Z",
       "author": "henrybottter",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["windows"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -9271,21 +7933,11 @@
       "createdAt": "2026-01-31T08:41:20Z",
       "updatedAt": "2026-02-05T20:55:55Z",
       "author": "saltyduckegg",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "windows",
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "channels": ["discord"],
+        "platforms": ["windows", "linux"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -9316,20 +7968,11 @@
       "createdAt": "2026-02-01T15:50:32Z",
       "updatedAt": "2026-02-05T20:55:54Z",
       "author": "henrybottter",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "signal"
-        ],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "channels": ["signal"],
+        "platforms": ["windows"],
+        "components": ["gateway", "websocket"]
       },
       "commentsData": [
         {
@@ -9352,21 +7995,11 @@
       "createdAt": "2026-01-31T01:09:40Z",
       "updatedAt": "2026-02-05T20:55:53Z",
       "author": "worflor",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "windows",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos", "windows", "linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -9393,9 +8026,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "websocket"
-        ]
+        "components": ["websocket"]
       },
       "commentsData": [
         {
@@ -9429,12 +8060,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -9477,10 +8104,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -9519,19 +8143,11 @@
       "createdAt": "2026-01-31T13:52:11Z",
       "updatedAt": "2026-02-05T20:51:07Z",
       "author": "sausix",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["linux", "docker"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -9578,15 +8194,10 @@
       "createdAt": "2026-02-05T20:39:13Z",
       "updatedAt": "2026-02-05T20:51:06Z",
       "author": "vincentkoc",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
+        "platforms": ["linux", "docker"],
         "components": []
       }
     },
@@ -9600,18 +8211,11 @@
       "createdAt": "2026-02-05T20:49:43Z",
       "updatedAt": "2026-02-05T20:49:43Z",
       "author": "guiteubeuh",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -9628,10 +8232,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -9644,17 +8245,11 @@
       "createdAt": "2026-02-02T21:15:51Z",
       "updatedAt": "2026-02-05T20:42:44Z",
       "author": "celsomilne",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "onboarding",
-          "config",
-          "websocket"
-        ]
+        "components": ["onboarding", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -9677,20 +8272,11 @@
       "createdAt": "2026-01-25T20:44:28Z",
       "updatedAt": "2026-02-05T20:41:21Z",
       "author": "JartanFTW",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "onboarding",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["docker"],
+        "components": ["gateway", "onboarding", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -9761,19 +8347,11 @@
       "createdAt": "2026-02-05T20:39:43Z",
       "updatedAt": "2026-02-05T20:39:43Z",
       "author": "jkoopmann",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["linux", "docker"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -9790,9 +8368,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway"
-        ]
+        "components": ["gateway"]
       },
       "commentsData": [
         {
@@ -9833,10 +8409,7 @@
       "author": "heybeaux",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp"
-        ],
+        "channels": ["telegram", "whatsapp"],
         "platforms": [],
         "components": []
       },
@@ -9865,10 +8438,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -9883,13 +8453,9 @@
       "author": "nicobrinkkemper",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
+        "channels": ["whatsapp"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -9920,21 +8486,11 @@
       "createdAt": "2026-01-31T16:38:58Z",
       "updatedAt": "2026-02-05T20:30:32Z",
       "author": "estacado",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "whatsapp",
-          "discord"
-        ],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "channels": ["whatsapp", "discord"],
+        "platforms": ["windows"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -9973,18 +8529,11 @@
       "createdAt": "2026-01-25T05:37:00Z",
       "updatedAt": "2026-02-05T20:29:41Z",
       "author": "myo-ojin",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "discord"
-        ],
+        "channels": ["telegram", "discord"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -10025,20 +8574,9 @@
       "author": "lil-woogie-min-ai",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "signal"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "tui",
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram", "signal"],
+        "platforms": ["macos"],
+        "components": ["gateway", "web-ui", "tui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -10069,14 +8607,10 @@
       "createdAt": "2026-02-04T06:16:15Z",
       "updatedAt": "2026-02-05T20:27:52Z",
       "author": "halthelobster",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
+        "platforms": ["linux"],
         "components": []
       },
       "commentsData": [
@@ -10100,15 +8634,11 @@
       "createdAt": "2026-02-05T19:33:23Z",
       "updatedAt": "2026-02-05T20:26:37Z",
       "author": "hlibr",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -10123,15 +8653,9 @@
       "author": "electronicshaman",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "whatsapp",
-          "discord"
-        ],
+        "channels": ["whatsapp", "discord"],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -10144,20 +8668,11 @@
       "createdAt": "2026-02-05T20:23:29Z",
       "updatedAt": "2026-02-05T20:23:29Z",
       "author": "dangogit",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
-        "platforms": [
-          "docker"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "channels": ["whatsapp"],
+        "platforms": ["docker"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -10170,19 +8685,11 @@
       "createdAt": "2026-01-30T19:47:04Z",
       "updatedAt": "2026-02-05T20:18:23Z",
       "author": "jacobaross",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["gateway", "websocket"]
       },
       "commentsData": [
         {
@@ -10209,10 +8716,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -10227,18 +8731,9 @@
       "author": "leiyangyou",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "discord"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "websocket"
-        ]
+        "channels": ["telegram", "discord"],
+        "platforms": ["macos"],
+        "components": ["gateway", "web-ui", "websocket"]
       }
     },
     {
@@ -10254,13 +8749,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "web-ui"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "web-ui"]
       }
     },
     {
@@ -10276,12 +8766,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway"]
       }
     },
     {
@@ -10298,11 +8784,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "web-ui",
-          "config"
-        ]
+        "components": ["gateway", "web-ui", "config"]
       }
     },
     {
@@ -10318,12 +8800,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["config"]
       }
     },
     {
@@ -10340,9 +8818,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -10358,13 +8834,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -10390,9 +8861,7 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
+        "platforms": ["linux"],
         "components": []
       },
       "commentsData": [
@@ -10416,15 +8885,10 @@
       "createdAt": "2026-01-31T01:26:24Z",
       "updatedAt": "2026-02-05T19:38:29Z",
       "author": "dClauzel",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
+        "platforms": ["linux", "docker"],
         "components": []
       },
       "commentsData": [
@@ -10475,13 +8939,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows",
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["windows", "linux"],
+        "components": ["config"]
       }
     },
     {
@@ -10494,13 +8953,9 @@
       "createdAt": "2026-02-05T19:21:04Z",
       "updatedAt": "2026-02-05T19:21:04Z",
       "author": "Stockenberger",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "signal"
-        ],
+        "channels": ["signal"],
         "platforms": [],
         "components": []
       }
@@ -10515,18 +8970,11 @@
       "createdAt": "2026-02-03T12:08:30Z",
       "updatedAt": "2026-02-05T19:20:30Z",
       "author": "yeager",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "websocket"]
       },
       "commentsData": [
         {
@@ -10568,13 +9016,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["config"]
       }
     },
     {
@@ -10587,17 +9030,11 @@
       "createdAt": "2026-02-01T22:30:34Z",
       "updatedAt": "2026-02-05T19:13:53Z",
       "author": "boyangwang",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "components": ["web-ui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -10623,14 +9060,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -10643,19 +9074,11 @@
       "createdAt": "2026-01-25T13:59:10Z",
       "updatedAt": "2026-02-05T19:07:19Z",
       "author": "chepurko",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "onboarding"
-        ]
+        "platforms": ["linux", "docker"],
+        "components": ["gateway", "onboarding"]
       },
       "commentsData": [
         {
@@ -10833,13 +9256,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -10872,17 +9290,9 @@
       "author": "chrysb",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux", "docker"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -10905,19 +9315,11 @@
       "createdAt": "2026-02-01T11:21:34Z",
       "updatedAt": "2026-02-05T18:58:50Z",
       "author": "cloudsolutiongmbh",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -10948,15 +9350,11 @@
       "createdAt": "2026-02-05T05:15:53Z",
       "updatedAt": "2026-02-05T18:56:59Z",
       "author": "liizfq",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -10981,13 +9379,9 @@
       "author": "sepivip",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -11000,20 +9394,11 @@
       "createdAt": "2026-02-05T18:46:15Z",
       "updatedAt": "2026-02-05T18:52:59Z",
       "author": "aelazhari",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows",
-          "docker"
-        ],
-        "components": [
-          "onboarding",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["windows", "docker"],
+        "components": ["onboarding", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -11036,17 +9421,11 @@
       "createdAt": "2026-02-03T00:51:18Z",
       "updatedAt": "2026-02-05T18:52:16Z",
       "author": "Br-Johnson",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -11071,14 +9450,9 @@
       "author": "immeasurablematt",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -11093,13 +9467,9 @@
       "author": "barryreynolds1",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -11112,22 +9482,11 @@
       "createdAt": "2026-02-04T11:34:27Z",
       "updatedAt": "2026-02-05T18:33:47Z",
       "author": "togotago",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "onboarding",
-          "config",
-          "websocket"
-        ]
+        "channels": ["whatsapp"],
+        "platforms": ["linux"],
+        "components": ["gateway", "onboarding", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -11177,12 +9536,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -11207,15 +9562,9 @@
       "author": "hudson-rivera",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "slack",
-          "signal"
-        ],
+        "channels": ["telegram", "slack", "signal"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -11240,16 +9589,9 @@
       "author": "rootwhois",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -11272,24 +9614,11 @@
       "createdAt": "2026-02-05T18:24:39Z",
       "updatedAt": "2026-02-05T18:24:39Z",
       "author": "TANZHEN1663",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "signal"
-        ],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram", "signal"],
+        "platforms": ["linux", "docker"],
+        "components": ["gateway", "web-ui", "config", "websocket"]
       }
     },
     {
@@ -11304,13 +9633,9 @@
       "author": "MarcoFPO",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
+        "channels": ["discord"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -11323,19 +9648,11 @@
       "createdAt": "2026-02-02T10:35:02Z",
       "updatedAt": "2026-02-05T18:20:53Z",
       "author": "i-smile",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["windows"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -11374,18 +9691,11 @@
       "createdAt": "2026-02-05T18:18:47Z",
       "updatedAt": "2026-02-05T18:19:42Z",
       "author": "jonwiley",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "web-ui"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "web-ui"]
       }
     },
     {
@@ -11401,13 +9711,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "websocket"]
       }
     },
     {
@@ -11423,13 +9728,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -11442,21 +9742,11 @@
       "createdAt": "2026-01-26T02:25:16Z",
       "updatedAt": "2026-02-05T18:08:31Z",
       "author": "lycfyi",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["macos", "docker"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -11487,16 +9777,11 @@
       "createdAt": "2026-02-03T00:49:23Z",
       "updatedAt": "2026-02-05T18:06:44Z",
       "author": "1alyx",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -11527,9 +9812,7 @@
       "createdAt": "2026-02-03T03:50:11Z",
       "updatedAt": "2026-02-05T18:06:42Z",
       "author": "1alyx",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
@@ -11556,9 +9839,7 @@
       "createdAt": "2026-02-03T03:50:23Z",
       "updatedAt": "2026-02-05T18:06:40Z",
       "author": "1alyx",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
@@ -11585,15 +9866,11 @@
       "createdAt": "2026-02-03T03:50:28Z",
       "updatedAt": "2026-02-05T18:06:39Z",
       "author": "1alyx",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -11616,20 +9893,11 @@
       "createdAt": "2026-02-03T05:04:35Z",
       "updatedAt": "2026-02-05T18:06:37Z",
       "author": "1alyx",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["discord"],
+        "platforms": ["macos"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -11652,16 +9920,11 @@
       "createdAt": "2026-02-03T19:12:27Z",
       "updatedAt": "2026-02-05T18:06:35Z",
       "author": "1alyx",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -11684,23 +9947,11 @@
       "createdAt": "2026-02-05T18:05:51Z",
       "updatedAt": "2026-02-05T18:05:51Z",
       "author": "NotKeKe",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "windows",
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["discord"],
+        "platforms": ["windows", "linux", "docker"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -11717,10 +9968,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "web-ui"
-        ]
+        "components": ["gateway", "web-ui"]
       }
     },
     {
@@ -11733,13 +9981,9 @@
       "createdAt": "2026-01-28T21:55:48Z",
       "updatedAt": "2026-02-05T18:04:16Z",
       "author": "vatsal28",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
         "components": []
       },
@@ -11764,15 +10008,11 @@
       "createdAt": "2026-01-31T17:45:39Z",
       "updatedAt": "2026-02-05T18:02:50Z",
       "author": "gering",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -11891,9 +10131,7 @@
       "createdAt": "2026-02-02T21:47:01Z",
       "updatedAt": "2026-02-05T18:01:44Z",
       "author": "elliottway",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
@@ -11936,17 +10174,11 @@
       "createdAt": "2026-02-05T18:01:22Z",
       "updatedAt": "2026-02-05T18:01:22Z",
       "author": "pahud",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["config"]
       }
     },
     {
@@ -11978,9 +10210,7 @@
       "author": "ekson73",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "signal"
-        ],
+        "channels": ["signal"],
         "platforms": [],
         "components": []
       }
@@ -11999,10 +10229,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -12036,9 +10263,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "websocket"
-        ]
+        "components": ["websocket"]
       }
     },
     {
@@ -12051,22 +10276,11 @@
       "createdAt": "2026-01-30T08:43:36Z",
       "updatedAt": "2026-02-05T17:55:46Z",
       "author": "hellosimplerick",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["gateway", "web-ui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -12177,18 +10391,11 @@
       "createdAt": "2026-02-05T16:42:05Z",
       "updatedAt": "2026-02-05T17:44:44Z",
       "author": "physics515",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["windows"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -12219,13 +10426,9 @@
       "createdAt": "2026-01-27T13:52:46Z",
       "updatedAt": "2026-02-05T17:38:25Z",
       "author": "Lukavyi",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
         "components": []
       },
@@ -12258,19 +10461,11 @@
       "createdAt": "2026-01-25T08:46:39Z",
       "updatedAt": "2026-02-05T17:37:47Z",
       "author": "trace37labs",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["web-ui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -12365,20 +10560,11 @@
       "createdAt": "2026-02-05T17:32:41Z",
       "updatedAt": "2026-02-05T17:32:41Z",
       "author": "orielhaim",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "tui",
-          "websocket"
-        ]
+        "platforms": ["windows", "docker"],
+        "components": ["gateway", "tui", "websocket"]
       }
     },
     {
@@ -12394,13 +10580,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "web-ui",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["web-ui", "config"]
       }
     },
     {
@@ -12416,12 +10597,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["websocket"]
       }
     },
     {
@@ -12434,23 +10611,11 @@
       "createdAt": "2026-02-02T04:21:23Z",
       "updatedAt": "2026-02-05T17:28:52Z",
       "author": "chrishutchins",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp",
-          "slack"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram", "whatsapp", "slack"],
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -12473,18 +10638,11 @@
       "createdAt": "2026-02-02T00:30:15Z",
       "updatedAt": "2026-02-05T17:25:43Z",
       "author": "limelightcreatornetwork-svg",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -12519,9 +10677,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "websocket"
-        ]
+        "components": ["websocket"]
       },
       "commentsData": [
         {
@@ -12552,18 +10708,11 @@
       "createdAt": "2026-02-02T14:03:36Z",
       "updatedAt": "2026-02-05T17:23:59Z",
       "author": "00ainick-cmd",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["windows"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -12596,17 +10745,9 @@
       "author": "realsamrat",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "discord",
-          "signal"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "channels": ["telegram", "discord", "signal"],
+        "platforms": ["linux"],
+        "components": ["config"]
       }
     },
     {
@@ -12619,19 +10760,11 @@
       "createdAt": "2026-01-31T15:45:00Z",
       "updatedAt": "2026-02-05T17:22:25Z",
       "author": "msl2246",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -12654,16 +10787,11 @@
       "createdAt": "2026-02-03T00:55:51Z",
       "updatedAt": "2026-02-05T17:20:39Z",
       "author": "er587",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -12689,9 +10817,7 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
+        "platforms": ["linux"],
         "components": []
       },
       "commentsData": [
@@ -12715,17 +10841,11 @@
       "createdAt": "2026-02-05T17:17:02Z",
       "updatedAt": "2026-02-05T17:17:02Z",
       "author": "noobskies",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["config"]
       }
     },
     {
@@ -12741,13 +10861,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -12764,11 +10879,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "tui",
-          "config",
-          "websocket"
-        ]
+        "components": ["tui", "config", "websocket"]
       }
     },
     {
@@ -12783,16 +10894,9 @@
       "author": "morethan-jean-luc",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -12805,18 +10909,11 @@
       "createdAt": "2026-02-05T17:02:43Z",
       "updatedAt": "2026-02-05T17:02:43Z",
       "author": "LorenzGit",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -12831,19 +10928,9 @@
       "author": "theta55",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp",
-          "discord",
-          "signal"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram", "whatsapp", "discord", "signal"],
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -12868,14 +10955,9 @@
       "author": "ndohuu",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "googlechat"
-        ],
+        "channels": ["googlechat"],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -12888,14 +10970,9 @@
       "createdAt": "2026-01-31T00:49:14Z",
       "updatedAt": "2026-02-05T16:59:44Z",
       "author": "NOVA-Openclaw",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "signal"
-        ],
+        "channels": ["telegram", "signal"],
         "platforms": [],
         "components": []
       },
@@ -12960,15 +11037,11 @@
       "createdAt": "2026-02-05T16:51:59Z",
       "updatedAt": "2026-02-05T16:56:33Z",
       "author": "alexalmadav",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -12995,11 +11068,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -13030,18 +11099,11 @@
       "createdAt": "2026-02-05T16:44:30Z",
       "updatedAt": "2026-02-05T16:54:53Z",
       "author": "MarkSurfas",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "docker"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "platforms": ["macos", "docker"],
+        "components": ["gateway"]
       },
       "commentsData": [
         {
@@ -13067,13 +11129,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -13098,16 +11155,9 @@
       "author": "jeefy",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["discord"],
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -13142,9 +11192,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -13167,17 +11215,11 @@
       "createdAt": "2026-01-27T05:35:14Z",
       "updatedAt": "2026-02-05T16:46:21Z",
       "author": "WatermelonPan",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "platforms": ["windows"],
+        "components": ["websocket"]
       },
       "commentsData": [
         {
@@ -13324,9 +11366,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -13342,13 +11382,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows",
-          "linux"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "platforms": ["windows", "linux"],
+        "components": ["websocket"]
       },
       "commentsData": [
         {
@@ -13398,14 +11433,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -13448,10 +11477,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -13466,16 +11492,9 @@
       "author": "henrybottter",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "channels": ["whatsapp"],
+        "platforms": ["windows"],
+        "components": ["gateway", "websocket"]
       }
     },
     {
@@ -13488,19 +11507,11 @@
       "createdAt": "2026-02-03T16:30:56Z",
       "updatedAt": "2026-02-05T16:24:28Z",
       "author": "fagnersouza666",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -13534,12 +11545,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -13573,14 +11580,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -13614,12 +11615,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -13644,15 +11641,9 @@
       "author": "ChanDava",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["macos"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -13675,19 +11666,11 @@
       "createdAt": "2026-02-03T17:52:38Z",
       "updatedAt": "2026-02-05T16:17:55Z",
       "author": "devbyray",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "docker"
-        ],
-        "components": [
-          "web-ui",
-          "onboarding"
-        ]
+        "platforms": ["macos", "docker"],
+        "components": ["web-ui", "onboarding"]
       },
       "commentsData": [
         {
@@ -13726,21 +11709,11 @@
       "createdAt": "2026-01-26T11:52:29Z",
       "updatedAt": "2026-02-05T16:15:55Z",
       "author": "26tajeen",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "whatsapp",
-          "signal"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "channels": ["whatsapp", "signal"],
+        "platforms": ["macos"],
+        "components": ["gateway", "websocket"]
       },
       "commentsData": [
         {
@@ -13782,13 +11755,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["config"]
       }
     },
     {
@@ -13801,17 +11769,11 @@
       "createdAt": "2026-02-05T15:28:28Z",
       "updatedAt": "2026-02-05T16:07:58Z",
       "author": "Grenghis-Khan",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "platforms": ["windows"],
+        "components": ["websocket"]
       },
       "commentsData": [
         {
@@ -13834,16 +11796,11 @@
       "createdAt": "2026-02-01T07:11:42Z",
       "updatedAt": "2026-02-05T16:06:33Z",
       "author": "thegdsks",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -13884,9 +11841,7 @@
       "author": "xaker01",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
         "components": []
       }
@@ -13901,19 +11856,11 @@
       "createdAt": "2026-01-30T21:42:56Z",
       "updatedAt": "2026-02-05T15:57:50Z",
       "author": "zivrozz",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -13936,20 +11883,11 @@
       "createdAt": "2026-02-05T15:44:57Z",
       "updatedAt": "2026-02-05T15:56:36Z",
       "author": "nowading",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "windows",
-          "docker"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["windows", "docker"],
+        "components": ["websocket"]
       }
     },
     {
@@ -13962,9 +11900,7 @@
       "createdAt": "2026-02-03T11:37:13Z",
       "updatedAt": "2026-02-05T15:53:43Z",
       "author": "PaulRBerg",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
@@ -13994,12 +11930,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -14050,9 +11982,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -14068,13 +11998,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -14091,10 +12016,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -14110,9 +12032,7 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
+        "platforms": ["macos"],
         "components": []
       }
     },
@@ -14130,10 +12050,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -14150,10 +12067,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -14170,11 +12084,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "tui",
-          "config",
-          "websocket"
-        ]
+        "components": ["tui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -14197,16 +12107,11 @@
       "createdAt": "2026-02-05T15:27:53Z",
       "updatedAt": "2026-02-05T15:27:53Z",
       "author": "Buriv",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "onboarding",
-          "config"
-        ]
+        "components": ["onboarding", "config"]
       }
     },
     {
@@ -14222,13 +12127,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -14299,9 +12199,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -14332,16 +12230,11 @@
       "createdAt": "2026-02-05T15:07:00Z",
       "updatedAt": "2026-02-05T15:08:41Z",
       "author": "xpbl",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "web-ui",
-          "onboarding"
-        ]
+        "components": ["web-ui", "onboarding"]
       }
     },
     {
@@ -14354,15 +12247,11 @@
       "createdAt": "2026-01-26T08:31:50Z",
       "updatedAt": "2026-02-05T15:03:24Z",
       "author": "abrkn",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -14393,18 +12282,11 @@
       "createdAt": "2026-02-04T20:18:29Z",
       "updatedAt": "2026-02-05T15:02:43Z",
       "author": "vporton",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux", "docker"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -14438,15 +12320,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "web-ui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -14471,18 +12346,9 @@
       "author": "zlxdengtianhei",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "macos",
-          "windows",
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "channels": ["discord"],
+        "platforms": ["macos", "windows", "linux"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -14498,14 +12364,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -14530,13 +12390,9 @@
       "author": "NOVA-Openclaw",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "signal"
-        ],
+        "channels": ["signal"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -14549,19 +12405,11 @@
       "createdAt": "2026-02-05T14:42:56Z",
       "updatedAt": "2026-02-05T14:48:27Z",
       "author": "emanzx",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux", "docker"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -14584,15 +12432,11 @@
       "createdAt": "2026-01-31T22:17:11Z",
       "updatedAt": "2026-02-05T14:47:09Z",
       "author": "phantomgreen75",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -14642,12 +12486,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "docker"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "platforms": ["docker"],
+        "components": ["gateway"]
       }
     },
     {
@@ -14660,21 +12500,11 @@
       "createdAt": "2026-02-05T07:06:53Z",
       "updatedAt": "2026-02-05T14:42:55Z",
       "author": "Motoharu-Ueda",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["discord"],
+        "platforms": ["windows"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -14699,13 +12529,8 @@
       "author": "Valinainformatica",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp"
-        ],
-        "platforms": [
-          "macos"
-        ],
+        "channels": ["telegram", "whatsapp"],
+        "platforms": ["macos"],
         "components": []
       }
     },
@@ -14721,16 +12546,9 @@
       "author": "americanfool",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "channels": ["discord"],
+        "platforms": ["linux"],
+        "components": ["gateway", "websocket"]
       }
     },
     {
@@ -14743,15 +12561,11 @@
       "createdAt": "2026-02-04T10:34:51Z",
       "updatedAt": "2026-02-05T14:34:01Z",
       "author": "willgeek",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -14786,9 +12600,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "web-ui"
-        ]
+        "components": ["web-ui"]
       },
       "commentsData": [
         {
@@ -14835,21 +12647,11 @@
       "createdAt": "2026-01-29T09:46:54Z",
       "updatedAt": "2026-02-05T14:23:57Z",
       "author": "cbxhpy",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["macos", "linux"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -14916,10 +12718,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -14934,18 +12733,9 @@
       "author": "cristhianeccnovo-dotcom",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "channels": ["whatsapp"],
+        "platforms": ["windows"],
+        "components": ["gateway", "web-ui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -14971,13 +12761,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -14993,10 +12778,7 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
+        "platforms": ["linux", "docker"],
         "components": []
       }
     },
@@ -15013,13 +12795,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["windows"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -15034,16 +12811,9 @@
       "author": "MwC-Trexx",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -15059,15 +12829,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -15083,12 +12846,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["config"]
       }
     },
     {
@@ -15101,19 +12860,11 @@
       "createdAt": "2026-02-05T04:57:22Z",
       "updatedAt": "2026-02-05T13:31:19Z",
       "author": "Khalil12138",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "onboarding"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["gateway", "onboarding"]
       },
       "commentsData": [
         {
@@ -15144,14 +12895,10 @@
       "createdAt": "2026-02-05T10:41:11Z",
       "updatedAt": "2026-02-05T13:24:38Z",
       "author": "chrisvaneijk",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
+        "platforms": ["linux"],
         "components": []
       },
       "commentsData": [
@@ -15191,20 +12938,11 @@
       "createdAt": "2026-02-02T17:06:50Z",
       "updatedAt": "2026-02-05T13:24:08Z",
       "author": "Arlo83963",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -15237,14 +12975,9 @@
       "author": "jeanldc17",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "components": ["gateway", "websocket"]
       }
     },
     {
@@ -15261,9 +12994,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -15279,14 +13010,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux", "docker"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -15299,22 +13024,11 @@
       "createdAt": "2026-02-02T04:21:17Z",
       "updatedAt": "2026-02-05T13:10:07Z",
       "author": "aiops111",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "onboarding",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux", "docker"],
+        "components": ["gateway", "web-ui", "onboarding", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -15340,13 +13054,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "websocket"]
       }
     },
     {
@@ -15363,11 +13072,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -15382,17 +13087,9 @@
       "author": "Baoyx007",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["discord"],
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -15425,12 +13122,8 @@
       "author": "daflood",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos"
-        ],
+        "channels": ["telegram"],
+        "platforms": ["macos"],
         "components": []
       }
     },
@@ -15444,18 +13137,11 @@
       "createdAt": "2026-02-01T01:59:33Z",
       "updatedAt": "2026-02-05T12:56:36Z",
       "author": "drawnwren",
-      "labels": [
-        "bug",
-        "r: support"
-      ],
+      "labels": ["bug", "r: support"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway"]
       },
       "commentsData": [
         {
@@ -15526,18 +13212,11 @@
       "createdAt": "2026-02-05T12:55:34Z",
       "updatedAt": "2026-02-05T12:55:34Z",
       "author": "pvdochtend",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
-        "channels": [
-          "telegram",
-          "whatsapp"
-        ],
+        "channels": ["telegram", "whatsapp"],
         "platforms": [],
-        "components": [
-          "websocket"
-        ]
+        "components": ["websocket"]
       }
     },
     {
@@ -15554,9 +13233,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "websocket"
-        ]
+        "components": ["websocket"]
       }
     },
     {
@@ -15569,20 +13246,11 @@
       "createdAt": "2026-01-31T05:54:10Z",
       "updatedAt": "2026-02-05T12:52:12Z",
       "author": "348566059",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "gateway",
-          "onboarding",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["windows"],
+        "components": ["gateway", "onboarding", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -15608,14 +13276,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "web-ui", "websocket"]
       }
     },
     {
@@ -15628,18 +13290,11 @@
       "createdAt": "2026-02-02T03:35:19Z",
       "updatedAt": "2026-02-05T12:45:31Z",
       "author": "ss7lyb",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -15670,17 +13325,11 @@
       "createdAt": "2026-01-28T17:00:17Z",
       "updatedAt": "2026-02-05T12:36:52Z",
       "author": "sungh7",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
+        "channels": ["discord"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -15727,18 +13376,11 @@
       "createdAt": "2026-01-31T17:37:23Z",
       "updatedAt": "2026-02-05T12:36:41Z",
       "author": "odonald",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "signal"
-        ],
+        "channels": ["signal"],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -15763,15 +13405,9 @@
       "author": "wbstrbt",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "imessage"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "channels": ["imessage"],
+        "platforms": ["macos"],
+        "components": ["websocket"]
       }
     },
     {
@@ -15784,19 +13420,11 @@
       "createdAt": "2026-02-05T11:40:50Z",
       "updatedAt": "2026-02-05T12:26:13Z",
       "author": "dluksza",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -15823,11 +13451,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -15840,18 +13464,11 @@
       "createdAt": "2026-02-03T02:45:25Z",
       "updatedAt": "2026-02-05T12:23:51Z",
       "author": "stutteringp0et",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux", "docker"],
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -15877,12 +13494,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway"]
       }
     },
     {
@@ -15895,9 +13508,7 @@
       "createdAt": "2026-02-05T12:02:52Z",
       "updatedAt": "2026-02-05T12:03:13Z",
       "author": "k14f",
-      "labels": [
-        "r: moltbook"
-      ],
+      "labels": ["r: moltbook"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
@@ -15926,14 +13537,9 @@
       "author": "itemx",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -15946,16 +13552,10 @@
       "createdAt": "2026-02-04T02:59:01Z",
       "updatedAt": "2026-02-05T11:55:22Z",
       "author": "motochan",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "whatsapp"
-        ],
-        "platforms": [
-          "linux"
-        ],
+        "channels": ["whatsapp"],
+        "platforms": ["linux"],
         "components": []
       },
       "commentsData": [
@@ -15987,19 +13587,11 @@
       "createdAt": "2026-02-01T05:08:40Z",
       "updatedAt": "2026-02-05T11:53:18Z",
       "author": "dragontpe",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -16072,18 +13664,9 @@
       "author": "vgoudschmidt",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["macos"],
+        "components": ["gateway", "web-ui", "config", "websocket"]
       }
     },
     {
@@ -16099,14 +13682,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "config", "websocket"]
       }
     },
     {
@@ -16119,20 +13696,11 @@
       "createdAt": "2026-02-05T11:46:26Z",
       "updatedAt": "2026-02-05T11:46:26Z",
       "author": "domenic-cosh",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -16148,14 +13716,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -16178,16 +13740,11 @@
       "createdAt": "2026-02-03T14:33:29Z",
       "updatedAt": "2026-02-05T11:42:21Z",
       "author": "dupermariobro",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -16200,15 +13757,11 @@
       "createdAt": "2026-02-05T11:36:55Z",
       "updatedAt": "2026-02-05T11:36:55Z",
       "author": "skyantao",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -16221,9 +13774,7 @@
       "createdAt": "2026-02-05T11:33:27Z",
       "updatedAt": "2026-02-05T11:35:34Z",
       "author": "hankhsu1996",
-      "labels": [
-        "r: moltbook"
-      ],
+      "labels": ["r: moltbook"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
@@ -16250,18 +13801,11 @@
       "createdAt": "2026-02-04T12:28:06Z",
       "updatedAt": "2026-02-05T11:34:44Z",
       "author": "MuchaZ",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -16316,19 +13860,11 @@
       "createdAt": "2026-02-04T17:01:23Z",
       "updatedAt": "2026-02-05T11:31:22Z",
       "author": "jonathanadams96",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -16359,15 +13895,10 @@
       "createdAt": "2026-01-29T17:59:50Z",
       "updatedAt": "2026-02-05T11:31:11Z",
       "author": "CntrlX",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
+        "platforms": ["linux", "docker"],
         "components": []
       },
       "commentsData": [
@@ -16787,9 +14318,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -16815,13 +14344,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "platforms": ["macos", "linux"],
+        "components": ["websocket"]
       }
     },
     {
@@ -16838,9 +14362,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -16856,13 +14378,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "websocket"]
       }
     },
     {
@@ -16875,17 +14392,11 @@
       "createdAt": "2026-02-04T10:11:56Z",
       "updatedAt": "2026-02-05T11:20:38Z",
       "author": "Leonccaa",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["websocket"]
       },
       "commentsData": [
         {
@@ -17052,20 +14563,11 @@
       "createdAt": "2026-02-05T11:20:37Z",
       "updatedAt": "2026-02-05T11:20:37Z",
       "author": "jazzits",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux", "docker"],
+        "components": ["websocket"]
       }
     },
     {
@@ -17078,21 +14580,11 @@
       "createdAt": "2026-01-31T18:19:34Z",
       "updatedAt": "2026-02-05T11:20:21Z",
       "author": "elied-dev",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["telegram"],
+        "platforms": ["linux", "docker"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -17109,9 +14601,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -17124,19 +14614,11 @@
       "createdAt": "2026-02-03T15:42:21Z",
       "updatedAt": "2026-02-05T11:10:16Z",
       "author": "Shiva-destroyer",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway", "web-ui", "config"]
       },
       "commentsData": [
         {
@@ -17177,9 +14659,7 @@
       "author": "PamelaFernandez2",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "slack"
-        ],
+        "channels": ["slack"],
         "platforms": [],
         "components": []
       }
@@ -17194,22 +14674,11 @@
       "createdAt": "2026-02-04T11:50:20Z",
       "updatedAt": "2026-02-05T11:06:10Z",
       "author": "Nirokusa",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "windows",
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "channels": ["discord"],
+        "platforms": ["windows", "linux", "docker"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -17235,12 +14704,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["websocket"]
       }
     },
     {
@@ -17270,17 +14735,11 @@
       "createdAt": "2026-02-04T11:53:10Z",
       "updatedAt": "2026-02-05T11:04:10Z",
       "author": "Rishhiram",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "platforms": ["windows"],
+        "components": ["websocket"]
       },
       "commentsData": [
         {
@@ -17346,14 +14805,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "tui",
-          "config"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "tui", "config"]
       }
     },
     {
@@ -17370,9 +14823,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -17395,19 +14846,11 @@
       "createdAt": "2026-01-30T08:26:12Z",
       "updatedAt": "2026-02-05T10:46:53Z",
       "author": "bee4come",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "tui",
-          "config",
-          "websocket"
-        ]
+        "components": ["tui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -17496,15 +14939,9 @@
       "author": "Explorer1092",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "signal"
-        ],
-        "platforms": [
-          "docker"
-        ],
-        "components": [
-          "config"
-        ]
+        "channels": ["signal"],
+        "platforms": ["docker"],
+        "components": ["config"]
       }
     },
     {
@@ -17520,12 +14957,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "docker"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["docker"],
+        "components": ["config"]
       }
     },
     {
@@ -17541,12 +14974,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows"
-        ],
-        "components": [
-          "websocket"
-        ]
+        "platforms": ["windows"],
+        "components": ["websocket"]
       }
     },
     {
@@ -17559,16 +14988,11 @@
       "createdAt": "2026-02-05T10:36:24Z",
       "updatedAt": "2026-02-05T10:36:24Z",
       "author": "aaronyarm",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -17584,12 +15008,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "config"
-        ]
+        "platforms": ["linux"],
+        "components": ["config"]
       }
     },
     {
@@ -17602,17 +15022,11 @@
       "createdAt": "2026-02-05T10:35:35Z",
       "updatedAt": "2026-02-05T10:35:35Z",
       "author": "sannc",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "platforms": ["linux"],
+        "components": ["gateway"]
       }
     },
     {
@@ -17625,19 +15039,11 @@
       "createdAt": "2026-02-05T10:31:03Z",
       "updatedAt": "2026-02-05T10:31:03Z",
       "author": "wtlgo",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows",
-          "docker"
-        ],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "platforms": ["windows", "docker"],
+        "components": ["config", "websocket"]
       }
     },
     {
@@ -17671,10 +15077,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "components": ["gateway", "websocket"]
       }
     },
     {
@@ -17690,10 +15093,7 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "windows",
-          "linux"
-        ],
+        "platforms": ["windows", "linux"],
         "components": []
       }
     },
@@ -17707,17 +15107,11 @@
       "createdAt": "2026-02-05T10:11:18Z",
       "updatedAt": "2026-02-05T10:21:52Z",
       "author": "sliverp",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "gateway",
-          "onboarding",
-          "websocket"
-        ]
+        "components": ["gateway", "onboarding", "websocket"]
       }
     },
     {
@@ -17733,14 +15127,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "web-ui",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["web-ui", "config", "websocket"]
       }
     },
     {
@@ -17753,18 +15141,11 @@
       "createdAt": "2026-02-05T10:15:44Z",
       "updatedAt": "2026-02-05T10:15:44Z",
       "author": "purpshell",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
-        "channels": [
-          "whatsapp",
-          "signal"
-        ],
+        "channels": ["whatsapp", "signal"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -17777,19 +15158,11 @@
       "createdAt": "2026-02-05T10:13:34Z",
       "updatedAt": "2026-02-05T10:13:34Z",
       "author": "alexgalbraith",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos", "docker"],
+        "components": ["gateway", "config"]
       }
     },
     {
@@ -17802,22 +15175,11 @@
       "createdAt": "2026-02-02T04:27:26Z",
       "updatedAt": "2026-02-05T10:11:15Z",
       "author": "ivelin",
-      "labels": [
-        "enhancement"
-      ],
+      "labels": ["enhancement"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "macos",
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["discord"],
+        "platforms": ["macos", "linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -17898,15 +15260,9 @@
       "author": "rayzhux",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway"
-        ]
+        "channels": ["discord"],
+        "platforms": ["macos"],
+        "components": ["gateway"]
       }
     },
     {
@@ -17919,9 +15275,7 @@
       "createdAt": "2026-02-05T10:03:44Z",
       "updatedAt": "2026-02-05T10:03:44Z",
       "author": "itxaiohanglover",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
@@ -17940,13 +15294,9 @@
       "author": "Ratzzz33",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "telegram"
-        ],
+        "channels": ["telegram"],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       }
     },
     {
@@ -17959,14 +15309,10 @@
       "createdAt": "2026-02-05T09:59:50Z",
       "updatedAt": "2026-02-05T09:59:50Z",
       "author": "andyleymusic",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
+        "platforms": ["macos"],
         "components": []
       }
     },
@@ -17980,20 +15326,11 @@
       "createdAt": "2026-02-05T09:58:38Z",
       "updatedAt": "2026-02-05T09:58:38Z",
       "author": "zihao2981",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "web-ui",
-          "onboarding"
-        ]
+        "platforms": ["macos", "docker"],
+        "components": ["gateway", "web-ui", "onboarding"]
       }
     },
     {
@@ -18006,20 +15343,11 @@
       "createdAt": "2026-02-05T05:22:51Z",
       "updatedAt": "2026-02-05T09:57:21Z",
       "author": "skypigeon1",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos"
-        ],
-        "components": [
-          "gateway",
-          "tui",
-          "config",
-          "websocket"
-        ]
+        "platforms": ["macos"],
+        "components": ["gateway", "tui", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -18066,15 +15394,11 @@
       "createdAt": "2026-01-30T00:08:36Z",
       "updatedAt": "2026-02-05T09:53:04Z",
       "author": "j-vasanth",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config"
-        ]
+        "components": ["config"]
       },
       "commentsData": [
         {
@@ -18121,17 +15445,10 @@
       "createdAt": "2026-02-01T16:49:46Z",
       "updatedAt": "2026-02-05T09:50:10Z",
       "author": "Iweisc",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
-        "platforms": [
-          "linux",
-          "docker"
-        ],
+        "channels": ["discord"],
+        "platforms": ["linux", "docker"],
         "components": []
       },
       "commentsData": [
@@ -18187,20 +15504,11 @@
       "createdAt": "2026-02-02T01:37:50Z",
       "updatedAt": "2026-02-05T09:49:19Z",
       "author": "lightclient",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "config"
-        ]
+        "platforms": ["macos", "linux", "docker"],
+        "components": ["gateway", "config"]
       },
       "commentsData": [
         {
@@ -18227,10 +15535,7 @@
       "taxonomy": {
         "channels": [],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -18253,15 +15558,10 @@
       "createdAt": "2026-02-04T22:21:36Z",
       "updatedAt": "2026-02-05T09:45:09Z",
       "author": "kayacancode",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "docker"
-        ],
+        "platforms": ["macos", "docker"],
         "components": []
       },
       "commentsData": [
@@ -18288,16 +15588,8 @@
       "labels": [],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "windows",
-          "linux",
-          "docker"
-        ],
-        "components": [
-          "gateway",
-          "websocket"
-        ]
+        "platforms": ["macos", "windows", "linux", "docker"],
+        "components": ["gateway", "websocket"]
       }
     },
     {
@@ -18310,15 +15602,10 @@
       "createdAt": "2026-02-05T08:53:42Z",
       "updatedAt": "2026-02-05T09:38:21Z",
       "author": "ellisfan",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "macos",
-          "docker"
-        ],
+        "platforms": ["macos", "docker"],
         "components": []
       },
       "commentsData": [
@@ -18358,18 +15645,11 @@
       "createdAt": "2026-01-28T17:17:56Z",
       "updatedAt": "2026-02-05T09:31:34Z",
       "author": "fdsouvenir",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
-        "channels": [
-          "discord"
-        ],
+        "channels": ["discord"],
         "platforms": [],
-        "components": [
-          "config",
-          "websocket"
-        ]
+        "components": ["config", "websocket"]
       },
       "commentsData": [
         {
@@ -18426,17 +15706,9 @@
       "author": "DerekLYC",
       "labels": [],
       "taxonomy": {
-        "channels": [
-          "signal"
-        ],
-        "platforms": [
-          "linux"
-        ],
-        "components": [
-          "gateway",
-          "config",
-          "websocket"
-        ]
+        "channels": ["signal"],
+        "platforms": ["linux"],
+        "components": ["gateway", "config", "websocket"]
       },
       "commentsData": [
         {
@@ -18459,14 +15731,10 @@
       "createdAt": "2026-01-29T13:55:14Z",
       "updatedAt": "2026-02-05T09:31:00Z",
       "author": "chung1912",
-      "labels": [
-        "bug"
-      ],
+      "labels": ["bug"],
       "taxonomy": {
         "channels": [],
-        "platforms": [
-          "docker"
-        ],
+        "platforms": ["docker"],
         "components": []
       },
       "commentsData": [

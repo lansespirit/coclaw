@@ -218,7 +218,10 @@ async function loadSolutionsIndex(repoRoot) {
     const fm = extractFrontmatterBlock(src);
     const title = extractScalar(fm, 'title') ?? slug;
     const errorSignatures = extractList(fm, 'errorSignatures');
-    const slugTokens = slug.split('-').map((t) => t.trim()).filter((t) => t.length >= 5);
+    const slugTokens = slug
+      .split('-')
+      .map((t) => t.trim())
+      .filter((t) => t.length >= 5);
     out.push({
       slug,
       filePath,
