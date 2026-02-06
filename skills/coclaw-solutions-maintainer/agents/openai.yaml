@@ -1,0 +1,4 @@
+interface:
+  display_name: "CoClaw Solutions Maintainer"
+  short_description: "Update troubleshooting Solutions from recent GitHub issues, avoid duplicates, and comment issues with coclaw.com links."
+  default_prompt: "Sync only the last 72 hours of OpenClaw issues, triage only newly-seen issues since last run, check whether each issue is already covered by an existing CoClaw troubleshooting Solution, and either (a) comment on the issue with the coclaw.com Solution link, or (b) draft/update the appropriate Solution page following docs/TROUBLESHOOTING-SOLUTIONS-MAINTENANCE.md."

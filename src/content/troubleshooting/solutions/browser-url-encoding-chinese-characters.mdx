@@ -1,0 +1,74 @@
+---
+title: "Browser tool: URLs with Chinese characters are mis-encoded"
+description: "Work around a browser tool encoding bug by pre-encoding non-ASCII query parameters (UTF-8) before calling the browser tool."
+kind: "solution"
+component: "gateway"
+severity: "medium"
+os:
+  - "macos"
+errorSignatures:
+  - "browser tool URL encoding issue"
+  - "incorrect UTF-8 bytes"
+  - "targetUrl containing Chinese characters"
+keywords:
+  - "browser tool"
+  - "url encoding"
+  - "utf-8"
+  - "chinese"
+  - "encodeURIComponent"
+publishDate: 2026-02-06
+lastUpdated: 2026-02-06
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 9574
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Using the browser tool with a `targetUrl` that includes Chinese characters in query parameters navigates to the wrong page/query.
+- The final URL shows percent-encoding that maps to *different* characters than what you intended.
+
+## Cause
+
+The browser tool incorrectly encodes non-ASCII characters in URL query parameters (not producing the expected UTF-8 percent-encoding).
+
+## Fix
+
+Until OpenClaw fixes the upstream encoding bug, use one of these workarounds so the browser tool only receives ASCII URLs.
+
+### 1) Pre-encode the query parameter yourself (recommended)
+
+Build the URL with proper UTF-8 encoding (and avoid double-encoding).
+
+JavaScript / TypeScript:
+
+```ts
+const q = "AI革命";
+const url = "https://www.google.com/search?q=" + encodeURIComponent(q);
+// Pass `url` to the browser tool.
+```
+
+Python:
+
+```py
+import urllib.parse
+
+q = "AI革命"
+url = "https://www.google.com/search?q=" + urllib.parse.quote(q, safe="")
+```
+
+### 2) If you already have a correct percent-encoded URL, do not re-encode it
+
+If your URL already contains `%E9%9D%A9...` style sequences, pass it through as-is.
+
+## Verify
+
+- The browser navigates to the intended query/page.
+- The URL uses the expected UTF-8 percent-encoding for the Chinese characters (for example, `"AI革命"` encodes to `%E9%9D%A9%E5%91%BD`).
+
+## Related
+
+- GitHub: #9574
+

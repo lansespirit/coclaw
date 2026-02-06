@@ -35,6 +35,8 @@ pnpm sync:issues
 可选参数：
 
 - `OPENCLAW_ISSUES_MAX`（默认 500）
+- `OPENCLAW_ISSUES_SINCE_HOURS`（可选；只同步最近 N 小时内有更新的 issues，用于增量维护；例如 72）
+- `OPENCLAW_ISSUES_SINCE_ISO`（可选；ISO 时间；优先级高于 `OPENCLAW_ISSUES_SINCE_HOURS`）
 - `OPENCLAW_ISSUES_INCLUDE_COMMENTS`（默认 `1`；设为 `0` 可跳过 comments 以加速）
 - `OPENCLAW_ISSUES_COMMENTS_CONCURRENCY`（默认 6）
 - `OPENCLAW_ISSUES_COMMENTS_MAX_PER_ISSUE`（默认 50；设为 `0` 表示保存全部评论）

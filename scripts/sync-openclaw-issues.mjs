@@ -12,6 +12,8 @@
  * Env:
  *   GITHUB_TOKEN (optional but recommended to avoid low rate limits)
  *   OPENCLAW_ISSUES_MAX (optional, default 500)
+ *   OPENCLAW_ISSUES_SINCE_HOURS (optional; when set, only include issues updated in the last N hours)
+ *   OPENCLAW_ISSUES_SINCE_ISO (optional; overrides OPENCLAW_ISSUES_SINCE_HOURS; ISO datetime)
  *   OPENCLAW_ISSUES_INCLUDE_COMMENTS (optional, default 1)
  *   OPENCLAW_ISSUES_COMMENTS_CONCURRENCY (optional, default 6)
  *   OPENCLAW_ISSUES_COMMENTS_MAX_PER_ISSUE (optional, default 50; set 0 for all)
@@ -21,6 +23,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
+import { execFileSync } from 'node:child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -35,6 +38,13 @@ const MAX =
     ? Number.parseInt(process.env.OPENCLAW_ISSUES_MAX ?? '', 10)
     : 500;
 
+const SINCE_ISO = (process.env.OPENCLAW_ISSUES_SINCE_ISO ?? '').trim() || null;
+
+const SINCE_HOURS =
+  Number.parseInt(process.env.OPENCLAW_ISSUES_SINCE_HOURS ?? '', 10) > 0
+    ? Number.parseInt(process.env.OPENCLAW_ISSUES_SINCE_HOURS ?? '', 10)
+    : null;
+
 const INCLUDE_COMMENTS = (process.env.OPENCLAW_ISSUES_INCLUDE_COMMENTS ?? '1').trim() !== '0';
 
 const COMMENTS_CONCURRENCY =
@@ -48,9 +58,22 @@ const COMMENTS_MAX_PER_ISSUE =
     : 50;
 
 function getAuthHeader() {
-  const token = process.env.GITHUB_TOKEN?.trim();
-  if (!token) return {};
-  return { Authorization: `Bearer ${token}` };
+  const envToken = process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim();
+  if (envToken) return { Authorization: `Bearer ${envToken}` };
+
+  // Fallback: use GitHub CLI auth (if available). This avoids requiring the token
+  // to be exported in the shell environment (common in local dev setups).
+  try {
+    const ghToken = execFileSync('gh', ['auth', 'token'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    if (ghToken) return { Authorization: `Bearer ${ghToken}` };
+  } catch {
+    // ignore
+  }
+
+  return {};
 }
 
 function withQuery(url, params) {
@@ -240,6 +263,23 @@ function normalizeIssue(issue) {
   };
 }
 
+function resolveSinceDate() {
+  if (SINCE_ISO) {
+    const d = new Date(SINCE_ISO);
+    if (Number.isNaN(d.getTime())) {
+      throw new Error(`Invalid OPENCLAW_ISSUES_SINCE_ISO: ${SINCE_ISO}`);
+    }
+    return d;
+  }
+
+  if (SINCE_HOURS != null) {
+    const ms = SINCE_HOURS * 60 * 60 * 1000;
+    return new Date(Date.now() - ms);
+  }
+
+  return null;
+}
+
 function normalizeIssueComment(comment) {
   return {
     id: comment.id,
@@ -254,17 +294,29 @@ function normalizeIssueComment(comment) {
 async function main() {
   const channelTaxonomy = await loadChannelTaxonomyFromRef();
   const startUrl = `https://api.github.com/repos/${OWNER}/${REPO}/issues?state=all&per_page=100&sort=updated&direction=desc`;
+  const sinceDate = resolveSinceDate();
 
   /** @type {any[]} */
   const out = [];
 
   let url = startUrl;
-  while (url && out.length < MAX) {
+  let reachedCutoff = false;
+  while (url && out.length < MAX && !reachedCutoff) {
     const { json, nextUrl } = await fetchJson(url);
     if (!Array.isArray(json)) throw new Error('Unexpected GitHub API response shape.');
 
     for (const item of json) {
       if (item?.pull_request) continue;
+
+      if (sinceDate) {
+        const updatedAt = item.updated_at ? new Date(item.updated_at) : null;
+        if (!updatedAt || Number.isNaN(updatedAt.getTime())) continue;
+        if (updatedAt < sinceDate) {
+          reachedCutoff = true;
+          break;
+        }
+      }
+
       const normalized = normalizeIssue(item);
       normalized.taxonomy.channels = detectChannels(
         `${normalized.title}\n${normalized.body}`,
@@ -297,6 +349,7 @@ async function main() {
     repo: `${OWNER}/${REPO}`,
     fetchedAt: new Date().toISOString(),
     max: MAX,
+    since: sinceDate ? sinceDate.toISOString() : null,
     issues: out,
   };
 
