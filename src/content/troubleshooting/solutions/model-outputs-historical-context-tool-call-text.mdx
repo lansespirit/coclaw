@@ -1,0 +1,92 @@
+---
+title: "Model outputs '[Historical context]' / tool-call JSON instead of a normal reply"
+description: "Fix chat replies that leak internal tool metadata (e.g. '[Historical context: ... Do not mimic ...]') by switching to a tool-capable model/provider and ensuring function calling is enabled."
+kind: "solution"
+component: "model"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "[Historical context:"
+  - "Do not mimic this format"
+  - "use proper function calling"
+keywords:
+  - "tool calling"
+  - "function calling"
+  - "gemini"
+  - "lm studio"
+publishDate: 2026-02-07
+lastUpdated: 2026-02-07
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/concepts/models"
+    - "https://docs.openclaw.ai/cli/models"
+    - "https://docs.openclaw.ai/help/troubleshooting"
+  githubIssues:
+    - 10940
+    - 3344
+    - 9675
+    - 10494
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- The bot replies with internal-looking text like:
+  - `[Historical context: a different model called tool "..." with arguments: {...}. Do not mimic this format - use proper function calling.]`
+- Tools don’t run (or run inconsistently), and you see “tool call” syntax as plain text in the chat.
+- This is most noticeable with some “reasoning-heavy” or “non-tool-native” models (often on Telegram), but it can happen on any channel.
+
+## Cause
+
+The selected model/provider is not reliably using OpenClaw’s native tool calling interface.
+Instead of emitting a structured tool call, it outputs internal prompt artifacts (like the “Historical context” guard text) as normal assistant text.
+
+Common triggers:
+
+- A model that doesn’t support function/tool calling on your provider.
+- A provider integration that disables or degrades tool calling for that model.
+- A “thinking/reasoning” model producing extra metadata that leaks into the final output stream.
+
+## Fix
+
+### 1) Switch to a known tool-capable model (fastest)
+
+In chat, switch models (exact command may vary by channel UI), for example:
+
+- `/model list`
+- `/model <provider>/<model>`
+
+Then retry the same prompt that previously leaked “Historical context”.
+
+### 2) If you are using Gemini / Antigravity, try a different Gemini tier
+
+If you’re on a Gemini model that frequently leaks tool metadata:
+
+- Try a “flash” / less reasoning-heavy variant for tool-heavy workflows, or
+- Temporarily switch to a different provider/model for tasks that require tools.
+
+### 3) If you are using a local backend (LM Studio / Ollama), confirm tool calling is enabled
+
+Local backends often require an explicit “function calling / tool use” toggle, and not every model checkpoint supports it.
+
+Checklist:
+
+- Enable function/tool calling in the backend UI (if available).
+- Switch to a model that explicitly supports tool calling.
+- Restart the gateway after changing model/provider settings.
+
+## Verify
+
+- Ask the agent to do a trivial tool action (for example, read a local file or run a simple diagnostic) and confirm:
+  - You do **not** see `[Historical context: ...]` in the chat
+  - The tool actually executes (not just described)
+- `openclaw models status --probe` succeeds for your selected model.
+
+## Related
+
+- GitHub issues (examples): see `related.githubIssues` in frontmatter.

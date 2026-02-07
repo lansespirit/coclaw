@@ -1,0 +1,70 @@
+---
+title: "Web chat: dragging an image opens it in a new tab (no upload)"
+description: "Work around OpenClaw web chat drag-and-drop image uploads opening in a new tab by using paste/file picker and keeping images small until the UI fix lands."
+kind: "solution"
+component: "web-ui"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "opens the file in a new tab"
+  - "Drag and drop"
+  - "close code 1009"
+keywords:
+  - "web ui"
+  - "webchat"
+  - "attachments"
+  - "drag and drop"
+publishDate: 2026-02-07
+lastUpdated: 2026-02-07
+author: "CoClaw Team"
+related:
+  docs: []
+  githubIssues:
+    - 6525
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- In the OpenClaw web chat UI, dragging an image file from your desktop into the input area opens the image in a **new browser tab** instead of uploading it.
+- You may also see close code **1009** when pasting images (often size-related).
+
+## Cause
+
+This is typically a web UI drag-and-drop handler bug: the page doesn’t intercept the browser’s default “open the dropped file” behavior, so the drop navigates away instead of uploading.
+
+## Fix
+
+### 1) Use paste or the file picker (current workaround)
+
+- Copy the image, then **paste** into the message box.
+- If the UI has an attachment button / file picker, use that instead of drag-and-drop.
+
+### 2) If paste fails with 1009, reduce image size
+
+1009 is commonly triggered by payload limits.
+
+Try one or more:
+
+- Use a smaller image (resize / re-export to JPEG).
+- Avoid very large screenshots; crop to the relevant region first.
+
+### 3) Refresh the web UI after upgrading
+
+If you recently upgraded OpenClaw, hard-reload the page to ensure you’re running the latest frontend assets:
+
+- macOS: `Cmd + Shift + R`
+- Windows/Linux: `Ctrl + Shift + R`
+
+## Verify
+
+- Send an image using paste or file picker; it should appear as an attachment and deliver successfully.
+- Drag-and-drop should no longer open a new tab once the upstream UI fix is released.
+
+## Related
+
+- GitHub issues: see `related.githubIssues` in frontmatter.
