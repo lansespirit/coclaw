@@ -29,6 +29,26 @@ node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs
 
 脚本会维护本地 state（默认路径：`.cache/coclaw-solutions-maintainer/state.json`），用于“只分析新增”。
 
+3. （可选）把“已覆盖”的 solutions 链接回填到 GitHub issues（帮助用户自助解决）
+
+先生成一个临时 plan（不会写入 state）：
+
+```bash
+node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs \
+  --state .cache/coclaw-solutions-maintainer/state-temp.json \
+  --dry-run \
+  --json > .cache/coclaw-solutions-maintainer/triage-latest.json
+```
+
+然后筛选出要评论的 issues（本仓库已内置一个基于强匹配的 plan 生成逻辑；也可手工编辑 plan）并运行评论脚本：
+
+```bash
+env -u GITHUB_TOKEN -u GH_TOKEN \
+  node skills/coclaw-solutions-maintainer/scripts/comment-issues-with-solutions.mjs --limit 15
+```
+
+说明：如果你的环境里设置了 `GITHUB_TOKEN`（通常权限只覆盖你自己的仓库），`gh` 可能无法在 `openclaw/openclaw` 评论；用 `env -u ...` 可以强制 `gh` 使用本机 keyring 登录信息。
+
 ## 每个新增 issue 的处理规则
 
 1. **先查重（必须）**
