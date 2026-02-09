@@ -59,13 +59,11 @@ env -u GITHUB_TOKEN -u GH_TOKEN \
    - 不新增 solution（避免 SEO 重复）
    - 直接在 issue 下评论，附 `coclaw.com` solution 链接
 
-GitHub 评论（用 `gh` CLI）模板：
+GitHub 评论要求：
 
-```bash
-gh issue comment <ISSUE_NUMBER> \
-  --repo openclaw/openclaw \
-  --body $'This issue is already covered by our Troubleshooting Solution:\n\nhttps://coclaw.com/troubleshooting/solutions/<slug>/\n\nIf you try the steps and it still fails, please reply with logs + your OS/channel/version.'
-```
+- 不要用“固定模板”刷屏；每条评论都要结合 issue 的症状/报错 + 线程里的关键信息做个性化回复
+- 至少点出**为什么**该 solution 匹配（例如引用 issue 里的某条 error string / close code），并提 1-2 个该 solution 里的关键排查/修复步骤
+- 建议优先用 `comment-issues-with-solutions.mjs`，它会读取 issue + 现有评论并生成个性化回帖，同时会跳过已回过 `coclaw.com` 链接的 issues
 
 3. **若未覆盖**
    - 新建或更新对应的 solution 文件：
