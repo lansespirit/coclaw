@@ -468,7 +468,9 @@ function composeComment({ issue, comments, solution, url, evidence }) {
   if (quote) {
     parts.push(`From your report: \"${quote}\"`);
   } else {
-    parts.push(`Thanks for the detailed report - sharing a troubleshooting link that matches the symptoms here.`);
+    parts.push(
+      `Thanks for the detailed report - sharing a troubleshooting link that matches the symptoms here.`
+    );
   }
 
   if (evidence) {
