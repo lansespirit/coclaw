@@ -14,8 +14,12 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
 const OPENCLAW_ISSUES_FILE_ENV = (process.env.OPENCLAW_ISSUES_FILE ?? '').trim();
-const OPENCLAW_ISSUE_ANALYSIS_OUT_FILE_ENV = (process.env.OPENCLAW_ISSUE_ANALYSIS_OUT_FILE ?? '').trim();
-const OPENCLAW_ISSUE_ANALYSIS_MD_OUT_ENV = (process.env.OPENCLAW_ISSUE_ANALYSIS_MD_OUT ?? '').trim();
+const OPENCLAW_ISSUE_ANALYSIS_OUT_FILE_ENV = (
+  process.env.OPENCLAW_ISSUE_ANALYSIS_OUT_FILE ?? ''
+).trim();
+const OPENCLAW_ISSUE_ANALYSIS_MD_OUT_ENV = (
+  process.env.OPENCLAW_ISSUE_ANALYSIS_MD_OUT ?? ''
+).trim();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

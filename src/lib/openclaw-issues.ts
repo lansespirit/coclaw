@@ -37,7 +37,13 @@ export type OpenClawIssuesDataset = {
 };
 
 const DATASET_CANDIDATES = [
-  path.resolve(process.cwd(), 'skills', 'coclaw-solutions-maintainer', 'data', 'openclaw-issues.json'),
+  path.resolve(
+    process.cwd(),
+    'skills',
+    'coclaw-solutions-maintainer',
+    'data',
+    'openclaw-issues.json'
+  ),
 ];
 
 let cachedDataset: OpenClawIssuesDataset | null = null;
@@ -66,7 +72,9 @@ function normalizeDataset(raw: unknown): OpenClawIssuesDataset {
   return {
     repo: typeof parsed.repo === 'string' && parsed.repo ? parsed.repo : fallback.repo,
     fetchedAt:
-      typeof parsed.fetchedAt === 'string' && parsed.fetchedAt ? parsed.fetchedAt : fallback.fetchedAt,
+      typeof parsed.fetchedAt === 'string' && parsed.fetchedAt
+        ? parsed.fetchedAt
+        : fallback.fetchedAt,
     max: typeof parsed.max === 'number' && Number.isFinite(parsed.max) ? parsed.max : fallback.max,
     issues: Array.isArray(parsed.issues) ? (parsed.issues as OpenClawIssue[]) : fallback.issues,
   };
