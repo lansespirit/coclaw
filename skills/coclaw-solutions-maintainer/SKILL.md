@@ -23,14 +23,16 @@ description: 'Maintain CoClaw troubleshooting Solutions from recent OpenClaw iss
 
 ## 脚本职责拆分
 
-- 数据同步（外部脚本）
-  - `pnpm sync:issues`
+- 数据同步（本 skill）
+  - `node skills/coclaw-solutions-maintainer/scripts/sync-openclaw-issues.mjs`
 - 参考源码同步（本 skill）
   - `node skills/coclaw-solutions-maintainer/scripts/sync-openclaw-ref.mjs`
 - 增量 triage（本 skill）
   - `node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs`
 - 分类建议（本 skill）
   - `node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs`
+- 趋势分析（可选，本 skill）
+  - `node skills/coclaw-solutions-maintainer/scripts/analyze-openclaw-issues.mjs`
 - 自动评论（本 skill）
   - `comment-issues-with-solutions.mjs` 已停用，仅输出迁移提示并退出
 
@@ -48,6 +50,8 @@ node skills/coclaw-solutions-maintainer/scripts/sync-openclaw-ref.mjs
 OPENCLAW_ISSUES_SINCE_HOURS=72 pnpm sync:issues
 ```
 
+默认输出到 `skills/coclaw-solutions-maintainer/data/openclaw-issues.json`（仅供本 skill 使用）。
+
 ### 2) 生成“增量 issues”
 
 ```bash
@@ -62,6 +66,14 @@ node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs \
   --triage .cache/coclaw-solutions-maintainer/triage-latest.json \
   --output .cache/coclaw-solutions-maintainer/classification-latest.json
 ```
+
+### 3.5) 可选：更新 issue 分析报告
+
+```bash
+pnpm analyze:issues
+```
+
+默认输出机器结果到 `skills/coclaw-solutions-maintainer/data/issue-analysis.json`。
 
 ### 4) 人工 / sub-agent 逐条处理
 

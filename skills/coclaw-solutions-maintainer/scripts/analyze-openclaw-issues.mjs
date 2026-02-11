@@ -2,7 +2,7 @@
 /**
  * Analyze the locally-synced OpenClaw issues dataset and produce:
  * - a human report: docs/TROUBLESHOOTING-ISSUE-ANALYSIS.md
- * - a machine report: src/data/openclaw/issue-analysis.json
+ * - a machine report: skills/coclaw-solutions-maintainer/data/issue-analysis.json
  *
  * This is meant to drive the "curated troubleshooting" backlog (what to write next),
  * not to mirror GitHub.
@@ -13,20 +13,21 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
+const OPENCLAW_ISSUES_FILE_ENV = (process.env.OPENCLAW_ISSUES_FILE ?? '').trim();
+const OPENCLAW_ISSUE_ANALYSIS_OUT_FILE_ENV = (process.env.OPENCLAW_ISSUE_ANALYSIS_OUT_FILE ?? '').trim();
+const OPENCLAW_ISSUE_ANALYSIS_MD_OUT_ENV = (process.env.OPENCLAW_ISSUE_ANALYSIS_MD_OUT ?? '').trim();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
 
-const DATASET_FILE = path.resolve(
-  __dirname,
-  '..',
-  'src',
-  'data',
-  'openclaw',
-  'openclaw-issues.json'
-);
+const DEFAULT_DATASET_FILE = path.resolve(__dirname, '..', 'data', 'openclaw-issues.json');
+const DEFAULT_OUT_MD = path.resolve(REPO_ROOT, 'docs', 'TROUBLESHOOTING-ISSUE-ANALYSIS.md');
+const DEFAULT_OUT_JSON = path.resolve(__dirname, '..', 'data', 'issue-analysis.json');
 
-const OUT_MD = path.resolve(__dirname, '..', 'docs', 'TROUBLESHOOTING-ISSUE-ANALYSIS.md');
-const OUT_JSON = path.resolve(__dirname, '..', 'src', 'data', 'openclaw', 'issue-analysis.json');
+const DATASET_FILE = path.resolve(OPENCLAW_ISSUES_FILE_ENV || DEFAULT_DATASET_FILE);
+const OUT_MD = path.resolve(OPENCLAW_ISSUE_ANALYSIS_MD_OUT_ENV || DEFAULT_OUT_MD);
+const OUT_JSON = path.resolve(OPENCLAW_ISSUE_ANALYSIS_OUT_FILE_ENV || DEFAULT_OUT_JSON);
 
 function toDateOnlyIso(d) {
   return d.toISOString().slice(0, 10);

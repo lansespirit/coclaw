@@ -20,7 +20,7 @@
 
 输出文件：
 
-- `src/data/openclaw/openclaw-issues.json`
+- `skills/coclaw-solutions-maintainer/data/openclaw-issues.json`
 
 ### 1.2 执行方式
 
@@ -57,7 +57,7 @@ pnpm analyze:issues
 输出：
 
 - `docs/TROUBLESHOOTING-ISSUE-ANALYSIS.md`（人类可读：Top patterns + 示例）
-- `src/data/openclaw/issue-analysis.json`（机器可读：用于后续工具/脚本）
+- `skills/coclaw-solutions-maintainer/data/issue-analysis.json`（机器可读：用于后续工具/脚本）
 
 分析规则：
 

@@ -24,7 +24,7 @@ If you want to help maintain CoClaw, please jump in with issues/PRs. Feature ide
 - **Guides & docs**: `src/content/**` (MDX)
 - **Troubleshooting KB**: `src/content/troubleshooting/**`
 - **Tools**: interactive pages in `src/pages/tools/**` (and related components in `src/components/**`)
-- **OpenClaw issue mirror (optional)**: `pnpm sync:issues` writes to `src/data/openclaw/openclaw-issues.json`
+- **OpenClaw issue sync (skill workflow)**: `pnpm sync:issues` writes to `skills/coclaw-solutions-maintainer/data/openclaw-issues.json`
 
 ## Contributing
 
@@ -85,7 +85,7 @@ pnpm preview
 - `pnpm format` - Format code with Prettier
 - `pnpm format:check` - Check code formatting
 - `pnpm tokens:check` - Validate required design tokens
-- `pnpm sync:issues` - (Optional) sync OpenClaw issues into local JSON for the site
+- `pnpm sync:issues` - (Optional) sync OpenClaw issues for the coclaw-solutions-maintainer skill
 
 ## Project Structure
 

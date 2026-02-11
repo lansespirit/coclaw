@@ -61,7 +61,7 @@ pnpm build
 
 ## Optional: Sync OpenClaw Issues (Maintainers)
 
-The site can mirror OpenClaw issues into `src/data/openclaw/openclaw-issues.json`:
+The maintainer skill can sync OpenClaw issues into `skills/coclaw-solutions-maintainer/data/openclaw-issues.json`:
 
 ```bash
 pnpm sync:issues

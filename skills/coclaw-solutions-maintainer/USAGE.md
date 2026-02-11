@@ -16,7 +16,7 @@
 
 ### 1.1 脚本职责（强制分离）
 
-- `scripts/sync-openclaw-issues.mjs`
+- `skills/coclaw-solutions-maintainer/scripts/sync-openclaw-issues.mjs`
   - 负责同步 issues 数据
 - `skills/coclaw-solutions-maintainer/scripts/sync-openclaw-ref.mjs`
   - 负责同步 `.ref/openclaw` 参考源码
@@ -26,6 +26,9 @@
 - `skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs`
   - 仅做“分类建议”
   - **不做**最终决策、评论
+- `skills/coclaw-solutions-maintainer/scripts/analyze-openclaw-issues.mjs`
+  - 可选：生成 patterns 分析报告
+  - **不做**评论与最终决策
 - `skills/coclaw-solutions-maintainer/scripts/comment-issues-with-solutions.mjs`
   - 已停用（防止程序化评论）
 
@@ -53,6 +56,11 @@ node skills/coclaw-solutions-maintainer/scripts/sync-openclaw-ref.mjs
 OPENCLAW_ISSUES_SINCE_HOURS=72 pnpm sync:issues
 ```
 
+说明：
+
+- 同步数据默认落盘到 `skills/coclaw-solutions-maintainer/data/openclaw-issues.json`
+- 该目录已在 `.gitignore` 中忽略，不进入版本控制
+
 ### Step 2：生成增量 issue 队列
 
 ```bash
@@ -77,6 +85,17 @@ node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs \
 
 - 这是“建议”，不是最终结论
 - 最终动作必须基于完整阅读后决策
+
+### Step 3.5：可选生成分析报告
+
+```bash
+pnpm analyze:issues
+```
+
+说明：
+
+- 机器报告输出到 `skills/coclaw-solutions-maintainer/data/issue-analysis.json`
+- 人类报告输出到 `docs/TROUBLESHOOTING-ISSUE-ANALYSIS.md`
 
 ### Step 4：逐条深读并决策
 
@@ -185,6 +204,7 @@ node skills/coclaw-solutions-maintainer/scripts/sync-openclaw-ref.mjs
 OPENCLAW_ISSUES_SINCE_HOURS=72 pnpm sync:issues
 node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs --json > .cache/coclaw-solutions-maintainer/triage-latest.json
 node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs --triage .cache/coclaw-solutions-maintainer/triage-latest.json --output .cache/coclaw-solutions-maintainer/classification-latest.json
+pnpm analyze:issues
 ```
 
 ### 6.2 triage 参数

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { labelToFilterValue } from '../../lib/openclaw-issues';
+import { labelToFilterValue } from '../../lib/openclaw-issues-filters';
 import { loadPagefind, type PagefindModule } from '../../lib/pagefind';
 
 type IssuePreview = {

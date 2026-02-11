@@ -107,3 +107,7 @@ pagefind/
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Skill-local synced issue datasets
+skills/coclaw-solutions-maintainer/data/
+

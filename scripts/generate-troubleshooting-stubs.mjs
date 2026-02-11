@@ -10,6 +10,7 @@
  *
  * Env:
  *   TROUBLESHOOTING_STUBS_MAX (default 30)
+ *   OPENCLAW_ISSUES_FILE (optional; issues dataset path)
  */
 
 import fs from 'node:fs/promises';
@@ -17,17 +18,20 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
+const OPENCLAW_ISSUES_FILE_ENV = (process.env.OPENCLAW_ISSUES_FILE ?? '').trim();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DATASET_FILE = path.resolve(
+const DEFAULT_DATASET_FILE = path.resolve(
   __dirname,
   '..',
-  'src',
+  'skills',
+  'coclaw-solutions-maintainer',
   'data',
-  'openclaw',
   'openclaw-issues.json'
 );
+const DATASET_FILE = path.resolve(OPENCLAW_ISSUES_FILE_ENV || DEFAULT_DATASET_FILE);
 const OUT_DIR = path.resolve(__dirname, '..', 'src', 'content', 'troubleshooting', 'github');
 
 const MAX =

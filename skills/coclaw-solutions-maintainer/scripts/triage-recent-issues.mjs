@@ -3,7 +3,7 @@
  * Incremental triage for OpenClaw issues (no issue analysis).
  *
  * Responsibilities:
- * - Read synced dataset: src/data/openclaw/openclaw-issues.json
+ * - Read synced dataset: skills/coclaw-solutions-maintainer/data/openclaw-issues.json
  * - Select issues updated within N hours
  * - Emit only newly-seen issues (or updated issues with --include-updated)
  * - Persist state: .cache/coclaw-solutions-maintainer/state.json
@@ -18,9 +18,17 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
+const DEFAULT_ISSUES_FILE = path.resolve(
+  'skills',
+  'coclaw-solutions-maintainer',
+  'data',
+  'openclaw-issues.json'
+);
+
 function parseArgs(argv) {
   const args = {
     sinceHours: 72,
+    issuesFile: DEFAULT_ISSUES_FILE,
     stateFile: path.resolve('.cache', 'coclaw-solutions-maintainer', 'state.json'),
     dryRun: false,
     includeUpdated: false,
@@ -29,6 +37,14 @@ function parseArgs(argv) {
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
+
+    if (arg === '--issues') {
+      const value = argv[i + 1];
+      i += 1;
+      if (!value) throw new Error('Missing value for --issues');
+      args.issuesFile = path.resolve(value);
+      continue;
+    }
 
     if (arg === '--since-hours') {
       const value = argv[i + 1];
@@ -69,6 +85,7 @@ function parseArgs(argv) {
 
 Options:
   --since-hours <n>      Only include issues updated within the last N hours (default: 72)
+  --issues <path>        Override issues dataset path (default: skills/coclaw-solutions-maintainer/data/openclaw-issues.json)
   --include-updated      Include already-processed issues if updatedAt advanced since last run
   --state <path>         Override state file path (default: .cache/coclaw-solutions-maintainer/state.json)
   --dry-run              Do not write state
@@ -123,9 +140,7 @@ function commentsCount(issue) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const repoRoot = process.cwd();
-
-  const issuesFile = path.join(repoRoot, 'src', 'data', 'openclaw', 'openclaw-issues.json');
+  const issuesFile = args.issuesFile;
   if (!(await fileExists(issuesFile))) {
     throw new Error(
       `Missing issues dataset: ${issuesFile}\nRun: OPENCLAW_ISSUES_SINCE_HOURS=72 pnpm sync:issues`

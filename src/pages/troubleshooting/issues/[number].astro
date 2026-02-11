@@ -2,11 +2,8 @@
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Section from '../../../components/layout/Section.astro';
-import {
-  findIssueByNumber,
-  getOpenClawIssuesDataset,
-  labelToFilterValue,
-} from '../../../lib/openclaw-issues';
+import { findIssueByNumber, getOpenClawIssuesDataset } from '../../../lib/openclaw-issues';
+import { labelToFilterValue } from '../../../lib/openclaw-issues-filters';
 
 export const getStaticPaths = (async () => {
   const dataset = getOpenClawIssuesDataset();

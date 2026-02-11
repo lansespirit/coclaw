@@ -17,6 +17,13 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
+const DEFAULT_ISSUES_FILE = path.resolve(
+  'skills',
+  'coclaw-solutions-maintainer',
+  'data',
+  'openclaw-issues.json'
+);
+
 const ISSUE_TYPES = [
   'usage_config',
   'usage_deploy',
@@ -30,7 +37,7 @@ const ISSUE_TYPES = [
 function parseArgs(argv) {
   const args = {
     triageFile: path.resolve('.cache', 'coclaw-solutions-maintainer', 'triage-latest.json'),
-    issuesFile: path.resolve('src', 'data', 'openclaw', 'openclaw-issues.json'),
+    issuesFile: DEFAULT_ISSUES_FILE,
     outputFile: null,
     limit: null,
     json: false,
@@ -83,7 +90,7 @@ function parseArgs(argv) {
 
 Options:
   --triage <path>       Triage JSON path (default: .cache/coclaw-solutions-maintainer/triage-latest.json)
-  --issues <path>       Full issues dataset path (default: src/data/openclaw/openclaw-issues.json)
+  --issues <path>       Full issues dataset path (default: skills/coclaw-solutions-maintainer/data/openclaw-issues.json)
   --output <path>       Also write result JSON to this path
   --limit <n>           Only include first N triage items
   --json                Print machine-readable JSON

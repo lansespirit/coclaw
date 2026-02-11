@@ -1,19 +1,20 @@
 #!/usr/bin/env node
 /**
- * Sync OpenClaw GitHub issues into a local JSON "database" for the site.
+ * Sync OpenClaw GitHub issues into the coclaw-solutions-maintainer skill dataset.
  *
  * - Uses GitHub REST API: GET /repos/{owner}/{repo}/issues
  * - Filters out pull requests
- * - Writes to: src/data/openclaw/openclaw-issues.json
+ * - Writes to: OPENCLAW_ISSUES_OUT_FILE or skills/coclaw-solutions-maintainer/data/openclaw-issues.json
  *
  * Usage:
- *   node scripts/sync-openclaw-issues.mjs
+ *   node skills/coclaw-solutions-maintainer/scripts/sync-openclaw-issues.mjs
  *
  * Env:
  *   GITHUB_TOKEN (optional but recommended to avoid low rate limits)
  *   OPENCLAW_ISSUES_MAX (optional, default 500)
  *   OPENCLAW_ISSUES_SINCE_HOURS (optional; when set, only include issues updated in the last N hours)
  *   OPENCLAW_ISSUES_SINCE_ISO (optional; overrides OPENCLAW_ISSUES_SINCE_HOURS; ISO datetime)
+ *   OPENCLAW_ISSUES_OUT_FILE (optional; output JSON path)
  *   OPENCLAW_ISSUES_INCLUDE_COMMENTS (optional, default 1)
  *   OPENCLAW_ISSUES_COMMENTS_CONCURRENCY (optional, default 6)
  *   OPENCLAW_ISSUES_COMMENTS_MAX_PER_ISSUE (optional, default 50; set 0 for all)
@@ -30,8 +31,13 @@ const __dirname = path.dirname(__filename);
 
 const OWNER = 'openclaw';
 const REPO = 'openclaw';
-const OUT_FILE = path.resolve(__dirname, '..', 'src', 'data', 'openclaw', 'openclaw-issues.json');
-const OPENCLAW_REF_DIR = path.resolve(__dirname, '..', '.ref', 'openclaw');
+const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
+const DEFAULT_OUT_FILE = path.resolve(__dirname, '..', 'data', 'openclaw-issues.json');
+
+const OUT_FILE = path.resolve(
+  (process.env.OPENCLAW_ISSUES_OUT_FILE ?? '').trim() || DEFAULT_OUT_FILE
+);
+const OPENCLAW_REF_DIR = path.resolve(REPO_ROOT, '.ref', 'openclaw');
 
 const MAX =
   Number.parseInt(process.env.OPENCLAW_ISSUES_MAX ?? '', 10) > 0
