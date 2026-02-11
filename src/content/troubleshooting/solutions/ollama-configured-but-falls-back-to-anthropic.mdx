@@ -1,0 +1,108 @@
+---
+title: "Ollama configured, but OpenClaw still uses Anthropic (or model discovery keeps failing)"
+description: "Fix local Ollama setups where gateway logs show Anthropic fallback or repeated Ollama model-discovery failures by pinning provider config and verifying connectivity from the gateway runtime."
+kind: "solution"
+component: "model"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "Failed to discover Ollama models: TypeError: fetch failed"
+  - "agent model: anthropic/"
+  - "hard fallback to Anthropic"
+keywords:
+  - "ollama"
+  - "anthropic fallback"
+  - "baseUrl"
+  - "local model"
+publishDate: 2026-02-11
+lastUpdated: 2026-02-11
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/concepts/models"
+    - "https://docs.openclaw.ai/cli/models"
+    - "https://docs.openclaw.ai/gateway/configuration"
+  githubIssues:
+    - 14053
+    - 5790
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- You set an Ollama model, but gateway logs still show `agent model: anthropic/...`.
+- Local model requests fail silently (or look like provider fallback), especially with no Anthropic key configured.
+- Logs repeatedly show `Failed to discover Ollama models: TypeError: fetch failed`, even though a manual `curl` may work from another shell.
+
+## Cause
+
+OpenClaw can only use Ollama if the **gateway runtime** can resolve and reach the configured Ollama endpoint, and if model/provider config is explicit enough for model selection.
+
+Common causes:
+
+- `models.providers.ollama.baseUrl` is reachable from your host shell, but not from the actual runtime context (Docker/WSL/container namespace).
+- Discovery requests fail and leave model resolution relying on stale/default provider settings.
+- `agents.defaults.model.primary` is not pinned to an `ollama/...` id, so selection falls back to another provider.
+
+## Fix
+
+### 1) Verify connectivity from the same runtime as gateway
+
+Run from the same host/container that runs gateway:
+
+```bash
+curl -sS http://<ollama-host>:11434/v1/models
+```
+
+If this fails inside runtime, fix networking first (host mapping, bridge address, firewall, WSL host routing).
+
+### 2) Pin Ollama provider and models explicitly
+
+Use explicit provider config and model ids instead of relying only on auto-discovery.
+
+```json5
+{
+  models: {
+    mode: "merge",
+    providers: {
+      ollama: {
+        baseUrl: "http://localhost:11434/v1",
+        apiKey: "ollama-local",
+        api: "openai-completions",
+        models: [{ id: "ollama/qwen2.5:7b", name: "qwen2.5:7b" }],
+      },
+    },
+  },
+  agents: {
+    defaults: {
+      model: {
+        primary: "ollama/qwen2.5:7b",
+      },
+    },
+  },
+}
+```
+
+### 3) Confirm active model selection and probe
+
+```bash
+openclaw config get agents.defaults.model.primary
+openclaw models status --probe
+```
+
+If probe still resolves to Anthropic, restart gateway and recheck runtime config path/environment.
+
+## Verify
+
+- Gateway logs show an `ollama/...` model as active (not Anthropic fallback).
+- A test message produces a normal response using the local model.
+- Repeated Ollama discovery errors no longer appear continuously (or no longer affect serving).
+
+## Related
+
+- For generic auth/rate-limit/provider failures, use:
+  - `/troubleshooting/solutions/models-all-models-failed/`

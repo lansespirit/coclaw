@@ -1,112 +1,141 @@
 ---
 name: coclaw-solutions-maintainer
-description: 'Maintain CoClaw troubleshooting Solutions from OpenClaw GitHub issues: sync only the latest 72 hours, triage only newly-seen issues since last run, avoid duplicate Solutions by checking existing site content first, and (when already covered) comment on the issue with the coclaw.com Solution link instead of creating duplicates.'
+description: 'Maintain CoClaw troubleshooting Solutions from recent OpenClaw issues with strict role separation: sync reference/data, incremental triage, standalone classification, manual high-value issue replies, and optional 1-3 new Solutions per run.'
 ---
 
 # CoClaw Solutions Maintainer
 
-目标：按 `docs/TROUBLESHOOTING-SOLUTIONS-MAINTENANCE.md` 的规范持续维护站点 `Solutions`，同时做到：
+目标：基于 `docs/TROUBLESHOOTING-SOLUTIONS-MAINTENANCE.md`，建立“高价值、低噪音”的 issues 维护闭环：
 
-- 仅拉取最近 72 hours 的 issues（减少 API 成本）
-- 仅分析“新增”的 issues（避免重复劳动）
-- 新增/更新 solution 前先核对站点（即本仓库 solutions 内容）是否已覆盖；若已覆盖，直接在 GitHub issue 下评论并附 `coclaw.com` 对应页面链接
+- 每轮先同步 `.ref/openclaw` 到最新
+- 仅对最近 72h 且增量 issues 进入队列
+- 脚本只做“数据同步 + 初步分类建议”，不自动发评论
+- 每条 GitHub 回帖必须人工（或 AI sub-agent 人工化）完整阅读 issue 主贴 + 现有评论后撰写
+- 仅对“使用问题”与“已知 bug 但有稳定 workaround”给出 solution；纯代码 bug / feature / 其他报告跳过
+- 每轮最多新建 1-3 篇 solution
 
-## Quick start（推荐流程）
+## 强约束（必须遵守）
 
-1. 同步最近 72h issues 数据集：
+1. `comment-issues-with-solutions.mjs` 已停用，禁止程序化批量评论。
+2. `triage-recent-issues.mjs` 只做增量检出，不做分析与匹配。
+3. issue 分类由独立脚本执行（建议），最终决策由人工/AI sub-agent 完整阅读后做出。
+4. 回帖必须“先提供可执行价值，再附 coclaw solution 链接”。
+
+## 脚本职责拆分
+
+- 数据同步（外部脚本）
+  - `pnpm sync:issues`
+- 参考源码同步（本 skill）
+  - `node skills/coclaw-solutions-maintainer/scripts/sync-openclaw-ref.mjs`
+- 增量 triage（本 skill）
+  - `node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs`
+- 分类建议（本 skill）
+  - `node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs`
+- 自动评论（本 skill）
+  - `comment-issues-with-solutions.mjs` 已停用，仅输出迁移提示并退出
+
+## 推荐执行流程（每轮）
+
+### 0) 同步 `.ref/openclaw`（必须先跑）
+
+```bash
+node skills/coclaw-solutions-maintainer/scripts/sync-openclaw-ref.mjs
+```
+
+### 1) 同步最近 72h issues 数据集
 
 ```bash
 OPENCLAW_ISSUES_SINCE_HOURS=72 pnpm sync:issues
 ```
 
-说明：GitHub API 需要鉴权以避免低 rate limit。优先用 `GITHUB_TOKEN`，否则确保本机已 `gh auth login`（脚本会自动尝试读取 `gh auth token`）。
-
-2. 仅输出“新增 issues”（带可能匹配的现有 solution）并更新本地 state：
-
-```bash
-node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs
-```
-
-脚本会维护本地 state（默认路径：`.cache/coclaw-solutions-maintainer/state.json`），用于“只分析新增”。
-
-3. （可选）把“已覆盖”的 solutions 链接回填到 GitHub issues（帮助用户自助解决）
-
-先生成一个临时 plan（不会写入 state）：
+### 2) 生成“增量 issues”
 
 ```bash
 node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs \
-  --state .cache/coclaw-solutions-maintainer/state-temp.json \
-  --dry-run \
   --json > .cache/coclaw-solutions-maintainer/triage-latest.json
 ```
 
-然后筛选出要评论的 issues（本仓库已内置一个基于强匹配的 plan 生成逻辑；也可手工编辑 plan）并运行评论脚本：
+### 3) 生成“分类建议队列”（仅建议）
 
 ```bash
-env -u GITHUB_TOKEN -u GH_TOKEN \
-  node skills/coclaw-solutions-maintainer/scripts/comment-issues-with-solutions.mjs --limit 15
+node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs \
+  --triage .cache/coclaw-solutions-maintainer/triage-latest.json \
+  --output .cache/coclaw-solutions-maintainer/classification-latest.json
 ```
 
-说明：如果你的环境里设置了 `GITHUB_TOKEN`（通常权限只覆盖你自己的仓库），`gh` 可能无法在 `openclaw/openclaw` 评论；用 `env -u ...` 可以强制 `gh` 使用本机 keyring 登录信息。
+### 4) 人工 / sub-agent 逐条处理
 
-## 每个新增 issue 的处理规则
+从 `classification-latest.json` 中逐条处理，每条 issue 必须完整阅读：
 
-1. **先查重（必须）**
-   - 先看 triage 输出的 `matches`（现有 solutions 的候选）
-   - 必要时再在本仓库里全文搜索：`src/content/troubleshooting/solutions/*.mdx`
+- issue title/body
+- 现有所有评论
+- 必要时 `.ref/openclaw` 相关源码或配置实现
 
-2. **若已被现有 solution 覆盖**
-   - 不新增 solution（避免 SEO 重复）
-   - 直接在 issue 下评论，附 `coclaw.com` solution 链接
+决策：
 
-GitHub 评论要求：
+- `usage_config` / `usage_deploy` / `usage_channel` / `known_bug_with_workaround`
+  - 先查站内是否已有 solution 覆盖
+  - 有覆盖：写高价值回帖并附链接
+  - 无覆盖：调研后新建 solution（每轮总量 1-3 篇）再回帖
+- `code_bug` / `feature_request` / `other_meta`
+  - 跳过，不回帖
 
-- 不要用“固定模板”刷屏；每条评论都要结合 issue 的症状/报错 + 线程里的关键信息做个性化回复
-- 至少点出**为什么**该 solution 匹配（例如引用 issue 里的某条 error string / close code），并提 1-2 个该 solution 里的关键排查/修复步骤
-- 建议优先用 `comment-issues-with-solutions.mjs`，它会读取 issue + 现有评论并生成个性化回帖，同时会跳过已回过 `coclaw.com` 链接的 issues
+### 5) 手工评论（非模板）
 
-3. **若未覆盖**
-   - 新建或更新对应的 solution 文件：
-     - `src/content/troubleshooting/solutions/<slug>.mdx`
-     - 路由：`/troubleshooting/solutions/<slug>/`
-   - 严格遵守写作规范（Frontmatter + 标题顺序 + `errorSignatures` 规则），详见：
-     - `docs/TROUBLESHOOTING-SOLUTIONS-MAINTENANCE.md`
-   - 在 frontmatter 里补来源（不要镜像 issue 内容）：
-     - `related.githubIssues: [<ISSUE_NUMBER>]`
-
-4. **合并前自检**
-   - `pnpm build`
-   - 自测 solution 页面渲染 + Pagefind 搜索（用 `errorSignatures` 的 token 搜索验证）
-
-## 任务完成后的 Git 操作（commit & push）
-
-每次完成一次“新增/更新 solutions +（可选）发 issue comment”的维护任务后，按以下顺序执行：
-
-1. 确认当前分支
-   - 若当前在 `main` / `master`，先切到新分支（遵循本仓库约定前缀 `codex/`）：
+推荐命令（每条 issue 单独写内容）：
 
 ```bash
-git switch -c codex/solutions-maintenance-<yyyymmdd>
+gh issue comment <ISSUE_NUMBER> \
+  --repo openclaw/openclaw \
+  --body-file /tmp/issue-<ISSUE_NUMBER>-reply.md
 ```
 
-2. 提交
+回帖质量要求：
+
+- 必须引用该 issue 的具体症状 / 报错 / 环境信息
+- 给出 1-2 条可立即执行的步骤，并说明为何适用
+- 若附 solution 链接，链接是补充而不是唯一内容
+
+### 6) 合并前校验
+
+```bash
+pnpm build
+```
+
+并手动验证：
+
+- 新增/更新 solution 页面可渲染
+- Pagefind 可通过 `errorSignatures` 关键 token 检索命中
+
+## Sub-agent 分工建议（防止主任务跑偏）
+
+- Agent A（Ref Sync）
+  - 仅负责 `.ref/openclaw` 同步
+- Agent B（Data + Triage）
+  - 仅负责 issues 同步与增量 triage
+- Agent C（Classifier）
+  - 仅负责分类建议输出
+- Agent D（Resolver）
+  - 逐条 issue 深读，给出最终动作：`link existing` / `create solution` / `skip`
+- Agent E（Author）
+  - 撰写 1-3 篇 solution（若需要）
+- Agent F（Commenter）
+  - 根据 Resolver 结论，逐条写“高价值非模板回帖”，并执行 `gh issue comment`
+- Agent G（QA）
+  - 构建与检索验证
+
+## Git 操作
+
+完成一轮维护后：
 
 ```bash
 git add -A
-git commit -m "docs(troubleshooting): update solutions from recent issues"
-```
-
-3. 推送
-
-```bash
+git commit -m "docs(troubleshooting): maintain solutions from incremental issues"
 git push -u origin HEAD
 ```
 
-## 状态与“只分析新增”
-
-- triage 脚本以 issue `number` 去重：同一个 issue 昨天已经处理过，今天再次拉取不会重复出现在“新增列表”里。
-- 若确实希望“已处理 issue 但今天有新信息（新评论/新根因）也要重新进入分析”，运行：
+若当前在 `main` / `master`，先切分支（前缀 `codex/`）：
 
 ```bash
-node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs --include-updated
+git switch -c codex/solutions-maintenance-<yyyymmdd>
 ```
