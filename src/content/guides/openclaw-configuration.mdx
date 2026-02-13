@@ -1,0 +1,382 @@
+---
+title: "OpenClaw Configuration Guide: openclaw.json, Models, Gateway, Channels, and Plugins"
+description: "A beginner-friendly but thorough guide to OpenClaw configuration: where openclaw.json lives, safe defaults, model/provider setup, gateway auth/networking, channels, plugins, and the most common config pitfalls."
+category: "deployment"
+difficulty: "Beginner"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+time: "35 min"
+publishDate: 2026-02-13
+lastUpdated: 2026-02-13
+steps:
+  - title: "Know where config lives and how precedence works"
+    content: "Start by locating your state directory and openclaw.json, and learn what overwrites what (CLI vs file vs env)."
+  - title: "Start from a safe minimal config"
+    content: "Set a conservative gateway auth mode + bind, then add channels intentionally with allowlists/mention rules."
+  - title: "Configure models/providers the right way"
+    content: "Pin a model ref like provider/model, and define provider catalogs with correct model ids and base URLs."
+  - title: "Use the right tool for edits (generator vs CLI vs file)"
+    content: "Avoid footguns: use the config generator for structure, CLI for small edits, and the file for versionable changes."
+  - title: "Debug config with a small set of commands"
+    content: "Use config get, models status --probe, gateway status, and logs to diagnose 80% of misconfigurations."
+keywords:
+  - "openclaw.json"
+  - "configuration"
+  - "gateway"
+  - "models"
+  - "providers"
+  - "ollama"
+  - "token auth"
+  - "allowlist"
+---
+
+This guide is a "map" of OpenClaw configuration. It is not a full schema reference, but it should get you from
+"I have a config file" to "I can change behavior confidently and debug problems quickly."
+
+If you are brand new, start here first:
+
+- [/guides/new-user-checklist](/guides/new-user-checklist)
+
+If you want a safe starting point without hand-editing JSON, use:
+
+- [OpenClaw Config Generator](/openclaw-config-generator)
+
+If you are currently blocked by an error, jump to:
+
+- [Troubleshooting quick links](#troubleshooting-quick-links)
+
+## 0) Where configuration lives
+
+OpenClaw is stateful. Most users should treat the **state directory** as "the install":
+
+- Default state directory: `~/.openclaw/`
+- Default config file: `~/.openclaw/openclaw.json`
+
+If you are in Docker/CI/remote hosts, the state directory may be overridden (for example via an environment variable
+or a container volume). When debugging, always confirm you are editing the same config that the gateway is reading.
+
+### Config file path overrides (the 60-second mental model)
+
+When something "ignores" your config, it is often because you are editing the wrong file.
+
+Common overrides:
+
+- `OPENCLAW_STATE_DIR` changes where the entire state (sessions, creds, caches) lives.
+- `OPENCLAW_CONFIG_PATH` points the gateway at a specific config file (can be outside the state dir).
+
+Practical rule: if you are running OpenClaw via a service manager (launchd/systemd) or Docker, the runtime environment
+may not match your interactive shell. Confirm the service is using the same `OPENCLAW_CONFIG_PATH` / `OPENCLAW_STATE_DIR`
+you think it is.
+
+Tip: you can run multiple isolated gateways on one machine by giving each instance its own state + config:
+
+```bash
+OPENCLAW_STATE_DIR=~/.openclaw-main OPENCLAW_CONFIG_PATH=~/.openclaw-main/openclaw.json openclaw gateway --port 18789
+OPENCLAW_STATE_DIR=~/.openclaw-lab  OPENCLAW_CONFIG_PATH=~/.openclaw-lab/openclaw.json  openclaw gateway --port 19001
+```
+
+## 1) Three ways to change config (and when to use each)
+
+### A) Config generator (best for structure)
+
+The generator helps you avoid schema/indentation mistakes and keeps you from accidentally enabling unsafe defaults:
+
+- [OpenClaw Config Generator](/openclaw-config-generator)
+
+### B) CLI config commands (best for small edits)
+
+For targeted changes, prefer CLI writes (they tend to preserve structure better than manual edits):
+
+```bash
+openclaw config get agents.defaults.model.primary
+openclaw config set gateway.bind loopback
+```
+
+### C) Editing `openclaw.json` (best for "versionable" config)
+
+This is the best option if you want to store config in git, review diffs, and make grouped changes.
+
+Important: OpenClaw allows JSON5-style syntax in many places (comments, trailing commas). If you use strict JSON tools,
+you may accidentally break formatting or remove comments.
+
+## 2) Secrets and modular config (recommended once your config grows)
+
+### Use env var substitution for secrets
+
+Avoid committing tokens and API keys into `openclaw.json`. Prefer env var substitution:
+
+```json5
+{
+  gateway: { auth: { mode: "token", token: "${OPENCLAW_GATEWAY_TOKEN}" } },
+  models: {
+    providers: {
+      openrouter: { apiKey: "${OPENROUTER_API_KEY}" },
+    },
+  },
+}
+```
+
+Notes:
+
+- Only uppercase env var names are substituted (`[A-Z_][A-Z0-9_]*`).
+- Missing or empty values typically fail at load time (good: fail fast).
+- To output a literal `${VAR}` string, escape like `$${VAR}`.
+
+Where env vars can come from (common defaults):
+
+- The gateway parent process environment (launchd/systemd/Docker environment is what matters).
+- `.env` in your current working directory (if present).
+- `~/.openclaw/.env` as a global fallback.
+
+If you consistently see "token missing" or providers look unauthenticated only when running as a service, you are
+debugging **environment propagation**, not JSON syntax.
+
+Optional (advanced): if you do not want to hardcode env vars into a service definition, OpenClaw can import missing
+env vars from your login shell. This can help on macOS/Linux when your shell profile exports API keys, but your service
+environment does not.
+
+```json5
+{
+  env: {
+    shellEnv: { enabled: true, timeoutMs: 15000 },
+  },
+}
+```
+
+Trade-off: shell env import can hide where secrets come from. Prefer explicit service env vars for production.
+
+### Split large configs with `$include`
+
+Once your config contains multiple channels, multiple agents, and custom models, use `$include` to keep it readable.
+
+Example:
+
+```json5
+// ~/.openclaw/openclaw.json
+{
+  gateway: { $include: "./gateway.json5" },
+  agents: { $include: "./agents.json5" },
+  models: { $include: "./models.json5" },
+  channels: { $include: "./channels.json5" },
+}
+```
+
+Good to know:
+
+- `$include: "./file.json5"` replaces the containing object.
+- `$include: ["./a.json5", "./b.json5"]` deep-merges in order (later wins).
+- Sibling keys are applied after includes (so you can override included defaults).
+- Relative paths resolve relative to the including file.
+- Nested includes are supported up to 10 levels deep.
+
+Security note: `$include` is great for keeping secrets out of the main file (for example, a local `secrets.json5`
+that is excluded by gitignore), but you still need to protect the included file at rest.
+
+## 3) Minimal safe baseline (gateway first, then channels)
+
+A common beginner failure mode is: "It works on localhost, then I expose it and accidentally run an open relay."
+
+Start with a conservative gateway:
+
+```json5
+{
+  gateway: {
+    mode: "local",
+    bind: "loopback", // only local machine
+    auth: { mode: "token", token: "${OPENCLAW_GATEWAY_TOKEN}" },
+  },
+}
+```
+
+Notes:
+
+- Prefer token auth even locally. It avoids "unauthorized" surprises in the Control UI and makes habits portable.
+- If you use env substitution (`${...}`), make sure your runtime (launchd/systemd/docker) actually exports that env var.
+
+## 4) Gateway reload behavior (why some changes \"need a restart\")
+
+Most config changes hot-apply, but gateway server settings usually require a restart (bind/port/auth/TLS/etc).
+
+If you want predictable reload behavior, set an explicit reload mode:
+
+```json5
+{
+  gateway: {
+    reload: { mode: "hybrid", debounceMs: 300 }, // hot | hybrid | restart | off
+  },
+}
+```
+
+If you edit config and nothing changes, confirm:
+
+- you edited the active config file (see [Config file path overrides](#config-file-path-overrides-the-60-second-mental-model)), and
+- the gateway reload mode isn't set to `off`, and
+- your change is in a category that hot-applies.
+
+If you need a quick \"it must pick up changes\" workflow, use:
+
+```bash
+openclaw gateway restart
+```
+
+## 5) Models & providers: the mental model that prevents 50% of bugs
+
+### Model "refs" vs provider catalog "ids"
+
+You will see two similar-looking strings:
+
+- **Model ref** (selection): `provider/model` (example: `ollama/qwen2.5:7b`)
+- **Model id** (catalog entry): `model` only (example: `qwen2.5:7b`)
+
+In practice:
+
+- Use refs in `agents.defaults.model.primary` and when selecting with CLI.
+- Use raw ids in `models.providers.<provider>.models[].id`.
+
+Extra gotcha: when you run `openclaw models status --probe` with `--agent <id>`, it uses the agent's model/auth state.
+When omitted, the CLI may use `OPENCLAW_AGENT_DIR` / `PI_CODING_AGENT_DIR` if set (common in multi-agent setups).
+
+### A correct Ollama config example
+
+```json5
+{
+  models: {
+    mode: "merge",
+    providers: {
+      ollama: {
+        // Prefer 127.0.0.1 to avoid IPv6 localhost (::1) edge cases.
+        baseUrl: "http://127.0.0.1:11434/v1",
+        api: "openai-completions",
+        models: [{ id: "qwen2.5:7b", name: "qwen2.5:7b" }],
+      },
+    },
+  },
+  agents: {
+    defaults: {
+      model: { primary: "ollama/qwen2.5:7b" },
+    },
+  },
+}
+```
+
+If Ollama is configured but requests still fall back or silently fail, see:
+
+- [/troubleshooting/solutions/ollama-configured-but-falls-back-to-anthropic/](/troubleshooting/solutions/ollama-configured-but-falls-back-to-anthropic/)
+
+### Verify model selection the right way
+
+Before you test in the UI, confirm what the runtime actually resolved:
+
+```bash
+openclaw models status --probe
+```
+
+If you see a different provider than expected, you are debugging **resolution** (config/catalog), not generation quality.
+
+### About `models.mode` (merge vs replace)
+
+When you add `models.providers`, you can choose how it combines with the built-in/implicit catalog:
+
+- `merge` (common): add/override providers and keep everything else available.
+- `replace` (strict): only the providers you list are available.
+
+If you are building a locked-down install for a team, `replace` can reduce accidental provider drift. If you are a new
+user, `merge` is usually less surprising.
+
+### Two \"gotcha\" checks for local endpoints
+
+If you point a provider at a local process (Ollama, LM Studio, vLLM, LiteLLM, etc.):
+
+- Prefer `127.0.0.1` over `localhost` to avoid IPv6 `::1` edge cases.
+- Make sure the gateway runtime is the same network namespace as the local process (containers and WSL can break this).
+
+## 6) Common config pitfalls (and how to avoid them)
+
+### "Config validation failed" after editing
+
+Usually means:
+
+- A key is misspelled or moved between versions.
+- JSON/JSON5 parse error (missing comma, unclosed quote).
+
+Fix flow:
+
+- [/troubleshooting/solutions/config-validation-failed/](/troubleshooting/solutions/config-validation-failed/)
+
+### "Model not allowed" (allowlist confusion)
+
+If `agents.defaults.models` is non-empty, it becomes an allowlist.
+
+Fix flow:
+
+- [/troubleshooting/solutions/model-not-allowed/](/troubleshooting/solutions/model-not-allowed/)
+
+### Token/auth issues that look like "no response"
+
+Two common patterns:
+
+- Control UI is "unauthorized" because you opened a non-tokenized URL (use `openclaw dashboard`).
+- Gateway token isn't being read in the runtime environment (launchd/systemd/docker env mismatch).
+
+### Docker permission errors writing config/state
+
+If your container can't write temporary config files under the mounted state directory:
+
+- [/troubleshooting/solutions/docker-eacces-openclaw-config-dir/](/troubleshooting/solutions/docker-eacces-openclaw-config-dir/)
+
+## 7) Debugging: the small command set to memorize
+
+```bash
+# What config is the gateway using?
+openclaw config get gateway
+
+# Is the gateway running and reachable?
+openclaw gateway status
+
+# Which model/provider will actually be used?
+openclaw models status --probe
+
+# Follow logs while reproducing an issue
+openclaw logs --follow
+```
+
+When you share logs publicly, redact:
+
+- gateway tokens
+- API keys
+- OAuth tokens
+
+## 8) Fast FAQ (symptom -> fix)
+
+| Symptom | Usually means | First things to try | Deep link |
+| --- | --- | --- | --- |
+| Gateway won't start after editing config | JSON5 parse error or strict validation error | `openclaw doctor` then `openclaw doctor --fix` | [/troubleshooting/solutions/config-validation-failed/](/troubleshooting/solutions/config-validation-failed/) |
+| Gateway refuses to bind without auth | Safety check: binding to non-loopback requires auth | Configure `gateway.auth` then restart | [/troubleshooting/solutions/gateway-refusing-to-bind-without-auth/](/troubleshooting/solutions/gateway-refusing-to-bind-without-auth/) |
+| Control UI says "unauthorized" | You opened a non-tokenized URL or token isn't set in the browser | Run `openclaw dashboard` and use the tokenized URL | [/troubleshooting/solutions/control-ui-unauthorized/](/troubleshooting/solutions/control-ui-unauthorized/) |
+| Gateway is running but probes fail | CLI is probing the wrong instance / remote mode mismatch | Check gateway URL/mode, then re-probe | [/troubleshooting/solutions/gateway-service-running-but-probe-fails/](/troubleshooting/solutions/gateway-service-running-but-probe-fails/) |
+| `/model` says "model not allowed" | `agents.defaults.models` allowlist blocks selection | `openclaw config get agents.defaults.models` | [/troubleshooting/solutions/model-not-allowed/](/troubleshooting/solutions/model-not-allowed/) |
+| Ollama configured but runtime still falls back | Endpoint unreachable from gateway runtime, or model catalog mismatch | Probe: `openclaw models status --probe` | [/troubleshooting/solutions/ollama-configured-but-falls-back-to-anthropic/](/troubleshooting/solutions/ollama-configured-but-falls-back-to-anthropic/) |
+| Docker shows `openclaw.json.*.tmp` EACCES | Bind-mounted state dir isn't writable by container uid | Fix uid/gid or mount ownership | [/troubleshooting/solutions/docker-eacces-openclaw-config-dir/](/troubleshooting/solutions/docker-eacces-openclaw-config-dir/) |
+| Telegram bot \"connects\" but nothing arrives | Bot not in group / privacy mode / mis-set group policy | Follow Telegram guide + validate updates | [/guides/telegram-setup](/guides/telegram-setup) |
+| You want a safe config without hand-editing JSON | You need a schema-aligned baseline | Use the generator, then iterate with CLI edits | [/openclaw-config-generator](/openclaw-config-generator) |
+
+## Troubleshooting quick links
+
+- Gateway won't start / validation errors:
+  - [/troubleshooting/solutions/config-validation-failed/](/troubleshooting/solutions/config-validation-failed/)
+- Ollama configured but still falls back:
+  - [/troubleshooting/solutions/ollama-configured-but-falls-back-to-anthropic/](/troubleshooting/solutions/ollama-configured-but-falls-back-to-anthropic/)
+- Model not allowed:
+  - [/troubleshooting/solutions/model-not-allowed/](/troubleshooting/solutions/model-not-allowed/)
+- Telegram setup:
+  - [/guides/telegram-setup](/guides/telegram-setup)
+- WhatsApp setup:
+  - [/guides/whatsapp-setup](/guides/whatsapp-setup)
+
+## More configuration-heavy guides
+
+- Docker deployment: [/guides/docker-deployment](/guides/docker-deployment)
+- Updating/migration: [/guides/updating-and-migration](/guides/updating-and-migration)
