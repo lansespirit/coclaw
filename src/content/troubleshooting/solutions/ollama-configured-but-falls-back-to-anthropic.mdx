@@ -19,7 +19,7 @@ keywords:
   - "baseUrl"
   - "local model"
 publishDate: 2026-02-11
-lastUpdated: 2026-02-11
+lastUpdated: 2026-02-13
 author: "CoClaw Team"
 related:
   docs:
@@ -47,6 +47,8 @@ Common causes:
 - `models.providers.ollama.baseUrl` is reachable from your host shell, but not from the actual runtime context (Docker/WSL/container namespace).
 - Discovery requests fail and leave model resolution relying on stale/default provider settings.
 - `agents.defaults.model.primary` is not pinned to an `ollama/...` id, so selection falls back to another provider.
+- You defined `models.providers.ollama.models[]`, but set each `id` to a *fully-qualified* ref like `ollama/qwen2.5:7b`.
+  In provider catalogs, `id` should be the **raw model id** (for example `qwen2.5:7b`), while `ollama/qwen2.5:7b` is the **reference** you use when selecting a model in `agents.defaults.model.primary`.
 
 ## Fix
 
@@ -60,6 +62,8 @@ curl -sS http://<ollama-host>:11434/v1/models
 
 If this fails inside runtime, fix networking first (host mapping, bridge address, firewall, WSL host routing).
 
+Tip: if `localhost` resolves to IPv6 (`::1`) on your system but Ollama is only listening on IPv4, prefer `127.0.0.1`.
+
 ### 2) Pin Ollama provider and models explicitly
 
 Use explicit provider config and model ids instead of relying only on auto-discovery.
@@ -70,10 +74,11 @@ Use explicit provider config and model ids instead of relying only on auto-disco
     mode: "merge",
     providers: {
       ollama: {
-        baseUrl: "http://localhost:11434/v1",
+        baseUrl: "http://127.0.0.1:11434/v1",
         apiKey: "ollama-local",
         api: "openai-completions",
-        models: [{ id: "ollama/qwen2.5:7b", name: "qwen2.5:7b" }],
+        // IMPORTANT: provider catalogs use raw ids (no "ollama/" prefix).
+        models: [{ id: "qwen2.5:7b", name: "qwen2.5:7b" }],
       },
     },
   },
