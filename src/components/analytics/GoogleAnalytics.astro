@@ -2,7 +2,9 @@
 // Prefer process.env so Cloudflare Pages build-time env vars work even if Vite doesn't
 // surface them on `import.meta.env` in this context.
 const gaId = process.env.PUBLIC_GA_MEASUREMENT_ID ?? import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
-const enabled = import.meta.env.PROD && typeof gaId === 'string' && gaId.length > 0;
+const isProdBuild =
+  import.meta.env.PROD || process.env.CF_PAGES === '1' || process.env.NODE_ENV === 'production';
+const enabled = isProdBuild && typeof gaId === 'string' && gaId.length > 0;
 
 // Keep the inline JS opaque to Astro/Prettier parsers.
 const inlineConfigJs = enabled

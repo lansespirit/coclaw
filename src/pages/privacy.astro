@@ -3,7 +3,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/layout/Section.astro';
 
 const gaId = process.env.PUBLIC_GA_MEASUREMENT_ID ?? import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
-const gaEnabled = import.meta.env.PROD && typeof gaId === 'string' && gaId.length > 0;
+const isProdBuild =
+  import.meta.env.PROD || process.env.CF_PAGES === '1' || process.env.NODE_ENV === 'production';
+const gaEnabled = isProdBuild && typeof gaId === 'string' && gaId.length > 0;
 
 const lastUpdated = gaEnabled ? 'February 15, 2026' : 'February 1, 2026';
 ---
