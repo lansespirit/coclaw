@@ -276,13 +276,15 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
       }
     } else {
       const envVar = ensureEnvVarName(state.ai.custom.apiKeyEnvVar);
-      requiredEnvVars.push(envVar);
       if (!/^[A-Z_][A-Z0-9_]*$/.test(envVar)) {
         issues.push({
-          level: 'warning',
+          level: 'error',
           path: 'ai.custom.apiKeyEnvVar',
-          message: 'Env var names should be uppercase (example: CUSTOM_PROVIDER_API_KEY).',
+          message:
+            'Env var names must be uppercase (example: CUSTOM_PROVIDER_API_KEY). OpenClaw only substitutes ${VARS} for uppercase names.',
         });
+      } else {
+        requiredEnvVars.push(envVar);
       }
     }
   } else if (state.secretsMode === 'env') {

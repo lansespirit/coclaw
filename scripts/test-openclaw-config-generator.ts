@@ -25,7 +25,7 @@ function baseState(): OpenClawConfigGeneratorState {
       },
       custom: {
         providerId: 'custom-proxy',
-        api: 'openai-completions',
+        api: 'openai-responses',
         baseUrl: 'http://localhost:4000/v1',
         apiKeyEnvVar: 'CUSTOM_PROVIDER_API_KEY',
         apiKey: '',
@@ -194,6 +194,16 @@ function run() {
       agents?: { defaults?: { model?: { fallbacks?: unknown } } };
     };
     assert.deepEqual(cfg.agents?.defaults?.model?.fallbacks, ['openai/gpt-4.1']);
+  }
+
+  // 6b) Custom provider: env var names must be uppercase (OpenClaw only substitutes ${VARS} for uppercase)
+  {
+    const s = baseState();
+    s.secretsMode = 'env';
+    s.ai.mode = 'custom';
+    s.ai.custom.apiKeyEnvVar = 'custom_provider_api_key';
+    const res = buildOpenClawConfig(s);
+    assert.ok(hasIssue(res, 'error', 'ai.custom.apiKeyEnvVar'));
   }
 
   // 7) Discord guild allowlist: allowlist mode + empty guilds should not error (blocks guild msgs)

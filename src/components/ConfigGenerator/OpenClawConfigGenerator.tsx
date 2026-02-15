@@ -45,6 +45,23 @@ function asInt(value: string, fallback: number): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
+const ENV_VAR_NAME_RE = /^[A-Z_][A-Z0-9_]*$/;
+
+function looksLikeApiKey(value: string): boolean {
+  const t = value.trim();
+  if (!t) return false;
+  if (ENV_VAR_NAME_RE.test(t)) return false;
+
+  // Common API key prefixes (best signal).
+  if (/^(sk-|sk-proj-|sk-or-|rk-|xoxb-|xapp-|ghp_|hf_|AIza|eyJ)/.test(t)) return true;
+
+  // Heuristic: long token-like strings are more likely a pasted key than an env var name.
+  // Keep this conservative to avoid misclassifying lowercased env var names.
+  if (t.length >= 32 && /^[A-Za-z0-9._-]+$/.test(t)) return true;
+
+  return false;
+}
+
 type ChannelKind = 'telegram' | 'whatsapp' | 'discord' | 'slack';
 
 function DmPolicyLabel({
@@ -192,7 +209,7 @@ const defaultState: OpenClawConfigGeneratorState = {
     },
     custom: {
       providerId: 'custom-proxy',
-      api: 'openai-completions',
+      api: 'openai-responses',
       baseUrl: 'http://localhost:4000/v1',
       apiKeyEnvVar: 'CUSTOM_PROVIDER_API_KEY',
       apiKey: '',
@@ -528,10 +545,28 @@ export default function OpenClawConfigGenerator() {
                         placeholder="CUSTOM_PROVIDER_API_KEY"
                         value={state.ai.custom.apiKeyEnvVar}
                         onValueChange={(v) =>
-                          setState((s) => ({
-                            ...s,
-                            ai: { ...s.ai, custom: { ...s.ai.custom, apiKeyEnvVar: v } },
-                          }))
+                          setState((s) => {
+                            // "Magic mode": if the user pastes a real API key into the env-var field,
+                            // switch to inline secrets automatically so the exported JSON is immediately usable.
+                            if (s.secretsMode === 'env' && s.ai.mode === 'custom' && looksLikeApiKey(v)) {
+                              return {
+                                ...s,
+                                secretsMode: 'inline',
+                                ai: {
+                                  ...s.ai,
+                                  custom: {
+                                    ...s.ai.custom,
+                                    apiKey: v,
+                                  },
+                                },
+                              };
+                            }
+
+                            return {
+                              ...s,
+                              ai: { ...s.ai, custom: { ...s.ai.custom, apiKeyEnvVar: v } },
+                            };
+                          })
                         }
                         variant="bordered"
                         description="Will be rendered as ${ENV_VAR} in openclaw.json"
