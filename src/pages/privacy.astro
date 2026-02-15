@@ -2,10 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/layout/Section.astro';
 
-const gaEnabled =
-  import.meta.env.PROD &&
-  typeof import.meta.env.PUBLIC_GA_MEASUREMENT_ID === 'string' &&
-  import.meta.env.PUBLIC_GA_MEASUREMENT_ID.length > 0;
+const gaId = process.env.PUBLIC_GA_MEASUREMENT_ID ?? import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
+const gaEnabled = import.meta.env.PROD && typeof gaId === 'string' && gaId.length > 0;
 
 const lastUpdated = gaEnabled ? 'February 15, 2026' : 'February 1, 2026';
 ---
