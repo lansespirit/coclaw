@@ -548,7 +548,11 @@ export default function OpenClawConfigGenerator() {
                           setState((s) => {
                             // "Magic mode": if the user pastes a real API key into the env-var field,
                             // switch to inline secrets automatically so the exported JSON is immediately usable.
-                            if (s.secretsMode === 'env' && s.ai.mode === 'custom' && looksLikeApiKey(v)) {
+                            if (
+                              s.secretsMode === 'env' &&
+                              s.ai.mode === 'custom' &&
+                              looksLikeApiKey(v)
+                            ) {
                               return {
                                 ...s,
                                 secretsMode: 'inline',
