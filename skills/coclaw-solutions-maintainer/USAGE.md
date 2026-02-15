@@ -104,9 +104,19 @@ pnpm analyze:issues
 1. `skip`
    - 代码 bug / feature request / 其他不适合 solution 的问题
 2. `link existing solution`
-   - 站内已有覆盖，写高价值评论并附链接
+   - 站内已有覆盖：**仍然要在 GitHub issue 下写高价值回复**，并在末尾附 solution 链接（链接仅作补充）
 3. `create solution + comment`
-   - 站内未覆盖，先调研并新增 solution（每轮最多 1-3 篇），再评论
+   - 站内未覆盖：先调研并新增 solution（每轮最多 1-3 篇）
+   - **先 commit & push 到 `main`（保证 Cloudflare 部署后用户可访问）**
+   - 再发布 GitHub 评论并附链接
+
+补充说明（很重要）：
+
+- 本 workflow 的目标是：**为 OpenClaw “使用问题” issues 提供可执行价值的回复**。
+- Solution 是“可复用的沉淀”，不是每次回复的前置条件：
+  - 若问题足够通用/可复用：创建 solution + push + 评论。
+  - 若问题较零散但仍是使用问题：只评论（不给 solution 也可以），不要为了凑 solution 而写。
+- 每条“可回帖”的 issue（`usage_*` / `known_bug_with_workaround`）都应优先产出回复；不要只挑“能写新 solution”的 issue。
 
 ### Step 5：手工评论（禁止模板批量）
 
@@ -115,6 +125,11 @@ gh issue comment <ISSUE_NUMBER> \
   --repo openclaw/openclaw \
   --body-file /tmp/issue-<ISSUE_NUMBER>-reply.md
 ```
+
+评论时机建议：
+
+- 如果引用的是**已有** solution：可直接评论（链接应已可访问）。
+- 如果引用的是**本轮新写** solution：先按“提交与推送”把 `main` 推上去，再评论（避免用户点开 404）。
 
 ### Step 6：质量校验
 
@@ -223,19 +238,18 @@ node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs --limit 50 -
 
 ## 7. 提交与推送
 
-完成一轮后：
+如果本轮新增/更新了 `src/content/troubleshooting/solutions/*.mdx`（或其他会影响站点渲染/搜索的内容），必须：
 
 ```bash
 git add -A
 git commit -m "docs(troubleshooting): maintain solutions from incremental issues"
-git push -u origin HEAD
+git push origin main
 ```
 
-若当前分支是 `main/master` 且你希望独立维护分支，建议先创建：
+重要：不要为 solutions 维护单独开分支。
 
-```bash
-git switch -c codex/solutions-maintenance-<yyyymmdd>
-```
+- 站点（Cloudflare）通常从 `main` 部署；不 push 到 `main`，新 solution 链接对用户不可用。
+- 只有当你本轮**确实没有改动站点内容**（只同步了 `.cache/` 或本地数据集）时，才可以不 commit/push。
 
 ---
 
