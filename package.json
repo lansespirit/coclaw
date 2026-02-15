@@ -20,9 +20,19 @@
     "test:config-generator": "tsx scripts/test-openclaw-config-generator.ts",
     "lint": "eslint . --ext .js,.ts,.astro",
     "lint:fix": "eslint . --ext .js,.ts,.astro --fix",
+    "lint:staged": "lint-staged",
     "format": "prettier --write \"**/*.{js,mjs,cjs,ts,tsx,astro,json,md}\"",
     "format:check": "prettier --check \"**/*.{js,mjs,cjs,ts,tsx,astro,json,md}\"",
     "prepare": "husky"
+  },
+  "lint-staged": {
+    "**/*.{js,mjs,cjs,ts,tsx,astro}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{json,md}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@astrojs/mdx": "^4.3.13",
@@ -52,6 +62,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^1.5.0",
     "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "pagefind": "^1.4.0",
     "prettier": "^3.8.1",
     "prettier-plugin-astro": "^0.14.1",
