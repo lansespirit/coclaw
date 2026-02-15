@@ -4,6 +4,8 @@ import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 import { GuideStepsAccordion } from '../../components/GuideStepsAccordion';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { buildWeightedTokens, topRelated } from '../../lib/related';
 import { Button, Chip } from '@heroui/react';
 
 export const getStaticPaths = (async () => {
@@ -20,6 +22,85 @@ const { Content } = await entry.render();
 const { title, difficulty, platforms, time, description, steps } = entry.data;
 const platformLabel = platforms.join(' / ');
 const hasBody = Boolean(entry.body?.trim());
+
+const allGuides = await getCollection('guides', ({ data }) => !data.draft);
+const allSolutions = await getCollection(
+  'troubleshooting',
+  ({ data }) => !data.draft && data.kind === 'solution'
+);
+const allGettingStarted = await getCollection('getting-started', ({ data }) => !data.draft);
+
+const seedTokens = buildWeightedTokens([
+  { text: title, weight: 3 },
+  { text: description, weight: 2 },
+  { text: entry.data.keywords ?? [], weight: 2 },
+  { text: entry.data.category, weight: 1 },
+  { text: entry.data.platforms ?? [], weight: 1 },
+]);
+
+const relatedGuides = topRelated({
+  seed: { id: entry.slug, tokens: seedTokens },
+  candidates: allGuides.map((g) => ({
+    id: g.slug,
+    tokens: buildWeightedTokens([
+      { text: g.data.title, weight: 3 },
+      { text: g.data.description, weight: 2 },
+      { text: g.data.keywords ?? [], weight: 2 },
+      { text: g.data.category, weight: 1 },
+      { text: g.data.platforms ?? [], weight: 1 },
+    ]),
+    item: g,
+  })),
+  limit: 3,
+}).map(({ item }) => ({
+  href: `/guides/${item.slug}`,
+  title: item.data.title,
+  description: item.data.description,
+  badge: 'Guide',
+}));
+
+const relatedSolutions = topRelated({
+  seed: { id: entry.slug, tokens: seedTokens },
+  candidates: allSolutions.map((s) => ({
+    id: s.slug,
+    tokens: buildWeightedTokens([
+      { text: s.data.title, weight: 3 },
+      { text: s.data.description, weight: 2 },
+      { text: s.data.keywords ?? [], weight: 2 },
+      { text: s.data.component, weight: 1 },
+      { text: s.data.os ?? [], weight: 1 },
+      { text: s.data.channel ?? [], weight: 1 },
+      { text: s.data.errorSignatures ?? [], weight: 1 },
+    ]),
+    item: s,
+  })),
+  limit: 3,
+}).map(({ item }) => ({
+  href: `/troubleshooting/${item.slug}`,
+  title: item.data.title,
+  description: item.data.description,
+  badge: 'Fix',
+}));
+
+const relatedGettingStarted = topRelated({
+  seed: { id: entry.slug, tokens: seedTokens },
+  candidates: allGettingStarted.map((d) => ({
+    id: d.slug,
+    tokens: buildWeightedTokens([
+      { text: d.data.title, weight: 3 },
+      { text: d.data.description, weight: 2 },
+      { text: d.data.keywords ?? [], weight: 2 },
+      { text: d.data.category, weight: 1 },
+    ]),
+    item: d,
+  })),
+  limit: 2,
+}).map(({ item }) => ({
+  href: `/getting-started/${item.slug}`,
+  title: item.data.title,
+  description: item.data.description,
+  badge: 'Start',
+}));
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const structuredData = {
@@ -62,6 +143,11 @@ const structuredData = {
           </article>
         ) : null
       }
+
+      <RelatedLinks
+        title="Related Resources"
+        items={[...relatedGuides, ...relatedSolutions, ...relatedGettingStarted]}
+      />
 
       <div
         class="mt-16 flex flex-wrap gap-4 items-center justify-between p-8 rounded-3xl bg-primary/5 border border-primary/10"

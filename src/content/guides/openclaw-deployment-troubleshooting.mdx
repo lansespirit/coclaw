@@ -1,0 +1,376 @@
+---
+title: 'OpenClaw Deployment Troubleshooting: Token Resets, STARTING Containers, and Startup Probe Failures'
+description: 'A platform-aware guide for Alibaba Cloud, Volcengine, Zeabur, Unraid, AWS, and Google Cloud: why image resets force token re-entry, how to persist OpenClaw state correctly, and how to debug STARTING / startup probe failed step-by-step.'
+category: 'deployment'
+difficulty: 'Intermediate'
+platforms:
+  - 'Alibaba Cloud'
+  - 'Volcengine'
+  - 'Zeabur'
+  - 'Unraid'
+  - 'AWS'
+  - 'Google Cloud'
+  - 'Kubernetes'
+  - 'Docker'
+  - 'Self-hosted'
+time: '25 min'
+publishDate: 2026-02-15
+lastUpdated: 2026-02-15
+steps:
+  - title: "Start with the real root cause: you didn't lose a token, you lost state"
+    content: 'OpenClaw is stateful. If your state directory is not persisted, resets/redeploys wipe tokens, configs, sessions, and device approvals together.'
+  - title: 'Make tokens reproducible and state persistent'
+    content: 'Pin gateway auth via env vars and mount a persistent state directory (host volume, EBS/PD, EFS, etc.).'
+  - title: 'Fix STARTING / probe failures using a layered checklist'
+    content: 'Verify the process is alive, the port is listening, bind/auth are correct, config loads cleanly, and the platform health check is not killing the service too early.'
+  - title: 'Apply platform specifics (Alibaba Cloud / Zeabur / Unraid / AWS / GCP)'
+    content: 'Each platform differs in what \"reset\" means, how persistence is configured, and how health checks are performed.'
+  - title: 'Do one backup + restore drill'
+    content: 'Practice restoring the state directory and reusing the same token so \"reset day\" is not a surprise.'
+keywords:
+  - 'STARTING'
+  - 'startup probe failed'
+  - 'connect ECONNREFUSED'
+  - 'token'
+  - 'OPENCLAW_GATEWAY_TOKEN'
+  - 'OPENCLAW_STATE_DIR'
+  - 'Zeabur'
+  - 'Unraid'
+  - 'AWS'
+  - 'Google Cloud'
+---
+
+Deployment problems often look like this:
+
+- After an image reset / OS reinstall / container rebuild, the Control UI asks you to enter the token again.
+- Your platform is stuck in `STARTING` with errors like:
+  - `Startup probe failed: dial tcp ... connect: connection refused`
+- The Control UI disconnects with:
+  - `disconnected (1008): pairing required`
+
+This guide gives you a repeatable playbook: fix persistence first (so you stop "losing" tokens), then debug STARTING
+and probe failures from the bottom up.
+
+Further reading in this site:
+
+- Configuration fundamentals: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- Docker quick start: [/guides/docker-deployment](/guides/docker-deployment)
+- Related troubleshooting:
+  - [/troubleshooting/solutions/gateway-refusing-to-bind-without-auth](/troubleshooting/solutions/gateway-refusing-to-bind-without-auth)
+  - [/troubleshooting/solutions/gateway-service-running-but-probe-fails](/troubleshooting/solutions/gateway-service-running-but-probe-fails)
+
+---
+
+## 1) Why tokens \"disappear\" after resets (the real cause)
+
+When people say "token", they usually mean the **Gateway token** (used for Control UI / API authentication).
+
+The key idea:
+
+- OpenClaw is **stateful**. The state directory (commonly `~/.openclaw/`) contains config, tokens, sessions, device
+  approvals, channel credentials, and caches.
+- If your platform reset/redeploy deletes the disk or container write layer, you did not just lose a token - you
+  provisioned a **new machine**.
+
+This is why "reset image" frequently means "re-enter token".
+
+---
+
+## 2) The golden rules (works on every platform)
+
+You want two outcomes:
+
+1. Tokens are **reproducible** (defined by env vars / secret manager).
+2. The OpenClaw state directory is **persistent** (volume / attached disk / network filesystem).
+
+### 2.1 Pin gateway auth via env vars (recommended)
+
+In `openclaw.json`, prefer env substitution:
+
+```json5
+{
+  gateway: {
+    auth: { mode: 'token', token: '${OPENCLAW_GATEWAY_TOKEN}' },
+    // Remote deployments usually need non-loopback bind
+    bind: 'lan',
+  },
+}
+```
+
+Set it in the runtime environment (systemd/Docker/PaaS env settings):
+
+```bash
+export OPENCLAW_GATEWAY_TOKEN='your-long-random-token'
+```
+
+Why this helps:
+
+- Browser storage can be wiped, but your gateway token stays stable.
+- You can rotate tokens by changing the secret, without editing JSON in multiple places.
+
+### 2.2 Persist the state directory (this is the real fix)
+
+Default state dir is `~/.openclaw/` (unless overridden). Persist it using one of:
+
+- Docker: bind-mount a host directory or a named volume into the container.
+- VM: store state on an attached data disk (EBS / Persistent Disk) rather than the system/root disk.
+- Kubernetes: store state on a PersistentVolume (EBS/EFS/CSI, etc.).
+- PaaS: enable platform persistence and mount it where the OpenClaw home/state lives.
+
+If you do only one thing in this guide, do this.
+
+---
+
+## 3) Recover or rotate your token (without wiping state)
+
+If the service was not reset and only your browser forgot the token:
+
+### 3.1 Docker: check `.env`
+
+The Docker setup flow commonly writes the token into `.env`.
+
+```bash
+cat .env | rg OPENCLAW_GATEWAY_TOKEN
+```
+
+### 3.2 Check config and the service runtime environment
+
+- If config uses `${OPENCLAW_GATEWAY_TOKEN}`, the actual value lives in systemd/Docker/PaaS env settings.
+- If you hardcoded it, you will see it in `openclaw.json`.
+
+Useful CLI command:
+
+```bash
+openclaw config get gateway.auth
+```
+
+### 3.3 \"pairing required\" (1008): approve the device
+
+The Control UI requires one-time device approval for new browser profiles/devices.
+
+```bash
+openclaw devices list
+openclaw devices approve <requestId>
+```
+
+If you truly lost state (fresh machine), you must repeat device approval - that is expected.
+
+---
+
+## 4) STARTING / startup probe failed: debug in layers
+
+`STARTING` is a platform health-check label, not an OpenClaw diagnosis. Use this bottom-up checklist:
+
+1. Is the process crashing/restarting? (logs)
+2. Is the port listening? (platform probes check TCP/HTTP reachability)
+3. Is bind correct? (binding only to `127.0.0.1` makes platform probes fail)
+4. Does config load? (config parse, missing env vars, permissions, disk full)
+5. Is the platform health check too aggressive? (startup too slow, probe kills it early)
+
+### 4.1 Logs first
+
+Docker:
+
+```bash
+docker compose logs -f openclaw-gateway
+```
+
+Typical restart-loop causes:
+
+- invalid config / bad include paths / missing env vars
+- state directory permissions (container user cannot write)
+- OOM (memory limit too low)
+
+### 4.2 Verify the port is listening
+
+On the host:
+
+```bash
+ss -ltnp | rg 18789 || true
+```
+
+Inside the container:
+
+```bash
+docker compose exec openclaw-gateway sh -lc 'ss -ltnp || netstat -ltnp'
+```
+
+If nothing is listening, probes will fail. Fix the startup error from logs.
+
+### 4.3 Bind matters: remote deployments usually require `lan`
+
+A very common failure mode:
+
+- Gateway is running and listening, but only on `127.0.0.1`.
+- Platform probes come from outside the container/VM and get `ECONNREFUSED`.
+
+For remote deployments, set:
+
+```json5
+{ gateway: { bind: 'lan' } }
+```
+
+Important: when binding beyond loopback, OpenClaw requires auth (token/password). If you see a message like
+"refusing to bind ... without auth", configure auth and restart.
+
+### 4.4 Use OpenClaw health/probe commands
+
+If you have shell access on the host/container, probe locally:
+
+```bash
+openclaw gateway health --url ws://127.0.0.1:18789 --token "$OPENCLAW_GATEWAY_TOKEN"
+```
+
+If local health fails, the issue is not the platform probe - it is a gateway startup/config/network issue.
+
+### 4.5 Platform probes too strict: give startup more time
+
+For Kubernetes-style platforms, add a `startupProbe` (TCP is usually the least surprising):
+
+```yaml
+startupProbe:
+  tcpSocket:
+    port: 18789
+  periodSeconds: 5
+  failureThreshold: 60 # ~5 minutes
+```
+
+For PaaS platforms with a health check toggle, it is often useful to temporarily disable health checks while fixing a
+bad config (to break the restart loop), then re-enable.
+
+---
+
+## 5) Platform guidance
+
+### 5.1 Alibaba Cloud (Simple Application Server image)
+
+Alibaba's OpenClaw image FAQ highlights the key pitfall: a system reset deletes system disk data, and you must
+reconfigure tokens/keys afterward.
+
+Checklist:
+
+- Treat `~/.openclaw/` as production data; snapshot/backup before resets.
+- Avoid exposing the Control UI publicly; prefer SSH tunnel/Tailscale.
+- If you do expose it, ensure firewall/security group rules allow only your IPs.
+
+### 5.2 Volcengine
+
+Volcengine behaves like most cloud VM/container platforms: if you rebuild without persistence, state is gone.
+
+Recommended:
+
+- Put OpenClaw state on a data disk (example mount: `/data/openclaw`).
+- Back up using disk snapshots.
+- If using Docker, bind-mount the data disk path into the container.
+
+### 5.3 Zeabur
+
+Zeabur deployments usually fail for two reasons:
+
+- Persistence is not configured, so redeploy wipes state.
+- Health checks kill the container before it becomes ready.
+
+Suggested workflow:
+
+- Enable persistent storage and mount it to where `/home/node/.openclaw` lives.
+- Fix bind/auth/port.
+- If needed, use rescue mode and temporarily disable health checks while you fix config.
+
+### 5.4 Unraid
+
+Unraid best practice is to map application state into `/mnt/user/appdata/...` so rebuilding the container (or
+recreating `docker.img`) does not wipe state.
+
+Suggested mapping:
+
+```text
+Host:      /mnt/user/appdata/openclaw
+Container: /home/node/.openclaw
+```
+
+If state was stored in the container write layer, rebuilding/updating will cause token resets and session loss.
+
+### 5.5 AWS (EC2 / ECS/Fargate / EKS)
+
+#### EC2 (recommended for a stateful gateway)
+
+- Use EBS for persistence.
+- Put OpenClaw state on a dedicated EBS data volume mounted at `/data/openclaw`.
+- Set `OPENCLAW_STATE_DIR=/data/openclaw/.openclaw` and back up with EBS snapshots.
+- Be mindful that root volumes are often deleted on termination unless configured otherwise.
+
+#### ECS/Fargate (stateless by default)
+
+Fargate is great for stateless services. For OpenClaw, you typically need a persistent filesystem for state.
+
+- If you deploy on Fargate, mount an EFS volume and store the OpenClaw state directory there.
+
+#### EKS (Kubernetes)
+
+- Store `~/.openclaw` on a PersistentVolume (EBS/EFS CSI).
+- Add a TCP `startupProbe` to avoid early restarts.
+
+### 5.6 Google Cloud (Compute Engine / GKE / Cloud Run)
+
+#### Compute Engine (recommended for a stateful gateway)
+
+- Use a Persistent Disk mounted at `/data/openclaw`.
+- Set `OPENCLAW_STATE_DIR=/data/openclaw/.openclaw`.
+- Back up with disk snapshots.
+
+Tip: use stable device naming (UUID or `/dev/disk/by-id`) when mounting disks.
+
+#### GKE (Kubernetes)
+
+- Mount a PersistentVolume for `~/.openclaw`.
+- Add a `startupProbe` (TCP) for port `18789`.
+
+#### Cloud Run (not ideal for OpenClaw)
+
+Cloud Run is optimized for stateless services. Local disk is ephemeral and instances can be replaced at any time.
+
+If you still want to experiment, Cloud Run supports Cloud Storage volume mounts, but this changes filesystem
+semantics (object storage presented as files) and may not be a drop-in replacement for all state patterns.
+
+For production, prefer Compute Engine or GKE.
+
+---
+
+## 6) Backup + restore drill (do this once before you need it)
+
+Minimal backup (VM / bare metal / Docker host):
+
+```bash
+tar -czf openclaw-state-backup.tgz ~/.openclaw
+```
+
+Verify you can:
+
+- restore onto a new VM/container
+- reuse the same `OPENCLAW_GATEWAY_TOKEN`
+- keep channels/devices working (or at least understand what must be re-approved)
+
+---
+
+## References (official docs)
+
+- OpenClaw Docker install: https://docs.openclaw.ai/install/docker
+- OpenClaw gateway CLI docs: https://docs.openclaw.ai/cli/gateway
+- OpenClaw dashboard + token: https://docs.openclaw.ai/web/dashboard
+- Zeabur OpenClaw template: https://zeabur.com/templates/VTZ4FX
+- Alibaba Cloud OpenClaw FAQ (reset wipes disk; token invalid):
+  https://www.alibabacloud.com/help/en/simple-application-server/use-cases/openclaw-faq
+- Unraid Docker container management (appdata mappings, docker.img):
+  https://docs.unraid.net/unraid-os/using-unraid-to/run-docker-containers/managing-and-customizing-containers/
+- Kubernetes probes (startupProbe):
+  https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+- AWS EC2 preserve volumes on termination:
+  https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/preserving-volumes-on-termination.html
+- AWS ECS EFS volumes:
+  https://docs.aws.amazon.com/AmazonECS/latest/developerguide/efs-volumes.html
+- Google Compute Engine Persistent Disk:
+  https://cloud.google.com/compute/docs/disks/persistent-disks
+- Google Compute Engine mount disks using UUID:
+  https://cloud.google.com/compute/docs/disks/mounting-disks#uuid
+- Cloud Run Cloud Storage volume mounts:
+  https://cloud.google.com/run/docs/configuring/services/cloud-storage-volume-mounts

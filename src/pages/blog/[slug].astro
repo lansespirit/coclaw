@@ -3,6 +3,8 @@ import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { buildWeightedTokens, topRelated } from '../../lib/related';
 import { Button, Chip, Avatar } from '@heroui/react';
 
 export const getStaticPaths = (async () => {
@@ -19,6 +21,34 @@ const { Content } = await entry.render();
 const { title, description, author, publishDate, lastUpdated, category, ogImage, keywords } =
   entry.data;
 const image = ogImage || '/images/og/og-main.png';
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const seedTokens = buildWeightedTokens([
+  { text: title, weight: 3 },
+  { text: description, weight: 2 },
+  { text: keywords ?? [], weight: 2 },
+  { text: category, weight: 1 },
+]);
+const relatedPosts = topRelated({
+  seed: { id: entry.slug, tokens: seedTokens },
+  candidates: allPosts.map((p) => ({
+    id: p.slug,
+    tokens: buildWeightedTokens([
+      { text: p.data.title, weight: 3 },
+      { text: p.data.description, weight: 2 },
+      { text: p.data.keywords ?? [], weight: 2 },
+      { text: p.data.category, weight: 1 },
+    ]),
+    item: p,
+  })),
+  limit: 4,
+  minScore: 0.09,
+}).map(({ item }) => ({
+  href: `/blog/${item.slug}`,
+  title: item.data.title,
+  description: item.data.description,
+  badge: 'Blog',
+}));
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const publishedLabel = publishDate.toLocaleDateString('en-US', {
@@ -94,6 +124,8 @@ const structuredData = {
       <article class="c-content prose prose-lg prose-primary max-w-none">
         <Content />
       </article>
+
+      <RelatedLinks title="Related Posts" items={relatedPosts} />
 
       <div class="mt-20 pt-12 border-t border-divider">
         <h3 class="text-2xl font-bold mb-8 italic">Shared this insight?</h3>

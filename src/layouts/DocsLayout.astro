@@ -1,5 +1,8 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import RelatedLinks from '../components/RelatedLinks.astro';
+import { buildWeightedTokens, topRelated } from '../lib/related';
 
 interface Props {
   frontmatter: {
@@ -27,6 +30,96 @@ const lastUpdated =
     : new Date(frontmatter.lastUpdated);
 const hasValidPublishDate = !Number.isNaN(publishDate.getTime());
 const hasValidLastUpdated = !Number.isNaN(lastUpdated.getTime());
+
+const pathname = Astro.url?.pathname ?? '';
+const isGettingStarted = pathname.startsWith('/getting-started/');
+const docSlug = isGettingStarted
+  ? pathname.replace('/getting-started/', '').replace(/\/+$/, '')
+  : null;
+
+let relatedItems: Array<{ href: string; title: string; description?: string; badge?: string }> = [];
+if (docSlug) {
+  const allDocs = await getCollection('getting-started', ({ data }) => !data.draft);
+  const current = allDocs.find((d) => d.slug === docSlug);
+
+  if (current) {
+    const seedTokens = buildWeightedTokens([
+      { text: current.data.title, weight: 3 },
+      { text: current.data.description, weight: 2 },
+      { text: current.data.keywords ?? [], weight: 2 },
+      { text: current.data.category, weight: 1 },
+    ]);
+
+    const relatedDocs = topRelated({
+      seed: { id: current.slug, tokens: seedTokens },
+      candidates: allDocs.map((d) => ({
+        id: d.slug,
+        tokens: buildWeightedTokens([
+          { text: d.data.title, weight: 3 },
+          { text: d.data.description, weight: 2 },
+          { text: d.data.keywords ?? [], weight: 2 },
+          { text: d.data.category, weight: 1 },
+        ]),
+        item: d,
+      })),
+      limit: 3,
+    }).map(({ item }) => ({
+      href: `/getting-started/${item.slug}`,
+      title: item.data.title,
+      description: item.data.description,
+      badge: 'Start',
+    }));
+
+    const allGuides = await getCollection('guides', ({ data }) => !data.draft);
+    const relatedGuides = topRelated({
+      seed: { id: current.slug, tokens: seedTokens },
+      candidates: allGuides.map((g) => ({
+        id: g.slug,
+        tokens: buildWeightedTokens([
+          { text: g.data.title, weight: 3 },
+          { text: g.data.description, weight: 2 },
+          { text: g.data.keywords ?? [], weight: 2 },
+          { text: g.data.category, weight: 1 },
+          { text: g.data.platforms ?? [], weight: 1 },
+        ]),
+        item: g,
+      })),
+      limit: 3,
+    }).map(({ item }) => ({
+      href: `/guides/${item.slug}`,
+      title: item.data.title,
+      description: item.data.description,
+      badge: 'Guide',
+    }));
+
+    const allSolutions = await getCollection(
+      'troubleshooting',
+      ({ data }) => !data.draft && data.kind === 'solution'
+    );
+    const relatedSolutions = topRelated({
+      seed: { id: current.slug, tokens: seedTokens },
+      candidates: allSolutions.map((s) => ({
+        id: s.slug,
+        tokens: buildWeightedTokens([
+          { text: s.data.title, weight: 3 },
+          { text: s.data.description, weight: 2 },
+          { text: s.data.keywords ?? [], weight: 2 },
+          { text: s.data.component, weight: 1 },
+          { text: s.data.errorSignatures ?? [], weight: 1 },
+        ]),
+        item: s,
+      })),
+      limit: 2,
+    }).map(({ item }) => ({
+      href: `/troubleshooting/${item.slug}`,
+      title: item.data.title,
+      description: item.data.description,
+      badge: 'Fix',
+    }));
+
+    relatedItems = [...relatedGuides, ...relatedDocs, ...relatedSolutions].slice(0, 6);
+  }
+}
 ---
 
 <BaseLayout title={frontmatter.title} description={frontmatter.description}>
@@ -91,5 +184,7 @@ const hasValidLastUpdated = !Number.isNaN(lastUpdated.getTime());
       </header>
       <slot />
     </article>
+
+    <RelatedLinks title="Related Resources" items={relatedItems} />
   </div>
 </BaseLayout>

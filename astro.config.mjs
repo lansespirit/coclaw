@@ -7,13 +7,16 @@ import Icons from 'unplugin-icons/vite';
 
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+import autolinkInternal from './src/lib/remark/autolink-internal.mjs';
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://coclaw.com',
   integrations: [
     react(),
-    mdx(),
+    mdx({
+      remarkPlugins: [autolinkInternal],
+    }),
     sitemap({
       changefreq: 'weekly',
       priority: 0.7,
@@ -27,6 +30,9 @@ export default defineConfig({
       },
     }),
   ],
+  markdown: {
+    remarkPlugins: [autolinkInternal],
+  },
 
   vite: {
     // Build-time Iconify icons for both `.astro` and React `.tsx` files.

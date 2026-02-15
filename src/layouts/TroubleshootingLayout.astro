@@ -1,5 +1,8 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import RelatedLinks from '../components/RelatedLinks.astro';
+import { buildWeightedTokens, topRelated } from '../lib/related';
 
 interface Props {
   frontmatter: {
@@ -15,6 +18,7 @@ interface Props {
     channel?: string[];
     errorSignatures?: string[];
     affectedVersions?: string[];
+    keywords?: string[];
     author?: string;
   };
 }
@@ -38,6 +42,98 @@ const os = (frontmatter.os ?? []).filter(Boolean);
 const component = frontmatter.component?.trim();
 const severity = frontmatter.severity?.trim();
 const errorSignatures = (frontmatter.errorSignatures ?? []).filter(Boolean);
+
+const pathname = Astro.url?.pathname ?? '';
+const tsSlug = pathname.startsWith('/troubleshooting/')
+  ? pathname.replace('/troubleshooting/', '').replace(/\/+$/, '')
+  : null;
+
+let relatedItems: Array<{ href: string; title: string; description?: string; badge?: string }> = [];
+if (tsSlug) {
+  const seedTokens = buildWeightedTokens([
+    { text: frontmatter.title, weight: 3 },
+    { text: frontmatter.description, weight: 2 },
+    { text: frontmatter.keywords ?? [], weight: 2 },
+    { text: frontmatter.component, weight: 1 },
+    { text: frontmatter.os ?? [], weight: 1 },
+    { text: frontmatter.channel ?? [], weight: 1 },
+    { text: frontmatter.errorSignatures ?? [], weight: 1 },
+  ]);
+
+  const allSolutions = await getCollection(
+    'troubleshooting',
+    ({ data }) => !data.draft && data.kind === 'solution'
+  );
+
+  const relatedSolutions = topRelated({
+    seed: { id: tsSlug, tokens: seedTokens },
+    candidates: allSolutions.map((s) => ({
+      id: s.slug,
+      tokens: buildWeightedTokens([
+        { text: s.data.title, weight: 3 },
+        { text: s.data.description, weight: 2 },
+        { text: s.data.keywords ?? [], weight: 2 },
+        { text: s.data.component, weight: 1 },
+        { text: s.data.os ?? [], weight: 1 },
+        { text: s.data.channel ?? [], weight: 1 },
+        { text: s.data.errorSignatures ?? [], weight: 1 },
+      ]),
+      item: s,
+    })),
+    limit: 4,
+    minScore: 0.1,
+  }).map(({ item }) => ({
+    href: `/troubleshooting/${item.slug}`,
+    title: item.data.title,
+    description: item.data.description,
+    badge: 'Fix',
+  }));
+
+  const allGuides = await getCollection('guides', ({ data }) => !data.draft);
+  const relatedGuides = topRelated({
+    seed: { id: tsSlug, tokens: seedTokens },
+    candidates: allGuides.map((g) => ({
+      id: g.slug,
+      tokens: buildWeightedTokens([
+        { text: g.data.title, weight: 3 },
+        { text: g.data.description, weight: 2 },
+        { text: g.data.keywords ?? [], weight: 2 },
+        { text: g.data.category, weight: 1 },
+        { text: g.data.platforms ?? [], weight: 1 },
+      ]),
+      item: g,
+    })),
+    limit: 3,
+  }).map(({ item }) => ({
+    href: `/guides/${item.slug}`,
+    title: item.data.title,
+    description: item.data.description,
+    badge: 'Guide',
+  }));
+
+  const allGettingStarted = await getCollection('getting-started', ({ data }) => !data.draft);
+  const relatedGettingStarted = topRelated({
+    seed: { id: tsSlug, tokens: seedTokens },
+    candidates: allGettingStarted.map((d) => ({
+      id: d.slug,
+      tokens: buildWeightedTokens([
+        { text: d.data.title, weight: 3 },
+        { text: d.data.description, weight: 2 },
+        { text: d.data.keywords ?? [], weight: 2 },
+        { text: d.data.category, weight: 1 },
+      ]),
+      item: d,
+    })),
+    limit: 2,
+  }).map(({ item }) => ({
+    href: `/getting-started/${item.slug}`,
+    title: item.data.title,
+    description: item.data.description,
+    badge: 'Start',
+  }));
+
+  relatedItems = [...relatedSolutions, ...relatedGuides, ...relatedGettingStarted].slice(0, 6);
+}
 ---
 
 <BaseLayout title={frontmatter.title} description={frontmatter.description}>
@@ -176,5 +272,7 @@ const errorSignatures = (frontmatter.errorSignatures ?? []).filter(Boolean);
         </a>
       </div>
     </div>
+
+    <RelatedLinks title="Related Resources" items={relatedItems} />
   </div>
 </BaseLayout>

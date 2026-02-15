@@ -3,6 +3,8 @@ import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { buildWeightedTokens, topRelated } from '../../lib/related';
 import { Button, Chip, Avatar } from '@heroui/react';
 
 export const getStaticPaths = (async () => {
@@ -17,6 +19,60 @@ const { entry } = Astro.props;
 const { Content } = await entry.render();
 
 const { name, role, company, image, summary, publishDate, sources, keywords } = entry.data;
+
+const allStories = await getCollection('stories', ({ data }) => !data.draft);
+const allGuides = await getCollection('guides', ({ data }) => !data.draft);
+
+const seedTokens = buildWeightedTokens([
+  { text: name, weight: 3 },
+  { text: role, weight: 2 },
+  { text: company, weight: 2 },
+  { text: summary, weight: 2 },
+  { text: keywords ? [keywords] : [], weight: 2 },
+]);
+
+const relatedStories = topRelated({
+  seed: { id: entry.slug, tokens: seedTokens },
+  candidates: allStories.map((s) => ({
+    id: s.slug,
+    tokens: buildWeightedTokens([
+      { text: s.data.name, weight: 3 },
+      { text: s.data.role, weight: 2 },
+      { text: s.data.company, weight: 2 },
+      { text: s.data.summary, weight: 2 },
+      { text: s.data.keywords ? [s.data.keywords] : [], weight: 2 },
+    ]),
+    item: s,
+  })),
+  limit: 3,
+  minScore: 0.08,
+}).map(({ item }) => ({
+  href: `/stories/${item.slug}`,
+  title: item.data.name,
+  description: item.data.summary,
+  badge: 'Story',
+}));
+
+const relatedGuides = topRelated({
+  seed: { id: entry.slug, tokens: seedTokens },
+  candidates: allGuides.map((g) => ({
+    id: g.slug,
+    tokens: buildWeightedTokens([
+      { text: g.data.title, weight: 3 },
+      { text: g.data.description, weight: 2 },
+      { text: g.data.keywords ?? [], weight: 2 },
+      { text: g.data.category, weight: 1 },
+      { text: g.data.platforms ?? [], weight: 1 },
+    ]),
+    item: g,
+  })),
+  limit: 2,
+}).map(({ item }) => ({
+  href: `/guides/${item.slug}`,
+  title: item.data.title,
+  description: item.data.description,
+  badge: 'Guide',
+}));
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const structuredData = {
@@ -74,6 +130,8 @@ const structuredData = {
       <article class="c-content prose prose-lg prose-primary max-w-none">
         <Content />
       </article>
+
+      <RelatedLinks title="Related" items={[...relatedStories, ...relatedGuides]} />
 
       <div
         class="mt-24 p-12 rounded-[40px] bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 text-center"
