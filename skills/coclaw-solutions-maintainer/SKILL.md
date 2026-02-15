@@ -86,9 +86,12 @@ pnpm analyze:issues
 决策：
 
 - `usage_config` / `usage_deploy` / `usage_channel` / `known_bug_with_workaround`
+  - 目标是：**在该 issue 下产出“可立即执行”的高价值回复**（solution 链接只作为补充；不是每次回复的前置条件）
   - 先查站内是否已有 solution 覆盖
-  - 有覆盖：写高价值回帖并附链接
-  - 无覆盖：调研后新建 solution（每轮总量 1-3 篇）再回帖
+  - 有覆盖：直接回帖（先给步骤与原因），末尾附 solution 链接
+  - 无覆盖：
+    - 若问题足够通用/可复用：调研后新建 solution（每轮总量 1-3 篇），**先 commit & push 到 `main`（确保 Cloudflare 部署后可访问）**，再回帖并附链接
+    - 若问题较零散但仍是使用问题：只回帖（不强求写 solution）
 - `code_bug` / `feature_request` / `other_meta`
   - 跳过，不回帖
 
@@ -138,16 +141,15 @@ pnpm build
 
 ## Git 操作
 
-完成一轮维护后：
+若本轮新增/更新了对外内容（例如 `src/content/troubleshooting/solutions/*.mdx`），完成一轮维护后：
 
 ```bash
 git add -A
 git commit -m "docs(troubleshooting): maintain solutions from incremental issues"
-git push -u origin HEAD
+git push origin main
 ```
 
-若当前在 `main` / `master`，先切分支（前缀 `codex/`）：
+重要：不要为 solutions 维护单独开分支。
 
-```bash
-git switch -c codex/solutions-maintenance-<yyyymmdd>
-```
+- 站点（Cloudflare）通常从 `main` 部署；不 push 到 `main`，新 solution 链接对用户不可用（评论里贴出去会 404/未更新）。
+- 只有当你本轮**确实没有改动站点内容**（只更新 `.cache/` 或本地数据集）时，才可以不 commit/push。
