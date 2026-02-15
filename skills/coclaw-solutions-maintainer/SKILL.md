@@ -1,25 +1,27 @@
 ---
 name: coclaw-solutions-maintainer
-description: 'Maintain CoClaw troubleshooting Solutions from recent OpenClaw issues with strict role separation: sync reference/data, incremental triage, standalone classification, manual high-value issue replies, and optional 1-3 new Solutions per run.'
+description: 'Maintain CoClaw troubleshooting Solutions from recent OpenClaw issues with strict role separation: sync reference/data, incremental triage, standalone classification, manual high-value issue replies, and optional (0-3) new Solutions per run.'
 ---
 
 # CoClaw Solutions Maintainer
 
 目标：基于 `docs/TROUBLESHOOTING-SOLUTIONS-MAINTENANCE.md`，建立“高价值、低噪音”的 issues 维护闭环：
 
+- **先明确 Task：**本 skill 的“任务是什么/范围/上限/验收”以 `skills/coclaw-solutions-maintainer/TASK.md` 为准（先读它）。
 - 每轮先同步 `.ref/openclaw` 到最新
 - 仅对最近 72h 且增量 issues 进入队列
 - 脚本只做“数据同步 + 初步分类建议”，不自动发评论
 - 每条 GitHub 回帖必须人工（或 AI sub-agent 人工化）完整阅读 issue 主贴 + 现有评论后撰写
-- 仅对“使用问题”与“已知 bug 但有稳定 workaround”给出 solution；纯代码 bug / feature / 其他报告跳过
-- 每轮最多新建 1-3 篇 solution
+- 仅对“使用问题”与“已知 bug 但有稳定 workaround”提供高价值回复；纯代码 bug / feature / 其他报告跳过
+- 每轮最多新建 0-3 篇 solution（按覆盖情况灵活判断；不要求必须新增）
+- 每轮最多评论 10 条 openclaw 使用相关 issues（以 `TASK.md` 为准）
 
 ## 强约束（必须遵守）
 
 1. `comment-issues-with-solutions.mjs` 已停用，禁止程序化批量评论。
 2. `triage-recent-issues.mjs` 只做增量检出，不做分析与匹配。
 3. issue 分类由独立脚本执行（建议），最终决策由人工/AI sub-agent 完整阅读后做出。
-4. 回帖必须“先提供可执行价值，再附 coclaw solution 链接”。
+4. 回帖必须“先提供可执行价值，再附站内链接（如有）”。链接不要求必须是 solution，也可以是 guides / config generator 等页面。
 
 ## 脚本职责拆分
 
@@ -37,6 +39,12 @@ description: 'Maintain CoClaw troubleshooting Solutions from recent OpenClaw iss
   - `comment-issues-with-solutions.mjs` 已停用，仅输出迁移提示并退出
 
 ## 推荐执行流程（每轮）
+
+开始前（强制）：
+
+1. 读 `skills/coclaw-solutions-maintainer/TASK.md`（任务定义与验收）
+2. 读 `skills/coclaw-solutions-maintainer/SKILL.md`（本文件：强约束与脚本职责）
+3. 读 `skills/coclaw-solutions-maintainer/USAGE.md`（runbook：命令怎么跑）
 
 ### 0) 同步 `.ref/openclaw`（必须先跑）
 
@@ -86,12 +94,8 @@ pnpm analyze:issues
 决策：
 
 - `usage_config` / `usage_deploy` / `usage_channel` / `known_bug_with_workaround`
-  - 目标是：**在该 issue 下产出“可立即执行”的高价值回复**（solution 链接只作为补充；不是每次回复的前置条件）
-  - 先查站内是否已有 solution 覆盖
-  - 有覆盖：直接回帖（先给步骤与原因），末尾附 solution 链接
-  - 无覆盖：
-    - 若问题足够通用/可复用：调研后新建 solution（每轮总量 1-3 篇），**先 commit & push 到 `main`（确保 Cloudflare 部署后可访问）**，再回帖并附链接
-    - 若问题较零散但仍是使用问题：只回帖（不强求写 solution）
+  - 具体决策规则、每轮上限与验收：以 `skills/coclaw-solutions-maintainer/TASK.md` 为准
+  - 一般原则：优先产出可执行回帖；链接可指向站内任意相关页面（solutions/guides/config generator 等），且链接仅作补充
 - `code_bug` / `feature_request` / `other_meta`
   - 跳过，不回帖
 
@@ -133,7 +137,7 @@ pnpm build
 - Agent D（Resolver）
   - 逐条 issue 深读，给出最终动作：`link existing` / `create solution` / `skip`
 - Agent E（Author）
-  - 撰写 1-3 篇 solution（若需要）
+  - 撰写 0-3 篇 solution（若需要）
 - Agent F（Commenter）
   - 根据 Resolver 结论，逐条写“高价值非模板回帖”，并执行 `gh issue comment`
 - Agent G（QA）
