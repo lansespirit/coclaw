@@ -1,0 +1,82 @@
+---
+title: "Control UI error: missing scope: operator.read (LAN/IP access)"
+description: "Work around a regression where the Control UI works on localhost but fails via LAN/IP with 'missing scope: operator.read'."
+kind: "solution"
+component: "web-ui"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel: []
+errorSignatures:
+  - "missing scope: operator.read"
+  - "operator.read"
+keywords:
+  - "control ui"
+  - "dashboard"
+  - "lan"
+  - "rbac"
+publishDate: 2026-02-16
+lastUpdated: 2026-02-16
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/web/dashboard"
+    - "https://docs.openclaw.ai/gateway/authentication"
+  githubIssues:
+    - 16862
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Opening the Control UI via a LAN/IP URL (for example, `http://<gateway-ip>:18789/`) shows **Connected** on the overview, but other pages show:
+  - `Error: missing scope: operator.read`
+- Opening the same gateway via `http://127.0.0.1:18789/` works normally.
+- This often starts after upgrading OpenClaw (for example, to `2026.2.14`).
+
+## Cause
+
+In some versions, the Control UI's auth/scope check can break when the UI is accessed via a non-loopback origin (LAN/IP), even though the gateway is reachable and otherwise healthy. The UI then fails RBAC checks and reports a missing `operator.read` scope.
+
+## Fix
+
+### 1) Use the loopback URL (recommended)
+
+Open the UI using the tokenized link from:
+
+```bash
+openclaw dashboard
+```
+
+If the gateway is on another machine, tunnel it and use the loopback URL locally:
+
+```bash
+ssh -N -L 18789:127.0.0.1:18789 user@host
+```
+
+Then open:
+
+- `http://127.0.0.1:18789/?token=...`
+
+### 2) Downgrade to a known-good version (workaround)
+
+If this started after upgrading and you need LAN/IP access immediately, downgrade OpenClaw and restart the gateway.
+
+For npm installs:
+
+```bash
+npm install -g openclaw@2026.2.13
+openclaw gateway restart
+```
+
+## Verify
+
+- Open the Control UI and navigate to pages that previously failed (for example, Operators / Sessions / Settings).
+- The UI loads data without `missing scope: operator.read`.
+
+## Related
+
+- GitHub issue: #16862
+

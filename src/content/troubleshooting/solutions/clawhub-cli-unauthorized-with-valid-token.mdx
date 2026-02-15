@@ -1,0 +1,66 @@
+---
+title: "ClawHub CLI: 'Unauthorized' even with a valid token"
+description: "Work around ClawHub CLI token auth failures by using the www registry URL (and the no-browser login flow)."
+kind: "solution"
+component: "install"
+severity: "medium"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel: []
+errorSignatures:
+  - "clawhub"
+  - "Unauthorized"
+  - "clh_"
+  - "--registry \"https://www.clawhub.ai/\""
+keywords:
+  - "clawhub"
+  - "skill"
+  - "token"
+  - "registry"
+publishDate: 2026-02-16
+lastUpdated: 2026-02-16
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 5483
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- `npx clawhub@latest auth login --token ...` fails with **Unauthorized**, even when the token was just generated.
+- The token looks like `clh_...`.
+- CLI actions that require auth (for example deleting a skill) fail due to the login not sticking.
+
+## Cause
+
+Some CLI versions default to a registry/base URL that causes token auth to fail. Pointing the CLI at the `www` registry URL works around the issue.
+
+## Fix
+
+### 1) Login with the www registry URL
+
+```bash
+npx clawhub@latest auth login \\
+  --token "clh_..." \\
+  --no-browser \\
+  --registry "https://www.clawhub.ai/"
+```
+
+If you're using a globally installed `clawhub` binary instead of `npx`, pass the same `--registry` flag.
+
+### 2) Retry the command that originally failed
+
+For example, retry the delete/install action after a successful login.
+
+## Verify
+
+- The login command completes without **Unauthorized**.
+- Your original CLI action (for example deleting the skill) succeeds.
+
+## Related
+
+- GitHub issue: #5483
+

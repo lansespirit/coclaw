@@ -1,0 +1,82 @@
+---
+title: "Onboarding skips Model/Auth setup (agent unresponsive after install)"
+description: "Fix a broken onboarding flow where OpenClaw defaults to a model without credentials, causing the agent to hang, by configuring provider auth manually or downgrading."
+kind: "solution"
+component: "install"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel: []
+errorSignatures:
+  - "Model/Auth step never appears"
+  - "claude-opus-4-6"
+  - "ANTHROPIC_API_KEY"
+  - "openclaw onboard"
+keywords:
+  - "onboarding"
+  - "api key"
+  - "configure"
+  - "anthropic"
+publishDate: 2026-02-16
+lastUpdated: 2026-02-16
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/start/wizard"
+    - "https://docs.openclaw.ai/config"
+  githubIssues:
+    - 16134
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- `openclaw onboard` finishes, but you were never asked to pick a model provider or enter an API key.
+- OpenClaw defaults to `anthropic/claude-opus-4-6`, but the agent never responds (TUI/WebChat shows "loading" indefinitely).
+- Re-running `openclaw onboard` does not bring back the missing Model/Auth step.
+
+## Cause
+
+The onboarding wizard can be broken in some releases and skip the Model/Auth step entirely. When that happens, OpenClaw may default to a provider/model that requires credentials, but no credentials were configured, so the agent cannot complete requests.
+
+## Fix
+
+### 1) Configure a provider API key after onboarding (fastest)
+
+If you're using Anthropic:
+
+```bash
+openclaw config set env.ANTHROPIC_API_KEY "sk-ant-..."
+openclaw gateway restart
+```
+
+If you're using OpenAI instead, set `env.OPENAI_API_KEY` (or configure it via `openclaw configure`) and restart the gateway.
+
+### 2) Run the interactive configurator
+
+```bash
+openclaw configure
+openclaw gateway restart
+```
+
+### 3) Downgrade and re-run onboarding (workaround)
+
+If you need the wizard flow to work end-to-end, install a known-good version, then rerun onboarding:
+
+```bash
+npm uninstall -g openclaw
+npm install -g openclaw@2026.2.9
+openclaw onboard
+```
+
+## Verify
+
+- Send a message in TUI/WebChat; the agent responds normally.
+- Optional: `openclaw models status --probe` succeeds for your configured provider.
+
+## Related
+
+- GitHub issue: #16134
+
