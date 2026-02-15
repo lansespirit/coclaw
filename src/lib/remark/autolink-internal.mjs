@@ -189,7 +189,10 @@ export default function autolinkInternal(options = {}) {
       'ig'
     ),
     phraseRule('pairing required', '/troubleshooting/solutions/control-ui-pairing-required'),
-    phraseRule('Startup probe failed', '/troubleshooting/solutions/gateway-service-running-but-probe-fails'),
+    phraseRule(
+      'Startup probe failed',
+      '/troubleshooting/solutions/gateway-service-running-but-probe-fails'
+    ),
     phraseRule('STARTING', '/troubleshooting/solutions/gateway-service-running-but-probe-fails', {
       caseInsensitive: false,
       wordBoundary: true,
@@ -212,7 +215,12 @@ export default function autolinkInternal(options = {}) {
       : rules;
 
     // Per-document budget to prevent over-linking.
-    const budget = { perRule: new Map(), maxPerRule: maxLinksPerRule, total: 0, maxTotal: maxLinksPerDoc };
+    const budget = {
+      perRule: new Map(),
+      maxPerRule: maxLinksPerRule,
+      total: 0,
+      maxTotal: maxLinksPerDoc,
+    };
 
     /**
      * @param {any} node
