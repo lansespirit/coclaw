@@ -1,6 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/layout/Section.astro';
+
+const gaEnabled =
+  import.meta.env.PROD &&
+  typeof import.meta.env.PUBLIC_GA_MEASUREMENT_ID === 'string' &&
+  import.meta.env.PUBLIC_GA_MEASUREMENT_ID.length > 0;
+
+const lastUpdated = gaEnabled ? 'February 15, 2026' : 'February 1, 2026';
 ---
 
 <BaseLayout
@@ -12,7 +19,8 @@ import Section from '../components/layout/Section.astro';
     <Section containerClass="max-w-4xl mx-auto pt-24 pb-16">
       <h1 class="text-4xl md:text-5xl font-bold mb-4">Privacy Policy</h1>
       <p class="text-default-700 dark:text-default-500">
-        <strong>Last updated:</strong> February 1, 2026
+        <strong>Last updated:</strong>
+        {lastUpdated}
       </p>
     </Section>
 
@@ -48,6 +56,13 @@ import Section from '../components/layout/Section.astro';
           <li>
             <strong>Cloudflare Pages</strong> (hosting / CDN).
           </li>
+          {
+            gaEnabled && (
+              <li>
+                <strong>Google Analytics</strong> (site usage analytics).
+              </li>
+            )
+          }
           <li>
             <strong>Google Fonts</strong> (the Inter font is loaded from fonts.googleapis.com).
           </li>
@@ -67,11 +82,22 @@ import Section from '../components/layout/Section.astro';
         </ul>
 
         <h2>Cookies and Tracking</h2>
-        <p>
-          CoClaw does not currently run first-party analytics scripts. However, third-party services
-          (such as embedded video providers) may set cookies or similar technologies when you
-          interact with their embeds.
-        </p>
+        {
+          gaEnabled ? (
+            <p>
+              CoClaw uses Google Analytics to understand aggregate site usage (for example, page
+              views and navigation paths) so we can improve the site. Third-party services (such as
+              embedded video providers) may also set cookies or similar technologies when you
+              interact with their embeds.
+            </p>
+          ) : (
+            <p>
+              CoClaw does not currently run first-party analytics scripts. However, third-party
+              services (such as embedded video providers) may set cookies or similar technologies
+              when you interact with their embeds.
+            </p>
+          )
+        }
 
         <h2>Data Retention</h2>
         <p>

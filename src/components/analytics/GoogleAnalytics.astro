@@ -1,0 +1,38 @@
+---
+const gaId = import.meta.env.PUBLIC_GA_MEASUREMENT_ID;
+const enabled = import.meta.env.PROD && typeof gaId === 'string' && gaId.length > 0;
+
+// Prettier's Astro parser can be strict about inline <script> contents.
+// Using `set:html` keeps the JS as an opaque string while still inlining it.
+const inlineJs = enabled
+  ? `(() => {
+  // Respect browser-level Do Not Track signals by not loading GA at all.
+  const dnt =
+    navigator.doNotTrack === '1' ||
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (navigator as any).msDoNotTrack === '1' ||
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any).doNotTrack === '1';
+  if (dnt) return;
+
+  const gaId = ${JSON.stringify(gaId)};
+
+  // Load gtag.js lazily (avoids contacting Google if DNT is enabled).
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(gaId);
+  document.head.appendChild(script);
+
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){window.dataLayer.push(arguments);}
+  window.gtag = gtag;
+  gtag('js', new Date());
+  gtag('config', gaId, {
+    allow_google_signals: false,
+    allow_ad_personalization_signals: false,
+  });
+})();`
+  : '';
+---
+
+{enabled ? <script is:inline set:html={inlineJs} /> : null}

@@ -1,6 +1,7 @@
 ---
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
+import GoogleAnalytics from '../components/analytics/GoogleAnalytics.astro';
 import '../styles/global.css';
 
 interface Props {
@@ -87,6 +88,7 @@ const finalOgImage = ogImage || defaultOgImage;
     <meta name="theme-color" content="#006fee" />
 
     <!-- Per-page additions (JSON-LD, extra meta tags, etc.) -->
+    <GoogleAnalytics />
     <slot name="head" />
   </head>
   <body class="bg-background text-foreground min-h-screen flex flex-col">
