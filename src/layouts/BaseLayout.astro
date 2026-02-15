@@ -28,6 +28,11 @@ const {
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const defaultOgImage = '/images/og/og-main.png'; // Default OG image
 const finalOgImage = ogImage || defaultOgImage;
+
+// Cloudflare Pages injects these at build time. Keeping them in the HTML makes it easy
+// to verify which deployment is currently serving traffic when debugging env issues.
+const cfCommit = process.env.CF_PAGES_COMMIT_SHA;
+const cfBranch = process.env.CF_PAGES_BRANCH;
 ---
 
 <!doctype html>
@@ -86,6 +91,8 @@ const finalOgImage = ogImage || defaultOgImage;
     <meta name="robots" content={robots} />
     <meta name="author" content="CoClaw Community" />
     <meta name="theme-color" content="#006fee" />
+    {cfCommit && <meta name="cf-pages-commit-sha" content={cfCommit} />}
+    {cfBranch && <meta name="cf-pages-branch" content={cfBranch} />}
 
     <!-- Per-page additions (JSON-LD, extra meta tags, etc.) -->
     <GoogleAnalytics />
