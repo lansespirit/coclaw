@@ -9,10 +9,8 @@ const inlineJs = enabled
   // Respect browser-level Do Not Track signals by not loading GA at all.
   const dnt =
     navigator.doNotTrack === '1' ||
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (navigator as any).msDoNotTrack === '1' ||
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).doNotTrack === '1';
+    navigator.msDoNotTrack === '1' ||
+    window.doNotTrack === '1';
   if (dnt) return;
 
   const gaId = ${JSON.stringify(gaId)};
