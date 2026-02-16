@@ -1,6 +1,6 @@
 ---
 name: coclaw-solutions-maintainer
-description: 'Maintain CoClaw troubleshooting Solutions from recent OpenClaw issues with strict role separation: sync reference/data, incremental triage, standalone classification, manual high-value issue replies, and optional (0-3) new Solutions per run.'
+description: 'Maintain CoClaw troubleshooting content from recent OpenClaw issues with strict role separation: sync reference/data, incremental triage, standalone classification, manual high-value issue replies, and optional (0-3) new/updated CoClaw pages per run.'
 ---
 
 # CoClaw Solutions Maintainer
@@ -13,7 +13,7 @@ description: 'Maintain CoClaw troubleshooting Solutions from recent OpenClaw iss
 - 脚本只做“数据同步 + 初步分类建议”，不自动发评论
 - 每条 GitHub 回帖必须人工（或 AI sub-agent 人工化）完整阅读 issue 主贴 + 现有评论后撰写
 - 仅对“使用问题”与“已知 bug 但有稳定 workaround”提供高价值回复；纯代码 bug / feature / 其他报告跳过
-- 每轮最多新建 0-3 篇 solution（按覆盖情况灵活判断；不要求必须新增）
+- 每轮最多新增/更新 0-3 个站内页面（按覆盖情况灵活判断；不要求必须新增；通常为 solutions）
 - 每轮最多评论 10 条 openclaw 使用相关 issues（以 `TASK.md` 为准）
 
 ## 强约束（必须遵守）
@@ -21,7 +21,7 @@ description: 'Maintain CoClaw troubleshooting Solutions from recent OpenClaw iss
 1. `comment-issues-with-solutions.mjs` 已停用，禁止程序化批量评论。
 2. `triage-recent-issues.mjs` 只做增量检出，不做分析与匹配。
 3. issue 分类由独立脚本执行（建议），最终决策由人工/AI sub-agent 完整阅读后做出。
-4. 回帖必须“先提供可执行价值，再附站内链接（如有）”。链接不要求必须是 solution，也可以是 guides / config generator 等页面。
+4. 回帖必须“先提供可执行价值，再在末尾推荐 1-2 个 `coclaw.com` 站内页面（默认需要）”。链接不要求必须是 solution，也可以是 guides / config generator 等页面；确实无合适页面时允许不贴链接但需说明原因（以 `TASK.md` 为准）。
 
 ## 脚本职责拆分
 
@@ -137,7 +137,7 @@ pnpm build
 - Agent D（Resolver）
   - 逐条 issue 深读，给出最终动作：`link existing` / `create solution` / `skip`
 - Agent E（Author）
-  - 撰写 0-3 篇 solution（若需要）
+  - 撰写/更新 0-3 篇 solution 或相关站内页面（若需要）
 - Agent F（Commenter）
   - 根据 Resolver 结论，逐条写“高价值非模板回帖”，并执行 `gh issue comment`
 - Agent G（QA）
