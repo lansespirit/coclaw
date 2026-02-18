@@ -1,0 +1,76 @@
+---
+title: "Windows: Exec tool returns empty output unless pty: true"
+description: "Work around a Windows regression where non-PTY exec produces no output or side effects by forcing PTY and (optionally) capturing clean output via a temp file."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "windows"
+channel: []
+errorSignatures:
+  - "Exec tool returns empty output"
+  - "Non-PTY exec"
+keywords:
+  - "windows"
+  - "exec"
+  - "pty"
+  - "PowerShell"
+publishDate: 2026-02-18
+lastUpdated: 2026-02-18
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 19107
+    - 20084
+  docs:
+    - "https://docs.openclaw.ai/tools/exec"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- On Windows (10/11), `exec` tool calls with `pty: false` (or omitted) return **empty output**.
+- Even commands that should have side effects appear to do nothing:
+  - `echo test > file.txt` does not create `file.txt`
+  - `Write-Output test` prints nothing
+- The same commands work when `pty: true`.
+
+## Cause
+
+This is a known regression affecting the Windows non-PTY execution path in some OpenClaw versions. Using `pty: true`
+routes execution through a different code path that continues to work.
+
+## Fix
+
+### 1) Force PTY for all exec calls on Windows
+
+When calling the `exec` tool, always include `pty: true`:
+
+```json
+{ "command": "echo test", "pty": true }
+```
+
+### 2) If you need clean output, round-trip through a temp file
+
+PTY mode can include ANSI escape sequences in the returned output. A simple workaround is to redirect output to a temp
+file and then read it back:
+
+```powershell
+powershell -NoProfile -Command "echo test | Out-File -FilePath $env:TEMP\\exec.out -Encoding utf8; Get-Content $env:TEMP\\exec.out"
+```
+
+## Verify
+
+Run an `exec` call with `pty: true`:
+
+```powershell
+echo test
+```
+
+You should see `test` in the tool output. If you use redirection, confirm the file actually exists and has content.
+
+## Related
+
+- OpenClaw docs: Exec tool
+- GitHub: #19107, #20084
+
