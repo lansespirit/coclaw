@@ -28,6 +28,7 @@ const ISSUE_TYPES = [
   'usage_config',
   'usage_deploy',
   'usage_channel',
+  'usage_other',
   'known_bug_with_workaround',
   'code_bug',
   'feature_request',
@@ -250,6 +251,38 @@ function classifyIssue(issue, triageItem) {
     return {
       suggestedType: 'usage_config',
       confidence: 0.74,
+      suggestedAction: 'link_or_create_solution',
+      reasons,
+    };
+  }
+
+  if (
+    hasAny(text, [
+      /\bopenclaw\b/,
+      /\bgateway\b/,
+      /\btui\b/,
+      /\bcontrol ui\b/,
+      /\bweb ui\b/,
+      /\bonboard\b/,
+      /\bplugins?\b/,
+      /\bskills?\b/,
+    ]) &&
+    hasAny(text, [
+      /\bhow do i\b/,
+      /\bhow to\b/,
+      /\bhelp\b/,
+      /\bquestion\b/,
+      /\b(can't|cannot|unable)\b/,
+      /\bfail(?:ed|s|ure)?\b/,
+      /\berror\b/,
+      /\bnot working\b/,
+      /无法|不能|报错|怎么/,
+    ])
+  ) {
+    reasons.push('general usage/help signal detected');
+    return {
+      suggestedType: 'usage_other',
+      confidence: 0.62,
       suggestedAction: 'link_or_create_solution',
       reasons,
     };

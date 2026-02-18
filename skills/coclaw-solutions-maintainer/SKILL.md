@@ -1,27 +1,21 @@
 ---
 name: coclaw-solutions-maintainer
-description: 'Maintain CoClaw troubleshooting content from recent OpenClaw issues with strict role separation: sync reference/data, incremental triage, standalone classification, manual high-value issue replies, and optional (0-3) new/updated CoClaw pages per run.'
+description: 'Maintain CoClaw troubleshooting content from recent OpenClaw issues with strict role separation: sync reference/data, incremental triage, standalone classification, and manual issue replies.'
 ---
 
 # CoClaw Solutions Maintainer
 
 目标：基于 `docs/TROUBLESHOOTING-SOLUTIONS-MAINTENANCE.md`，建立“高价值、低噪音”的 issues 维护闭环：
 
-- **先明确 Task：**本 skill 的“任务是什么/范围/上限/验收”以 `skills/coclaw-solutions-maintainer/TASK.md` 为准（先读它）。
 - 每轮先同步 `.ref/openclaw` 到最新
-- 仅对最近 72h 且增量 issues 进入队列
 - 脚本只做“数据同步 + 初步分类建议”，不自动发评论
-- 每条 GitHub 回帖必须人工（或 AI sub-agent 人工化）完整阅读 issue 主贴 + 现有评论后撰写
-- 仅对“使用问题”与“已知 bug 但有稳定 workaround”提供高价值回复；纯代码 bug / feature / 其他报告跳过
-- 每轮最多新增/更新 0-3 个站内页面（按覆盖情况灵活判断；不要求必须新增；通常为 solutions）
-- 每轮最多评论 10 条 openclaw 使用相关 issues（以 `TASK.md` 为准）
+- 增量 triage 与分类仅输出“建议队列”，不做最终决策
 
 ## 强约束（必须遵守）
 
-1. `comment-issues-with-solutions.mjs` 已停用，禁止程序化批量评论。
+1. 禁止程序化批量评论（GitHub 回帖必须手工/人工化执行）。
 2. `triage-recent-issues.mjs` 只做增量检出，不做分析与匹配。
 3. issue 分类由独立脚本执行（建议），最终决策由人工/AI sub-agent 完整阅读后做出。
-4. 回帖必须“先提供可执行价值，再在末尾推荐 1-2 个 `coclaw.com` 站内页面（默认需要）”。链接不要求必须是 solution，也可以是 guides / config generator 等页面；确实无合适页面时允许不贴链接但需说明原因（以 `TASK.md` 为准）。
 
 ## 脚本职责拆分
 
@@ -35,96 +29,10 @@ description: 'Maintain CoClaw troubleshooting content from recent OpenClaw issue
   - `node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs`
 - 趋势分析（可选，本 skill）
   - `node skills/coclaw-solutions-maintainer/scripts/analyze-openclaw-issues.mjs`
-- 自动评论（本 skill）
-  - `comment-issues-with-solutions.mjs` 已停用，仅输出迁移提示并退出
 
-## 推荐执行流程（每轮）
+## 用法
 
-开始前（强制）：
-
-1. 读 `skills/coclaw-solutions-maintainer/TASK.md`（任务定义与验收）
-2. 读 `skills/coclaw-solutions-maintainer/SKILL.md`（本文件：强约束与脚本职责）
-3. 读 `skills/coclaw-solutions-maintainer/USAGE.md`（runbook：命令怎么跑）
-
-### 0) 同步 `.ref/openclaw`（必须先跑）
-
-```bash
-node skills/coclaw-solutions-maintainer/scripts/sync-openclaw-ref.mjs
-```
-
-### 1) 同步最近 72h issues 数据集
-
-```bash
-OPENCLAW_ISSUES_SINCE_HOURS=72 pnpm sync:issues
-```
-
-默认输出到 `skills/coclaw-solutions-maintainer/data/openclaw-issues.json`（仅供本 skill 使用）。
-
-### 2) 生成“增量 issues”
-
-```bash
-node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs \
-  --json > .cache/coclaw-solutions-maintainer/triage-latest.json
-```
-
-### 3) 生成“分类建议队列”（仅建议）
-
-```bash
-node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs \
-  --triage .cache/coclaw-solutions-maintainer/triage-latest.json \
-  --output .cache/coclaw-solutions-maintainer/classification-latest.json
-```
-
-### 3.5) 可选：更新 issue 分析报告
-
-```bash
-pnpm analyze:issues
-```
-
-默认输出机器结果到 `skills/coclaw-solutions-maintainer/data/issue-analysis.json`。
-
-### 4) 人工 / sub-agent 逐条处理
-
-从 `classification-latest.json` 中逐条处理，每条 issue 必须完整阅读：
-
-- issue title/body
-- 现有所有评论
-- 必要时 `.ref/openclaw` 相关源码或配置实现
-
-决策：
-
-- `usage_config` / `usage_deploy` / `usage_channel` / `known_bug_with_workaround`
-  - 具体决策规则、每轮上限与验收：以 `skills/coclaw-solutions-maintainer/TASK.md` 为准
-  - 一般原则：优先产出可执行回帖；链接可指向站内任意相关页面（solutions/guides/config generator 等），且链接仅作补充
-- `code_bug` / `feature_request` / `other_meta`
-  - 跳过，不回帖
-
-### 5) 手工评论（非模板）
-
-推荐命令（每条 issue 单独写内容）：
-
-```bash
-gh issue comment <ISSUE_NUMBER> \
-  --repo openclaw/openclaw \
-  --body-file /tmp/issue-<ISSUE_NUMBER>-reply.md
-```
-
-回帖质量要求：
-
-- 必须引用该 issue 的具体症状 / 报错 / 环境信息
-- 给出 1-2 条可立即执行的步骤，并说明为何适用
-- 若附 solution 链接，链接是补充而不是唯一内容
-
-### 6) 合并前校验
-
-```bash
-pnpm build
-```
-
-并手动验证：
-
-- 新增/更新 solution 页面可渲染
-- Pagefind 可通过 `errorSignatures` 关键 token 检索命中
+命令与输出路径见 `skills/coclaw-solutions-maintainer/USAGE.md`。
 
 ## Sub-agent 分工建议（防止主任务跑偏）
 
@@ -135,25 +43,10 @@ pnpm build
 - Agent C（Classifier）
   - 仅负责分类建议输出
 - Agent D（Resolver）
-  - 逐条 issue 深读，给出最终动作：`link existing` / `create solution` / `skip`
+  - 逐条 issue 深读，给出最终动作建议
 - Agent E（Author）
-  - 撰写/更新 0-3 篇 solution 或相关站内页面（若需要）
+  - 撰写/更新站内页面（若需要）
 - Agent F（Commenter）
   - 根据 Resolver 结论，逐条写“高价值非模板回帖”，并执行 `gh issue comment`
 - Agent G（QA）
   - 构建与检索验证
-
-## Git 操作
-
-若本轮新增/更新了对外内容（例如 `src/content/troubleshooting/solutions/*.mdx`），完成一轮维护后：
-
-```bash
-git add -A
-git commit -m "docs(troubleshooting): maintain solutions from incremental issues"
-git push origin main
-```
-
-重要：不要为 solutions 维护单独开分支。
-
-- 站点（Cloudflare）通常从 `main` 部署；不 push 到 `main`，新 solution 链接对用户不可用（评论里贴出去会 404/未更新）。
-- 只有当你本轮**确实没有改动站点内容**（只更新 `.cache/` 或本地数据集）时，才可以不 commit/push。

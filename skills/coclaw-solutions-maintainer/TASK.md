@@ -35,7 +35,7 @@
 
 - 数据范围：默认最近 72h 更新的 issues（由 runbook 决定具体参数）。
 - 仅处理 OpenClaw 的“使用问题”相关 issue：
-  - `usage_config` / `usage_deploy` / `usage_channel`
+  - `usage_config` / `usage_deploy` / `usage_channel` / `usage_other`
   - `known_bug_with_workaround`（仅当 workaround 稳定可执行）
 - 跳过：
   - `code_bug`（需要改源码才能解决）
@@ -79,7 +79,7 @@
 
 仅在以下情况才允许“评论不贴链接”：
 
-- 站内确实没有合适页面可推荐，且硬贴会误导（此时在回复中说明原因）
+- 站内确实没有合适页面可推荐，且硬贴会误导（此时仅回复帮助信息即可）
 
 仅在以下情况才新增/更新站内内容：
 
