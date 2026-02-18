@@ -139,8 +139,21 @@ function classifyIssue(issue, triageItem) {
     };
   }
 
-  if (hasAny(text, [/\bcve\b/, /\bvulnerability\b/, /\bsecurity\b/, /\bxss\b/, /\binjection\b/])) {
-    reasons.push('security keyword detected');
+  // Only treat explicit security vulnerability reports as code bugs. Avoid triggering on
+  // benign usage text like "channel security", "context injection", etc.
+  if (
+    hasAny(text, [
+      /\bcve\b/,
+      /\bvulnerability\b/,
+      /\bsecurity vulnerability\b/,
+      /\bsecurity issue\b/,
+      /\bexploit\b/,
+      /\bxss\b/,
+      /\bsql injection\b/,
+      /\brce\b/,
+    ])
+  ) {
+    reasons.push('security vulnerability keyword detected');
     return {
       suggestedType: 'code_bug',
       confidence: 0.8,
@@ -149,10 +162,24 @@ function classifyIssue(issue, triageItem) {
     };
   }
 
+  // Downgrade/pin is a strong user-actionable workaround signal, even if the issue is a regression.
+  if (hasAny(text, [/\bdowngrad(e|ed|ing)\b/, /\bpinned?\b/, /\binstall(?:ed)? .*@\\d{4}\\./])) {
+    reasons.push('downgrade/pin workaround detected');
+    return {
+      suggestedType: 'known_bug_with_workaround',
+      confidence: 0.72,
+      suggestedAction: 'link_or_create_solution',
+      reasons,
+    };
+  }
+
   if (
     hasAny(text, [
       /\broot cause\b/,
       /\bsrc\//,
+      /\b[a-z0-9_-]{3,}\.ts\b/,
+      /\bpatternproperties\b/,
+      /\bfunction_declarations\b/,
       /\bregression\b/,
       /\bstack trace\b/,
       /\bpanic\b/,
@@ -215,7 +242,19 @@ function classifyIssue(issue, triageItem) {
       /systemd/,
       /wsl/,
       /docker/,
-      /install/,
+      /\bdeploy\b/,
+      /\brender\b/,
+      /\brailway\b/,
+      /\bvercel\b/,
+      /\bfly\.io\b/,
+      /\bheroku\b/,
+      /\bkoyeb\b/,
+      /\bcloudflare\b/,
+      /\bnpm install\b/,
+      /\bbrew install\b/,
+      /\bapt(-get)? install\b/,
+      /\byum install\b/,
+      /\bapk add\b/,
       /gateway install/,
       /service/,
       /launchd/,
