@@ -1,48 +1,50 @@
 # Troubleshooting Issue Analysis
 
-Generated: 2026-02-03
+Generated: 2026-02-19
 Dataset: openclaw/openclaw
-Fetched at: 2026-02-03T11:15:47.623Z
+Fetched at: 2026-02-19T00:59:53.631Z
 Total issues analyzed: 500
 
 ## Top Channels (in issues text)
 
-- telegram: 97
-- whatsapp: 36
-- discord: 34
-- signal: 21
-- slack: 16
-- imessage: 9
+- telegram: 112
+- discord: 53
+- whatsapp: 43
+- slack: 39
+- signal: 17
+- imessage: 15
+- googlechat: 6
+- irc: 4
 
 ## Top Platforms (in issues text)
 
-- linux: 132
-- macos: 121
-- docker: 56
-- windows: 41
+- linux: 171
+- macos: 143
+- windows: 52
+- docker: 33
 
 ## Top Components (heuristic)
 
-- config: 310
-- gateway: 200
-- websocket: 185
-- web-ui: 62
-- tui: 13
-- onboarding: 12
+- config: 370
+- gateway: 246
+- websocket: 205
+- web-ui: 67
+- onboarding: 15
+- tui: 11
 
 ## High-Value Error Signatures (for curated articles)
 
-- model: 94
-- docker: 56
-- windows: 41
-- oauth: 23
-- eacces: 12
-- unauthorized: 9
-- pairing_required: 3
+- model: 120
+- windows: 60
+- oauth: 43
+- docker: 42
+- unauthorized: 20
+- eacces: 20
+- pairing_required: 5
 - setmycommands: 1
+- enotfound: 1
 - device_identity_required: 0
 - eaddrinuse: 0
-- enotfound: 0
 
 ## Recommended Writing Backlog (start here)
 
@@ -57,31 +59,33 @@ These are _solution_ pages we should curate (problem → cause → fix → verif
 
 ## Example Issues Per Signature (top by comments)
 
-### Unauthorized / token mismatch (Control UI) (9)
+### Unauthorized / token mismatch (Control UI) (20)
 
-- #1690 (closed, 10 comments): Webchat UI fails to authenticate: 'gateway token missing' even with token in URL
-- #5483 (closed, 5 comments): clawhub CLI: Token authentication fails with "Unauthorized" error, cannot delete skill
-- #6959 (open, 2 comments): Fix "disconnected (1008): pairing required" Error in OpenClaw Docker
-- #7903 (open, 0 comments): Critical: Self-talk detection runs AFTER tool execution, allowing unauthorized actions
-- #7749 (open, 0 comments): openclaw dashboard doesn't include token in URL
+- #9028 (closed, 10 comments): [Bug]: Docker install/onboarding stuck: CLI can’t connect to gateway (1006/1008), token mismatch due to OPENCLAW_GATEWAY_TOKEN override + confusing pairing flow/docs
+- #18274 (closed, 6 comments): [Bug]: gateway closed (1008): unauthorized: device token mismatch (rotate/reissue device token)
+- #17328 (closed, 4 comments): [Bug]: Telegram bot replies "unknown model: ollama/gemma3:4b" despite status showing it as default (v2026.2.12)
+- #3181 (open, 4 comments): [Bug]: Runaway heartbeat loop triggers excessive model calls + retries (high CPU / cost)
+- #17262 (open, 3 comments): BlueBubbles: Incoming messages rejected with 'unauthorized guid' regardless of dmPolicy
 
-### Control UI: pairing required (1008) (3)
+### Control UI: pairing required (1008) (5)
 
-- #6959 (open, 2 comments): Fix "disconnected (1008): pairing required" Error in OpenClaw Docker
-- #7715 (open, 0 comments): Feature: hot-reload device pairing approvals without gateway restart
-- #7384 (open, 0 comments): WebGUI/WebSocket always disconnected (1008): pairing required despite trustedProxies set in 2026.x
+- #9028 (closed, 10 comments): [Bug]: Docker install/onboarding stuck: CLI can’t connect to gateway (1006/1008), token mismatch due to OPENCLAW_GATEWAY_TOKEN override + confusing pairing flow/docs
+- #12210 (closed, 4 comments): sessions_spawn fails with "gateway closed (1008): pairing required" for internal subagents
+- #16305 (open, 3 comments): Gateway unreachable: pairing required
+- #20447 (open, 0 comments): Control UI does not receive device.pair.requested broadcast (pairing approval UI broken)
+- #20401 (open, 0 comments): [Bug]: Webchat pairing fails behind Tailscale Serve — isLocalDirectRequest unreachable .ts.net check
 
 ### Control UI: device identity required (1008) (0)
 
 - (no examples)
 
-### EACCES / permission denied (npm/global install) (12)
+### EACCES / permission denied (npm/global install) (20)
 
-- #2596 (open, 15 comments): [Bug]: read tool validation fails - uses "file_path" but expects "path" parameter
-- #4855 (open, 11 comments): [Bug]: Control UI assets not found on npm global install (resolveControlUiDistIndexPath fails)
-- #5434 (open, 8 comments): Error: EACCES: permission denied, open '/home/node/.openclaw/openclaw.json.7.2ede223b-aa90-4aa5-8f0d-97049696b626.tmp'
-- #5571 (closed, 2 comments): Dashboard: Logo image broken/missing, causing header layout issues
-- #4585 (open, 1 comments): google-gemini-cli provider: client_secret missing error with Gemini CLI OAuth
+- #17019 (open, 26 comments): [Bug]: 400 Item 'rs\_[...]' of type 'reasoning' was provided without its required following item.
+- #19769 (open, 7 comments): v2026.2.17: Anthropic auth fails with OAuth error
+- #4686 (open, 6 comments): [Bug]: WhatsApp linking stuck at "logging in" after initial successful link - cannot relink any number
+- #9831 (open, 5 comments): [Bug]: openclaw config doesn't see gemini-cli installation
+- #18965 (open, 4 comments): [Bug]: Exec tool returns empty stdout on Windows 10 native after upgrade from 2026.2.9 to 2026.2.15
 
 ### EADDRINUSE / GatewayLockError (port already used) (0)
 
@@ -89,40 +93,40 @@ These are _solution_ pages we should curate (problem → cause → fix → verif
 
 ### Telegram setMyCommands failed (1)
 
-- #7511 (open, 0 comments): Teltelegram provider crashes gateway on startup (unhandled fetch rejection + setMyCommands failure) + OpenAI key not loading after OAuth success
+- #19842 (open, 3 comments): [Bug]: Telegram provider fails to start polling after setMyCommands error
 
-### ENOTFOUND / DNS resolution failures (0)
+### ENOTFOUND / DNS resolution failures (1)
 
-- (no examples)
+- #13371 (open, 6 comments): [Bug] WhatsApp channel exits permanently after DNS failure instead of retrying
 
-### OAuth/Auth flows failing (23)
+### OAuth/Auth flows failing (43)
 
-- #2697 (open, 25 comments): [Bug]: Claude Code CLI OAuth auth fails - mode/type mismatch between config files
-- #4772 (open, 6 comments): Discord integration fails in China: "Failed to resolve Discord application id"
-- #6732 (open, 5 comments): [Bug]: Anthropic (claude) token authentication misverifcation
-- #5483 (closed, 5 comments): clawhub CLI: Token authentication fails with "Unauthorized" error, cannot delete skill
-- #6823 (open, 3 comments): Feature Request: Execution Guardrails for Tool Safety
+- #2697 (closed, 33 comments): [Bug]: Claude Code CLI OAuth auth fails - mode/type mismatch between config files
+- #2145 (closed, 25 comments): [Bug]: After I start it, it always appears disconnected (1006): no reason, can't use
+- #9095 (closed, 24 comments): [Bug] Anthropic OAuth authentication fails with HTTP 401 invalid bearer token
+- #11359 (open, 18 comments): Telegram shows billing error while Web UI responses succeed (Claude Max)
+- #19769 (open, 7 comments): v2026.2.17: Anthropic auth fails with OAuth error
 
-### Model resolution / providers / "all models failed" (94)
+### Model resolution / providers / "all models failed" (120)
 
-- #2697 (open, 25 comments): [Bug]: Claude Code CLI OAuth auth fails - mode/type mismatch between config files
-- #1866 (open, 12 comments): [Bug]: Add tool calling support for `openai-completions` API mode
-- #2315 (open, 11 comments): Venice AI provider returns empty responses (no API calls made)
-- #3475 (open, 11 comments): [Bug]: Kimi/Moonshot OpenAI-compatible models fail silently (direct API works, Clawdbot hangs)
-- #4499 (open, 8 comments): bug(tui): MiniMax responses show '(no output)' until TUI restart
+- #2697 (closed, 33 comments): [Bug]: Claude Code CLI OAuth auth fails - mode/type mismatch between config files
+- #17019 (open, 26 comments): [Bug]: 400 Item 'rs\_[...]' of type 'reasoning' was provided without its required following item.
+- #2145 (closed, 25 comments): [Bug]: After I start it, it always appears disconnected (1006): no reason, can't use
+- #9095 (closed, 24 comments): [Bug] Anthropic OAuth authentication fails with HTTP 401 invalid bearer token
+- #19184 (open, 23 comments): [Bug]: [OpenAI Responses] "400 Item 'rs\_...' of type 'reasoning' was provided without its required following item" loop on gpt-5.2
 
-### Windows install/runtime issues (41)
+### Windows install/runtime issues (60)
 
-- #75 (open, 16 comments): Linux/Windows Clawdbot Apps
-- #2596 (open, 15 comments): [Bug]: read tool validation fails - uses "file_path" but expects "path" parameter
-- #5231 (open, 8 comments): [Bug]: i cant install
-- #6834 (closed, 6 comments): [Bug]: Windows 11 installation update failed
-- #5483 (closed, 5 comments): clawhub CLI: Token authentication fails with "Unauthorized" error, cannot delete skill
+- #7559 (closed, 26 comments): 📱 Request iOS/Android TestFlight/Beta Access - @cnshenyi
+- #2145 (closed, 25 comments): [Bug]: After I start it, it always appears disconnected (1006): no reason, can't use
+- #19184 (open, 23 comments): [Bug]: [OpenAI Responses] "400 Item 'rs\_...' of type 'reasoning' was provided without its required following item" loop on gpt-5.2
+- #9645 (closed, 9 comments): memory_search never calls qmd search when using QMD backend
+- #2868 (open, 9 comments): [Bug]: Unexpected high token consumption with Claude models
 
-### Docker deployment issues (56)
+### Docker deployment issues (42)
 
-- #4111 (open, 51 comments): [Bug]:This version of Antigravity is no longer supported. Please update to receive the latest features!
-- #1818 (open, 16 comments): [Bug]: Onboarding wizard does not install Systemd service on Ubuntu 22.04
-- #3146 (closed, 9 comments): [Bug]: docker install "./docker-setup.sh" happen => ERROR [12/14] RUN CLAWDBOT_A2UI_SKIP_MISSING=1 pnpm build
-- #5434 (open, 8 comments): Error: EACCES: permission denied, open '/home/node/.openclaw/openclaw.json.7.2ede223b-aa90-4aa5-8f0d-97049696b626.tmp'
-- #5231 (open, 8 comments): [Bug]: i cant install
+- #2145 (closed, 25 comments): [Bug]: After I start it, it always appears disconnected (1006): no reason, can't use
+- #11359 (open, 18 comments): Telegram shows billing error while Web UI responses succeed (Claude Max)
+- #9028 (closed, 10 comments): [Bug]: Docker install/onboarding stuck: CLI can’t connect to gateway (1006/1008), token mismatch due to OPENCLAW_GATEWAY_TOKEN override + confusing pairing flow/docs
+- #4686 (open, 6 comments): [Bug]: WhatsApp linking stuck at "logging in" after initial successful link - cannot relink any number
+- #8714 (open, 5 comments): [Bug]: Custom OpenAI-compatible provider shows 'Cannot read properties of undefined (reading 0)' before response
