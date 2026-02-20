@@ -8,6 +8,16 @@
 node skills/coclaw-solutions-maintainer/scripts/sync-openclaw-ref.mjs
 ```
 
+### Step 0.5：生成 KB 索引文档（推荐）
+
+用于让 sub-agent 在回帖/写作前快速获取“站内页面链接 + OpenClaw 溯源入口”的上下文。
+
+```bash
+pnpm kb:build
+```
+
+脚本入口：`scripts/build-kb-index.mjs`
+
 ### Step 1：同步最近 issues 数据
 
 ```bash
@@ -55,7 +65,7 @@ pnpm analyze:issues
 - 机器报告输出到 `skills/coclaw-solutions-maintainer/data/issue-analysis.json`。
 - 人类报告输出到 `docs/TROUBLESHOOTING-ISSUE-ANALYSIS.md`。
 
-## 手工评论
+## 逐条发布评论（推荐：每条写好就立刻提交）
 
 ```bash
 gh issue comment <ISSUE_NUMBER> \

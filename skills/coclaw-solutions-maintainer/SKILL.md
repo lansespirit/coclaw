@@ -13,7 +13,7 @@ description: 'Maintain CoClaw troubleshooting content from recent OpenClaw issue
 
 ## 强约束（必须遵守）
 
-1. 禁止程序化批量评论（GitHub 回帖必须手工/人工化执行）。
+1. 评论发布方式：仅逐条使用 `gh issue comment` 立即发布单条回复；不要用脚本/循环一次性发送多条评论。
 2. `triage-recent-issues.mjs` 只做增量检出，不做分析与匹配。
 3. issue 分类由独立脚本执行（建议），最终决策由人工/AI sub-agent 完整阅读后做出。
 
