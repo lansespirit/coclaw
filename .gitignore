@@ -111,3 +111,5 @@ pagefind/
 # Skill-local synced issue datasets
 skills/coclaw-solutions-maintainer/data/
 
+# Local knowledge base (do not track)
+/docs/kb/
