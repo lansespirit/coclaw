@@ -18,6 +18,7 @@
     "generate:troubleshooting-stubs": "node scripts/generate-troubleshooting-stubs.mjs",
     "analyze:issues": "node skills/coclaw-solutions-maintainer/scripts/analyze-openclaw-issues.mjs",
     "test:config-generator": "tsx scripts/test-openclaw-config-generator.ts",
+    "kb:build": "node scripts/build-kb-index.mjs",
     "lint": "eslint . --ext .js,.ts,.astro",
     "lint:fix": "eslint . --ext .js,.ts,.astro --fix",
     "lint:staged": "lint-staged",
