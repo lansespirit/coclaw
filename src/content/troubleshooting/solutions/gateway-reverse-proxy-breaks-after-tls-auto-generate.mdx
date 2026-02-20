@@ -1,0 +1,76 @@
+---
+title: "Gateway: reverse proxy 502 / HTTP/0.9 after update (TLS auto-generate enabled)"
+description: "Fix reverse proxy breakage after an update enables gateway TLS: disable gateway TLS or update your proxy to talk HTTPS to the gateway."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "curl: (1) Received HTTP/0.9 when not allowed"
+  - "502 Bad Gateway"
+keywords:
+  - "gateway"
+  - "tls"
+  - "reverse proxy"
+  - "caddy"
+  - "nginx"
+publishDate: 2026-02-20
+lastUpdated: 2026-02-20
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 21814
+  docs:
+    - "https://docs.openclaw.ai/gateway/configuration-reference"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- After upgrading OpenClaw, your reverse proxy (Caddy/nginx/Traefik) starts returning **502** for Gateway endpoints (for example `/hooks/wake`).
+- Hitting the gateway port over HTTP locally fails, often with:
+  - `curl: (1) Received HTTP/0.9 when not allowed`
+- But HTTPS works (for example `curl -k https://127.0.0.1:18789/...`).
+
+## Cause
+
+The gateway is now speaking **HTTPS** on its port (TLS enabled / auto-generated certs), but your reverse proxy is still forwarding **plain HTTP** to that backend.
+
+## Fix
+
+Pick one approach:
+
+### Option A (recommended): keep gateway HTTP, terminate TLS at the reverse proxy
+
+Disable gateway TLS and restart:
+
+```bash
+openclaw config set gateway.tls.enabled false --json
+openclaw gateway restart
+```
+
+### Option B: make your reverse proxy talk HTTPS to the gateway
+
+If you want the proxy->gateway hop to be TLS, update your proxy upstream to `https://127.0.0.1:<port>` and (if using auto-generated certs) disable upstream cert verification or trust the gateway cert.
+
+## Verify
+
+From the gateway host:
+
+```bash
+curl -i http://127.0.0.1:18789/healthz
+```
+
+You should get a normal HTTP response (not an HTTP/0.9/TLS handshake error).
+
+Then re-test your proxy URL (webhook/hook endpoints) and confirm 502s are gone.
+
+## Related
+
+- GitHub: #21814
+- OpenClaw config reference: `gateway.tls.*`
+

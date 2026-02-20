@@ -1,0 +1,87 @@
+---
+title: "Cron: jobs don't fire and nextRunAtMs silently advances"
+description: "Fix cron jobs that skip runs (no execution/logs) while nextRunAtMs advances by upgrading past known scheduler regressions and verifying cron storage + timezone."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "Cron jobs not firing"
+  - "nextRunAtMs silently advances"
+keywords:
+  - "cron"
+  - "scheduler"
+  - "nextRunAtMs"
+publishDate: 2026-02-20
+lastUpdated: 2026-02-20
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 12502
+  docs:
+    - "https://docs.openclaw.ai/automation/cron-jobs"
+    - "https://docs.openclaw.ai/cli/cron"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- A cron job looks enabled and has a valid `nextRunAtMs`, but it **never executes**.
+- At the scheduled time:
+  - no logs appear for the run,
+  - `openclaw cron runs --id <job-id>` stays empty,
+  - and `nextRunAtMs` **advances** to the next occurrence anyway (as if it ran).
+
+## Cause
+
+This is usually caused by a **Gateway cron scheduler regression** in some OpenClaw versions where maintenance logic can advance a past-due `nextRunAtMs` without executing the run.
+
+It can also be caused by mismatched assumptions around timezones (host timezone vs explicit `tz`).
+
+## Fix
+
+### 1) Upgrade OpenClaw and restart the gateway
+
+Upgrade to the latest OpenClaw (or at least a version that includes the cron scheduler fixes), then restart:
+
+```bash
+openclaw --version
+
+# npm global install
+npm update -g openclaw
+
+openclaw gateway restart
+```
+
+### 2) Verify cron storage + job state
+
+List jobs and confirm the scheduler sees it as enabled with a future `nextRunAtMs`:
+
+```bash
+openclaw cron list
+openclaw cron runs --id <job-id>
+```
+
+If the job is supposed to run at a specific wall-clock time, set an explicit timezone:
+
+```bash
+openclaw cron edit <job-id> --tz "America/Los_Angeles"
+```
+
+## Verify
+
+- Wait for the next scheduled time and confirm the job appears in:
+  - `openclaw cron runs --id <job-id>`
+- If it is a main-session job, confirm the system event is delivered.
+- If it is an isolated job, confirm it produces an isolated run and (if enabled) delivery happens.
+
+## Related
+
+- OpenClaw docs: Cron Jobs
+- OpenClaw CLI: `openclaw cron`
+- GitHub: #12502
+
