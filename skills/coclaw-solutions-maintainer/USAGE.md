@@ -67,6 +67,40 @@ pnpm analyze:issues
 
 ## 逐条发布评论（推荐：每条写好就立刻提交）
 
+### gh 认证与常见坑（重要）
+
+`gh` 会优先使用环境变量 `GITHUB_TOKEN` / `GH_TOKEN`。在本地维护时，如果你的 shell 里意外带了一个权限不够的 token，可能会出现：
+
+- `GraphQL: Resource not accessible by personal access token (addComment)`
+
+推荐做法：
+
+1. 先检查当前 gh 使用的身份：
+
+```bash
+gh auth status
+```
+
+2. **发布评论时**，显式禁用环境变量 token，让 gh 使用本机登录态（keychain）：
+
+```bash
+env -u GITHUB_TOKEN -u GH_TOKEN gh issue comment <ISSUE_NUMBER> \
+  --repo openclaw/openclaw \
+  --body-file /tmp/issue-<ISSUE_NUMBER>-reply.md
+```
+
+或在当前终端会话里直接清掉（一次性）：
+
+```bash
+unset GITHUB_TOKEN GH_TOKEN
+```
+
+如果 `gh auth status` 显示未登录，则先执行：
+
+```bash
+gh auth login
+```
+
 ```bash
 gh issue comment <ISSUE_NUMBER> \
   --repo openclaw/openclaw \
