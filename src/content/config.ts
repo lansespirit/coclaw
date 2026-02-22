@@ -112,6 +112,8 @@ const storiesCollection = defineCollection({
     company: z.string(),
     avatar: z.string(),
     ogImage: z.string().optional(),
+    // Optional large hero/background image for the story detail page.
+    coverImage: z.string().optional(),
     summary: z.string(),
     quote: z.string(),
     publishDate: z.date(),

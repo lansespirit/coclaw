@@ -1,0 +1,116 @@
+---
+import { Chip } from '@heroui/react';
+import { IconArrowTopRightOnSquare } from '../icons';
+
+type StorySource = { label: string; url: string };
+
+interface Props {
+  name: string;
+  role: string;
+  avatar: string;
+  sources?: StorySource[];
+  keywordList?: string[];
+  maxSourcesPreview?: number;
+  class?: string;
+}
+
+const {
+  name,
+  role,
+  avatar,
+  sources = [],
+  keywordList = [],
+  maxSourcesPreview = 2,
+  class: className = '',
+} = Astro.props;
+
+const previewSources = sources.slice(0, maxSourcesPreview);
+const moreSources = sources.slice(maxSourcesPreview);
+---
+
+<div class={`m-card-surface p-6 ${className}`.trim()}>
+  <div class="flex items-center gap-4">
+    <!--
+      NOTE: HeroUI <Avatar src="..."/> keeps the <img> at opacity:0 until a client-side
+      "loaded" data attribute is set. On non-hydrated Astro pages this can make SVGs
+      appear as a solid fallback color. Use a plain <img> for cover/avatar assets.
+    -->
+    <span
+      class="flex relative justify-center items-center box-border overflow-hidden align-middle rounded-full ring-2 ring-offset-2 ring-offset-background dark:ring-offset-background-dark ring-primary w-16 h-16 bg-content2"
+    >
+      <img src={avatar} alt={`${name} avatar`} class="w-full h-full object-cover" loading="lazy" />
+    </span>
+    <div>
+      <div class="font-black text-foreground leading-tight">{name}</div>
+      <div class="text-sm text-default-600">{role}</div>
+    </div>
+  </div>
+
+  {
+    sources?.length ? (
+      <div class="mt-6 pt-6 border-t border-divider">
+        <h2 class="text-xs font-black uppercase tracking-widest text-default-500 mb-3">Sources</h2>
+
+        <ul class="space-y-3">
+          {previewSources.map((s) => (
+            <li>
+              <a
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group inline-flex items-start gap-2 text-sm font-medium text-primary hover:opacity-80 transition-opacity"
+              >
+                <span class="flex-1">{s.label}</span>
+                <IconArrowTopRightOnSquare
+                  className="w-4 h-4 mt-0.5 opacity-60 group-hover:opacity-100"
+                  aria-hidden="true"
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        {moreSources.length ? (
+          <details class="mt-4">
+            <summary class="cursor-pointer text-sm font-bold text-default-600 hover:text-foreground transition-colors">
+              Show {moreSources.length} more
+            </summary>
+            <ul class="mt-3 space-y-3">
+              {moreSources.map((s) => (
+                <li>
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="group inline-flex items-start gap-2 text-sm font-medium text-primary hover:opacity-80 transition-opacity"
+                  >
+                    <span class="flex-1">{s.label}</span>
+                    <IconArrowTopRightOnSquare
+                      className="w-4 h-4 mt-0.5 opacity-60 group-hover:opacity-100"
+                      aria-hidden="true"
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        ) : null}
+      </div>
+    ) : null
+  }
+
+  {
+    keywordList.length ? (
+      <div class="mt-6 pt-6 border-t border-divider">
+        <h2 class="text-xs font-black uppercase tracking-widest text-default-500 mb-3">Keywords</h2>
+        <div class="flex flex-wrap gap-2">
+          {keywordList.map((k) => (
+            <Chip size="sm" variant="flat" color="primary">
+              {k}
+            </Chip>
+          ))}
+        </div>
+      </div>
+    ) : null
+  }
+</div>

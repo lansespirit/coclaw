@@ -1,0 +1,104 @@
+---
+import { IconCopy } from '../icons';
+
+interface Props {
+  canonicalUrl: string;
+  shareTitle: string;
+  sticky?: boolean;
+  class?: string;
+}
+
+const { canonicalUrl, shareTitle, sticky = true, class: className = '' } = Astro.props;
+
+const slug = canonicalUrl.split('?')[0].split('#')[0].split('/').filter(Boolean).at(-1) ?? 'story';
+const safeSlug = slug.replace(/[^a-zA-Z0-9_-]/g, '');
+const copyBtnId = `copy-story-link-${safeSlug}`;
+const copyLabelId = `copy-story-link-label-${safeSlug}`;
+---
+
+<div class={`${sticky ? 'sticky top-28' : ''} space-y-6 ${className}`.trim()}>
+  <div class="m-card-surface p-6">
+    <h2 class="text-sm font-black mb-2">Share</h2>
+    <p class="text-sm text-default-600 mb-4">If this story helped, share it with your team.</p>
+    <div class="flex flex-wrap gap-3">
+      <a
+        class="inline-flex items-center justify-center h-10 px-4 rounded-full bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-opacity"
+        href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
+          canonicalUrl
+        )}&text=${encodeURIComponent(shareTitle)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Share on X
+      </a>
+      <a
+        class="inline-flex items-center justify-center h-10 px-4 rounded-full border border-divider bg-content1 font-bold text-sm hover:bg-content2 transition-colors"
+        href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+          canonicalUrl
+        )}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Share on LinkedIn
+      </a>
+      <button
+        id={copyBtnId}
+        type="button"
+        class="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-full border border-divider bg-content1 font-bold text-sm hover:bg-content2 transition-colors"
+      >
+        <IconCopy className="w-4 h-4" aria-hidden="true" />
+        <span id={copyLabelId}>Copy link</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="m-card-surface p-6">
+    <h2 class="text-sm font-black mb-2">New to OpenClaw?</h2>
+    <p class="text-sm text-default-600 mb-5">
+      Start with a safe, repeatable setup. We’ll walk you through the basics.
+    </p>
+    <a
+      href="/getting-started"
+      class="inline-flex items-center justify-center h-11 w-full rounded-full bg-primary text-primary-foreground font-black hover:opacity-90 transition-opacity"
+    >
+      Get Started
+    </a>
+  </div>
+</div>
+
+<script
+  is:inline
+  define:vars={{
+    copyBtnId,
+    copyLabelId,
+    storyUrl: canonicalUrl,
+  }}
+>
+  (() => {
+    const btn = document.getElementById(copyBtnId);
+    const label = document.getElementById(copyLabelId);
+    if (!btn || !label) return;
+    const original = label.textContent || 'Copy link';
+
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(storyUrl);
+        label.textContent = 'Copied';
+        setTimeout(() => {
+          label.textContent = original;
+        }, 1500);
+      } catch {
+        const input = document.createElement('input');
+        input.value = storyUrl;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        label.textContent = 'Copied';
+        setTimeout(() => {
+          label.textContent = original;
+        }, 1500);
+      }
+    });
+  })();
+</script>

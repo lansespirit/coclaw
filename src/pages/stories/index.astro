@@ -3,7 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 import { UserStoryCard } from '../../components/UserStoryCard';
-import { Button, Avatar } from '@heroui/react';
+import { Button } from '@heroui/react';
 import { IconQuote } from '../../components/icons';
 
 const storyEntries = await getCollection('stories', ({ data }) => !data.draft);
@@ -95,12 +95,14 @@ const structuredData = {
                 </blockquote>
                 <div class="flex flex-col md:flex-row items-center justify-between gap-12">
                   <div class="flex flex-col lg:flex-row items-center gap-6">
-                    <Avatar
-                      src={mainStory.avatar}
-                      className="w-20 h-20"
-                      isBordered
-                      color="secondary"
-                    />
+                    <span class="flex relative justify-center items-center box-border overflow-hidden align-middle rounded-full ring-2 ring-offset-2 ring-offset-background dark:ring-offset-background-dark ring-secondary w-20 h-20 bg-content2">
+                      <img
+                        src={mainStory.avatar}
+                        alt={`${mainStory.name} avatar`}
+                        class="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    </span>
                     <div class="text-center lg:text-left">
                       <p class="text-2xl font-black text-foreground">{mainStory.name}</p>
                       <p class="text-secondary font-bold text-lg">{mainStory.role}</p>

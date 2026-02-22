@@ -3,38 +3,34 @@ name: Haoyang Zhang (autogame-17)
 role: Builder of "capability-evolver" (SOUL skill) and founder of EvoMap
 company: EvoMap / AutoGame Limited
 avatar: /images/stories/evomap.svg
-summary: "A ClawHub #1 skill hit 35k+ installs, got pulled, sparked a $1,000 email screenshot, then got accused of exfiltrating data. The author says it was a false positive. The ecosystem called it a warning."
-quote: "A plugin hits #1 in 10 minutes. Then it disappears."
+coverImage: /images/stories/covers/haoyang-zhang-evomap.svg
+summary: 'A ClawHub #1 skill was delisted after 35k+ installs, then drew a $1,000 email screenshot and exfiltration allegations. The author disputes both.'
+quote: 'A plugin hits #1 in 10 minutes. Then it disappears.'
 publishDate: 2026-02-22
-keywords: "OpenClaw story, EvoMap, capability-evolver, ClawHub, SOUL registry, agent self-evolution, supply chain security, governance, marketplaces"
+keywords: 'EvoMap, capability-evolver, ClawHub, SOUL registry, agent self-evolution, supply chain security, governance, marketplaces, OpenClaw story'
 sources:
-  - label: "EvoMap blog -- Origin story (timeline + Unicode/ASCII email excerpt)"
+  - label: 'EvoMap blog -- Origin story (timeline + Unicode/ASCII email excerpt)'
     url: https://evomap.ai/blog/evomap-origin-story
-  - label: "GitHub -- autogame-17/evolver (Capability Evolver repo)"
+  - label: 'Saoud Khalifah -- blog post alleging Evolver exfiltrates data to Feishu (code excerpt)'
+    url: https://saoudkhalifah.com/2026/02/02/the-new-botnet-powered-by-your-personal-ai-assistants
+  - label: 'GitHub -- autogame-17/evolver (Capability Evolver repo)'
     url: https://github.com/autogame-17/evolver
-  - label: "ClawHub docs -- security + moderation + CLI (official docs)"
+  - label: 'ClawHub docs -- security + moderation + CLI (official docs)'
     url: https://docs.openclaw.ai/tools/clawhub
-  - label: "Reddit -- '$1000 donation' email screenshot thread (community allegation)"
-    url: https://www.reddit.com/r/aiagents/comments/1qzc1ta/is_the_openclaw_creator_holding_plugins_hostage/
   - label: "Answer Overflow (Discord mirror) -- autogame-17 reports shadowban + 'Unauthorized' CLI"
     url: https://www.answeroverflow.com/m/1472032753699520604
-  - label: "Saoud Khalifah -- blog post alleging Evolver exfiltrates data to Feishu (code excerpt)"
-    url: https://saoudkhalifah.com/2026/02/02/the-new-botnet-powered-by-your-personal-ai-assistants
-  - label: "The Hacker News -- OpenClaw adds VirusTotal scanning for ClawHub skills"
+  - label: "Reddit -- '$1000 donation' email screenshot thread (community allegation)"
+    url: https://www.reddit.com/r/aiagents/comments/1qzc1ta/is_the_openclaw_creator_holding_plugins_hostage/
+  - label: 'The Hacker News -- OpenClaw adds VirusTotal scanning for ClawHub skills'
     url: https://thehackernews.com/2026/02/openclaw-integrates-virustotal-scanning.html
-  - label: "The Verge -- skills ecosystem described as a security nightmare (press context)"
+  - label: 'The Verge -- skills ecosystem described as a security nightmare (press context)'
     url: https://www.theverge.com/news/874011/openclaw-ai-skill-clawhub-extensions-security-nightmare
 ---
 
-<p class="text-2xl font-medium text-foreground/80 mb-12 leading-relaxed italic">
-  A new OpenClaw skill hits #1 in 10 minutes.
-  <br />
-  35,000 installs pile up.
-  <br />
-  Then it gets pulled.
-  <br />
-  Then a screenshot leaks.
-</p>
+> A new OpenClaw skill hits #1 in 10 minutes.  
+> 35,000 installs pile up.  
+> Then it gets pulled.  
+> Then a screenshot leaks.
 
 On February 1, 2026, a ClawHub skill called **Capability Evolver** rockets to the top of the chart.
 It promises something OpenClaw builders secretly want and publicly fear: a self-improving agent
@@ -68,7 +64,7 @@ If you are wondering why builders feel whiplash: this is why.
 
 ## Act I: The pitch that makes you lean in
 
-OpenClaw already lets agents *do things*. The Evolver pitch goes one layer deeper:
+OpenClaw already lets agents _do things_. The Evolver pitch goes one layer deeper:
 
 - read the agent's runtime history
 - detect failure patterns
@@ -154,7 +150,7 @@ includes a code excerpt and claims the skill:
 If the allegation is true, the story stops being "platform drama" and becomes an actual breach.
 
 If the allegation is false, the story is still bad: it means the ecosystem is now in a posture
-where *a self-evolving skill* looks indistinguishable from malware.
+where _a self-evolving skill_ looks indistinguishable from malware.
 
 Either way, the lesson is brutal:
 
@@ -168,8 +164,8 @@ themselves as Zhang Haoyang (`autogame-17`) and says:
 - their ClawHub profile is visible, but skills vanish from search
 - the CLI returns `Unauthorized`
 - they suspect the safety system flagged their evolver research as malware
- - they cannot access their skills list or favorites anymore (their words: "I can't access my skills
-   and my favorites")
+- they cannot access their skills list or favorites anymore (their words: "I can't access my skills
+  and my favorites")
 
 The line that lands is the simplest:
 
@@ -209,18 +205,18 @@ accept that your product is a permission.
 If you read the public artifacts back-to-back, you can feel the ecosystem splitting into three
 competing explanations:
 
-1) The hostage story (Reddit)
+1. The hostage story (Reddit)
 
 An email screenshot circulates. The quote is brutal. The subtext is worse: "pay, and you get your
 distribution back."
 
-2) The false-positive story (support thread + security winter)
+2. The false-positive story (support thread + security winter)
 
 ClawHub tightens safety controls while press reports about malicious skills spike. A powerful,
 self-evolving skill looks suspicious by default. The author says they were shadowbanned and locked
 out of their own catalog.
 
-3) The malware story (security blog)
+3. The malware story (security blog)
 
 A researcher points at code, tokens, and outbound data flow. If the analysis is correct, then the
 registry did not "overreact" -- it responded late.
@@ -233,7 +229,7 @@ The uncomfortable part is that all three stories can coexist in the same ecosyst
 
 ## The closing question (the one nobody can dodge now)
 
-Capability Evolver is a story about *self-improvement*, but it ended up exposing the ecosystem's
+Capability Evolver is a story about _self-improvement_, but it ended up exposing the ecosystem's
 real bottleneck: trust.
 
 When your extensions can read secrets and modify code, your marketplace is no longer a convenience.

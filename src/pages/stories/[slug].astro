@@ -4,8 +4,11 @@ import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 import RelatedLinks from '../../components/RelatedLinks.astro';
+import StoryMetaCard from '../../components/stories/StoryMetaCard.astro';
+import StorySidebar from '../../components/stories/StorySidebar.astro';
 import { buildWeightedTokens, topRelated } from '../../lib/related';
-import { Button, Chip, Avatar } from '@heroui/react';
+import { Button, Chip } from '@heroui/react';
+import { IconChevronLeft, IconQuote } from '../../components/icons';
 
 export const getStaticPaths = (async () => {
   const stories = await getCollection('stories', ({ data }) => !data.draft);
@@ -18,9 +21,34 @@ export const getStaticPaths = (async () => {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 
-const { name, role, company, avatar, ogImage, summary, publishDate, sources, keywords } =
-  entry.data;
+const {
+  name,
+  role,
+  company,
+  avatar,
+  ogImage,
+  coverImage,
+  summary,
+  quote,
+  publishDate,
+  sources,
+  keywords,
+} = entry.data;
 const og = ogImage || '/images/og/og-main.png';
+const heroImage = coverImage || undefined;
+const heroImageIsSvg = Boolean(heroImage && heroImage.toLowerCase().endsWith('.svg'));
+
+const keywordList =
+  keywords
+    ?.split(/[,，;]/g)
+    .map((k) => k.trim())
+    .filter(Boolean) ?? [];
+const keywordsMeta = keywordList.length ? keywordList.join(', ') : keywords;
+const publishedLabel = publishDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+});
 
 const allStories = await getCollection('stories', ({ data }) => !data.draft);
 const allGuides = await getCollection('guides', ({ data }) => !data.draft);
@@ -87,6 +115,12 @@ const structuredData = {
   dateModified: publishDate.toISOString(),
   author: { '@type': 'Organization', name: 'CoClaw' },
   publisher: { '@type': 'Organization', name: 'CoClaw', url: 'https://coclaw.com' },
+  about: {
+    '@type': 'Person',
+    name,
+    jobTitle: role,
+    worksFor: { '@type': 'Organization', name: company },
+  },
   mainEntityOfPage: canonicalURL.toString(),
 };
 ---
@@ -94,54 +128,124 @@ const structuredData = {
 <BaseLayout
   title={`${name} | CoClaw Stories`}
   description={summary}
-  keywords={keywords}
+  keywords={keywordsMeta}
   ogImage={og}
   type="article"
 >
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
-  <div class="bg-background min-h-screen pt-32 pb-24">
-    <Section containerClass="max-w-4xl mx-auto px-6">
-      <div class="flex flex-col items-center text-center mb-16">
-        <Avatar src={avatar} className="w-24 h-24 mb-6" isBordered color="primary" />
-        <div class="flex items-center gap-2 mb-4">
-          <Chip size="sm" color="primary" variant="flat" className="font-bold">STORY</Chip>
+  <meta slot="head" property="article:published_time" content={publishDate.toISOString()} />
+
+  <div class="bg-background min-h-screen relative">
+    <Section as="header" py="pt-32 pb-12" containerClass="max-w-6xl">
+      <div class="flex items-center justify-between gap-6 mb-10">
+        <a
+          href="/stories"
+          class="inline-flex items-center gap-2 text-sm font-bold text-default-600 hover:text-foreground transition-colors"
+        >
+          <IconChevronLeft className="w-4 h-4" aria-hidden="true" />
+          Back to stories
+        </a>
+
+        <Chip size="sm" color="primary" variant="flat" className="font-bold"> STORY </Chip>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        <div class="lg:col-span-8">
+          <h1 class="text-4xl md:text-6xl font-black tracking-tighter mb-4 text-balance">{name}</h1>
+          <p class="text-xl text-default-500 font-medium">
+            {role} @ {company}
+          </p>
+
+          <div class="mt-6 flex flex-wrap items-center gap-3 text-sm text-default-600">
+            <time datetime={publishDate.toISOString()} class="font-medium">
+              {publishedLabel}
+            </time>
+            {keywordList.length ? <span class="text-default-500">•</span> : null}
+            {
+              keywordList.length ? (
+                <span class="font-medium">Keywords: {keywordList.slice(0, 4).join(', ')}</span>
+              ) : null
+            }
+          </div>
+
+          <p class="mt-8 text-xl text-default-600 leading-relaxed max-w-2xl">{summary}</p>
+
+          {
+            quote ? (
+              <div class="mt-10 m-card-glass-soft p-8 overflow-hidden">
+                <div class="flex items-start gap-4">
+                  <div class="shrink-0 opacity-40">
+                    <IconQuote className="w-8 h-8 text-primary fill-current" aria-hidden="true" />
+                  </div>
+                  <blockquote class="text-2xl md:text-3xl font-black italic tracking-tight text-foreground leading-snug">
+                    "{quote}"
+                  </blockquote>
+                </div>
+              </div>
+            ) : null
+          }
         </div>
-        <h1 class="text-4xl md:text-6xl font-black tracking-tighter mb-4">{name}</h1>
-        <p class="text-xl text-default-500 font-medium">{role} @ {company}</p>
+
+        <div class="lg:col-span-4">
+          <div class="flex lg:justify-end">
+            <StoryMetaCard
+              class="w-full max-w-sm"
+              name={name}
+              role={role}
+              avatar={avatar}
+              sources={sources}
+              keywordList={keywordList}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div slot="background" class="absolute inset-0 -z-10 overflow-hidden">
+        <div
+          class="absolute inset-0 bg-gradient-to-b from-secondary/10 via-background/40 to-background"
+        >
+        </div>
+        <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-primary/10 blur-3xl"></div>
+        <div class="absolute top-32 -left-24 w-96 h-96 rounded-full bg-secondary/10 blur-3xl"></div>
         {
-          sources?.length ? (
-            <p class="mt-6 text-sm text-default-600 max-w-2xl">
-              Sources:{' '}
-              {sources.map((s, idx) => (
-                <>
-                  <a
-                    href={s.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-primary hover:underline"
-                  >
-                    {s.label}
-                  </a>
-                  {idx < sources.length - 1 ? ' · ' : ''}
-                </>
-              ))}
-            </p>
+          heroImage ? (
+            <>
+              <img
+                src={heroImage}
+                alt=""
+                class={`absolute inset-0 w-full h-full object-cover ${
+                  heroImageIsSvg ? 'opacity-60' : 'opacity-35'
+                }`}
+                loading="eager"
+              />
+              <div class="absolute inset-0 bg-gradient-to-b from-background/10 via-background/55 to-background" />
+            </>
           ) : null
         }
       </div>
+    </Section>
 
-      <article class="c-content prose prose-lg prose-primary max-w-none">
-        <Content />
-      </article>
+    <Section py="pb-24" containerClass="max-w-6xl">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        <article class="lg:col-span-8 c-content prose prose-lg prose-primary max-w-none">
+          <Content />
+        </article>
 
-      <RelatedLinks title="Related" items={[...relatedStories, ...relatedGuides]} />
+        <aside class="lg:col-span-4">
+          <StorySidebar
+            canonicalUrl={canonicalURL.toString()}
+            shareTitle={`${name} — OpenClaw Story`}
+          />
+        </aside>
+      </div>
 
-      <div
-        class="mt-24 p-12 rounded-[40px] bg-gradient-to-br from-primary/10 to-transparent border border-primary/20 text-center"
-      >
-        <h3 class="text-3xl font-bold mb-6 italic">Ready to write your own story?</h3>
-        <p class="text-xl text-default-600 mb-10 max-w-2xl mx-auto">
-          Join thousands of users who are building the future of automated, private communication.
+      <RelatedLinks title="Related Stories" items={relatedStories} />
+      <RelatedLinks title="Related Guides" items={relatedGuides} />
+
+      <div class="mt-16 p-10 rounded-3xl bg-primary/5 border border-primary/10 text-center">
+        <h3 class="text-3xl font-black mb-4 italic">Ready to write your own story?</h3>
+        <p class="text-lg text-default-600 mb-8 max-w-2xl mx-auto">
+          Join builders who care about privacy, safety, and real-world automation.
         </p>
         <Button
           as="a"
@@ -149,7 +253,7 @@ const structuredData = {
           size="lg"
           color="primary"
           radius="full"
-          className="font-bold px-12 h-16 text-lg"
+          className="font-bold px-12 h-14 text-base"
         >
           Get Started with OpenClaw
         </Button>
