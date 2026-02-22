@@ -65,6 +65,8 @@ coverage/
 *.temp
 .cache/
 .temp/
+tmp/
+output/imagegen/
 
 # Cloudflare Workers
 .wrangler/
