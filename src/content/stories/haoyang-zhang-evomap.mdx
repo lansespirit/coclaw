@@ -1,0 +1,242 @@
+---
+name: Haoyang Zhang (autogame-17)
+role: Builder of "capability-evolver" (SOUL skill) and founder of EvoMap
+company: EvoMap / AutoGame Limited
+image: /images/stories/evomap.svg
+summary: "A ClawHub #1 skill hit 35k+ installs, got pulled, sparked a $1,000 email screenshot, then got accused of exfiltrating data. The author says it was a false positive. The ecosystem called it a warning."
+quote: "A plugin hits #1 in 10 minutes. Then it disappears."
+publishDate: 2026-02-22
+keywords: "OpenClaw story, EvoMap, capability-evolver, ClawHub, SOUL registry, agent self-evolution, supply chain security, governance, marketplaces"
+sources:
+  - label: "EvoMap blog -- Origin story (timeline + Unicode/ASCII email excerpt)"
+    url: https://evomap.ai/blog/evomap-origin-story
+  - label: "GitHub -- autogame-17/evolver (Capability Evolver repo)"
+    url: https://github.com/autogame-17/evolver
+  - label: "ClawHub docs -- security + moderation + CLI (official docs)"
+    url: https://docs.openclaw.ai/tools/clawhub
+  - label: "Reddit -- '$1000 donation' email screenshot thread (community allegation)"
+    url: https://www.reddit.com/r/aiagents/comments/1qzc1ta/is_the_openclaw_creator_holding_plugins_hostage/
+  - label: "Answer Overflow (Discord mirror) -- autogame-17 reports shadowban + 'Unauthorized' CLI"
+    url: https://www.answeroverflow.com/m/1472032753699520604
+  - label: "Saoud Khalifah -- blog post alleging Evolver exfiltrates data to Feishu (code excerpt)"
+    url: https://saoudkhalifah.com/2026/02/02/the-new-botnet-powered-by-your-personal-ai-assistants
+  - label: "The Hacker News -- OpenClaw adds VirusTotal scanning for ClawHub skills"
+    url: https://thehackernews.com/2026/02/openclaw-integrates-virustotal-scanning.html
+  - label: "The Verge -- skills ecosystem described as a security nightmare (press context)"
+    url: https://www.theverge.com/news/874011/openclaw-ai-skill-clawhub-extensions-security-nightmare
+---
+
+<p class="text-2xl font-medium text-foreground/80 mb-12 leading-relaxed italic">
+  A new OpenClaw skill hits #1 in 10 minutes.
+  <br />
+  35,000 installs pile up.
+  <br />
+  Then it gets pulled.
+  <br />
+  Then a screenshot leaks.
+</p>
+
+On February 1, 2026, a ClawHub skill called **Capability Evolver** rockets to the top of the chart.
+It promises something OpenClaw builders secretly want and publicly fear: a self-improving agent
+runtime.
+
+Within days, the story turns into a mess of competing realities:
+
+- The EvoMap team says the plugin was **delisted** and platform dependence became existential.
+- A Reddit thread shares an email screenshot that reads like a **$1,000 pay-to-fix** shakedown.
+- A security researcher publishes a code excerpt and alleges the skill **exfiltrates** data to
+  Feishu/Lark.
+- The author goes to support channels claiming they're **shadowbanned** and their CLI now returns
+  `Unauthorized`.
+
+This is that story, told in an interview-style arc: the rise, the fall, the allegations, the
+counterclaims, and the pivot to a new project called **EvoMap**.
+
+## The timeline (because this really did happen fast)
+
+From public posts and artifacts:
+
+- Feb 1, 2026: EvoMap's origin story says Capability Evolver hits **#1 in ~10 minutes** and later
+  exceeds **35,000 downloads**.
+- Feb 2, 2026: A security blog post alleges the skill contains **undisclosed Feishu exfiltration**
+  and includes a code snippet.
+- Feb 8, 2026: Reddit threads circulate an alleged **"$1000 donation"** email screenshot.
+- Feb 16, 2026: EvoMap publishes its origin story and includes an email excerpt describing an
+  **ASCII-only** check that misclassified Unicode skills and triggered bans.
+
+If you are wondering why builders feel whiplash: this is why.
+
+## Act I: The pitch that makes you lean in
+
+OpenClaw already lets agents *do things*. The Evolver pitch goes one layer deeper:
+
+- read the agent's runtime history
+- detect failure patterns
+- generate patches
+- package the "winning" fix so other agents can inherit it
+
+On GitHub, the repo is `autogame-17/evolver` and the motto is direct:
+
+> "Evolution is not optional. Adapt or die."
+
+The README describes a **protocol-constrained** evolution engine: it emits a strict evolution
+prompt, stores assets like genes/capsules/events, and exposes knobs like `EVOLVE_STRATEGY` so the
+mutation intent is explicit (repair vs harden vs innovate). In other words, it does not frame
+self-modification as magic; it frames it as governance.
+
+And that is exactly why the install curve looks like a meme: it is the most compelling promise in
+agent-land.
+
+## Act II: The moment it goes viral (and why that is a threat model)
+
+In the EvoMap origin story, the team anchors the launch with a Matrix line:
+
+> "I know Kung Fu."
+
+It is a perfect line for a viral skill: recognizable, arrogant, and a little ominous. It also
+captures the underlying psychology:
+
+> If agents can inherit capabilities instantly, adoption stops being "marketing."
+> It becomes survival.
+
+## Act III: The pull, the screenshot, and the copycat story
+
+Viral is not just growth. Viral is exposure.
+
+ClawHub's own docs describe a simple rule with chaotic implications: if a skill is reported by
+**three different users**, it can be automatically hidden.
+
+Read that again, as an ecosystem builder:
+
+> If you become the #1 skill, you become three reports away from invisibility.
+
+It gets harsher. The docs also note each user can keep multiple active reports open. In a hype
+cycle, that turns a moderation feature into a weaponizable throttle.
+
+On Reddit, a thread claims Capability Evolver was hidden/removed after spiking to #1, and includes a
+screenshot of an email allegedly from OpenClaw creator Peter Steinberger:
+
+> "If you would like to donate $1000 to the project, I can look into this for you right now."
+
+That post also claims a suspicious copycat appeared shortly after, listed under "Peter" with no
+public repo attached. None of this is a court record. But it is the kind of narrative that spreads
+when a platform's "why" is invisible and the stakes are high.
+
+The interesting part is not whether the internet is fair.
+
+The interesting part is that a skill registry turned into a gossip machine overnight.
+
+## Act IV: The security winter (and the false-positive trap)
+
+Around the same period, ClawHub is hit by broad reporting of malicious skills, and OpenClaw
+announces VirusTotal-based scanning for uploads.
+
+This is the trapdoor every ecosystem falls through:
+
+- If you do nothing, malware spreads.
+- If you tighten enforcement quickly, you will hit legitimate edge cases.
+- If your enforcement is opaque, the ecosystem becomes rumor-driven.
+
+ClawHub's own docs make the governance levers explicit: account age requirements, reporting, auto
+hiding, moderator actions, and CLI-level auth. When the system turns on you, it is not just "my
+skill got removed." It is your distribution, updates, and reputation being switched off.
+
+## Act V: The Feishu allegation (the part that makes your stomach drop)
+
+On February 2, 2026, security researcher Saoud Khalifah published a blog post calling Capability
+Evolver "exfiltration malware" and alleging it exported OpenClaw data to Feishu/Lark. The post
+includes a code excerpt and claims the skill:
+
+- reads local OpenClaw artifacts (history/memory/state)
+- packages that data into Feishu/Lark "cards" (per the post's screenshots)
+- relies on a hardcoded Feishu token in the code excerpt shown
+
+If the allegation is true, the story stops being "platform drama" and becomes an actual breach.
+
+If the allegation is false, the story is still bad: it means the ecosystem is now in a posture
+where *a self-evolving skill* looks indistinguishable from malware.
+
+Either way, the lesson is brutal:
+
+> The more powerful the skill, the harder it is to prove it is safe.
+
+## Act VI: "I am shadowbanned." (and the CLI says: Unauthorized)
+
+Two weeks later, the author shows up in a support thread (mirrored on Answer Overflow) identifying
+themselves as Zhang Haoyang (`autogame-17`) and says:
+
+- their ClawHub profile is visible, but skills vanish from search
+- the CLI returns `Unauthorized`
+- they suspect the safety system flagged their evolver research as malware
+ - they cannot access their skills list or favorites anymore (their words: "I can't access my skills
+   and my favorites")
+
+The line that lands is the simplest:
+
+> "I am shadowbanned."
+
+It is the human endpoint of automated governance: not "you are banned", but "you are nobody." Your
+account exists. Your work does not.
+
+## Act VII: The Unicode/ASCII ban incident (and the quiet part out loud)
+
+EvoMap's origin story describes a separate incident where Unicode (including Chinese) caused an
+automated "empty skill" check to misfire, triggering mass suspensions. The post includes an email
+excerpt attributed to Steinberger explaining the failure mode: the check "ignored unicode" and
+Chinese is not part of ASCII.
+
+Even if you have no opinion on the drama, this detail matters:
+
+- ecosystems that assume ASCII ship a global product with a local bias
+- "safety automation" can become a blunt instrument against entire communities
+- once the system deletes artifacts, "we restored the account" is not restoration
+
+## Act VIII: The pivot -- from "skill" to protocol (EvoMap)
+
+EvoMap's origin story frames the whole saga as the moment they stopped building a plugin and
+started building a protocol: **GEP (Genome Evolution Protocol)**.
+
+The claim is simple:
+
+- a platform can delist you
+- a protocol can be implemented anywhere
+
+It is an old open-source move, repackaged for agents: route around central points of control, or
+accept that your product is a permission.
+
+## The gossip fork: three stories, one dead skill
+
+If you read the public artifacts back-to-back, you can feel the ecosystem splitting into three
+competing explanations:
+
+1) The hostage story (Reddit)
+
+An email screenshot circulates. The quote is brutal. The subtext is worse: "pay, and you get your
+distribution back."
+
+2) The false-positive story (support thread + security winter)
+
+ClawHub tightens safety controls while press reports about malicious skills spike. A powerful,
+self-evolving skill looks suspicious by default. The author says they were shadowbanned and locked
+out of their own catalog.
+
+3) The malware story (security blog)
+
+A researcher points at code, tokens, and outbound data flow. If the analysis is correct, then the
+registry did not "overreact" -- it responded late.
+
+The uncomfortable part is that all three stories can coexist in the same ecosystem:
+
+- enforcement can be opaque,
+- skills can be genuinely risky,
+- and builders can still get crushed by blunt automation.
+
+## The closing question (the one nobody can dodge now)
+
+Capability Evolver is a story about *self-improvement*, but it ended up exposing the ecosystem's
+real bottleneck: trust.
+
+When your extensions can read secrets and modify code, your marketplace is no longer a convenience.
+It is critical infrastructure.
+
+And critical infrastructure does not get to be vague.

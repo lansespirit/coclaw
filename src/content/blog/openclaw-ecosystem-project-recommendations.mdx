@@ -1,0 +1,185 @@
+---
+title: "OpenClaw Ecosystem Picks (2026): Skills, Deployment, and a Practical Security Baseline"
+description: "A research-backed shortlist of the most useful OpenClaw ecosystem projects (skills discovery, deployment templates, packaging, and tooling), plus a hard-nosed security checklist for real-world use."
+category: "Deep Dive"
+author: "CoClaw Research Team"
+publishDate: 2026-02-22
+lastUpdated: 2026-02-22
+keywords:
+  - "OpenClaw"
+  - "Ecosystem"
+  - "Skills"
+  - "Directory"
+  - "Self Hosting"
+  - "Deployment"
+  - "Security"
+  - "Supply Chain"
+ogImage: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200"
+---
+
+<p class="text-xl leading-relaxed mb-8">
+  What makes OpenClaw "feel" powerful is rarely just the core repo. Its real leverage comes from what
+  you attach to it: skill packs, registries, deployment templates, packaging, and operational
+  tooling. The ecosystem sets your ceiling, and it sets your risk surface.
+</p>
+
+This is a "practical picks" list for 2026. We researched the ecosystem across:
+
+- **Search engines / press** (security incidents, ecosystem shifts, vendor offerings)
+- **GitHub** (repos, releases, activity, issue response patterns)
+- **Community discussion** (Reddit threads and incident postmortems)
+
+Then we grouped projects by the jobs they actually solve and added a selection framework that
+assumes skills are part of your supply chain, not toys.
+
+> Premise: OpenClaw skills can execute real actions (files, tokens, messaging). Treat ecosystem
+> adoption like production dependency management: least privilege, auditability, rollback, and
+> provenance.
+
+---
+
+## How We Evaluate Ecosystem Projects
+
+Before recommending anything, we run a quick but strict rubric:
+
+1. **Clear trust model**: explicit permissions/scope; where data goes; whether installs can be pinned
+   and verified.
+2. **Maintenance signal**: recent activity, tagged releases, and responsive issue triage.
+3. **Portability**: can you export configs/state and move providers or environments?
+4. **Operability**: logs, observability hooks, and a straightforward rollback path.
+5. **Still safe when things go wrong**: compromised skill, stolen token, or bad update should be
+   containable.
+
+---
+
+## Pick 1: Skill Discovery and Distribution
+
+### ClawHub (community skills directory)
+
+If you want a single starting point for discovering skills, ClawHub is the ecosystem "front door":
+a community directory with documentation and tooling around skills distribution.
+
+Good for:
+
+- New users who do not want to spelunk GitHub/search results
+- Teams that want a shared catalogue of vetted skills
+- Skill authors who want a discoverable distribution channel
+
+What to watch:
+
+- A directory is not a security guarantee. Multiple reports and community threads have highlighted
+  malicious skills and supply-chain style abuse. Use ClawHub as discovery, not as trust.
+
+---
+
+## Pick 2: Deployments You Can Repeat
+
+### openclaw-coolify (Coolify deployment template)
+
+This repo focuses on turning "I got it running once" into "I can reproduce it": a Coolify template
+that helps teams deploy OpenClaw quickly using an existing PaaS control plane.
+
+Good for:
+
+- Test/staging/multi-env setups
+- Anyone tired of hand-maintaining Docker Compose variants
+- Teams that already standardized on Coolify
+
+Selection note:
+
+- If you are already on Coolify, this is a high-leverage template. If you are not, evaluate the
+  platform decision first (Coolify vs raw Docker vs Kubernetes) before adopting a template.
+
+---
+
+## Pick 3: Reproducible Packaging (and Less Snowflake Ops)
+
+### nix-openclaw (Nix/NixOS packaging)
+
+If you care about reproducibility and deterministic environments, Nix packaging is one of the best
+ways to reduce "works on my machine" drift. `nix-openclaw` is a focused effort around packaging and
+deployment via Nix/NixOS.
+
+Good for:
+
+- Operators who want repeatable builds/environments
+- Nix/NixOS users building internal automation reliably
+- Anyone treating OpenClaw as infrastructure, not a desktop toy
+
+Operational upside:
+
+- Easier to pin versions and roll forward/back
+- Cleaner separation between config, state, and runtime dependencies
+
+---
+
+## Pick 4: Desktop/Operator Tooling
+
+### ClawSuite (Linux desktop client)
+
+Not every workflow wants a web dashboard. ClawSuite is a Linux desktop client that packages a
+practical operator UI for OpenClaw-style automation.
+
+Good for:
+
+- People running local-first setups on Linux
+- Operators who want a dedicated UI instead of stitching scripts together
+
+---
+
+## Pick 5: Learning and "Unblocking" Guides
+
+### explain-openclaw (community-written guide)
+
+Ecosystems mature when newcomers can get from zero to working without tribal knowledge.
+`explain-openclaw` is an example of community documentation that helps users understand the moving
+parts and common gotchas.
+
+Good for:
+
+- New users building a mental model of how OpenClaw fits together
+- Teams creating internal onboarding docs from a known baseline
+
+---
+
+## Do Not Skip This: A Minimal Security Baseline (Ecosystem Edition)
+
+OpenClaw skills are effectively executable dependencies. Before installing anything:
+
+1. **Assume compromise is possible**: malicious skills have been publicly reported and discussed in
+   both press and community channels.
+2. **Pin versions**: avoid "latest" installs for anything that can run code or access secrets.
+3. **Least privilege by default**: separate read-only tooling from write/exec tooling; require
+   explicit elevation for dangerous actions.
+4. **Audit and alert**: you should be able to answer "who ran what, when, and what it touched."
+5. **Contain blast radius**: isolate runtime, limit filesystem scope, and segment network egress.
+6. **Have a rollback**: treat upgrades as change-management events, not casual updates.
+
+---
+
+## Reference Links (verified entry points as of 2026-02-22)
+
+### Official docs / core
+
+- OpenClaw docs: https://docs.openclaw.ai
+- Core repo (ClawDBot): https://github.com/clawdbot/clawdbot
+
+### Ecosystem projects
+
+- ClawHub (skills directory): https://github.com/openclaw/clawhub
+- ClawHub docs: https://clawhub.docs.openclaw.ai
+- SOUL registry referenced by ClawHub: https://onlycrabs.ai
+- openclaw-coolify (deployment template): https://github.com/essamamdani/openclaw-coolify
+- Coolify docs (OpenClaw): https://coolify.io/docs/services/openclaw
+- nix-openclaw (packaging): https://github.com/openclaw/nix-openclaw
+- ClawSuite (Linux client): https://github.com/outsourc-e/clawsuite
+- explain-openclaw (community guide): https://github.com/centminmod/explain-openclaw
+
+### Supply-chain risk signals (press + community)
+
+- WIRED: https://www.wired.com/story/openclaw-ban-better-plugins/
+- The Verge (malicious skills reports): https://www.theverge.com/2026/2/13/24362550/openclaw-malicious-skills-ai-botnet
+- Tom's Hardware (malicious skill incident): https://www.tomshardware.com/tech-industry/cyber-security/openclaw-ai-developer-warns-users-to-uninstall-after-skill-is-found-to-have-malware-infostealer
+- Business Insider (malicious skills): https://www.businessinsider.com/openclaw-ai-botnet-fake-skills-cybersecurity-2026-2
+- TechRadar (malicious scripts / credential theft framing): https://www.techradar.com/pro/security/openclaw-software-contains-malicious-scripts-that-can-steal-user-login-credentials
+- Reddit thread (community discussion): https://www.reddit.com/r/openclaw/comments/1j2k5xm/psa_openclaw_skills_compromised_in_the_wild/
