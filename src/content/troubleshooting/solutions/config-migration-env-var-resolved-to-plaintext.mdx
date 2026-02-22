@@ -1,0 +1,93 @@
+---
+title: "Config migration writes ${ENV_VAR} secrets into openclaw.json (upgrade security risk)"
+description: "If an OpenClaw upgrade/migration rewrites `${ENV_VAR}` references (like `${TELEGRAM_BOT_TOKEN}`) into plaintext values inside `~/.openclaw/openclaw.json`, rotate the affected tokens and move secrets back to env/.env to prevent accidental leaks."
+kind: "solution"
+component: "config"
+severity: "critical"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "${TELEGRAM_BOT_TOKEN}"
+  - "${OPENAI_API_KEY}"
+  - "${ANTHROPIC_API_KEY}"
+keywords:
+  - "security"
+  - "env"
+  - "migration"
+  - "plaintext"
+publishDate: 2026-02-22
+lastUpdated: 2026-02-22
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 23307
+  docs:
+    - "https://docs.openclaw.ai/help/faq#how-does-openclaw-load-environment-variables"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- You previously stored secrets in config via env references, for example:
+  - `"botToken": "${TELEGRAM_BOT_TOKEN}"`
+- After upgrading OpenClaw (or after first gateway start on the new version), `~/.openclaw/openclaw.json` is modified and the `${...}` is replaced with the **actual token** in plaintext.
+
+## Cause
+
+A config migration / config rewrite path can accidentally **resolve env references** and write the resolved value back to disk.
+
+This is a security risk because:
+
+- the plaintext secret may be committed to backups/repos by mistake,
+- it can be exposed in screenshots/pastes,
+- it increases blast radius if the machine is compromised.
+
+## Fix
+
+### 1) Treat the secret as compromised and rotate it
+
+Examples:
+
+- Telegram Bot API: rotate the bot token in @BotFather (revoke / regenerate).
+- Provider API keys (OpenAI/Anthropic/etc): rotate/revoke the key in the provider console.
+
+### 2) Move the secret back to env / `~/.openclaw/.env`
+
+Recommended: store long-lived secrets in the gateway environment file:
+
+```bash
+printf 'TELEGRAM_BOT_TOKEN=%s\n' 'YOUR_NEW_TOKEN' >> ~/.openclaw/.env
+```
+
+Then edit `~/.openclaw/openclaw.json` to restore the placeholder:
+
+```json5
+channels: {
+  telegram: {
+    botToken: "${TELEGRAM_BOT_TOKEN}",
+  },
+}
+```
+
+Restart the gateway:
+
+```bash
+openclaw gateway restart
+```
+
+### 3) Reduce accidental exposure
+
+- Avoid pasting `openclaw.json` unredacted into GitHub issues or chat.
+- Keep your state directory permissions tight (especially on shared servers).
+
+## Verify
+
+1) Confirm the config contains `${...}` placeholders again (not plaintext).
+2) Confirm the gateway still works with the env-loaded secret:
+
+```bash
+openclaw channels status --probe telegram
+```
+

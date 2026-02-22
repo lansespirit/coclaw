@@ -1,0 +1,107 @@
+---
+title: "Gateway: 'disconnected (1008): pairing required' after update (scope-upgrade / operator.write)"
+description: "If new connections (Control UI, sub-agents, cron announce, webchat) are rejected with WebSocket 1008 'pairing required' after an update or reinstall, you may need to approve a device scope-upgrade (often `operator.write`)."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "disconnected (1008): pairing required"
+  - "gateway closed (1008): pairing required"
+  - "reason=scope-upgrade"
+keywords:
+  - "pairing"
+  - "devices"
+  - "operator.write"
+  - "scope-upgrade"
+publishDate: 2026-02-22
+lastUpdated: 2026-02-22
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 21236
+    - 22298
+    - 22299
+    - 23044
+  docs:
+    - "https://docs.openclaw.ai/web/control-ui"
+    - "https://docs.openclaw.ai/cli/devices"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- The gateway is running, but **new** connections fail with:
+  - `disconnected (1008): pairing required` (Control UI / webchat), or
+  - `gateway closed (1008): pairing required` (CLI / `sessions_spawn` / cron announce).
+- One existing session may still work, but anything that opens a new WebSocket gets rejected.
+- This often starts after:
+  - `openclaw update`,
+  - `openclaw gateway install --force`,
+  - deleting/resetting `~/.openclaw/identity` / `~/.openclaw/devices`,
+  - changing gateway auth/bind settings.
+
+## Cause
+
+OpenClaw enforces **device pairing** (and **scoped device access**) on gateway WebSocket connections.
+
+Sometimes the device is already paired, but the new connection requests a higher scope (a **scope upgrade**), for example `operator.write`. In that case the gateway still closes the connection with `1008: pairing required` until the scope upgrade is approved.
+
+## Fix
+
+### 1) Approve the pending device request
+
+```bash
+openclaw devices list
+openclaw devices approve <requestId>
+```
+
+Tip: if there is only one pending request, you can often do:
+
+```bash
+openclaw devices approve
+```
+
+### 2) If it is a scope-upgrade: rotate the operator token with `operator.write`
+
+First find the paired device id:
+
+```bash
+openclaw devices list --json
+```
+
+Then rotate the operator token to include the missing scope(s):
+
+```bash
+openclaw devices rotate --device <deviceId> --role operator \
+  --scope operator.read --scope operator.write
+```
+
+If your setup requires additional operator scopes, include them in the rotate command as well.
+
+### 3) Confirm what the gateway thinks is happening (logs)
+
+On the gateway host:
+
+```bash
+openclaw logs --follow | rg -i "pairing required|scope-upgrade|devices"
+```
+
+If you see `reason=scope-upgrade` in logs, step (2) is usually required.
+
+## Verify
+
+- Control UI loads without disconnect:
+  - open `http://127.0.0.1:18789/`
+- Sub-agents work again:
+  - retry your `sessions_spawn` call
+- Cron announce delivery no longer errors (if this was the trigger):
+  - wait for the next cron run
+
+## Related
+
+- CoClaw: Control UI pairing required: `/troubleshooting/solutions/control-ui-pairing-required/`
+

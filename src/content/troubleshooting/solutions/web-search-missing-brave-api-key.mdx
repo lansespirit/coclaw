@@ -1,0 +1,67 @@
+---
+title: "Web search: missing_brave_api_key even though it's configured"
+description: "If `web_search` fails with `missing_brave_api_key` but you set the key via `openclaw configure --section web`, make sure the running gateway service can see the secret (often via `~/.openclaw/.env`) and restart the gateway."
+kind: "solution"
+component: "tools"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "missing_brave_api_key"
+keywords:
+  - "web_search"
+  - "brave"
+  - "BRAVE_API_KEY"
+publishDate: 2026-02-22
+lastUpdated: 2026-02-22
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 23058
+  docs:
+    - "https://docs.openclaw.ai/tools/web"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- `web_search` fails with `missing_brave_api_key`.
+- You already ran `openclaw configure --section web` and the config shows an `apiKey` field (often redacted when printed).
+
+## Cause
+
+The running gateway process may not be reading the same secrets source you just edited.
+
+Common cases:
+
+- You edited config in an interactive shell, but the gateway is running as a background service with a different environment.
+- The Brave key exists in config, but the gateway/tool path is only checking the environment variable in your current version/build.
+
+## Fix
+
+### 1) Put the key in `~/.openclaw/.env` and restart the gateway (most reliable)
+
+```bash
+printf 'BRAVE_API_KEY=%s\n' 'YOUR_BRAVE_KEY' >> ~/.openclaw/.env
+openclaw gateway restart
+```
+
+### 2) Confirm config flags are sane
+
+```bash
+openclaw config get tools.web.search.enabled
+openclaw config get tools.web.search.provider
+```
+
+Notes:
+
+- `enabled` should not be `false`.
+- `provider` should be `brave` (or unset; brave is the default).
+
+## Verify
+
+- Run a small search and confirm it returns results (not `missing_brave_api_key`).
+- If it still fails, capture the tool error payload + `openclaw gateway status --json` (redact tokens).
+
