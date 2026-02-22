@@ -1,0 +1,101 @@
+---
+title: "Cron: jobs run but Telegram announce delivery fails (no notification sent)"
+description: "If isolated cron jobs execute successfully but the Telegram notification never arrives (\"cron announce delivery failed\"), disable announce and send via the message tool, or switch delivery mode while you capture gateway logs for the failing announce path."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "telegram"
+errorSignatures:
+  - "cron announce delivery failed"
+keywords:
+  - "cron"
+  - "announce"
+  - "delivery"
+  - "telegram"
+publishDate: 2026-02-22
+lastUpdated: 2026-02-22
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 23004
+  docs:
+    - "https://docs.openclaw.ai/automation/cron-jobs"
+    - "https://docs.openclaw.ai/cli/cron"
+    - "https://docs.openclaw.ai/channels/telegram"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Your cron jobs execute normally (facts extraction, summaries, etc.).
+- But jobs configured with delivery **announce** to Telegram do not arrive.
+- You may see an error state like `cron announce delivery failed` in cron run status / UI.
+- Manual Telegram messaging still works (for example via the `message` tool or direct Bot API tests).
+
+## Cause
+
+OpenClaw cron has multiple output paths:
+
+- `delivery.mode = "announce"`: cron delivers the run's outbound payloads directly via the channel adapters.
+- `delivery.mode = "none"`: cron does **not** deliver; you can send messages yourself inside the run.
+- `delivery.mode = "webhook"`: cron posts the finished event to your endpoint.
+
+When only `announce` fails, it usually indicates a problem in the announce delivery pipeline (target parsing/routing, channel adapter send, or a regression in the cron announce path), not a general Telegram connectivity problem.
+
+## Fix
+
+### 1) Fastest workaround: turn off announce and send via `message` inside the job
+
+Edit the job to disable announce:
+
+```bash
+openclaw cron edit <job-id> --no-deliver
+```
+
+Then update your cron prompt to send the message explicitly (example idea):
+
+- Generate the content
+- Call `message.send` to your Telegram target
+
+Why this helps: docs note that `announce` delivery **suppresses messaging tool sends** for the run. With `delivery.mode = "none"`, you regain full control of outbound messages.
+
+### 2) If you want delivery without chat adapters: use webhook mode
+
+If you have an HTTP endpoint that forwards to Telegram (or logs results), switch the job:
+
+```bash
+openclaw cron edit <job-id> --webhook --to "https://example.com/openclaw/cron"
+```
+
+### 3) Capture the failing announce error from gateway logs
+
+On the gateway host:
+
+```bash
+openclaw logs --follow | rg -i "cron|announce|telegram|deliver|sendMessage|error"
+```
+
+And verify Telegram is configured and probe-able:
+
+```bash
+openclaw channels status --probe telegram
+```
+
+If you can paste the announce-related error lines (redacting tokens), it will usually show whether this is a target parsing issue or an adapter send failure.
+
+## Verify
+
+- Wait for the next scheduled run
+- Confirm one of:
+  - The job delivers via your explicit `message.send` path (with `--no-deliver`), or
+  - The webhook endpoint receives the payload (with `delivery.mode = "webhook"`)
+
+## Related
+
+- CoClaw: Cron runs but never fire (different symptom): `/troubleshooting/solutions/cron-jobs-not-firing-next-run-advances/`
+
