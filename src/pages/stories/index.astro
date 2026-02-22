@@ -18,7 +18,7 @@ const userStories = storyEntries
     quote: entry.data.quote,
     href: `/stories/${entry.slug}`,
     featured: entry.data.featured,
-    avatar: entry.data.image,
+    avatar: entry.data.avatar,
   }));
 
 const mainStory = userStories.find((s) => s.featured);

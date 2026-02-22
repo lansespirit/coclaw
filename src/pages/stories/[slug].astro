@@ -18,7 +18,9 @@ export const getStaticPaths = (async () => {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 
-const { name, role, company, image, summary, publishDate, sources, keywords } = entry.data;
+const { name, role, company, avatar, ogImage, summary, publishDate, sources, keywords } =
+  entry.data;
+const og = ogImage || '/images/og/og-main.png';
 
 const allStories = await getCollection('stories', ({ data }) => !data.draft);
 const allGuides = await getCollection('guides', ({ data }) => !data.draft);
@@ -80,6 +82,7 @@ const structuredData = {
   '@type': 'Article',
   headline: `${name} — OpenClaw Story`,
   description: summary,
+  image: [new URL(og, Astro.site).toString()],
   datePublished: publishDate.toISOString(),
   dateModified: publishDate.toISOString(),
   author: { '@type': 'Organization', name: 'CoClaw' },
@@ -92,14 +95,14 @@ const structuredData = {
   title={`${name} | CoClaw Stories`}
   description={summary}
   keywords={keywords}
-  ogImage={image}
+  ogImage={og}
   type="article"
 >
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
   <div class="bg-background min-h-screen pt-32 pb-24">
     <Section containerClass="max-w-4xl mx-auto px-6">
       <div class="flex flex-col items-center text-center mb-16">
-        <Avatar src={image} className="w-24 h-24 mb-6" isBordered color="primary" />
+        <Avatar src={avatar} className="w-24 h-24 mb-6" isBordered color="primary" />
         <div class="flex items-center gap-2 mb-4">
           <Chip size="sm" color="primary" variant="flat" className="font-bold">STORY</Chip>
         </div>
