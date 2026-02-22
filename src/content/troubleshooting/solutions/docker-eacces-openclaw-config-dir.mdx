@@ -47,6 +47,22 @@ This fails most often on Linux when:
 
 ## Fix
 
+### 0) Confirm what you are actually mounting (docker-setup.sh always mounts something)
+
+If you used `./docker-setup.sh`, you *are* bind-mounting host directories into the container by default:
+
+- `${OPENCLAW_CONFIG_DIR:-$HOME/.openclaw}` → `/home/node/.openclaw`
+- `${OPENCLAW_WORKSPACE_DIR:-$HOME/.openclaw/workspace}` → `/home/node/.openclaw/workspace`
+
+Quick sanity check on the host:
+
+```bash
+echo "OPENCLAW_CONFIG_DIR=${OPENCLAW_CONFIG_DIR:-$HOME/.openclaw}"
+echo "OPENCLAW_WORKSPACE_DIR=${OPENCLAW_WORKSPACE_DIR:-$HOME/.openclaw/workspace}"
+ls -ld "${OPENCLAW_CONFIG_DIR:-$HOME/.openclaw}" "${OPENCLAW_WORKSPACE_DIR:-$HOME/.openclaw/workspace}"
+id
+```
+
 ### 1) Confirm which host directories are mounted
 
 If you used `docker-setup.sh`, it typically mounts:
@@ -68,6 +84,31 @@ Then restart the containers:
 ```bash
 docker compose restart
 ```
+
+### 2.5) NAS / NFS / "chmod 777 still fails": prefer a named volume
+
+On some NAS / NFS / ACL-heavy filesystems (or when root-squash is involved), the container may still fail to `mkdir`
+even if the directory *looks* writable on the host.
+
+In that case, the fastest workaround is to persist OpenClaw state in a Docker named volume (no host bind mount):
+
+```yaml
+services:
+  openclaw-gateway:
+    volumes:
+      - openclaw:/home/node/.openclaw
+  openclaw-cli:
+    volumes:
+      - openclaw:/home/node/.openclaw
+
+volumes:
+  openclaw:
+```
+
+Notes:
+
+- You will need to copy any existing `~/.openclaw` state into the volume if you already onboarded.
+- If your config hard-codes workspace paths, update them to match the container path (`/home/node/.openclaw/workspace`).
 
 ### 3) Alternative: run the container as your host user (advanced)
 

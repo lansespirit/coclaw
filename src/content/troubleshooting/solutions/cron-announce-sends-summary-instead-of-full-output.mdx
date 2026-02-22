@@ -1,0 +1,78 @@
+---
+title: "Cron: announce delivery sends a summary instead of the full output (Telegram topics / chat channels)"
+description: "If an isolated cron job used to deliver the full multi-line output but now only a short summary is sent (or output appears in the wrong place), disable announce and send explicitly via the message tool, or pin/upgrade past the regression."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "telegram"
+errorSignatures:
+  - "cron announce"
+  - "summary instead of full output"
+keywords:
+  - "cron"
+  - "announce"
+  - "telegram"
+  - "topic"
+publishDate: 2026-02-22
+lastUpdated: 2026-02-22
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 13812
+  docs:
+    - "https://docs.openclaw.ai/automation/cron-jobs"
+    - "https://docs.openclaw.ai/channels/telegram"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- You have an isolated cron job that generates a multi-line report.
+- After an upgrade, `delivery.mode = "announce"` delivers only a short summary (or noisy relay) instead of the full report output.
+- This is especially common when delivering to Telegram forum topics (threads).
+
+## Cause
+
+Some OpenClaw versions/regressions have produced incorrect announce behavior for isolated cron runs:
+
+- the delivery path summarizes output rather than forwarding the full outbound payloads, and/or
+- the output is surfaced in an unexpected place (for example Control UI chat history) rather than the intended channel target.
+
+## Fix
+
+### 1) Most reliable: disable announce and send the full report yourself
+
+Turn off announce delivery:
+
+```bash
+openclaw cron edit <job-id> --no-deliver
+```
+
+Then change the job prompt so it explicitly calls the message tool to send the report.
+
+For Telegram forum topics, prefer sending to the group id plus a `messageThreadId` (topic id).
+
+### 2) If you need a fast operational workaround: pin a known-good version
+
+If you know a previous version delivered correctly in your environment, pin to it temporarily (many reports cite older 2026.2.x builds as working for this path), then restart the gateway.
+
+### 3) If you're on a newer build: avoid Telegram topic delivery while you verify
+
+As a temporary measure, deliver to a DM or a non-topic group target (no thread id) to confirm the job output itself is correct, then move back to topic delivery once the regression is fixed.
+
+## Verify
+
+- Trigger a run:
+  - `openclaw cron run <job-id>`
+- Confirm the full report is delivered (not summarized), and only once.
+
+## Related
+
+- If announce delivery fails completely with `cron announce delivery failed`, see:
+  - `/troubleshooting/solutions/cron-announce-delivery-fails-telegram/`
+
