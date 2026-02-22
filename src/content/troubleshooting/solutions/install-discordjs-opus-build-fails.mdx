@@ -61,6 +61,20 @@ If you’re pinned to a specific version (example):
 env CFLAGS='-DOPUS_ARM_MAY_HAVE_NEON_INTR' npm i -g openclaw@2026.2.21-2
 ```
 
+### 2.5) "One-and-done" workaround: persist CFLAGS for future updates
+
+If you keep hitting this on every `openclaw update`, set the flag in your shell profile so it is present whenever you run updates:
+
+```bash
+echo "export CFLAGS='-DOPUS_ARM_MAY_HAVE_NEON_INTR'" >> ~/.profile
+source ~/.profile
+```
+
+Notes:
+
+- This helps when you update via `openclaw update` (it runs your package manager and inherits the current environment).
+- If you update via a background service/Control UI (gateway-managed update), set the same env var in the gateway service environment instead (systemd/launchd/Docker env).
+
 ### 3) If you’re blocked and just need a working gateway right now: pin a known-good version
 
 ```bash
@@ -84,4 +98,3 @@ gcc --version
 ```
 
 Plus the last ~40 lines of the `@discordjs/opus` build error.
-
