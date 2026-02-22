@@ -1,0 +1,87 @@
+---
+title: "Install/Update fails building @discordjs/opus (Raspberry Pi ARM64 and some Linux distros)"
+description: "If `openclaw update` or `npm i -g openclaw@...` fails while building `@discordjs/opus`, install build tools and retry with the ARM64 CFLAGS workaround (or pin a known-good OpenClaw version)."
+kind: "solution"
+component: "install"
+severity: "high"
+os:
+  - "linux"
+errorSignatures:
+  - "@discordjs/opus"
+  - "celt_neon_intr.c"
+  - "implicit declaration of function 'celt_inner_prod_neon'"
+  - "node-pre-gyp ERR! install response status 404"
+  - "OPUS_ARM_MAY_HAVE_NEON_INTR"
+keywords:
+  - "raspberry pi"
+  - "arm64"
+  - "node-gyp"
+publishDate: 2026-02-22
+lastUpdated: 2026-02-22
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 22983
+    - 23045
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- `openclaw update` fails during the npm step, or `npm i -g openclaw@...` fails.
+- The failure shows `@discordjs/opus` (native module) and often includes one of:
+  - `node-pre-gyp ERR! install response status 404 ...` (missing prebuilt binary)
+  - `.../celt_neon_intr.c: ... implicit declaration of function 'celt_inner_prod_neon'`
+
+## Cause
+
+`@discordjs/opus` tries to download a prebuilt binary for your exact Node ABI + platform.
+When that prebuild isn’t available, it falls back to compiling from source (node-gyp), which can fail on some Linux/ARM64 setups without the right toolchain and/or a platform-specific define.
+
+## Fix
+
+### 1) Ensure build tools are installed
+
+On Debian/Ubuntu/Raspberry Pi OS:
+
+```bash
+sudo apt update
+sudo apt install -y build-essential python3 make g++
+```
+
+### 2) ARM64 workaround (Raspberry Pi): install/update with CFLAGS
+
+```bash
+env CFLAGS='-DOPUS_ARM_MAY_HAVE_NEON_INTR' npm i -g openclaw@latest
+```
+
+If you’re pinned to a specific version (example):
+
+```bash
+env CFLAGS='-DOPUS_ARM_MAY_HAVE_NEON_INTR' npm i -g openclaw@2026.2.21-2
+```
+
+### 3) If you’re blocked and just need a working gateway right now: pin a known-good version
+
+```bash
+npm i -g openclaw@2026.2.19-2
+openclaw gateway restart
+```
+
+## Verify
+
+```bash
+openclaw version
+openclaw status
+```
+
+If it still fails, paste:
+
+```bash
+node -v
+uname -a
+gcc --version
+```
+
+Plus the last ~40 lines of the `@discordjs/opus` build error.
+

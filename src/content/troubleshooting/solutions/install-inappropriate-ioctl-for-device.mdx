@@ -1,0 +1,69 @@
+---
+title: "Install: 'inappropriate ioctl for device' when running install.sh"
+description: "If `curl ... | sudo bash` prints repeated 'inappropriate ioctl for device' and the OpenClaw installer fails or behaves oddly, rerun the installer with a real TTY (or disable gum), or install via npm directly."
+kind: "solution"
+component: "install"
+severity: "high"
+os:
+  - "linux"
+errorSignatures:
+  - "inappropriate ioctl for device"
+  - "WARN npm install openclaw@latest failed; retrying openclaw@next"
+keywords:
+  - "install.sh"
+  - "sudo"
+  - "gum"
+publishDate: 2026-02-22
+lastUpdated: 2026-02-22
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 23066
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- While installing with the one-liner, you see repeated:
+  - `inappropriate ioctl for device`
+- The install may still continue, but can fail later (sometimes with a misleading retry like `npm install openclaw@latest failed; retrying openclaw@next`).
+- This is most common when piping the script into `sudo bash`.
+
+## Cause
+
+The installer is doing interactive / TTY-oriented work (terminal state changes + UI via `gum`).
+When you run `curl ... | sudo bash`, stdin often isn’t a real TTY, so those steps print `inappropriate ioctl for device`.
+
+## Fix
+
+### 1) Run the installer with a real TTY (recommended)
+
+Download the script, then run it normally (interactive shell):
+
+```bash
+curl -fsSL https://openclaw.ai/install.sh -o /tmp/openclaw-install.sh
+bash /tmp/openclaw-install.sh
+```
+
+### 2) Disable gum UI
+
+```bash
+curl -fsSL https://openclaw.ai/install.sh | bash -s -- --no-gum
+```
+
+### 3) If Node is already installed, install via npm directly
+
+```bash
+npm i -g openclaw@latest
+openclaw onboard --install-daemon
+```
+
+## Verify
+
+```bash
+openclaw version
+openclaw gateway status
+```
+
+If the installer still fails, capture the lines *after* the first `WARN npm install ... failed` message (the ioctl lines are often just noise).
+
