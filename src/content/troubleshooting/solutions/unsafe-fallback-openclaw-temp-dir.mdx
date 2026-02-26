@@ -1,0 +1,87 @@
+---
+title: "OpenClaw: 'Unsafe fallback OpenClaw temp dir' after update (openclaw commands crash)"
+description: "Fix OpenClaw CLI/gateway crashes when the fallback temp dir under /tmp already exists with insecure permissions or wrong ownership."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "linux"
+channel: []
+errorSignatures:
+  - "Unsafe fallback OpenClaw temp dir"
+  - "/tmp/openclaw-"
+keywords:
+  - "openclaw"
+  - "tmp"
+  - "permissions"
+  - "update"
+publishDate: 2026-02-26
+lastUpdated: 2026-02-26
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 27329
+    - 27399
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- After updating OpenClaw, **any** `openclaw ...` command crashes with an error like:
+  - `Error: Unsafe fallback OpenClaw temp dir: /tmp/openclaw-1000`
+- Gateway restart may also fail because the CLI can’t finish startup.
+
+## Cause
+
+OpenClaw tries to use a secure temp directory under `/tmp` for caches and CLI startup work.
+
+If `/tmp/openclaw` isn’t available, it falls back to a per-user path like:
+
+- `/tmp/openclaw-<uid>` (example: `/tmp/openclaw-1000`)
+
+For safety on multi-user hosts, OpenClaw rejects the fallback directory if it is:
+
+- not owned by your user, or
+- group/other-writable (e.g. `drwxrwxrwx`), or
+- a symlink.
+
+This most often happens when that directory was created earlier with permissive permissions or the wrong owner.
+
+## Fix
+
+### 1) Check which temp dir is failing
+
+```bash
+id -u
+ls -ld /tmp/openclaw /tmp/openclaw-$(id -u) 2>/dev/null || true
+```
+
+### 2) Make the fallback dir secure (recommended: chmod 700)
+
+If the directory exists, fix ownership + permissions:
+
+```bash
+sudo chown -R "$(id -u)":"$(id -g)" "/tmp/openclaw-$(id -u)"
+sudo chmod 700 "/tmp/openclaw-$(id -u)"
+```
+
+If you don’t need the contents, you can also remove it and let OpenClaw recreate it safely:
+
+```bash
+sudo rm -rf "/tmp/openclaw-$(id -u)"
+```
+
+### 3) Restart OpenClaw
+
+```bash
+openclaw gateway restart
+```
+
+## Verify
+
+- `openclaw tui` starts without the temp dir error.
+- `openclaw gateway status --probe --deep` reports healthy (or at least no temp-dir-related crash on startup).
+
+## Related
+
+- Linux install guide: [/getting-started/linux](/getting-started/linux)
