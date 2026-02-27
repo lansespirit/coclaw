@@ -16,7 +16,7 @@ import {
   Textarea,
   Tooltip,
 } from '@heroui/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   buildOpenClawConfig,
   type DmPolicy,
@@ -27,6 +27,7 @@ import {
   type OpenClawConfigGeneratorState,
   type SecretsMode,
 } from '../../lib/openclaw-config/generator';
+import { inferOfficialModelLimits } from '../../lib/openclaw-config/official-model-limits';
 import { OPENCLAW_REF } from '../../lib/openclaw-ref';
 import {
   IconCopy,
@@ -205,7 +206,7 @@ const defaultState: OpenClawConfigGeneratorState = {
   ai: {
     mode: 'built-in',
     builtIn: {
-      primaryModel: 'anthropic/claude-opus-4-5',
+      primaryModel: 'anthropic/claude-opus-4.6',
     },
     custom: {
       providerId: 'custom-proxy',
@@ -214,13 +215,13 @@ const defaultState: OpenClawConfigGeneratorState = {
       apiKeyEnvVar: 'CUSTOM_PROVIDER_API_KEY',
       apiKey: '',
       model: {
-        id: 'llama-3.1-8b',
-        name: 'Llama 3.1 8B',
+        id: 'gpt-5.2',
+        name: 'GPT-5.2',
         reasoning: false,
         inputText: true,
         inputImage: false,
-        contextWindow: 128000,
-        maxTokens: 8192,
+        contextWindow: 400000,
+        maxTokens: 128000,
       },
     },
   },
@@ -228,7 +229,7 @@ const defaultState: OpenClawConfigGeneratorState = {
     port: 18789,
     bind: 'loopback',
     customBindHost: '',
-    authMode: 'off',
+    authMode: 'token',
     authToken: '',
     authPassword: '',
   },
@@ -249,6 +250,7 @@ const defaultState: OpenClawConfigGeneratorState = {
       enabled: false,
       dmPolicy: 'pairing',
       allowFromRaw: '',
+      selfChatMode: false,
       groupPolicy: 'allowlist',
       groupAllowFromRaw: '',
       groupIdsRaw: '',
@@ -281,6 +283,50 @@ export default function OpenClawConfigGenerator() {
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showExpert, setShowExpert] = useState(false);
+  const [autoModelLimits, setAutoModelLimits] = useState(true);
+
+  const officialModelLimits = useMemo(
+    () => inferOfficialModelLimits(state.ai.custom.api, state.ai.custom.model.id),
+    [state.ai.custom.api, state.ai.custom.model.id]
+  );
+
+  const modelIdPlaceholder = useMemo(() => {
+    if (state.ai.custom.api === 'anthropic-messages') return 'claude-sonnet-4-6';
+    return 'gpt-5.2';
+  }, [state.ai.custom.api]);
+
+  const modelNamePlaceholder = useMemo(() => {
+    if (state.ai.custom.api === 'anthropic-messages') return 'Claude Sonnet 4.6';
+    return 'GPT-5.2';
+  }, [state.ai.custom.api]);
+
+  useEffect(() => {
+    if (state.ai.mode !== 'custom') return;
+    if (!autoModelLimits) return;
+    if (!officialModelLimits) return;
+
+    if (
+      state.ai.custom.model.contextWindow === officialModelLimits.contextWindow &&
+      state.ai.custom.model.maxTokens === officialModelLimits.maxTokens
+    ) {
+      return;
+    }
+
+    setState((s) => ({
+      ...s,
+      ai: {
+        ...s.ai,
+        custom: {
+          ...s.ai.custom,
+          model: {
+            ...s.ai.custom.model,
+            contextWindow: officialModelLimits.contextWindow,
+            maxTokens: officialModelLimits.maxTokens,
+          },
+        },
+      },
+    }));
+  }, [autoModelLimits, officialModelLimits, state.ai.mode]);
 
   const result = useMemo(() => buildOpenClawConfig(state), [state]);
 
@@ -444,7 +490,7 @@ export default function OpenClawConfigGenerator() {
                 >
                   <SelectItem
                     key="built-in"
-                    description="Enter a model id like anthropic/claude-opus-4-5; keys are usually env vars."
+                    description="Enter a model id like anthropic/claude-opus-4.6; keys are usually env vars."
                   >
                     Built-in
                   </SelectItem>
@@ -460,7 +506,7 @@ export default function OpenClawConfigGenerator() {
                   <div className="space-y-3">
                     <Input
                       label="Primary model (agents.defaults.model.primary)"
-                      placeholder="anthropic/claude-opus-4-5"
+                      placeholder="anthropic/claude-opus-4.6"
                       value={state.ai.builtIn.primaryModel}
                       onValueChange={(v) =>
                         setState((s) => ({
@@ -582,7 +628,7 @@ export default function OpenClawConfigGenerator() {
                     <div className="grid sm:grid-cols-2 gap-4">
                       <Input
                         label="model id"
-                        placeholder="llama-3.1-8b"
+                        placeholder={modelIdPlaceholder}
                         value={state.ai.custom.model.id}
                         onValueChange={(v) =>
                           setState((s) => ({
@@ -597,7 +643,7 @@ export default function OpenClawConfigGenerator() {
                       />
                       <Input
                         label="model name"
-                        placeholder="Llama 3.1 8B"
+                        placeholder={modelNamePlaceholder}
                         value={state.ai.custom.model.name}
                         onValueChange={(v) =>
                           setState((s) => ({
@@ -619,6 +665,7 @@ export default function OpenClawConfigGenerator() {
                             type="number"
                             label="contextWindow"
                             value={String(state.ai.custom.model.contextWindow)}
+                            isDisabled={autoModelLimits && !!officialModelLimits}
                             onValueChange={(v) =>
                               setState((s) => ({
                                 ...s,
@@ -628,7 +675,10 @@ export default function OpenClawConfigGenerator() {
                                     ...s.ai.custom,
                                     model: {
                                       ...s.ai.custom.model,
-                                      contextWindow: asInt(v, 128000),
+                                      contextWindow: asInt(
+                                        v,
+                                        officialModelLimits?.contextWindow ?? 128000
+                                      ),
                                     },
                                   },
                                 },
@@ -641,6 +691,7 @@ export default function OpenClawConfigGenerator() {
                             type="number"
                             label="maxTokens"
                             value={String(state.ai.custom.model.maxTokens)}
+                            isDisabled={autoModelLimits && !!officialModelLimits}
                             onValueChange={(v) =>
                               setState((s) => ({
                                 ...s,
@@ -648,7 +699,10 @@ export default function OpenClawConfigGenerator() {
                                   ...s.ai,
                                   custom: {
                                     ...s.ai.custom,
-                                    model: { ...s.ai.custom.model, maxTokens: asInt(v, 8192) },
+                                    model: {
+                                      ...s.ai.custom.model,
+                                      maxTokens: asInt(v, officialModelLimits?.maxTokens ?? 8192),
+                                    },
                                   },
                                 },
                               }))
@@ -656,6 +710,30 @@ export default function OpenClawConfigGenerator() {
                             variant="bordered"
                             min={1}
                           />
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                          <Switch
+                            isSelected={autoModelLimits}
+                            onValueChange={(v) => setAutoModelLimits(v)}
+                            isDisabled={!officialModelLimits}
+                          >
+                            Auto-fill known token limits
+                          </Switch>
+                          {officialModelLimits ? (
+                            <div className="text-xs text-default-700 dark:text-default-500">
+                              Detected:{' '}
+                              <Code className="px-1 py-0.5">
+                                {state.ai.custom.model.id.trim() || modelIdPlaceholder}
+                              </Code>{' '}
+                              → contextWindow {officialModelLimits.contextWindow.toLocaleString()},
+                              maxTokens {officialModelLimits.maxTokens.toLocaleString()}
+                            </div>
+                          ) : (
+                            <div className="text-xs text-default-700 dark:text-default-500">
+                              No known token limits detected for this model id.
+                            </div>
+                          )}
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-4">
@@ -744,7 +822,7 @@ export default function OpenClawConfigGenerator() {
                         </span>
                       }
                       classNames={{ label: 'pointer-events-auto' }}
-                      placeholder={'anthropic/claude-sonnet-4\nopenai/gpt-4.1'}
+                      placeholder={'anthropic/claude-sonnet-4.6\nopenai/gpt-4.1'}
                       value={state.modelFallbacksRaw ?? ''}
                       onValueChange={(v) => setState((s) => ({ ...s, modelFallbacksRaw: v }))}
                       variant="bordered"
@@ -1097,6 +1175,7 @@ export default function OpenClawConfigGenerator() {
                     )}
 
                     {(state.channels.telegram.dmPolicy === 'open' ||
+                      state.channels.telegram.dmPolicy === 'allowlist' ||
                       showAdvanced ||
                       !!state.channels.telegram.allowFromRaw.trim()) && (
                       <div className="space-y-1">
@@ -1104,7 +1183,7 @@ export default function OpenClawConfigGenerator() {
                           label={
                             <span className="inline-flex items-center gap-1">
                               allowFrom
-                              <Tooltip content='Optional allowlist for Telegram DMs. For dmPolicy="open", include "*".'>
+                              <Tooltip content='Allowlist for Telegram DMs. Required for dmPolicy="allowlist". For dmPolicy="open", include "*".'>
                                 <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                   <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                 </span>
@@ -1133,11 +1212,10 @@ export default function OpenClawConfigGenerator() {
                           </p>
                         )}
                         {state.channels.telegram.dmPolicy === 'allowlist' &&
-                          showAdvanced &&
                           !state.channels.telegram.allowFromRaw.trim() && (
                             <p className="text-xs text-warning">
-                              Optional. With dmPolicy=&quot;allowlist&quot;, new senders will be
-                              blocked unless already paired or explicitly allowlisted.
+                              Required: add at least one sender id (example:{' '}
+                              <Code className="px-1 py-0.5">tg:123456789</Code>).
                             </p>
                           )}
                       </div>
@@ -1387,7 +1465,30 @@ export default function OpenClawConfigGenerator() {
                       })}
                     </RadioGroup>
 
+                    <Switch
+                      isSelected={state.channels.whatsapp.selfChatMode}
+                      onValueChange={(v) =>
+                        setState((s) => ({
+                          ...s,
+                          channels: {
+                            ...s.channels,
+                            whatsapp: { ...s.channels.whatsapp, selfChatMode: v },
+                          },
+                        }))
+                      }
+                    >
+                      <span className="inline-flex items-center gap-1">
+                        selfChatMode
+                        <Tooltip content="Enable if you run on your personal number and want to test by messaging yourself.">
+                          <span className="inline-flex items-center text-default-500 cursor-help">
+                            <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                          </span>
+                        </Tooltip>
+                      </span>
+                    </Switch>
+
                     {(state.channels.whatsapp.dmPolicy === 'open' ||
+                      state.channels.whatsapp.dmPolicy === 'allowlist' ||
                       showAdvanced ||
                       !!state.channels.whatsapp.allowFromRaw.trim()) && (
                       <div className="space-y-1">
@@ -1395,7 +1496,7 @@ export default function OpenClawConfigGenerator() {
                           label={
                             <span className="inline-flex items-center gap-1">
                               allowFrom
-                              <Tooltip content='Optional allowlist for WhatsApp DMs (E.164). For dmPolicy="open", include "*".'>
+                              <Tooltip content='Allowlist for WhatsApp DMs (E.164). Required for dmPolicy="allowlist". For dmPolicy="open", include "*".'>
                                 <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                   <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                 </span>
@@ -1424,11 +1525,10 @@ export default function OpenClawConfigGenerator() {
                           </p>
                         )}
                         {state.channels.whatsapp.dmPolicy === 'allowlist' &&
-                          showAdvanced &&
                           !state.channels.whatsapp.allowFromRaw.trim() && (
                             <p className="text-xs text-warning">
-                              Optional. With dmPolicy=&quot;allowlist&quot;, new senders will be
-                              blocked unless already paired or explicitly allowlisted.
+                              Required: add at least one E.164 number (example:{' '}
+                              <Code className="px-1 py-0.5">+15551234567</Code>).
                             </p>
                           )}
                       </div>
@@ -1670,6 +1770,7 @@ export default function OpenClawConfigGenerator() {
                     )}
 
                     {(state.channels.discord.dmPolicy === 'open' ||
+                      state.channels.discord.dmPolicy === 'allowlist' ||
                       showAdvanced ||
                       !!state.channels.discord.allowFromRaw.trim()) && (
                       <div className="space-y-1">
@@ -1677,7 +1778,7 @@ export default function OpenClawConfigGenerator() {
                           label={
                             <span className="inline-flex items-center gap-1">
                               dm.allowFrom
-                              <Tooltip content='Optional DM allowlist (Discord user IDs). For dmPolicy="open", include "*".'>
+                              <Tooltip content='DM allowlist (Discord user IDs). Required for dmPolicy="allowlist". For dmPolicy="open", include "*".'>
                                 <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                   <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                 </span>
@@ -1706,11 +1807,9 @@ export default function OpenClawConfigGenerator() {
                           </p>
                         )}
                         {state.channels.discord.dmPolicy === 'allowlist' &&
-                          showAdvanced &&
                           !state.channels.discord.allowFromRaw.trim() && (
                             <p className="text-xs text-warning">
-                              Optional. With dmPolicy=&quot;allowlist&quot;, new senders will be
-                              blocked unless already paired or explicitly allowlisted.
+                              Required: add at least one user id.
                             </p>
                           )}
                       </div>
@@ -1942,6 +2041,7 @@ export default function OpenClawConfigGenerator() {
                     )}
 
                     {(state.channels.slack.dmPolicy === 'open' ||
+                      state.channels.slack.dmPolicy === 'allowlist' ||
                       showAdvanced ||
                       !!state.channels.slack.allowFromRaw.trim()) && (
                       <div className="space-y-1">
@@ -1949,7 +2049,7 @@ export default function OpenClawConfigGenerator() {
                           label={
                             <span className="inline-flex items-center gap-1">
                               dm.allowFrom
-                              <Tooltip content='Optional DM allowlist (Slack user IDs). For dmPolicy="open", include "*".'>
+                              <Tooltip content='DM allowlist (Slack user IDs). Required for dmPolicy="allowlist". For dmPolicy="open", include "*".'>
                                 <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                   <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                 </span>
@@ -1978,11 +2078,9 @@ export default function OpenClawConfigGenerator() {
                           </p>
                         )}
                         {state.channels.slack.dmPolicy === 'allowlist' &&
-                          showAdvanced &&
                           !state.channels.slack.allowFromRaw.trim() && (
                             <p className="text-xs text-warning">
-                              Optional. With dmPolicy=&quot;allowlist&quot;, new senders will be
-                              blocked unless already paired or explicitly allowlisted.
+                              Required: add at least one user id.
                             </p>
                           )}
                       </div>

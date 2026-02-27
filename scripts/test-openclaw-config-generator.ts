@@ -4,6 +4,7 @@ import {
   buildOpenClawConfig,
   type OpenClawConfigGeneratorState,
 } from '../src/lib/openclaw-config/generator';
+import { inferOfficialModelLimits } from '../src/lib/openclaw-config/official-model-limits';
 
 function hasIssue(
   res: ReturnType<typeof buildOpenClawConfig>,
@@ -21,7 +22,7 @@ function baseState(): OpenClawConfigGeneratorState {
     ai: {
       mode: 'built-in',
       builtIn: {
-        primaryModel: 'anthropic/claude-opus-4-5',
+        primaryModel: 'anthropic/claude-opus-4.6',
       },
       custom: {
         providerId: 'custom-proxy',
@@ -30,13 +31,13 @@ function baseState(): OpenClawConfigGeneratorState {
         apiKeyEnvVar: 'CUSTOM_PROVIDER_API_KEY',
         apiKey: '',
         model: {
-          id: 'llama-3.1-8b',
-          name: 'Llama 3.1 8B',
+          id: 'gpt-5.2',
+          name: 'GPT-5.2',
           reasoning: false,
           inputText: true,
           inputImage: false,
-          contextWindow: 128000,
-          maxTokens: 8192,
+          contextWindow: 400000,
+          maxTokens: 128000,
         },
       },
     },
@@ -65,6 +66,7 @@ function baseState(): OpenClawConfigGeneratorState {
         enabled: false,
         dmPolicy: 'pairing',
         allowFromRaw: '',
+        selfChatMode: false,
         groupPolicy: 'allowlist',
         groupAllowFromRaw: '',
         groupIdsRaw: '',
@@ -94,6 +96,52 @@ function baseState(): OpenClawConfigGeneratorState {
 }
 
 function run() {
+  // 0) Official model limits inference (best-effort fallbacks)
+  {
+    assert.deepEqual(inferOfficialModelLimits('openai-responses', 'gpt-5.2'), {
+      contextWindow: 400_000,
+      maxTokens: 128_000,
+    });
+
+    assert.deepEqual(inferOfficialModelLimits('openai-responses', 'gpt-some-unknown'), {
+      contextWindow: 128_000,
+      maxTokens: 16_384,
+    });
+
+    assert.deepEqual(inferOfficialModelLimits('anthropic-messages', 'claude-sonnet-4.6'), {
+      contextWindow: 200_000,
+      maxTokens: 64_000,
+    });
+
+    assert.deepEqual(inferOfficialModelLimits('openai-responses', 'glm-5'), {
+      contextWindow: 200_000,
+      maxTokens: 131_072,
+    });
+    assert.deepEqual(inferOfficialModelLimits('openai-responses', 'z-ai/glm-5:free'), {
+      contextWindow: 200_000,
+      maxTokens: 131_072,
+    });
+
+    assert.deepEqual(inferOfficialModelLimits('openai-responses', 'kimi-latest'), {
+      contextWindow: 131_072,
+      maxTokens: 131_072,
+    });
+
+    assert.deepEqual(inferOfficialModelLimits('openai-responses', 'moonshot-v1-128k'), {
+      contextWindow: 131_072,
+      maxTokens: 131_072,
+    });
+    assert.deepEqual(inferOfficialModelLimits('openai-responses', 'moonshotai/moonshot-v1-128k'), {
+      contextWindow: 131_072,
+      maxTokens: 131_072,
+    });
+
+    assert.deepEqual(inferOfficialModelLimits('openai-responses', 'kimi-k2.5'), {
+      contextWindow: 262_144,
+      maxTokens: 131_072,
+    });
+  }
+
   // 1) Gateway: bind=custom must set customBindHost
   {
     const s = baseState();
@@ -187,7 +235,7 @@ function run() {
   // 6) Fallback list should not include primary model
   {
     const s = baseState();
-    s.modelFallbacksRaw = 'anthropic/claude-opus-4-5\nopenai/gpt-4.1';
+    s.modelFallbacksRaw = 'anthropic/claude-opus-4.6\nopenai/gpt-4.1';
     const res = buildOpenClawConfig(s);
     assert.ok(hasIssue(res, 'info', 'agents.defaults.model.fallbacks'));
     const cfg = res.config as unknown as {
@@ -250,6 +298,57 @@ function run() {
     const res = buildOpenClawConfig(s);
     assert.equal(res.issues.filter((i) => i.level === 'error').length, 0);
     assert.ok(hasIssue(res, 'warning', 'channels.slack.channels.*.requireMention'));
+  }
+
+  // 9) dmPolicy="allowlist" requires allowFrom (all supported channels)
+  {
+    const s = baseState();
+    s.channels.telegram.enabled = true;
+    s.channels.telegram.dmPolicy = 'allowlist';
+    s.channels.telegram.allowFromRaw = '';
+    let res = buildOpenClawConfig(s);
+    assert.ok(hasIssue(res, 'error', 'channels.telegram.allowFrom'));
+
+    const w = baseState();
+    w.channels.whatsapp.enabled = true;
+    w.channels.whatsapp.dmPolicy = 'allowlist';
+    w.channels.whatsapp.allowFromRaw = '';
+    res = buildOpenClawConfig(w);
+    assert.ok(hasIssue(res, 'error', 'channels.whatsapp.allowFrom'));
+
+    const d = baseState();
+    d.channels.discord.enabled = true;
+    d.channels.discord.dmPolicy = 'allowlist';
+    d.channels.discord.allowFromRaw = '';
+    res = buildOpenClawConfig(d);
+    assert.ok(hasIssue(res, 'error', 'channels.discord.dm.allowFrom'));
+
+    const sl = baseState();
+    sl.channels.slack.enabled = true;
+    sl.channels.slack.dmPolicy = 'allowlist';
+    sl.channels.slack.allowFromRaw = '';
+    res = buildOpenClawConfig(sl);
+    assert.ok(hasIssue(res, 'error', 'channels.slack.dm.allowFrom'));
+  }
+
+  // 10) Gateway should include explicit mode=local
+  {
+    const s = baseState();
+    const res = buildOpenClawConfig(s);
+    const cfg = res.config as unknown as { gateway?: { mode?: unknown } };
+    assert.equal(cfg.gateway?.mode, 'local');
+  }
+
+  // 11) WhatsApp selfChatMode should be emitted when enabled
+  {
+    const s = baseState();
+    s.channels.whatsapp.enabled = true;
+    s.channels.whatsapp.selfChatMode = true;
+    const res = buildOpenClawConfig(s);
+    const cfg = res.config as unknown as {
+      channels?: { whatsapp?: { selfChatMode?: unknown } };
+    };
+    assert.equal(cfg.channels?.whatsapp?.selfChatMode, true);
   }
 
   process.stdout.write('config-generator tests: OK\n');

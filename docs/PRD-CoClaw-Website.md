@@ -481,7 +481,7 @@ CoClaw.com will serve as the central hub for tutorials, troubleshooting, communi
 │                                                          │
 │  Step 4: AI Model                                       │
 │  Provider: [Anthropic Claude ▼]                         │
-│  Model: [claude-opus-4-5 ▼]                             │
+│  Model: [claude-opus-4.6 ▼]                             │
 │  Est. cost: ~$20-50/month for typical usage             │
 │                                                          │
 │  [▼ Advanced Options]                                   │
@@ -490,7 +490,7 @@ CoClaw.com will serve as the central hub for tutorials, troubleshooting, communi
 │  │ Preview: openclaw.json                          │   │
 │  │ {                                               │   │
 │  │   "agent": {                                    │   │
-│  │     "model": "anthropic/claude-opus-4-5"        │   │
+│  │     "model": "anthropic/claude-opus-4.6"        │   │
 │  │   },                                            │   │
 │  │   "channels": {                                 │   │
 │  │     "telegram": { ... }                         │   │

@@ -31,6 +31,7 @@ export type TelegramState = ChannelStateBase & {
 
 export type WhatsAppState = ChannelStateBase;
 export type WhatsAppStateAdvanced = ChannelStateBase & {
+  selfChatMode: boolean;
   groupPolicy: GroupPolicy;
   groupAllowFromRaw: string;
   groupIdsRaw: string;
@@ -174,7 +175,7 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
     issues.push({
       level: 'error',
       path: 'agents.defaults.model.primary',
-      message: 'Pick a model (example: anthropic/claude-opus-4-5).',
+      message: 'Pick a model (example: anthropic/claude-opus-4.6).',
     });
   }
 
@@ -266,6 +267,19 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
       });
     }
 
+    if (
+      Number.isFinite(state.ai.custom.model.contextWindow) &&
+      state.ai.custom.model.contextWindow > 0 &&
+      Number.isFinite(state.ai.custom.model.maxTokens) &&
+      state.ai.custom.model.maxTokens > state.ai.custom.model.contextWindow
+    ) {
+      issues.push({
+        level: 'warning',
+        path: `models.providers.${providerId || '<providerId>'}.models[0].maxTokens`,
+        message: 'maxTokens is greater than contextWindow; it will be clamped by OpenClaw.',
+      });
+    }
+
     if (state.secretsMode === 'inline') {
       if (!state.ai.custom.apiKey.trim()) {
         issues.push({
@@ -319,6 +333,9 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
   };
 
   const gatewayCfg: Record<string, unknown> = {
+    // OpenClaw 2026.x expects an explicit mode (local vs remote).
+    // The config generator currently targets the common local gateway setup.
+    mode: 'local',
     port: state.gateway.port,
     bind: state.gateway.bind,
     ...(state.gateway.bind === 'custom' && state.gateway.customBindHost.trim()
@@ -364,6 +381,7 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
         }
       } else {
         requiredEnvVars.push('OPENCLAW_GATEWAY_TOKEN');
+        auth.token = `\${OPENCLAW_GATEWAY_TOKEN}`;
       }
     } else if (authMode === 'password') {
       if (state.secretsMode === 'inline') {
@@ -379,6 +397,7 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
         }
       } else {
         requiredEnvVars.push('OPENCLAW_GATEWAY_PASSWORD');
+        auth.password = `\${OPENCLAW_GATEWAY_PASSWORD}`;
       }
     }
     gatewayCfg.auth = auth;
@@ -429,6 +448,9 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
           ? state.ai.custom.apiKey.trim()
           : `\${${ensureEnvVarName(state.ai.custom.apiKeyEnvVar)}}`;
 
+      const contextWindow = state.ai.custom.model.contextWindow;
+      const maxTokens = Math.min(state.ai.custom.model.maxTokens, contextWindow);
+
       cfg.models = {
         mode: 'merge',
         providers: {
@@ -443,8 +465,8 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
                 reasoning: !!state.ai.custom.model.reasoning,
                 input,
                 cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-                contextWindow: state.ai.custom.model.contextWindow,
-                maxTokens: state.ai.custom.model.maxTokens,
+                contextWindow,
+                maxTokens,
               },
             ],
           },
@@ -471,10 +493,10 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
     }
     if (state.channels.telegram.dmPolicy === 'allowlist' && allowFrom.length === 0) {
       issues.push({
-        level: 'info',
+        level: 'error',
         path: 'channels.telegram.allowFrom',
         message:
-          'dmPolicy="allowlist" works without allowFrom, but new senders will be blocked unless already paired or explicitly allowlisted.',
+          'Telegram dmPolicy="allowlist" requires allowFrom to contain at least one sender ID.',
       });
     }
 
@@ -553,6 +575,7 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
       }
     } else {
       requiredEnvVars.push('TELEGRAM_BOT_TOKEN');
+      telegram.botToken = `\${TELEGRAM_BOT_TOKEN}`;
     }
 
     channelsCfg.telegram = telegram;
@@ -582,10 +605,10 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
     }
     if (state.channels.whatsapp.dmPolicy === 'allowlist' && allowFrom.length === 0) {
       issues.push({
-        level: 'info',
+        level: 'error',
         path: 'channels.whatsapp.allowFrom',
         message:
-          'dmPolicy="allowlist" works without allowFrom, but new senders will be blocked unless already paired or explicitly allowlisted.',
+          'WhatsApp dmPolicy="allowlist" requires allowFrom to contain at least one sender ID.',
       });
     }
 
@@ -615,9 +638,14 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
     }
 
     const whatsapp: Record<string, unknown> = {
+      enabled: true,
       dmPolicy: state.channels.whatsapp.dmPolicy,
       ...(allowFrom.length ? { allowFrom } : {}),
     };
+
+    if (state.channels.whatsapp.selfChatMode) {
+      whatsapp.selfChatMode = true;
+    }
 
     if (groupPolicy !== 'allowlist') {
       whatsapp.groupPolicy = groupPolicy;
@@ -658,10 +686,10 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
     }
     if (state.channels.discord.dmPolicy === 'allowlist' && allowFrom.length === 0) {
       issues.push({
-        level: 'info',
+        level: 'error',
         path: 'channels.discord.dm.allowFrom',
         message:
-          'dm.policy="allowlist" works without dm.allowFrom, but new senders will be blocked unless already paired or explicitly allowlisted.',
+          'Discord dm.policy="allowlist" requires dm.allowFrom to contain at least one sender ID.',
       });
     }
 
@@ -724,6 +752,7 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
       }
     } else {
       requiredEnvVars.push('DISCORD_BOT_TOKEN');
+      discord.token = `\${DISCORD_BOT_TOKEN}`;
     }
 
     channelsCfg.discord = discord;
@@ -751,10 +780,10 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
     }
     if (state.channels.slack.dmPolicy === 'allowlist' && allowFrom.length === 0) {
       issues.push({
-        level: 'info',
+        level: 'error',
         path: 'channels.slack.dm.allowFrom',
         message:
-          'dm.policy="allowlist" works without dm.allowFrom, but new senders will be blocked unless already paired or explicitly allowlisted.',
+          'Slack dm.policy="allowlist" requires dm.allowFrom to contain at least one sender ID.',
       });
     }
 
@@ -826,6 +855,8 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
       }
     } else {
       requiredEnvVars.push('SLACK_BOT_TOKEN', 'SLACK_APP_TOKEN');
+      slack.botToken = `\${SLACK_BOT_TOKEN}`;
+      slack.appToken = `\${SLACK_APP_TOKEN}`;
     }
 
     channelsCfg.slack = slack;
