@@ -1,0 +1,381 @@
+---
+title: "OpenClaw Relay & API Proxy Troubleshooting (NewAPI/OneAPI/AnyRouter): Fix 403s, 404s, and Empty Replies"
+description: "A practical integration guide for using OpenClaw with OpenAI/Anthropic-compatible relays and API proxies (NewAPI, OneAPI, AnyRouter, LiteLLM, vLLM): choose the right API mode, set baseUrl correctly, avoid config precedence traps, and debug 403/404/blank-output failures fast."
+category: "integration"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+time: "20 min"
+publishDate: 2026-02-27
+lastUpdated: 2026-02-27
+steps:
+  - title: "Confirm what your relay actually implements"
+    content: "Identify whether your provider supports Anthropic Messages, OpenAI Chat Completions, or OpenAI Responses (or only a partial subset)."
+  - title: "Edit the config the gateway is truly using"
+    content: "Avoid the #1 footgun: multiple config locations and per-agent overrides can make your changes look ignored."
+  - title: "Get baseUrl + endpoint paths right (no accidental /v1/v1)"
+    content: "Use the base URL format that matches the API mode so OpenClaw hits real endpoints instead of 404s."
+  - title: "Fix 403 blocks (WAF / User-Agent / region / IP)"
+    content: "Some relays block SDK user agents or specific regions/IPs. Set headers or ask the relay to allowlist your traffic."
+  - title: "Solve empty replies and silent failures"
+    content: "Most blank outputs come from response-shape mismatch (completions vs chat) or unsupported options like reasoning."
+  - title: "Verify with a tight debug loop"
+    content: "Use `openclaw models status --probe`, gateway logs, and a minimal curl repro to confirm the exact URL/headers/shape."
+keywords:
+  - "relay"
+  - "proxy"
+  - "NewAPI"
+  - "OneAPI"
+  - "AnyRouter"
+  - "LiteLLM"
+  - "vLLM"
+  - "403"
+  - "404"
+  - "User-Agent"
+  - "baseUrl"
+  - "openai-completions"
+  - "openai-responses"
+  - "anthropic-messages"
+---
+
+Relays and API proxies are incredibly useful (especially if you need multi-provider routing, unified billing, or a China-friendly
+endpoint), but they also introduce a new class of “it works in curl but not in OpenClaw” failures.
+
+This guide is a battle-tested checklist for the most common issues reported by the community: **403 blocks**, **404 not found**
+(often caused by wrong `baseUrl`), and **blank/empty replies** caused by response-format mismatch.
+
+If you’re new to OpenClaw configuration, start here first:
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+
+If your TUI shows “(no output)” specifically:
+
+- [/troubleshooting/solutions/tui-no-output-after-send](/troubleshooting/solutions/tui-no-output-after-send)
+
+---
+
+## 0) Mental model: API mode decides the contract
+
+In OpenClaw, a relay “provider” typically looks like:
+
+```json5
+{
+  models: {
+    mode: "merge",
+    providers: {
+      myrelay: {
+        baseUrl: "https://example.com/...", // important: varies by API mode
+        apiKey: "${MYRELAY_API_KEY}",
+        api: "openai-completions" // or "openai-responses" / "anthropic-messages"
+      }
+    }
+  }
+}
+```
+
+The `api` mode is not just a label — it decides:
+
+- which **endpoint path** OpenClaw calls,
+- how OpenClaw authenticates,
+- and what **response JSON shape** OpenClaw expects.
+
+Practical takeaway: when a relay says “OpenAI compatible”, it often means *one* of these, not all of them:
+
+- OpenAI **Chat Completions** (`/v1/chat/completions`) → OpenClaw `api: "openai-completions"`
+- OpenAI **Responses** (`/v1/responses`) → OpenClaw `api: "openai-responses"`
+- Anthropic **Messages** (`/v1/messages`) → OpenClaw `api: "anthropic-messages"`
+
+---
+
+## 1) Pick the right `api` mode (and don’t “invent” values)
+
+If you see an error like:
+
+> `Invalid discriminator value. Expected 'anthropic-messages' | 'openai-responses' | 'openai-completions'`
+
+It means your config is being schema-validated and `api:` must be one of the supported enum values for your OpenClaw version.
+
+### Compatibility heuristics (fast)
+
+- If your relay advertises “Anthropic compatible / Claude compatible”, start with `api: "anthropic-messages"`.
+- If your relay only advertises “OpenAI compatible” and shows examples with `/v1/chat/completions`, start with `api: "openai-completions"`.
+- If your relay supports `/v1/responses`, prefer `api: "openai-responses"` (newer contract, generally fewer edge cases than legacy completions).
+
+If you’re unsure, verify support by checking the relay docs or trying a minimal request (see the curl section below).
+
+---
+
+## 2) Confirm you’re editing the config the gateway is actually using
+
+When changes “don’t work”, 80% of the time you edited the wrong file or the gateway never reloaded.
+
+### 2.1 The two most common config locations
+
+Depending on your setup, you may have more than one config file in the state directory:
+
+- `~/.openclaw/openclaw.json` (main gateway config for most modern setups)
+- `~/.openclaw/config.json` (older/legacy config used by some flows)
+
+Rule: update the file that your running gateway instance loads, then restart the gateway.
+
+### 2.2 Per-agent overrides can bypass your provider catalog
+
+Some setup flows store model/provider settings in a per-agent file like:
+
+- `~/.openclaw/agents/<agentId>/agent/models.json`
+
+If you set a model in an agent-specific config, it can override what you think is “default” in `openclaw.json`.
+
+Quick checks:
+
+```bash
+openclaw config get agents.defaults.model.primary
+openclaw config get agents.defaults.model.fallbacks
+openclaw models status --probe
+```
+
+If `--probe` resolves to a different provider than expected, you’re debugging **model selection / precedence**, not networking.
+
+---
+
+## 3) Base URL rules: prevent 404s (and watch for accidental `/v1/v1`)
+
+Different API modes commonly want different `baseUrl` formats.
+
+### 3.1 Known-good `baseUrl` patterns (copy/paste)
+
+**A) Anthropic Messages relays**
+
+For many Anthropic-compatible relays, `baseUrl` should be the host root (no `/v1`), because the Messages API endpoint itself is `/v1/messages`:
+
+```json5
+{
+  models: {
+    providers: {
+      myrelay: {
+        baseUrl: "https://my-relay.example.com",
+        apiKey: "${MYRELAY_API_KEY}",
+        api: "anthropic-messages"
+      }
+    }
+  }
+}
+```
+
+**B) OpenAI Chat Completions relays (`openai-completions`)**
+
+OpenAI-style relays commonly expose chat completions under a `/v1` prefix. Many known-good configs use:
+
+```json5
+{
+  models: {
+    providers: {
+      myrelay: {
+        baseUrl: "https://my-relay.example.com/v1",
+        apiKey: "${MYRELAY_API_KEY}",
+        api: "openai-completions"
+      }
+    }
+  }
+}
+```
+
+**C) OpenAI Responses relays (`openai-responses`)**
+
+Most relays that implement the Responses API also use a `/v1` base:
+
+```json5
+{
+  models: {
+    providers: {
+      myrelay: {
+        baseUrl: "https://my-relay.example.com/v1",
+        apiKey: "${MYRELAY_API_KEY}",
+        api: "openai-responses"
+      }
+    }
+  }
+}
+```
+
+### 3.2 The only rule that always works: verify the *final URL*
+
+If your gateway logs show something like:
+
+- `.../v1/v1/messages` (Anthropic mode)
+- `.../v1/v1/chat/completions` (OpenAI mode)
+
+You have a duplicated `/v1`. Remove it from the `baseUrl` (or from the relay path), restart, and try again.
+
+If logs show a URL without `/v1` and your relay requires it, add `/v1` back.
+
+---
+
+## 4) 403 Forbidden: WAF / User-Agent blocks are real
+
+Symptom pattern:
+
+- Your key is valid.
+- A manual request from Postman/curl works.
+- OpenClaw gets a `403` (sometimes with a message like “Request Blocked”, “Forbidden”, or a vendor WAF page).
+
+Common causes:
+
+- The relay blocks SDK user agents (for example `Anthropic/*`, `OpenAI/*`) or unknown automation traffic.
+- The relay has region/IP restrictions or requires allowlisting.
+- The relay expects an additional header (custom auth, tenant id, etc.).
+
+### 4.1 Workaround: set custom headers (especially `User-Agent`)
+
+If your relay blocks the default SDK user-agent, set a browser-like UA:
+
+```json5
+{
+  models: {
+    providers: {
+      myrelay: {
+        api: "anthropic-messages",
+        baseUrl: "https://my-relay.example.com",
+        apiKey: "${MYRELAY_API_KEY}",
+        headers: {
+          "User-Agent": "Mozilla/5.0 (OpenClaw; +https://coclaw.com)"
+        }
+      }
+    }
+  }
+}
+```
+
+If your relay is strict, you may need to coordinate with the relay operator:
+
+- ask them to allowlist your gateway IP,
+- or to disable WAF rules that block SDK traffic.
+
+---
+
+## 5) “Empty reply”, blank output, or silent failures
+
+This is where most relay integrations go wrong: the HTTP request succeeds, but OpenClaw can’t parse the result (or the relay
+returns a different shape than the chosen API mode expects).
+
+### 5.1 OpenAI “completions” vs “chat completions” JSON mismatch
+
+In OpenAI-compatible relays, “completions” can mean two different payload shapes:
+
+- **Legacy text completions** often return output in `choices[0].text`
+- **Chat completions** often return output in `choices[0].message.content`
+
+If OpenClaw expects one shape but the relay returns the other, you can get a “successful HTTP request” but a blank/empty UI.
+
+This is most often reported when a relay advertises “OpenAI compatible” but only fully implements one of the two contracts.
+
+Fix options:
+
+- Switch API mode (`openai-responses` or `anthropic-messages`) if your relay supports it.
+- In the relay admin panel, enable the compatibility mode that matches what you configured in OpenClaw.
+- Test the exact response JSON with curl and compare it with the contract of the endpoint you’re claiming to support.
+
+### 5.2 Don’t enable `reasoning: true` unless you know your relay supports it
+
+Several relay users report “blank” or broken responses when a model entry includes `reasoning: true` but the upstream does not
+support that toggle consistently.
+
+If you’re troubleshooting, set `reasoning: false` first and re-test.
+
+### 5.3 If the gateway makes zero API calls, you’re not hitting that provider
+
+If you expect “relay X” to be called but logs show no outbound request at all, the problem is typically:
+
+- model selection chose a different provider,
+- your relay provider is defined but your agent is pinned elsewhere,
+- or the provider name collides with something you didn’t expect.
+
+Tip: avoid naming a custom relay provider `openai` or `anthropic`. Use a unique key like `newapi`, `oneapi`, `anyrouter`,
+or `relay`.
+
+---
+
+## 6) A tight debug loop (fastest way to converge)
+
+### 6.1 Probe from OpenClaw first
+
+```bash
+openclaw models status --probe
+openclaw logs --follow
+```
+
+You’re looking for:
+
+- the **resolved model** (which provider OpenClaw actually chose),
+- the **exact request URL** (does it contain `/v1` once?),
+- the **HTTP status code** (403/404/429),
+- and any structured error body.
+
+### 6.2 Reproduce with curl using the same URL and headers
+
+Once you see the final URL in logs, reproduce it directly. Examples (adjust to match your API mode):
+
+OpenAI-compatible **Chat Completions** request (common for many relays):
+
+```bash
+curl -sS https://my-relay.example.com/v1/chat/completions \
+  -H "Authorization: Bearer $MYRELAY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0" \
+  -d '{"model":"gpt-4.1-mini","messages":[{"role":"user","content":"ping"}]}'
+```
+
+OpenAI-compatible **Legacy Completions** request (some relays still use this):
+
+```bash
+curl -sS https://my-relay.example.com/v1/completions \
+  -H "Authorization: Bearer $MYRELAY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "User-Agent: Mozilla/5.0" \
+  -d '{"model":"gpt-4.1-mini","prompt":"ping","max_tokens":64}'
+```
+
+Anthropic Messages-style:
+
+```bash
+curl -sS https://my-relay.example.com/v1/messages \
+  -H "x-api-key: $MYRELAY_API_KEY" \
+  -H "Content-Type: application/json" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "User-Agent: Mozilla/5.0" \
+  -d '{"model":"claude-3-5-sonnet-latest","max_tokens":64,"messages":[{"role":"user","content":"ping"}]}'
+```
+
+If curl works but OpenClaw doesn’t, compare:
+
+- request URL paths,
+- auth header format (`Authorization` vs `x-api-key`),
+- required vendor headers,
+- and response JSON shape.
+
+---
+
+## Quick checklist (print this)
+
+- [ ] `api` is one of: `anthropic-messages`, `openai-responses`, `openai-completions`
+- [ ] `baseUrl` matches the mode (and logs do not show `/v1/v1`)
+- [ ] You edited the config the gateway uses, then restarted it
+- [ ] No per-agent override is pinning a different provider/model
+- [ ] If 403: set `headers.User-Agent`, and verify IP/region allowlist
+- [ ] If blank output: verify response JSON matches the endpoint contract; disable `reasoning: true`
+
+---
+
+## Further reading
+
+- OpenClaw model concepts and configuration:
+  - https://docs.openclaw.ai/concepts/models
+  - https://docs.openclaw.ai/gateway/configuration
+- Community-reported relay edge cases (discussion threads):
+  - https://linux.do/t/topic/1667136
+  - https://linux.do/t/topic/1573970
+  - https://linux.do/t/topic/1574006
