@@ -1,0 +1,174 @@
+---
+title: "OpenClaw Not Responding: Fix 'no output', Incorrect API, Rate Limits, and Silent Failures"
+description: "A high-signal checklist for when OpenClaw stops replying (TUI shows '(no output)', channels go quiet, or logs show 401/403/429). Covers config precedence, provider auth, model allowlists, relay API-mode mismatch, and rate-limit/billing traps."
+category: "deployment"
+difficulty: "Beginner"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+time: "25 min"
+publishDate: 2026-03-02
+lastUpdated: 2026-03-02
+featured: true
+steps:
+  - title: "Confirm you're debugging the right layer"
+    content: "Separate UI/rendering issues from provider failures: use models probe + gateway logs to see if the request even reaches your LLM."
+  - title: "Eliminate config precedence surprises"
+    content: "Most 'it ignores my key/model' issues are editing the wrong config file or a service env override."
+  - title: "Fix the top provider failures (401/403/429/billing)"
+    content: "Resolve auth, quota, and rate limits by probing the provider, checking account credits, and setting a sane fallback model."
+  - title: "Fix silent/blank replies (relay contract mismatch)"
+    content: "If HTTP succeeds but output is blank, verify your relay API mode, baseUrl, and response shape assumptions."
+  - title: "Lock in a stable debug loop"
+    content: "Use repeatable commands and minimal prompts so you can prove a fix before changing more knobs."
+keywords:
+  - "not responding"
+  - "(no output)"
+  - "rate limit"
+  - "429"
+  - "incorrect api"
+  - "all models failed"
+  - "blank reply"
+  - "openclaw models status --probe"
+---
+
+When OpenClaw “doesn’t respond”, the fastest path is to **stop guessing** and answer two questions:
+
+1. Did the gateway successfully call your model provider?
+2. If it did, did the UI/channel render the reply (or was it dropped/blank)?
+
+This guide is a tight, repeatable checklist for the most common community failure modes.
+
+If you’re still working through initial setup, start here first:
+
+- [/getting-started/quick-start](/getting-started/quick-start)
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+
+---
+
+## 0) The two “truth sources”: probe + logs
+
+Run these on the gateway host:
+
+```bash
+openclaw status --deep
+openclaw models status --probe
+openclaw logs --follow
+```
+
+Interpretation:
+
+- `models status --probe` tells you whether **auth + routing + model resolution** are correct.
+- `logs --follow` tells you whether the gateway is returning **401/403/429** (provider), **model mismatch**, or **schema/config** issues.
+
+If you’re on a channel (Telegram/Slack/etc.), also probe channel health:
+
+```bash
+openclaw channels status --probe
+```
+
+---
+
+## 1) If the TUI shows “(no output)” or a blank reply
+
+Start with the dedicated fix page:
+
+- [/troubleshooting/solutions/tui-no-output-after-send](/troubleshooting/solutions/tui-no-output-after-send)
+
+Then check the most common root causes.
+
+### 1.1 Provider failed (but UI looks “blank”)
+
+If logs show any of these:
+
+- 401 / 403 → auth or account/billing block
+- 429 → rate limit / concurrency cap / quota exceeded
+- “all models failed” → your primary + fallbacks all failed
+
+Use:
+
+- [/troubleshooting/solutions/models-all-models-failed](/troubleshooting/solutions/models-all-models-failed)
+
+### 1.2 Model selection is blocked by an allowlist (“model not allowed”)
+
+- [/troubleshooting/solutions/model-not-allowed](/troubleshooting/solutions/model-not-allowed)
+
+### 1.3 Relay/proxy contract mismatch (silent blank output)
+
+If you use a relay/proxy (NewAPI/OneAPI/AnyRouter/LiteLLM/etc.), “HTTP 200 but blank output” is often a response-shape mismatch
+(Chat Completions vs Responses vs Anthropic Messages).
+
+Use:
+
+- [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+
+---
+
+## 2) “Incorrect API” / “configured but no calls” (auth & config precedence)
+
+If OpenClaw keeps acting like your API key isn’t set, assume you’re debugging **precedence**, not “the key is wrong”.
+
+Checklist:
+
+1. Confirm the gateway is reading the config file you’re editing:
+   - [/guides/openclaw-configuration](/guides/openclaw-configuration)
+2. Check for service-level env overrides (Docker/systemd/launchd) that differ from your interactive shell.
+3. Probe auth using:
+
+```bash
+openclaw models status --probe
+```
+
+If you see provider entries with “unauthenticated / missing key”, fix env propagation first.
+
+---
+
+## 3) Rate limits, quota, and billing: what to do first
+
+If you hit 429/rate limit, the high-value goal is to get back to a stable “it replies” baseline:
+
+1. Reduce concurrency (fewer parallel runs).
+2. Choose a model/provider with higher limits (or add a fallback).
+3. Confirm account credits / spending caps / organization limits.
+
+CoClaw references:
+
+- “All models failed” diagnostic flow: [/troubleshooting/solutions/models-all-models-failed](/troubleshooting/solutions/models-all-models-failed)
+- Cost + quota background (long-form): [/blog/openclaw-cost-api-challenges](/blog/openclaw-cost-api-challenges)
+
+Practical tip: probes consume tokens and can trip limits, but they save hours by proving whether auth works.
+
+---
+
+## 4) A minimal debug loop (copy/paste)
+
+When you’re unsure whether a change fixed anything, use the smallest loop possible:
+
+```bash
+openclaw models status --probe
+openclaw tui
+```
+
+In TUI, send a minimal prompt:
+
+- “Reply with the word OK.”
+
+If that works, then reintroduce:
+
+- your real system prompt
+- your channel integration
+- your cron/automation load
+
+This keeps you from changing five variables at once.
+
+---
+
+## 5) Related “it looks like no response” problems
+
+- Install/runtime issues: [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
+- Control UI unauthorized/pairing: [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+- Config validation failures after edits: [/troubleshooting/solutions/config-validation-failed](/troubleshooting/solutions/config-validation-failed)
+

@@ -1,0 +1,186 @@
+---
+title: "OpenClaw Security Playbook: Skill Supply Chain Safety & Prompt Injection Defense"
+description: "A practical hardening guide for OpenClaw operators: reduce skill malware risk, defend against prompt injection from emails/web pages, and design safe-by-default workflows (separate accounts, least privilege, allowlists, audit trails)."
+category: "advanced"
+difficulty: "Advanced"
+platforms:
+  - "Self-hosted"
+  - "Docker"
+  - "VPS"
+time: "30 min"
+publishDate: 2026-03-02
+lastUpdated: 2026-03-02
+featured: true
+steps:
+  - title: "Treat skills as software supply chain"
+    content: "Install skills like you would install npm packages: verify source, review code, and pin versions."
+  - title: "Assume untrusted content can command your agent"
+    content: "Emails, web pages, and PDFs can contain hidden instructions; build workflows that separate 'data' from 'commands'."
+  - title: "Constrain blast radius with least privilege"
+    content: "Separate accounts, strict allowlists, read-only modes, and limited filesystem scopes turn catastrophic compromise into recoverable incidents."
+  - title: "Make actions auditable"
+    content: "Force evidence output (logs + artifacts), and keep a rollback path for config/state/skills."
+  - title: "Operate like incidents are normal"
+    content: "Have a kill switch, rotation plan for keys/tokens, and a reinstall-from-known-good drill."
+keywords:
+  - "prompt injection"
+  - "supply chain"
+  - "skills"
+  - "clawhub"
+  - "malware"
+  - "least privilege"
+  - "allowlist"
+---
+
+This is the “operator’s version” of the security discussion: not fear, not hype — practical defenses.
+
+If you are new, read these first for context:
+
+- [/blog/openclaw-security-privacy-nightmare](/blog/openclaw-security-privacy-nightmare)
+- [/blog/openclaw-memecoin-attack-surface](/blog/openclaw-memecoin-attack-surface)
+
+If you run email/browser tools, treat this guide as required reading.
+
+---
+
+## 0) Threat model in one paragraph
+
+OpenClaw is powerful because it can:
+
+- read/write files
+- call external APIs with your keys
+- control browser sessions
+- send messages/emails
+
+That means compromise can happen through:
+
+1. **Supply chain** (malicious skills / compromised dependencies).
+2. **Prompt injection** (malicious instructions embedded in content your agent processes).
+3. **Credential leakage** (logs, config, chat transcripts, or tool output).
+
+Your goal isn’t “perfect security” — it’s **bounded damage** and **fast recovery**.
+
+---
+
+## 1) Skill supply chain safety (ClawHub and beyond)
+
+### 1.1 Default posture: distrust
+
+Treat every third-party skill as untrusted until proven otherwise.
+
+High-value rules:
+
+- Prefer skills from known maintainers or orgs you can verify.
+- Pin versions/commits (avoid “latest” in production).
+- Keep an allowlist of approved skills (not an open marketplace on prod).
+
+### 1.2 Review before install (minimum viable)
+
+Before installing a skill:
+
+- Read its README and entrypoints (what tools does it call?)
+- Search for network exfil paths (HTTP POST, webhook, socket, DNS)
+- Search for filesystem grabs (`~/.ssh`, browser cookies, `~/.openclaw`, env dumps)
+
+If your OpenClaw instance is used by non-technical users, prefer: “curated skill sets” over free-for-all installs.
+
+### 1.3 Separate “lab” from “prod”
+
+Operate two environments:
+
+- `lab` (where you experiment with new skills)
+- `prod` (where only reviewed skills are installed)
+
+Config precedence + multiple state dirs:
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+
+---
+
+## 2) Prompt injection: assume content can contain commands
+
+Prompt injection is not only a “chat” problem. Any content source can be weaponized:
+
+- emails (hidden text, quoted replies)
+- web pages (invisible instructions, CSS tricks)
+- documents/PDFs (embedded text)
+
+### 2.1 The safe rule: separate “summarize” from “act”
+
+Design your workflows as two phases:
+
+1. **Read-only extraction**: summarize, classify, extract structured fields.
+2. **Human approval (or strict policy gate)** before any side-effect actions:
+   - sending emails
+   - transferring files
+   - running shell commands
+   - installing skills
+
+### 2.2 Constrain tool access by default
+
+If a prompt injection succeeds, the attacker’s power equals your tool permissions.
+
+Safer defaults:
+
+- disable dangerous tools unless required
+- restrict outbound messaging recipients (allowlists)
+- restrict file read/write scope to a dedicated workspace
+
+If you are integrating channels, keep inbound policies explicit:
+
+- Telegram allowlists/pairing: [/guides/telegram-setup](/guides/telegram-setup)
+- WhatsApp separate number + allowlist: [/guides/whatsapp-setup](/guides/whatsapp-setup)
+
+---
+
+## 3) Blast radius design (what “least privilege” means here)
+
+The most effective “security features” for OpenClaw are operational:
+
+1. **Separate accounts**
+   - dedicated email inbox
+   - dedicated messaging accounts
+   - dedicated API keys (not your main keys)
+2. **Separate machines/users**
+   - run OpenClaw under a non-admin OS user
+   - isolate the state directory permissions
+3. **Strict networking posture**
+   - avoid exposing the gateway publicly
+   - prefer SSH tunnels/Tailscale over open ports
+
+Control UI remote access hardening:
+
+- [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+
+Persistence + backups (so recovery is fast):
+
+- [/guides/openclaw-state-workspace-and-memory](/guides/openclaw-state-workspace-and-memory)
+
+---
+
+## 4) Auditing: make actions provable
+
+If you can’t answer “what happened?”, you can’t contain incidents.
+
+Minimum viable auditing:
+
+- keep logs (and know where they are)
+- force runs to write artifacts (timestamped reports)
+- keep a short incident checklist (rotate keys, disable channels, uninstall skills, restore known-good state)
+
+If you’re building 24/7 automations, bake “evidence output” into every cron run:
+
+- [/guides/openclaw-cron-and-heartbeat-24x7](/guides/openclaw-cron-and-heartbeat-24x7)
+
+---
+
+## 5) Recovery drill (do this once, before you need it)
+
+1. Back up the full state dir.
+2. Practice reinstalling/upgrading without deleting state.
+3. Rotate a provider API key and confirm OpenClaw picks up the new value via env var substitution.
+
+Install/runtime recovery:
+
+- [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
+

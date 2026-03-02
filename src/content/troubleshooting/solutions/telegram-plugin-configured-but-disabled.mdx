@@ -1,0 +1,93 @@
+---
+title: "Telegram: configured but '(plugin disabled)' / 'plugin not available'"
+description: "Fix Telegram showing as configured but disabled by verifying `channels.telegram.enabled`, config precedence, and forcing a gateway restart (plus update/rollback guidance)."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel:
+  - "telegram"
+errorSignatures:
+  - "configured (plugin disabled)"
+  - "plugin disabled"
+  - "plugin not available"
+keywords:
+  - "telegram"
+  - "plugin disabled"
+  - "not available"
+  - "channels.telegram.enabled"
+publishDate: 2026-03-02
+lastUpdated: 2026-03-02
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/telegram"
+    - "https://docs.openclaw.ai/gateway/configuration"
+  guides:
+    - "/guides/telegram-setup"
+    - "/guides/openclaw-configuration"
+    - "/guides/updating-and-migration"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- You configured a Telegram bot token, but the gateway/UI reports Telegram as:
+  - `configured (plugin disabled)`, or
+  - `plugin not available`
+- Restarting the UI does not help (because the gateway process is what loads the channel).
+
+## Cause
+
+This almost always means one of:
+
+1. `channels.telegram.enabled` is **false** (or missing) in the config the gateway is actually reading.
+2. You edited the wrong config file (config precedence / service environment differs from your shell).
+3. The gateway did not reload the channel (restart required), or you are running a stale service binary after an update.
+
+## Fix
+
+### 1) Confirm the live config values (gateway host)
+
+```bash
+openclaw config get channels.telegram.enabled
+openclaw config get channels.telegram.botToken
+openclaw doctor
+```
+
+If `channels.telegram.enabled` is not `true`, set it:
+
+```bash
+openclaw config set channels.telegram.enabled true
+```
+
+### 2) Restart the gateway (forces channel initialization)
+
+```bash
+openclaw gateway restart
+```
+
+### 3) If you suspect config precedence / wrong file
+
+Use the configuration guide’s precedence section to confirm what the running service is using:
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+
+### 4) If this started after an update
+
+Update to the latest version, or temporarily roll back/pin to a known-good version while you investigate:
+
+- [/guides/updating-and-migration](/guides/updating-and-migration)
+
+## Verify
+
+- `openclaw channels status --probe` shows Telegram as enabled/healthy.
+- Sending a DM to the bot produces logs (and ideally a response).
+
+If Telegram is enabled but messages never arrive, continue here:
+
+- [/troubleshooting/solutions/telegram-bot-connected-but-no-messages](/troubleshooting/solutions/telegram-bot-connected-but-no-messages)
+

@@ -1,0 +1,171 @@
+---
+title: "OpenClaw Email (Gmail/IMAP) Setup: OAuth Reliability, Re-Auth Loops, and Safer Alternatives"
+description: "Email is powerful and risky. This guide covers how to set up OpenClaw email integrations, why Gmail OAuth often needs re-auth, how to reduce blast radius (separate accounts/scopes), and when to use IMAP/SMTP or a dedicated mailbox provider instead."
+category: "integration"
+difficulty: "Intermediate"
+platforms:
+  - "Gmail"
+  - "Google Workspace"
+  - "IMAP/SMTP"
+  - "Self-hosted"
+time: "25 min"
+publishDate: 2026-03-02
+lastUpdated: 2026-03-02
+steps:
+  - title: "Decide your risk posture first (separate account, limited permissions)"
+    content: "Do not start with your primary inbox. Use a dedicated mailbox and minimal scopes/permissions."
+  - title: "Pick an auth mode you can keep stable"
+    content: "OAuth is convenient but can be brittle; IMAP/SMTP can be simpler for some setups if you can manage credentials safely."
+  - title: "Make refresh failures observable"
+    content: "Use models/channel status probes and logs so 'it stopped reading email' becomes a diagnosable failure."
+  - title: "Prevent re-auth loops by stabilizing state"
+    content: "Most repeated OAuth prompts come from state not persisting, time drift, or token refresh failing silently."
+  - title: "Use safer alternatives when Gmail is too fragile"
+    content: "Dedicated providers, service accounts, or a forwarding mailbox often outperform direct Gmail OAuth for 24/7 automation."
+keywords:
+  - "gmail"
+  - "email"
+  - "oauth"
+  - "refresh"
+  - "workspace"
+  - "imap"
+  - "smtp"
+---
+
+Email integration is one of the highest-ROI OpenClaw capabilities — and also one of the highest-risk.
+
+Community reports cluster around:
+
+- OAuth works once, then repeatedly asks you to re-auth (or silently stops).
+- Fresh VPS/Docker deploys “forget” the email session.
+- New dedicated Gmail accounts get flagged quickly.
+
+This guide focuses on **reliability** and **blast-radius control** rather than “just make it work once”.
+
+Security reading (recommended before you give an agent inbox access):
+
+- [/blog/openclaw-security-privacy-nightmare](/blog/openclaw-security-privacy-nightmare)
+- [/guides/openclaw-skill-safety-and-prompt-injection](/guides/openclaw-skill-safety-and-prompt-injection)
+
+---
+
+## 0) Before you connect an inbox: safer defaults
+
+Do these first:
+
+1. Use a **dedicated mailbox** (not your primary email).
+2. Use minimal permissions/scopes (read-only if that’s enough).
+3. Treat state persistence as mandatory (tokens live in state).
+
+Persistence guide:
+
+- [/guides/openclaw-state-workspace-and-memory](/guides/openclaw-state-workspace-and-memory)
+
+---
+
+## 1) Choose an auth strategy you can operate
+
+### Option A: OAuth (convenient, but can be brittle)
+
+OAuth is often the easiest to start with, but for unattended 24/7 agents it can become operational debt:
+
+- refresh token invalidation
+- “suspicious activity” checks
+- device/session churn after redeploys
+
+### Option B: IMAP/SMTP (simpler mechanics, harder secret handling)
+
+IMAP/SMTP can be more predictable if you:
+
+- store credentials in a secret manager (not plaintext in git)
+- limit the account’s privileges
+- monitor for auth failures and rotate creds
+
+If you are using a provider that supports app passwords (or a dedicated mailbox provider), this can be the boring path.
+
+---
+
+## 2) Why Gmail keeps asking you to re-auth
+
+In practice, repeated re-auth prompts usually come from one of:
+
+1. **State not persisting** (containers reset / VM image reset) → tokens disappear.
+2. **Multiple installs / wrong runtime** → service writes tokens to a different home/state than you think.
+3. **Token refresh failures** (provider-side) → refresh fails, and the integration falls back to “needs login”.
+4. **Security policy** on the Google account (new account flags, Workspace restrictions, 2FA policy mismatch).
+
+The first two are solvable on your side; fix them before assuming “Google is broken”.
+
+Start with:
+
+- [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+- [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
+
+---
+
+## 3) Make failures observable (so you stop guessing)
+
+When email stops working, capture evidence before changing config:
+
+```bash
+openclaw status --deep
+openclaw logs --follow
+```
+
+If the failure is OAuth-related, you may see refresh errors in logs.
+
+Related OAuth fix pattern (provider example):
+
+- [/troubleshooting/solutions/oauth-token-refresh-failed](/troubleshooting/solutions/oauth-token-refresh-failed)
+
+---
+
+## 4) Reliability patterns that actually work
+
+### 4.1 “Forwarding mailbox” pattern (recommended for many teams)
+
+Instead of giving OpenClaw your primary inbox:
+
+- Create a dedicated mailbox (or alias) that only receives forwarded/filtered emails.
+- Only forward messages that are safe to automate on (alerts, receipts, support queue).
+
+Benefits:
+
+- reduces prompt injection surface (less untrusted content)
+- reduces business risk
+- easier auditing (“what did the agent see?”)
+
+### 4.2 Split “read” and “send” identities
+
+If you need outbound email, separate identities:
+
+- an inbox reader account
+- a sending-only account with strict allowlist recipients
+
+### 4.3 Always write artifacts + summaries
+
+For cron-driven email processing, have each run:
+
+- write a timestamped report into workspace
+- send a short summary message (linking to the artifact)
+
+Cron reliability:
+
+- [/guides/openclaw-cron-and-heartbeat-24x7](/guides/openclaw-cron-and-heartbeat-24x7)
+
+---
+
+## 5) If Gmail is too fragile: alternatives
+
+Pragmatic alternatives when OAuth or account policy becomes too costly:
+
+- A dedicated mailbox provider for automation (separate domain/user)
+- IMAP/SMTP with app passwords / token-based credentials (where supported)
+- A relay service that provides a stable API (with strict allowlists and audit logs)
+
+The best “alternative” is the one you can:
+
+- keep stable without daily manual login
+- monitor and audit
+- revoke quickly if compromised
+

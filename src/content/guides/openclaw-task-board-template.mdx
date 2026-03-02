@@ -1,0 +1,157 @@
+---
+title: "OpenClaw TASKS.md Template: A Simple Workspace Task Board"
+description: "Download a ready-made TASKS.md file for your OpenClaw workspace to track multi-step work, make cron runs leave evidence, and reduce 'it promised but I can't see what happened' failures."
+category: "advanced"
+difficulty: "Beginner"
+platforms:
+  - "Self-hosted"
+  - "Docker"
+  - "VPS"
+time: "10 min"
+publishDate: 2026-03-02
+lastUpdated: 2026-03-02
+featured: true
+steps:
+  - title: "Download the template"
+    content: "Grab TASKS.md from CoClaw and place it into your OpenClaw workspace."
+  - title: "Confirm your workspace path"
+    content: "Use `openclaw config get agents.defaults.workspace` so you put TASKS.md in the directory the agent actually uses."
+  - title: "Require evidence in every automation"
+    content: "Have cron jobs write artifacts to workspace and append a single run-log line with the artifact path."
+  - title: "Keep it safe"
+    content: "Never paste secrets or full sensitive email bodies into the board."
+keywords:
+  - "tasks"
+  - "kanban"
+  - "workspace"
+  - "operability"
+  - "cron"
+---
+
+This page provides a low-tech task board that works anywhere because it’s **just a file**.
+
+## Download
+
+- Template file: `/templates/openclaw/TASKS.md`
+
+Direct link:
+
+- [Download TASKS.md](/templates/openclaw/TASKS.md)
+
+## Install into your OpenClaw workspace
+
+1. Confirm the workspace path used by your running gateway:
+
+```bash
+openclaw config get agents.defaults.workspace
+```
+
+2. Copy the template into that directory (example):
+
+```bash
+cp TASKS.md ~/.openclaw/workspace/TASKS.md
+```
+
+If you’re on Docker, remember the workspace path inside the container may differ; validate with config/volume mounts:
+
+- [/guides/openclaw-state-workspace-and-memory](/guides/openclaw-state-workspace-and-memory)
+
+## The one rule: every run leaves evidence
+
+For cron/heartbeat runs:
+
+1. Write a timestamped artifact into workspace (report markdown/JSON).
+2. Append one line into **Run Log** with: timestamp, task id, OK/FAIL, artifact path.
+
+Cron reliability guide:
+
+- [/guides/openclaw-cron-and-heartbeat-24x7](/guides/openclaw-cron-and-heartbeat-24x7)
+
+## Plug-and-play: ready-to-paste cron prompts
+
+Use these as your cron job prompt content. They are designed to work even if delivery is flaky because they always:
+
+- write a report artifact under `reports/`
+- append a single line to `TASKS.md` Run Log
+
+Tip: for maximum reliability, set cron delivery to **none** and explicitly send the summary message yourself (see the cron
+troubleshooting pages linked above). If you keep delivery as announce, the artifact + Run Log still gives you proof.
+
+### Prompt A: Daily “system health + model probe” report (safe baseline)
+
+Replace `T-HEALTH` with your task id.
+
+```text
+You are running as a scheduled cron job.
+
+Goal: produce a daily health report for this OpenClaw instance and leave durable evidence.
+
+Steps:
+1) Determine current timestamp in ISO format (YYYY-MM-DD and time).
+2) Run a minimal internal sanity check:
+   - Confirm gateway status (deep).
+   - Confirm the default model is callable (probe).
+   - Confirm channels are reachable (probe).
+3) Write a report file to: reports/health/YYYY-MM-DD.md
+   The report must include:
+   - timestamp
+   - a short OK/FAIL summary for each probe
+   - any error snippets (redacted; do not include tokens)
+4) Append one line to TASKS.md under Run Log:
+   `YYYY-MM-DD HH:MM` | `T-HEALTH` | `OK|FAIL` | `cron:health` | `reports/health/YYYY-MM-DD.md` | `<short error summary or ->`
+5) If delivery is enabled for this cron, send a short message:
+   - “Health report OK/FAIL — see reports/health/YYYY-MM-DD.md”
+
+Constraints:
+- Do NOT paste secrets into the report or TASKS.md.
+- If any step fails, still write the report file with failure details and mark the Run Log line as FAIL.
+```
+
+### Prompt B: Daily browser automation “smoke test” (leaves evidence)
+
+Replace `T-BROWSER` and the URL.
+
+```text
+You are running as a scheduled cron job.
+
+Goal: run a tiny browser automation smoke test and leave evidence for debugging timeouts.
+
+Target:
+- URL: https://example.com
+
+Steps:
+1) Determine current timestamp in ISO format (YYYY-MM-DD and time).
+2) Use the browser tool to open the target URL and extract:
+   - page title
+   - first 200 characters of visible body text (no secrets)
+3) Write a report file to: reports/browser-smoke/YYYY-MM-DD.md
+   Include:
+   - timestamp
+   - URL
+   - result (OK/FAIL)
+   - extracted title/text (if OK)
+   - error summary (if FAIL)
+4) Append one line to TASKS.md under Run Log:
+   `YYYY-MM-DD HH:MM` | `T-BROWSER` | `OK|FAIL` | `cron:browser-smoke` | `reports/browser-smoke/YYYY-MM-DD.md` | `<short error summary or ->`
+5) If the run fails with a browser timeout, include the exact error string in the report.
+6) If delivery is enabled for this cron, send a short message:
+   - “Browser smoke OK/FAIL — see reports/browser-smoke/YYYY-MM-DD.md”
+
+Constraints:
+- Fail fast: do not loop endlessly. One attempt is enough for a smoke test.
+- Do NOT paste cookies, tokens, or any sensitive page data into the report.
+```
+
+Related:
+
+- Browser timeout troubleshooting: [/guides/openclaw-browser-automation-timeouts](/guides/openclaw-browser-automation-timeouts)
+- “browser control service timeout” fix: [/troubleshooting/solutions/browser-control-service-timeout](/troubleshooting/solutions/browser-control-service-timeout)
+
+## Safety notes
+
+- Don’t paste tokens/API keys into TASKS.md.
+- Don’t paste full sensitive emails; link to redacted artifacts instead.
+
+Security playbook:
+
+- [/guides/openclaw-skill-safety-and-prompt-injection](/guides/openclaw-skill-safety-and-prompt-injection)

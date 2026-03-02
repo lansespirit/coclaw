@@ -1,0 +1,144 @@
+---
+title: "OpenClaw Browser Automation Timeouts: Fix 'browser control service timeout'"
+description: "Stabilize OpenClaw browser runs (Playwright) when they time out: verify the browser service is alive, increase timeouts where appropriate, reduce page complexity, and fix common headless/container dependencies."
+category: "advanced"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+time: "20 min"
+publishDate: 2026-03-02
+lastUpdated: 2026-03-02
+steps:
+  - title: "Prove the browser service is reachable"
+    content: "Confirm the gateway is healthy, then isolate whether timeouts are caused by a dead browser service vs a slow page."
+  - title: "Use a tight repro (one URL, one action)"
+    content: "Reduce to the smallest page + action that times out so you can tell dependency failures from website complexity."
+  - title: "Fix the common environment causes"
+    content: "Headless dependencies, container sandboxing, missing fonts, and low memory are the main drivers of flakiness."
+  - title: "Tune timeouts and retry strategy responsibly"
+    content: "Increase timeouts only after you fix env causes; add retries with evidence rather than blind loops."
+  - title: "Harden for 24/7 automation"
+    content: "Cron + browser control need uptime, persistence, and a fail-closed design so a stuck page doesn’t stall everything."
+keywords:
+  - "browser control service timeout"
+  - "playwright"
+  - "timeout"
+  - "headless"
+  - "chromium"
+---
+
+When browser automation fails, it often looks like “OpenClaw is slow”, but there are actually **two different timeout classes**:
+
+1. The **browser control service** is not reachable / crashed / wedged.
+2. The browser is alive, but the **page/action** is slow (heavy site, bot protection, infinite loading, large JS bundle).
+
+This guide helps you separate those causes and apply fixes that improve reliability long-term.
+
+If you’re seeing a URL encoding bug (Chinese query params), use:
+
+- [/troubleshooting/solutions/browser-url-encoding-chinese-characters](/troubleshooting/solutions/browser-url-encoding-chinese-characters)
+
+---
+
+## 0) Start with the truth sources: status + logs
+
+On the gateway host:
+
+```bash
+openclaw status --deep
+openclaw logs --follow
+```
+
+If OpenClaw is generally unstable (restarting, low disk, config invalid), fix that first:
+
+- [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
+- [/troubleshooting/solutions/config-validation-failed](/troubleshooting/solutions/config-validation-failed)
+
+---
+
+## 1) Reproduce with the smallest possible run
+
+Before changing timeouts, shrink the repro:
+
+- One URL (prefer a lightweight, static page)
+- One action (load page, extract title)
+- One run
+
+Why: if even a simple page times out, you have an environment/service problem. If only complex sites time out, you have a
+site complexity / bot protection / performance issue.
+
+---
+
+## 2) Common environment causes (and symptoms)
+
+### 2.1 Docker/WSL2 headless dependencies and sandbox constraints
+
+Symptoms:
+
+- browser launches inconsistently
+- random timeouts across many sites
+
+Fixes:
+
+- Ensure the runtime image includes required Playwright/Chromium deps.
+- Avoid over-restrictive container sandboxes that prevent the browser from launching.
+- Increase shared memory (`/dev/shm`) for Chromium-heavy pages (common in containers).
+
+If you’re already on Docker, read:
+
+- [/guides/docker-deployment](/guides/docker-deployment)
+
+### 2.2 Low memory (OOM) looks like timeouts
+
+Heavy sites can OOM the browser process and present as “timeout”.
+
+Check your platform logs and consider:
+
+- higher memory limit
+- reducing concurrent browser runs
+
+### 2.3 DNS / egress instability
+
+If many outbound requests hang, “timeout” is sometimes just network egress failure.
+
+Use the same host to `curl` the target domain and verify DNS resolves consistently.
+
+---
+
+## 3) Timeouts: increase only after fixing the root cause
+
+If you increase timeouts too early, you convert crashes into “slow stuck jobs”.
+
+Recommended approach:
+
+1. Fix environment stability first (deps/memory/egress).
+2. Add a modest timeout increase for known heavy pages.
+3. Add bounded retries with evidence output (log the URL, attempt count, and result).
+
+---
+
+## 4) Make browser automation safe for cron
+
+Browser automation + cron becomes reliable when each run:
+
+- writes a timestamped artifact (HTML snapshot, extracted JSON, screenshot)
+- sends a short status message (success/failure + artifact path)
+- fails fast and leaves evidence
+
+Related:
+
+- Cron reliability patterns: [/guides/openclaw-cron-and-heartbeat-24x7](/guides/openclaw-cron-and-heartbeat-24x7)
+- Persistence/workspace correctness: [/guides/openclaw-state-workspace-and-memory](/guides/openclaw-state-workspace-and-memory)
+
+---
+
+## 5) Dedicated fix page
+
+If you see the specific error string, also check:
+
+- [/troubleshooting/solutions/browser-control-service-timeout](/troubleshooting/solutions/browser-control-service-timeout)
+

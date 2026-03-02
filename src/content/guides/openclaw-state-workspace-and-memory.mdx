@@ -1,0 +1,175 @@
+---
+title: "OpenClaw State, Workspace, and Memory: Persistence & Permissions Troubleshooting"
+description: "Fix 'memory not written', 'it said it saved files but nothing exists', and post-restart amnesia by understanding the state directory, workspace paths, container UID/GID, and how to make persistence reproducible across Docker/VPS/PaaS."
+category: "deployment"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+time: "25 min"
+publishDate: 2026-03-02
+lastUpdated: 2026-03-02
+steps:
+  - title: "Know what must persist (state vs workspace)"
+    content: "Most 'I lost memory/tokens' reports are the state directory being wiped or not mounted where you think."
+  - title: "Confirm the gateway is writing where you expect"
+    content: "Check config precedence and the effective workspace path; ensure directories exist and are writable by the running user/container."
+  - title: "Fix the top persistence killers"
+    content: "Docker bind-mount ownership mismatch, wrong `$OPENCLAW_STATE_DIR`, and state directories living on ephemeral disks."
+  - title: "Design workflows that prove persistence"
+    content: "Write timestamped artifacts and verify them on disk after restarts; treat 'verify' as a required step."
+  - title: "Make restores boring"
+    content: "Back up the full state dir, pin secrets via env vars, and practice restore + reconnect (Control UI, channels, cron)."
+keywords:
+  - "state directory"
+  - "workspace"
+  - "memory"
+  - "does not write"
+  - "permissions"
+  - "Docker"
+  - "EACCES"
+  - "OPENCLAW_STATE_DIR"
+  - "OPENCLAW_WORKSPACE_DIR"
+---
+
+If OpenClaw:
+
+- “forgets everything” after a restart/redeploy,
+- never writes memory files,
+- or claims it saved files but the directory is empty,
+
+you’re almost always dealing with **persistence** (wrong directory / wiped disk) or **permissions** (can’t write).
+
+This guide helps you validate the real on-disk paths and make them stable.
+
+Related (high value):
+
+- Deployment persistence + tokens: [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+- Config precedence: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+
+---
+
+## 0) The two directories that matter
+
+### A) State directory (must persist)
+
+Default: `~/.openclaw/` (unless overridden by `OPENCLAW_STATE_DIR`).
+
+It commonly contains:
+
+- `openclaw.json` (config)
+- credentials/tokens
+- device approvals (Control UI pairing)
+- cron job state
+- caches and internal DBs
+
+If this directory is wiped, you didn’t “lose a token” — you created a new machine.
+
+### B) Workspace directory (must exist + be writable)
+
+This is where tools and runs write artifacts (reports, downloads, generated files). If the workspace path points to a
+nonexistent or unwritable directory, you’ll see “it said it wrote a file” but nothing appears.
+
+Where it’s configured varies by version, but you can always confirm the effective value via CLI:
+
+```bash
+openclaw config get agents.defaults.workspace
+```
+
+If you’re on Docker, also check any workspace env var you set (for example `OPENCLAW_WORKSPACE_DIR`) and make sure it
+matches the container path.
+
+---
+
+## 1) Confirm what the running gateway is actually using
+
+The #1 footgun is editing the wrong config file or assuming your interactive shell env is what the service uses.
+
+Use:
+
+```bash
+openclaw status --deep
+openclaw doctor
+```
+
+Then re-check config precedence:
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+
+---
+
+## 2) Fix the most common “can’t write” failures
+
+### 2.1 Docker: bind-mounted `~/.openclaw` not writable (UID/GID mismatch)
+
+Symptoms:
+
+- errors like `EACCES: permission denied ... openclaw.json.*.tmp`
+- config changes don’t persist
+- workspace artifacts never appear
+
+Fix page:
+
+- [/troubleshooting/solutions/docker-eacces-openclaw-config-dir](/troubleshooting/solutions/docker-eacces-openclaw-config-dir)
+
+### 2.2 Unsafe temp dir /tmp permission issues
+
+If OpenClaw refuses to start with an “unsafe fallback temp dir” error, fix temp directory ownership/permissions:
+
+- [/troubleshooting/solutions/unsafe-fallback-openclaw-temp-dir](/troubleshooting/solutions/unsafe-fallback-openclaw-temp-dir)
+
+---
+
+## 3) Fix the most common “it forgets after restart” failures
+
+### 3.1 You did not persist the state directory
+
+If you are on:
+
+- Docker → you must mount a host volume for the state directory
+- VPS/PaaS → avoid ephemeral root disks / container layers
+
+Use the persistence playbook:
+
+- [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+
+### 3.2 You have multiple installs and the service uses a different runtime
+
+If updates/installs were done in one shell, but the daemon runs another Node/PATH, you can get inconsistent behavior and
+“ghost writes” (writes go to a different home/state than you think).
+
+Start here:
+
+- [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
+
+---
+
+## 4) A persistence verification drill (do once)
+
+1. Create a timestamped artifact in the workspace (via a tool/run or manually).
+2. Restart the gateway service.
+3. Verify the artifact still exists on disk.
+
+If you also rely on Control UI:
+
+- Confirm device approvals persist (no repeated pairing every reboot):
+  - [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+
+If you rely on cron:
+
+- Confirm cron runs persist and history is readable:
+  - [/guides/openclaw-cron-and-heartbeat-24x7](/guides/openclaw-cron-and-heartbeat-24x7)
+
+---
+
+## 5) Backup strategy (minimum viable)
+
+Back up the entire state directory as a unit, not “just openclaw.json”.
+
+CoClaw checklist:
+
+- [/guides/new-user-checklist](/guides/new-user-checklist)
+

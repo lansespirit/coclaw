@@ -1,0 +1,211 @@
+---
+title: "OpenClaw Installation Troubleshooting: Node/NPM, PATH, Windows (WSL2), and Docker"
+description: "A layered checklist for the most common 'can't install' / 'command not found' / 'service won't start' failures. Covers Node version, global install permissions, PATH issues, WSL2 systemd, and Docker setup gotchas."
+category: "deployment"
+difficulty: "Beginner"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+time: "25 min"
+publishDate: 2026-03-02
+lastUpdated: 2026-03-02
+featured: true
+steps:
+  - title: "Identify your install method and what's actually failing"
+    content: "Separate 'CLI not installed', 'gateway service not installed', and 'dashboard can't connect' before changing anything."
+  - title: "Confirm Node/npm are supported (and match the service runtime)"
+    content: "Most failures reduce to a Node version mismatch or the gateway service using a different Node/PATH than your shell."
+  - title: "Fix global install permissions and PATH (no sudo needed)"
+    content: "Resolve EACCES/permission errors and 'openclaw: command not found' by using a user-owned npm prefix and ensuring the global bin is on PATH."
+  - title: "Windows (WSL2): enable systemd before installing the daemon"
+    content: "If `openclaw onboard --install-daemon` fails inside WSL2, enable systemd in `/etc/wsl.conf`, shut down WSL, and retry."
+  - title: "Docker: treat the state directory as production data"
+    content: "Persist `~/.openclaw/`, ensure the container user can write to it, and verify gateway bind/auth so the Control UI can connect."
+keywords:
+  - "npm install -g"
+  - "command not found"
+  - "EACCES"
+  - "WSL2"
+  - "systemd"
+  - "Docker"
+  - "gateway install"
+  - "onboard"
+---
+
+Most “install” problems are not one problem — they are one of these:
+
+1. The **CLI** is not installed (or not on PATH).
+2. The CLI is installed, but the **gateway service** did not install / start.
+3. The gateway is running, but the **Control UI / dashboard** cannot connect (auth/bind/port/tunnel).
+
+This guide helps you classify the failure quickly, then links you to the precise fix pages.
+
+If you are brand new and want the happy path first, start with:
+
+- [/getting-started/quick-start](/getting-started/quick-start)
+- [/guides/new-user-checklist](/guides/new-user-checklist)
+
+---
+
+## 0) Quick triage (2 minutes)
+
+Run these commands in the same environment where you expect OpenClaw to work:
+
+```bash
+command -v openclaw || which openclaw || true
+openclaw --version
+node -v
+npm -v
+```
+
+Now classify what you see:
+
+- **No `openclaw` found** → go to [1) CLI not on PATH](#1-cli-not-on-path-or-installed-but-not-discoverable).
+- **`openclaw` runs, but `openclaw onboard --install-daemon` fails** → go to [2) Gateway service install fails](#2-gateway-service-install-fails).
+- **Gateway “seems running”, but UI says unauthorized / pairing required / connection refused** → go to [4) Control UI can’t connect](#4-control-ui-dashboard-cant-connect).
+
+---
+
+## 1) CLI not on PATH (or installed but not discoverable)
+
+### 1.1 Confirm you actually installed it globally
+
+Recommended global install:
+
+```bash
+npm install -g openclaw@latest
+```
+
+If npm says it installed but `openclaw` is still missing, the global bin directory is not on PATH.
+
+Useful diagnostics:
+
+```bash
+npm prefix -g
+npm bin -g
+echo "$PATH"
+```
+
+If `npm bin -g` is not present in `PATH`, add it (shell profile) and restart your terminal.
+
+Dedicated fix page:
+
+- [/troubleshooting/solutions/openclaw-command-not-found](/troubleshooting/solutions/openclaw-command-not-found)
+
+Windows native installs can also fail to refresh PATH reliably:
+
+- [/troubleshooting/solutions/windows-openclaw-not-recognized-after-install](/troubleshooting/solutions/windows-openclaw-not-recognized-after-install)
+
+### 1.2 Node version mismatch (classic)
+
+If `openclaw` starts but prints Node runtime errors, or installs a package but fails at runtime, confirm your Node is supported:
+
+- [/troubleshooting/solutions/node-version-mismatch](/troubleshooting/solutions/node-version-mismatch)
+
+---
+
+## 2) Gateway service install fails
+
+The onboarding flow typically installs a **per-user supervised gateway service**:
+
+```bash
+openclaw onboard --install-daemon
+```
+
+If the service install fails, do not delete your state directory first — fix the daemon install.
+
+### 2.1 Windows (WSL2): systemd is not enabled
+
+On WSL2, the daemon relies on systemd. If systemd is off, installs fail or the gateway never stays running.
+
+Fix page (step-by-step):
+
+- [/troubleshooting/solutions/windows-wsl2-systemd-not-enabled](/troubleshooting/solutions/windows-wsl2-systemd-not-enabled)
+
+### 2.2 Onboarding “skips model/auth setup” (installed but unresponsive)
+
+If onboarding completes but the agent is unresponsive (and it looks like you never got to the model/auth part), use:
+
+- [/troubleshooting/solutions/onboard-skips-model-auth-setup](/troubleshooting/solutions/onboard-skips-model-auth-setup)
+
+---
+
+## 3) npm install errors: permissions, git, and “ioctl”
+
+### 3.1 EACCES / permission denied on global installs
+
+If you see `EACCES` when running `npm install -g ...`, do not “just sudo it” as a first reflex.
+Fix your global npm prefix so installs are user-owned:
+
+- [/troubleshooting/solutions/npm-eacces-global-install](/troubleshooting/solutions/npm-eacces-global-install)
+
+### 3.2 `spawn git ENOENT` during install
+
+Some dependencies require `git`. If your environment lacks it:
+
+- [/troubleshooting/solutions/install-spawn-git-enoent](/troubleshooting/solutions/install-spawn-git-enoent)
+
+### 3.3 `inappropriate ioctl for device` running `install.sh`
+
+If you install via the one-liner (`curl ... | bash`) in a non-interactive environment, the installer can emit repeated ioctl warnings.
+Use a real TTY or disable the interactive UI:
+
+- [/troubleshooting/solutions/install-inappropriate-ioctl-for-device](/troubleshooting/solutions/install-inappropriate-ioctl-for-device)
+
+---
+
+## 4) Control UI / dashboard can’t connect
+
+If `openclaw` is installed and the gateway is running, but the UI can’t connect, this is usually *not* an install problem.
+
+### 4.1 “unauthorized” reconnect loop
+
+- [/troubleshooting/solutions/control-ui-unauthorized](/troubleshooting/solutions/control-ui-unauthorized)
+
+### 4.2 “disconnected (1008): pairing required”
+
+- [/troubleshooting/solutions/control-ui-pairing-required](/troubleshooting/solutions/control-ui-pairing-required)
+
+### 4.3 Docker: build/setup fails, or state dir is not writable
+
+If your Docker build fails:
+
+- [/troubleshooting/solutions/docker-setup-build-fails](/troubleshooting/solutions/docker-setup-build-fails)
+
+If the container cannot write to `~/.openclaw/` (or the mounted state directory):
+
+- [/troubleshooting/solutions/docker-eacces-openclaw-config-dir](/troubleshooting/solutions/docker-eacces-openclaw-config-dir)
+
+For the full Docker walk-through:
+
+- [/guides/docker-deployment](/guides/docker-deployment)
+
+---
+
+## 5) If you’re “installed” but nothing works: reset the runtime, not the state
+
+Most “nuke and reinstall” attempts fail because they delete the state directory (tokens, device approvals, channel creds),
+but keep the broken runtime/service.
+
+A better recovery pattern:
+
+1. Leave `~/.openclaw/` intact (or back it up).
+2. Force reinstall the gateway service:
+
+```bash
+openclaw gateway install --force
+openclaw gateway restart
+```
+
+3. Re-open the dashboard from a fresh tokenized link:
+
+```bash
+openclaw dashboard
+```
+
+If you’re deploying on a platform that resets containers/VM images, also read:
+
+- [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+

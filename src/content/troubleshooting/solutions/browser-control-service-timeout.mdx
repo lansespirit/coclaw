@@ -1,0 +1,82 @@
+---
+title: "Browser tool: 'browser control service timeout'"
+description: "Fix browser automation timeouts by confirming the gateway/browser service is alive, reducing the repro, and addressing container/headless dependency and memory issues."
+kind: "solution"
+component: "browser"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "browser control service timeout"
+  - "Browser control service timeout"
+keywords:
+  - "browser"
+  - "playwright"
+  - "timeout"
+publishDate: 2026-03-02
+lastUpdated: 2026-03-02
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/tools/browser"
+  guides:
+    - "/guides/openclaw-browser-automation-timeouts"
+    - "/guides/openclaw-cron-and-heartbeat-24x7"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Browser runs fail with: **`browser control service timeout`**.
+- This can happen even on simple pages, or only on heavy websites.
+
+## Cause
+
+Two common categories:
+
+1. The browser control service is **down / wedged** (gateway instability, crashed browser process).
+2. The browser is alive, but the **page/action is too slow** (heavy JS sites, bot protection, unstable egress, low memory).
+
+## Fix
+
+### 1) Confirm the gateway is stable
+
+```bash
+openclaw status --deep
+openclaw logs --follow
+```
+
+If the gateway is restarting or config is invalid, fix that first.
+
+### 2) Reduce to the smallest repro
+
+Try a lightweight URL + one simple action. If that times out too, focus on environment/deps/memory.
+
+### 3) Docker/WSL2: check headless deps + memory
+
+Common causes in containers:
+
+- missing Chromium/Playwright dependencies
+- low memory or small `/dev/shm`
+- restrictive sandbox preventing browser launch
+
+Related:
+
+- [/guides/openclaw-browser-automation-timeouts](/guides/openclaw-browser-automation-timeouts)
+
+### 4) If only one site times out
+
+Treat it as a site complexity issue:
+
+- try a simpler navigation path
+- reduce JS-heavy steps
+- add bounded retries + evidence output
+
+## Verify
+
+- A minimal browser run succeeds on a lightweight page.
+- The failing site succeeds or fails with a more specific error than “timeout”.
+

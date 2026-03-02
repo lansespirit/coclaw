@@ -1,0 +1,149 @@
+---
+title: "OpenClaw Operability: Logs, Evidence, and a Simple Task Board (So You Know What Happened)"
+description: "A practical operability guide: how to capture high-signal logs, design runs that always leave evidence, and add a lightweight Kanban-style task board in your workspace so multi-step automations don’t feel invisible."
+category: "advanced"
+difficulty: "Intermediate"
+platforms:
+  - "Self-hosted"
+  - "Docker"
+  - "VPS"
+time: "20 min"
+publishDate: 2026-03-02
+lastUpdated: 2026-03-02
+steps:
+  - title: "Adopt the evidence mindset"
+    content: "If a run doesn’t leave artifacts + logs, you can’t debug it and you can’t trust it."
+  - title: "Standardize the 3 core probes"
+    content: "Status, model probe, channel probe: these answer 80% of 'is it alive / is it authorized / is it connected'."
+  - title: "Make cron runs observable by design"
+    content: "Store run outputs, send explicit summaries, and avoid relying on fragile announce delivery as your only signal."
+  - title: "Use a simple task board to track multi-step work"
+    content: "Represent tasks as files (or a single markdown board) so you can see queued/running/done without a UI dependency."
+  - title: "Keep it safe"
+    content: "Logs and boards can leak secrets; enforce redaction and least privilege."
+keywords:
+  - "operability"
+  - "observability"
+  - "logs"
+  - "kanban"
+  - "task board"
+  - "status --deep"
+  - "models status --probe"
+---
+
+OpenClaw can feel “invisible” when:
+
+- it’s working on something long-running,
+- it fails silently (rate limit / auth / relay mismatch),
+- or you don’t know whether cron actually executed.
+
+This guide gives you a low-tech, high-signal operability layer that works on any host.
+
+---
+
+## 0) The evidence mindset (the one rule)
+
+If a run doesn’t leave:
+
+- a log trail, and
+- a timestamped artifact (file),
+
+then you can’t prove it ran, and you can’t debug it when it doesn’t.
+
+This single mindset fixes most “it promised and never delivered” frustrations.
+
+Persistence basics:
+
+- [/guides/openclaw-state-workspace-and-memory](/guides/openclaw-state-workspace-and-memory)
+
+---
+
+## 1) The 3 probes to standardize
+
+Run on the gateway host:
+
+```bash
+openclaw status --deep
+openclaw models status --probe
+openclaw channels status --probe
+```
+
+Interpretation:
+
+- `status --deep` → is the gateway alive and reachable?
+- `models ... --probe` → can it actually call the model (auth/quota/routing)?
+- `channels ... --probe` → can it deliver/receive on the channel?
+
+If “not responding” is your symptom:
+
+- [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
+
+---
+
+## 2) Make cron observable (stop relying on announce as the only signal)
+
+Cron reliability and the three common failure modes:
+
+- [/guides/openclaw-cron-and-heartbeat-24x7](/guides/openclaw-cron-and-heartbeat-24x7)
+
+The high-value pattern:
+
+1. Every cron run writes a timestamped artifact (report JSON/MD).
+2. Every cron run sends an explicit summary with the artifact path.
+3. If delivery is flaky, use webhook delivery or store artifacts and pull them.
+
+---
+
+## 3) A lightweight task board that works everywhere
+
+If you need Trello-style visibility but don’t want another SaaS dependency, use your workspace as the source of truth.
+
+Download the ready-made template:
+
+- [/guides/openclaw-task-board-template](/guides/openclaw-task-board-template)
+
+### Option A (simplest): a single `TASKS.md`
+
+Create `TASKS.md` in your OpenClaw workspace:
+
+- Columns: Backlog / Doing / Blocked / Done
+- Each task is a checkbox with an owner, timestamp, and links to artifacts
+
+Because it’s just a file:
+
+- it survives reboots
+- it can be reviewed in git (if you version it)
+- it can be updated by cron runs (append a line each run)
+
+### Option B: file-per-task (more automation-friendly)
+
+Create directories:
+
+- `tasks/backlog/`
+- `tasks/doing/`
+- `tasks/done/`
+
+Each task is a small markdown file with:
+
+- goal
+- inputs/links
+- “definition of done”
+- last run timestamp
+- artifact paths
+
+Automations can “move” a task by renaming the file between folders.
+
+---
+
+## 4) Safety: logs and boards are secrets magnets
+
+Do not paste:
+
+- API keys
+- OAuth tokens
+- full email bodies from sensitive inboxes
+
+Use redaction and separate accounts:
+
+- [/guides/openclaw-skill-safety-and-prompt-injection](/guides/openclaw-skill-safety-and-prompt-injection)
+- [/guides/openclaw-account-ban-and-tos-risk](/guides/openclaw-account-ban-and-tos-risk)

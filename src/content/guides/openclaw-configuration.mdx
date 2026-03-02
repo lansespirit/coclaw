@@ -39,6 +39,7 @@ This guide is a "map" of OpenClaw configuration. It is not a full schema referen
 If you are brand new, start here first:
 
 - [/guides/new-user-checklist](/guides/new-user-checklist)
+- If you're currently stuck installing OpenClaw, use: [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
 
 If you want a safe starting point without hand-editing JSON, use:
 
@@ -101,6 +102,77 @@ This is the best option if you want to store config in git, review diffs, and ma
 
 Important: OpenClaw allows JSON5-style syntax in many places (comments, trailing commas). If you use strict JSON tools,
 you may accidentally break formatting or remove comments.
+
+---
+
+## 1.5) Safe editing and recovery (avoid “self-bricking”)
+
+Community reports show the same pattern repeatedly: a small “just switch model / enable plugin” change turns into a gateway
+that won’t start because `openclaw.json` is now invalid (syntax), schema-invalid (wrong keys/types), or references a model
+id your provider doesn’t support.
+
+Use this workflow to make config changes recoverable.
+
+### A) Always keep a rollback copy
+
+Before any manual edits:
+
+```bash
+cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak.$(date +%Y%m%d-%H%M%S)
+```
+
+If you’re iterating fast, also keep a “known-good minimal” file you can swap in.
+
+### B) Prefer CLI edits for small changes
+
+If you are only changing one field, prefer `openclaw config set` over hand-editing:
+
+```bash
+openclaw config get agents.defaults.model.primary
+openclaw config set agents.defaults.model.primary openrouter/auto
+```
+
+This reduces the chance of JSON5 syntax errors and tends to preserve structure.
+
+### C) Validate after every meaningful change
+
+If the gateway won’t start (or you suspect config drift), run:
+
+```bash
+openclaw doctor
+```
+
+If it offers a safe migration/fix:
+
+```bash
+openclaw doctor --fix
+```
+
+If you see `Failed to parse` / `validation` / `Unknown key` / `expected number, received string`, use the dedicated fix page:
+
+- [/troubleshooting/solutions/config-validation-failed](/troubleshooting/solutions/config-validation-failed)
+
+### D) If you changed models and now OpenClaw is “broken”
+
+Two quick checks that usually isolate the issue:
+
+1. Probe model resolution:
+
+```bash
+openclaw models status --probe
+```
+
+2. Revert the last known-good config:
+
+```bash
+ls -1 ~/.openclaw/openclaw.json.bak.* 2>/dev/null | tail -n 5
+```
+
+Then copy one back into place and restart the gateway.
+
+If you are unsure which config file the gateway is reading (service vs shell), re-check:
+
+- [Config file path overrides](#config-file-path-overrides-the-60-second-mental-model)
 
 ## 2) Secrets and modular config (recommended once your config grows)
 

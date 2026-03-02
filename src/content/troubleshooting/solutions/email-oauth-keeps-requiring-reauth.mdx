@@ -1,0 +1,73 @@
+---
+title: "Email OAuth keeps requiring re-auth (tokens disappear or refresh fails)"
+description: "Fix repeated email OAuth logins by persisting the OpenClaw state directory, eliminating config/runtime drift, and diagnosing refresh failures from logs."
+kind: "solution"
+component: "integration"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "reauth"
+  - "login required"
+  - "needs authentication"
+keywords:
+  - "email"
+  - "gmail"
+  - "oauth"
+  - "refresh"
+publishDate: 2026-03-02
+lastUpdated: 2026-03-02
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/concepts/oauth"
+  guides:
+    - "/guides/openclaw-email-gmail-setup-and-reliability"
+    - "/guides/openclaw-deployment-troubleshooting"
+    - "/guides/openclaw-state-workspace-and-memory"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Email integration works once, then repeatedly asks you to authenticate again.
+- After redeploy/reboot, OpenClaw behaves like it never had email credentials.
+
+## Cause
+
+Most cases reduce to one of:
+
+1. The OpenClaw **state directory is not persisted** (Docker layer reset, ephemeral disk, image resets).
+2. The gateway service is running with a **different home/state** than your shell (multiple installs, different user, different env vars).
+3. OAuth **refresh fails** (provider invalidated the refresh token or account policy blocks it).
+
+## Fix
+
+### 1) Confirm state persistence first (do not skip)
+
+Follow:
+
+- [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+- [/guides/openclaw-state-workspace-and-memory](/guides/openclaw-state-workspace-and-memory)
+
+### 2) Capture logs around refresh/auth
+
+```bash
+openclaw status --deep
+openclaw logs --follow
+```
+
+### 3) Eliminate runtime drift
+
+If updates were installed in one environment but the service uses another:
+
+- [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
+
+## Verify
+
+- Reboot/restart the gateway and confirm email auth persists.
+- Cron/email runs keep working for multiple cycles without manual login.
+

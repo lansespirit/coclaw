@@ -8,7 +8,7 @@ platforms:
   - "Messaging"
 time: "20 min"
 publishDate: 2026-02-01
-lastUpdated: 2026-02-13
+lastUpdated: 2026-03-02
 featured: true
 steps:
   - title: "Create a Telegram bot (BotFather) and save the token"
@@ -238,6 +238,41 @@ Quick test:
 
 - In the group, try mention the bot: `@your_bot ...`
 
+### Pitfall: "Telegram configured but (plugin disabled)" / "plugin not available"
+
+If you configured the token but the gateway reports something like:
+
+- `configured (plugin disabled)`
+- `plugin not available`
+
+It usually means OpenClaw **saw your Telegram config**, but the channel is not actually enabled/loaded in the running
+gateway process.
+
+Start with these checks (on the gateway host):
+
+```bash
+openclaw config get channels.telegram.enabled
+openclaw config get channels.telegram.botToken
+openclaw doctor
+```
+
+Then:
+
+1. Ensure `channels.telegram.enabled: true` is set in the config file the gateway is actually reading.
+2. Restart the gateway to force the channel to reinitialize:
+
+```bash
+openclaw gateway restart
+```
+
+If this started after an update, see the updating guide (and consider temporarily pinning a known-good version):
+
+- [/guides/updating-and-migration](/guides/updating-and-migration)
+
+Dedicated fix page:
+
+- [/troubleshooting/solutions/telegram-plugin-configured-but-disabled](/troubleshooting/solutions/telegram-plugin-configured-but-disabled)
+
 ### Pitfall: "`setMyCommands failed` / `sendMessage` failures"
 
 This usually means the gateway host cannot reliably reach `api.telegram.org`:
@@ -281,6 +316,7 @@ If you go down the webhook route, plan for:
 
 ## Suggested next guides
 
-- WhatsApp setup: `/guides/whatsapp-setup`
-- Docker gateway setup: `/guides/docker-deployment`
-- Tool allowlists and sandbox policy: `/guides/custom-tools`
+- WhatsApp setup: [/guides/whatsapp-setup](/guides/whatsapp-setup)
+- Docker gateway setup: [/guides/docker-deployment](/guides/docker-deployment)
+- Control UI auth/pairing: [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+- Tool allowlists and sandbox policy: [/guides/custom-tools](/guides/custom-tools)

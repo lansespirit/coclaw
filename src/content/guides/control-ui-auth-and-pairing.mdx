@@ -1,0 +1,198 @@
+---
+title: "OpenClaw Control UI Auth & Pairing: Fix 'unauthorized', 1008, and Remote Dashboard Access"
+description: "A practical guide to Control UI failures: why 'unauthorized' happens, how tokenized dashboard links work, what 'disconnected (1008): pairing required' really means, and how to connect safely to a remote gateway."
+category: "deployment"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+time: "20 min"
+publishDate: 2026-03-02
+lastUpdated: 2026-03-02
+steps:
+  - title: "Start with the mental model: token auth vs device pairing"
+    content: "Most dashboard problems are not 'the UI is broken' — they are either auth token mismatch or an unapproved device identity."
+  - title: "Fix 'unauthorized' by regenerating a tokenized link and aligning token sources"
+    content: "Use `openclaw dashboard`, verify env overrides like `OPENCLAW_GATEWAY_TOKEN`, and ensure you’re reaching the gateway you think you are."
+  - title: "Fix 1008 pairing by approving the device request once"
+    content: "List pending devices on the gateway host and approve them; then use a secure access path (SSH tunnel / HTTPS) for remote access."
+  - title: "Make remote access predictable (tunnel/TLS, bind, persistence)"
+    content: "Remote UI failures usually come from bind mode, reverse proxy/TLS edge cases, or ephemeral state wiping tokens/devices."
+  - title: "Lock in a recoverable setup"
+    content: "Persist state, pin gateway auth via env vars, and practice a restore drill so reconnecting isn’t a surprise."
+keywords:
+  - "unauthorized"
+  - "pairing required"
+  - "1008"
+  - "device_token_mismatch"
+  - "dashboard"
+  - "control ui"
+  - "OPENCLAW_GATEWAY_TOKEN"
+  - "ssh tunnel"
+---
+
+Control UI problems cluster into **two buckets**:
+
+1. **Auth token mismatch** → UI shows *unauthorized* or reconnect loops.
+2. **Device identity not approved** → UI disconnects with *1008: pairing required*.
+
+This guide gives you a single flow that’s easier than searching for error strings one-by-one, and links to dedicated fix
+pages when you need more detail.
+
+Prereqs (recommended):
+
+- You can run commands on the gateway host (local machine, container shell, or SSH).
+- You understand where OpenClaw state lives: `~/.openclaw/` (or `$OPENCLAW_STATE_DIR`).
+
+If you’re still stuck on install/service setup first, start here:
+
+- [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
+
+---
+
+## 0) The 60-second mental model
+
+### A) “Unauthorized” is about the **gateway token**
+
+The gateway typically has auth enabled (recommended). The UI must send the same token/password that the gateway expects.
+
+Token sources, in practice:
+
+- `gateway.auth.token` in `openclaw.json`, or
+- an environment override like `OPENCLAW_GATEWAY_TOKEN`
+
+The fastest way to open the UI correctly is:
+
+```bash
+openclaw dashboard
+```
+
+It prints a **tokenized URL** (often `...?token=...`) that bootstraps browser auth.
+
+### B) “Pairing required (1008)” is about the **device list**
+
+OpenClaw uses a device identity model: the first time a new browser/device connects, you must approve it once.
+
+On the gateway host:
+
+```bash
+openclaw devices list
+openclaw devices approve <requestId>
+```
+
+Dedicated fix pages:
+
+- Unauthorized: [/troubleshooting/solutions/control-ui-unauthorized](/troubleshooting/solutions/control-ui-unauthorized)
+- Pairing: [/troubleshooting/solutions/control-ui-pairing-required](/troubleshooting/solutions/control-ui-pairing-required)
+
+---
+
+## 1) Fix “unauthorized” (and stop the reconnect loop)
+
+### 1.1 Always start from a fresh tokenized link
+
+Run:
+
+```bash
+openclaw dashboard
+```
+
+Open the URL it prints. If you bookmarked an old URL (or opened `http://127.0.0.1:18789/` directly), you may simply be
+missing the one-time token bootstrap.
+
+### 1.2 Confirm you are reaching the right gateway
+
+This is the most common remote-host trap: you think you’re hitting the remote gateway, but you’re actually hitting a local
+port, a stale reverse proxy, or a different container.
+
+Run:
+
+```bash
+openclaw status --deep
+```
+
+If the gateway host is remote, prefer an SSH tunnel for first-time debugging:
+
+```bash
+ssh -N -L 18789:127.0.0.1:18789 user@host
+```
+
+Then open the tokenized URL on your local machine.
+
+### 1.3 Check for env var overrides (token drift)
+
+If `OPENCLAW_GATEWAY_TOKEN` is set in systemd/launchd/Docker, it can override what you see in the file.
+
+If you keep “fixing” `openclaw.json` but nothing changes, you are likely debugging config precedence:
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+
+---
+
+## 2) Fix “disconnected (1008): pairing required”
+
+### 2.1 Approve the pending device request (on the gateway host)
+
+```bash
+openclaw devices list
+openclaw devices approve <requestId>
+```
+
+Reload the page and reconnect.
+
+### 2.2 Use a secure access path for remote dashboards
+
+The most robust “first setup” options:
+
+- SSH tunnel (fast, no extra infra)
+- Tailscale / tailnet access + HTTPS serving
+- Reverse proxy with real TLS (avoid mixed-content / WebCrypto issues)
+
+If you are using a reverse proxy and things “worked then broke”, also check:
+
+- [/troubleshooting/solutions/gateway-reverse-proxy-breaks-after-tls-auto-generate](/troubleshooting/solutions/gateway-reverse-proxy-breaks-after-tls-auto-generate)
+
+### 2.3 If you see “device identity required” or token mismatch loops
+
+Some setups fail to persist browser identity (or you are switching browsers/profiles constantly). Use the targeted fix:
+
+- [/troubleshooting/solutions/control-ui-device-identity-required](/troubleshooting/solutions/control-ui-device-identity-required)
+
+---
+
+## 3) Make remote dashboard access predictable (bind + persistence)
+
+Remote connectivity failures often look like auth/pairing issues but actually come from:
+
+- binding only to loopback when you need LAN/tailnet access
+- not persisting state (fresh deployments wipe tokens + approved devices)
+
+If you deploy on Docker/VPS/PaaS, treat state persistence as a first-class requirement:
+
+- [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+
+If your gateway won’t bind without auth (or keeps restarting), see:
+
+- [/troubleshooting/solutions/gateway-refusing-to-bind-without-auth](/troubleshooting/solutions/gateway-refusing-to-bind-without-auth)
+
+---
+
+## 4) A “golden” recovery drill (do this once)
+
+If you only do one operational exercise, do this:
+
+1. Export/persist the state directory (`~/.openclaw/` or `$OPENCLAW_STATE_DIR`).
+2. Pin the gateway token via env var substitution in config.
+3. Reinstall/force-install the gateway service without deleting state:
+
+```bash
+openclaw gateway install --force
+openclaw gateway restart
+openclaw dashboard
+```
+
+If you can restore state + reconnect in under 15 minutes, “unauthorized/pairing day” stops being a crisis.
+

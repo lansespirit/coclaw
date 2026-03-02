@@ -1,0 +1,180 @@
+---
+title: "OpenClaw Cron & Heartbeat: Make Your Agent Actually Run 24/7"
+description: "A pragmatic guide to OpenClaw automation reliability: how cron runs are scheduled and delivered, why jobs can 'advance nextRunAtMs' without executing, and how to design runs that always leave evidence and alert correctly."
+category: "advanced"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+time: "25 min"
+publishDate: 2026-03-02
+lastUpdated: 2026-03-02
+steps:
+  - title: "Verify the gateway is truly always-on"
+    content: "Cron/heartbeat are gateway features. If your gateway isn’t running continuously, automation cannot be reliable."
+  - title: "Prove cron execution with runs + logs (not assumptions)"
+    content: "Use `openclaw cron runs` and gateway logs to confirm jobs actually executed, not just scheduled."
+  - title: "Fix the three common cron failure modes"
+    content: "Jobs never fire (scheduler regression/timezone), announce delivery fails, or announce delivers only a summary."
+  - title: "Design cron prompts that always leave evidence"
+    content: "Write outputs to files, send explicit messages, and use webhooks when announce is flaky."
+  - title: "Harden for upgrades and resets"
+    content: "Pin versions when needed, persist state, and practice a restore drill so automation survives redeploys."
+keywords:
+  - "cron"
+  - "heartbeat"
+  - "24/7"
+  - "nextRunAtMs"
+  - "announce"
+  - "cron announce delivery failed"
+  - "scheduler regression"
+---
+
+People expect “24/7” to mean: *I schedule a cron job and my agent reliably does it forever.*
+
+In practice, cron reliability depends on three things:
+
+1. The **gateway is always running** (daemon/service, not a one-off terminal session).
+2. The cron scheduler is healthy (no regressions, correct timezone, persistent storage).
+3. Your delivery strategy is robust (announce vs explicit sends vs webhooks).
+
+This guide focuses on repeatable diagnostics and designs that leave evidence.
+
+If your OpenClaw install is not yet stable, do that first:
+
+- [/guides/new-user-checklist](/guides/new-user-checklist)
+- [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
+
+---
+
+## 0) First principles: cron runs inside the gateway
+
+Cron is executed by the gateway process. If the gateway is down, sleeping, or constantly restarting, cron can’t be reliable.
+
+Baseline checks (gateway host):
+
+```bash
+openclaw status --deep
+openclaw logs --follow
+```
+
+If you are on WSL2, ensure systemd is enabled so the gateway stays alive:
+
+- [/troubleshooting/solutions/windows-wsl2-systemd-not-enabled](/troubleshooting/solutions/windows-wsl2-systemd-not-enabled)
+
+If you are on Docker, ensure the state directory is persisted and writable:
+
+- [/guides/docker-deployment](/guides/docker-deployment)
+- [/troubleshooting/solutions/docker-eacces-openclaw-config-dir](/troubleshooting/solutions/docker-eacces-openclaw-config-dir)
+
+---
+
+## 1) Prove cron is running (and see its history)
+
+List jobs:
+
+```bash
+openclaw cron list
+```
+
+Inspect runs for a job:
+
+```bash
+openclaw cron runs --id <job-id>
+```
+
+If `nextRunAtMs` advances but `runs` stays empty, that’s not “your prompt is bad” — it’s usually scheduler/timezone/storage.
+
+Dedicated fix page:
+
+- [/troubleshooting/solutions/cron-jobs-not-firing-next-run-advances](/troubleshooting/solutions/cron-jobs-not-firing-next-run-advances)
+
+---
+
+## 2) The 3 most common cron failure modes (and what to do)
+
+### 2.1 Cron never executes (runs stay empty)
+
+Symptoms:
+
+- Job looks enabled, `nextRunAtMs` keeps moving, but no runs are recorded.
+
+Fix:
+
+- Upgrade past known scheduler regressions, restart gateway, verify timezone and cron storage.
+- Follow: [/troubleshooting/solutions/cron-jobs-not-firing-next-run-advances](/troubleshooting/solutions/cron-jobs-not-firing-next-run-advances)
+
+### 2.2 Cron executes, but announce delivery fails
+
+Symptoms:
+
+- Runs exist, but you see `cron announce delivery failed` (often on Telegram delivery).
+
+High-value workaround:
+
+- Disable announce delivery and send explicitly inside the run (or switch to webhook delivery).
+
+Fix page:
+
+- [/troubleshooting/solutions/cron-announce-delivery-fails-telegram](/troubleshooting/solutions/cron-announce-delivery-fails-telegram)
+
+### 2.3 Cron delivers only a summary (not full output)
+
+Symptoms:
+
+- A multi-line report used to arrive; now you only get a short summary.
+
+Fix page:
+
+- [/troubleshooting/solutions/cron-announce-sends-summary-instead-of-full-output](/troubleshooting/solutions/cron-announce-sends-summary-instead-of-full-output)
+
+---
+
+## 3) Design cron prompts that always leave evidence
+
+The biggest quality-of-life upgrade is: stop treating delivery as the only “proof” that the job ran.
+
+Recommended patterns:
+
+1. **Write a timestamped artifact** (file) into the workspace each run.
+2. **Send an explicit message** with the artifact path + a short summary.
+3. Use a **webhook** for durable delivery when channels are flaky.
+
+If you ever see “it said it saved a file but nothing exists”, fix workspace/persistence first:
+
+- [/guides/openclaw-state-workspace-and-memory](/guides/openclaw-state-workspace-and-memory)
+
+---
+
+## 4) Heartbeat expectations (why “it’s lazy” happens)
+
+Heartbeat is not magic free will — it is a scheduling mechanism and still depends on:
+
+- gateway uptime
+- provider availability (rate limits)
+- stable state directory
+
+If your cron/heartbeat runs but the model silently fails, use:
+
+- [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
+
+---
+
+## 5) Upgrade-safe automation
+
+Upgrades and redeploys often “break cron” indirectly by wiping state or changing the runtime binary.
+
+Do these once:
+
+- Persist state (`~/.openclaw/` or `$OPENCLAW_STATE_DIR`)
+- Pin gateway auth via env vars (so restores are reproducible)
+- Practice a restore drill
+
+Useful references:
+
+- [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+- [/guides/updating-and-migration](/guides/updating-and-migration)
+
