@@ -53,6 +53,7 @@ const blogPosts = blogEntries
 const guideEntries = await getCollection('guides', ({ data }) => !data.draft);
 const guides = guideEntries
   .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+  .slice(0, 9)
   .map((entry) => ({
     title: entry.data.title,
     description: entry.data.description,
