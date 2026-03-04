@@ -4,12 +4,19 @@ interface Props {
   as?: string;
   /** Additional classes appended to the base container. */
   class?: string;
+  /** Controls the max-width of the container. */
+  size?: 'wide' | 'reading' | 'full';
+  /** Controls horizontal padding (gutters). */
+  gutter?: 'base' | 'docs' | 'none';
 }
 
-const { as = 'div', class: className = '' } = Astro.props;
+const { as = 'div', class: className = '', size = 'wide', gutter = 'base' } = Astro.props;
 const Tag = as as keyof HTMLElementTagNameMap;
+
+const sizeClass = size === 'wide' ? 'max-w-7xl' : size === 'reading' ? 'max-w-4xl' : 'max-w-none';
+const gutterClass = gutter === 'base' ? 'px-6' : gutter === 'docs' ? 'px-4' : 'px-0';
 ---
 
-<Tag class={`mx-auto w-full max-w-7xl px-6 ${className}`.trim()}>
+<Tag class={`mx-auto w-full ${sizeClass} ${gutterClass} ${className}`.trim()}>
   <slot />
 </Tag>

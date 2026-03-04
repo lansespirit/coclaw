@@ -116,7 +116,7 @@ const structuredData = {
 <BaseLayout title={`${title} | CoClaw Guides`} description={description} type="article">
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
   <div class="bg-background min-h-screen pt-32 pb-24">
-    <Section containerClass="max-w-4xl mx-auto px-6">
+    <Section containerSize="reading" containerGutter="docs">
       <div class="mb-12">
         <div class="flex flex-wrap items-center gap-4 mb-6">
           <Chip color="success" variant="flat" size="sm" className="font-bold">{difficulty}</Chip>
