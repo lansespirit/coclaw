@@ -1,0 +1,166 @@
+---
+title: "OpenClaw only chats and won't use tools after update"
+description: "Fix OpenClaw when it suddenly stops reading files, patching code, or running commands after a recent update. The most common cause is `tools.profile: messaging` or a narrower tool policy."
+kind: "solution"
+component: "config"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "I don't have the read tool available"
+  - "agent has no exec/read/write tools, only message and sessions"
+  - "can't access the local files"
+  - "Create this file manually"
+keywords:
+  - "OpenClaw only chats"
+  - "OpenClaw not using tools"
+  - "tools.profile messaging"
+  - "OpenClaw exec read write missing"
+  - "OpenClaw update regression"
+publishDate: 2026-03-06
+lastUpdated: 2026-03-06
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/gateway/configuration-reference"
+    - "https://docs.openclaw.ai/start/onboarding"
+  guides:
+    - "openclaw-not-using-tools-after-update"
+    - "openclaw-configuration"
+    - "updating-and-migration"
+  githubIssues:
+    - 34810
+    - 36968
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- OpenClaw still responds in chat, but it will not:
+  - read local files
+  - write or patch files
+  - run shell commands
+- You may see replies like:
+  - `I don't have the read tool available`
+  - `agent has no exec/read/write tools, only message and sessions`
+  - `Create this file manually`
+- This often appears right after updating or reinstalling OpenClaw in early March 2026.
+
+## Cause
+
+The most common root cause is a **tool policy change**, not a model failure.
+
+Recent OpenClaw onboarding/default flows moved some installs to:
+
+```json5
+{
+  tools: {
+    profile: "messaging"
+  }
+}
+```
+
+The `messaging` profile is safer, but it does **not** include the classic filesystem/runtime tools people expect for coding workflows.
+
+That means the agent can still chat and manage sessions, but it may lose `read`, `write`, `apply_patch`, and `exec` by default.
+
+This exact symptom cluster appears in recent GitHub reports such as:
+
+- `#34810` — agent reduced to “message and sessions” and no longer able to use `exec/read/write`
+- `#36968` — user cannot read a file in the workspace because the `read` tool is unavailable
+
+## Fix
+
+### 1) Check your current tools profile
+
+Run:
+
+```bash
+openclaw config get tools
+```
+
+If you see something like:
+
+```json
+{
+  "profile": "messaging"
+}
+```
+
+that is very likely the reason.
+
+### 2) Restore coding tools for local development
+
+If this is your own machine and you want the classic coding-agent behavior, set:
+
+```json5
+{
+  tools: {
+    profile: "coding"
+  }
+}
+```
+
+Edit `~/.openclaw/openclaw.json`, save, then restart OpenClaw.
+
+### 3) Or keep `messaging` and add only what you need
+
+If you want a narrower policy, use:
+
+```json5
+{
+  tools: {
+    profile: "messaging",
+    allow: ["group:fs", "group:runtime"]
+  }
+}
+```
+
+This restores most file and command workflows without fully broadening tool access.
+
+### 4) Restart and test
+
+```bash
+openclaw doctor
+openclaw gateway restart
+openclaw health
+```
+
+Then test a simple task:
+
+- read a known file in your workspace
+- run `pwd`
+- apply a small patch to a harmless file
+
+## Verify
+
+The fix is working if OpenClaw can once again:
+
+- read a file without asking you to paste it manually
+- run a simple command instead of describing it
+- patch a file directly instead of printing code for you to copy
+
+## If changing the profile did not fix it
+
+Check these next:
+
+- `tools.deny` may still block `exec` or `read`
+- an individual agent may override the global profile with `agents.list[].tools.profile`
+- your gateway may be running from a different state dir or config path than the one you edited
+
+Use:
+
+```bash
+openclaw config get tools.deny
+openclaw gateway status
+openclaw status --deep
+```
+
+## Recommended next steps
+
+- Full guide: [/guides/openclaw-not-using-tools-after-update](/guides/openclaw-not-using-tools-after-update)
+- Config basics: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- Update safety: [/guides/updating-and-migration](/guides/updating-and-migration)

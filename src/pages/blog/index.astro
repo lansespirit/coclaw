@@ -69,7 +69,6 @@ const regularPosts = blogPosts.filter((post) => !post.featured);
                 : 'm-card-surface border-divider/60 px-8 py-10 md:px-16 md:py-16'
             }`}
           >
-            <a href={featuredPost.href} class="absolute inset-0 z-20" />
             {featuredPost.image ? (
               <>
                 <img
@@ -88,45 +87,63 @@ const regularPosts = blogPosts.filter((post) => !post.featured);
             )}
 
             <div
-              class={`w-full z-30 ${featuredPost.image ? 'absolute bottom-0 left-0 p-8 md:p-16' : 'relative'}`}
+              class={`relative z-20 flex h-full flex-col justify-end ${
+                featuredPost.image ? 'p-8 md:p-16' : ''
+              }`}
             >
-              <div class="max-w-3xl">
-                <Chip
-                  color="primary"
-                  variant={featuredPost.image ? 'shadow' : 'flat'}
-                  className="mb-6 font-bold uppercase tracking-wider"
-                >
-                  FEATURED STORY
-                </Chip>
-                <h2
-                  class={`font-black mb-6 tracking-tight leading-tight ${
-                    featuredPost.image
-                      ? 'text-4xl md:text-6xl text-white'
-                      : 'text-4xl md:text-5xl text-foreground'
+              <div
+                class={`grid gap-8 lg:gap-10 ${featuredPost.image ? 'max-w-3xl' : 'lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-12'}`}
+              >
+                <div class={`${featuredPost.image ? '' : 'max-w-3xl'}`}>
+                  <Chip
+                    color="primary"
+                    variant={featuredPost.image ? 'shadow' : 'flat'}
+                    className="mb-6 font-bold uppercase tracking-wider"
+                  >
+                    FEATURED STORY
+                  </Chip>
+                  <h2
+                    class={`font-black mb-6 tracking-tight leading-tight ${
+                      featuredPost.image
+                        ? 'text-4xl md:text-6xl text-white'
+                        : 'text-4xl md:text-5xl text-foreground'
+                    }`}
+                  >
+                    <a
+                      href={featuredPost.href}
+                      class="inline-block transition-colors duration-300 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/70 rounded-lg"
+                    >
+                      {featuredPost.title}
+                    </a>
+                  </h2>
+                  <p
+                    class={`text-lg md:text-xl mb-8 max-w-2xl font-medium ${
+                      featuredPost.image ? 'text-white/70' : 'text-default-600'
+                    }`}
+                  >
+                    {featuredPost.excerpt}
+                  </p>
+                </div>
+
+                <div
+                  class={`flex flex-wrap items-center gap-4 ${
+                    featuredPost.image ? '' : 'lg:flex-col lg:items-end lg:justify-end'
                   }`}
                 >
-                  {featuredPost.title}
-                </h2>
-                <p
-                  class={`text-lg md:text-xl mb-8 line-clamp-2 max-w-2xl font-medium ${
-                    featuredPost.image ? 'text-white/70' : 'text-default-600'
-                  }`}
-                >
-                  {featuredPost.excerpt}
-                </p>
-                <div class="flex flex-wrap items-center gap-4">
+                  <span
+                    class={`text-sm font-bold ${featuredPost.image ? 'text-white/40' : 'text-default-500'}`}
+                  >
+                    {featuredPost.date} • 12 MIN READ
+                  </span>
                   <Button
+                    as="a"
+                    href={featuredPost.href}
                     radius="full"
                     color="primary"
                     className="font-bold px-8 h-12 shadow-lg shadow-primary/30"
                   >
                     Read Article
                   </Button>
-                  <span
-                    class={`text-sm font-bold ${featuredPost.image ? 'text-white/40' : 'text-default-500'}`}
-                  >
-                    {featuredPost.date} • 12 MIN READ
-                  </span>
                 </div>
               </div>
             </div>

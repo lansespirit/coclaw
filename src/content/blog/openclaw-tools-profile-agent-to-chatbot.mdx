@@ -81,6 +81,17 @@ This is a classic security move. It is also a classic onboarding trap.
 
 When the product category is “AI agent,” the user’s first benchmark is not prose quality. It is **initiative plus execution**. If the first-run experience blocks both, users do not interpret that as careful security posture. They interpret it as **the core promise failing in front of them**.
 
+## GitHub Issue Evidence: This Was Not Just Vibes
+
+The public narrative was quickly backed by real issue reports. In the local issue sync we pulled on **March 6, 2026**, two reports stand out as especially relevant:
+
+- [#34810](https://github.com/openclaw/openclaw/issues/34810) describes an agent that suddenly lost `exec`, `read`, and `write`, leaving only `message` and `sessions`. The reporter explicitly says the agent became a **chat-only assistant**.
+- [#36968](https://github.com/openclaw/openclaw/issues/36968) shows the same regression from another angle: a user asks OpenClaw to read a file in the workspace and gets told the `read` tool is unavailable.
+
+Even more telling, the discussion on [#34810](https://github.com/openclaw/openclaw/issues/34810) surfaces a practical workaround that matches the official config semantics: check whether `openclaw config get tools` returns `"profile": "messaging"`, and if so, switch to `"coding"` for local agent workflows.
+
+That matters because it turns this from a vague feeling into a traceable product event: users were not imagining the downgrade. They were running into a real post-update policy change with visible operational consequences.
+
 ## Why the Backlash Felt So Personal
 
 Most software defaults shape convenience. Agent defaults shape **personality**.
@@ -215,6 +226,8 @@ That means the editorial opportunity is larger than one reaction post. This topi
 - a practical migration guide
 - a security explainer for tool profiles
 - a troubleshooting article for “agent only talks, does not act”
+
+CoClaw now has exactly that high-intent fix page here: [/troubleshooting/solutions/openclaw-only-chats-no-tools-after-update](/troubleshooting/solutions/openclaw-only-chats-no-tools-after-update).
 
 For CoClaw specifically, that cluster is already within reach. Users who land here should be able to move naturally into [OpenClaw Configuration](/guides/openclaw-configuration), [Updating and Migration](/guides/updating-and-migration), and [Skill Safety and Prompt Injection](/guides/openclaw-skill-safety-and-prompt-injection).
 
