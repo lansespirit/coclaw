@@ -1,0 +1,387 @@
+---
+title: "OpenClaw Not Using Tools After the Update? Fix the ‘Only Chats, Doesn’t Act’ Problem"
+description: "A practical step-by-step guide to fix OpenClaw when it suddenly stops using tools after recent updates. Learn how to check `tools.profile`, restore coding tools safely, and verify the agent can act again."
+category: "deployment"
+difficulty: "Beginner"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+time: "15 min"
+publishDate: 2026-03-06
+lastUpdated: 2026-03-06
+featured: true
+steps:
+  - title: "Confirm the symptom is really a tool-policy issue"
+    content: "Check whether OpenClaw can reply normally but refuses to read files, run commands, or edit code."
+  - title: "Inspect your current tools configuration"
+    content: "Look at `tools.profile`, `tools.allow`, and `tools.deny` in `openclaw.json` or via `openclaw config get`."
+  - title: "Apply the right fix for your setup"
+    content: "Use `coding` for the classic local-agent experience, or keep `messaging` and add only the groups you need."
+  - title: "Restart and verify"
+    content: "Restart the gateway, run health checks, and test a real task like reading a file or executing a safe command."
+  - title: "Scope permissions more carefully if needed"
+    content: "Use per-agent overrides or narrower allowlists if you want one agent to act and another to remain messaging-only."
+keywords:
+  - "OpenClaw not using tools"
+  - "OpenClaw only chats"
+  - "tools.profile messaging"
+  - "OpenClaw coding profile"
+  - "OpenClaw update fix"
+  - "OpenClaw agent not acting"
+  - "openclaw.json"
+---
+
+If OpenClaw suddenly feels like it can **talk but not work**, this guide is for you.
+
+This became a common issue after the **March 3, 2026** update cycle, when new installs and some onboarding paths started defaulting to `tools.profile: "messaging"` instead of a broader tool set. The result is easy to recognize:
+
+- the agent answers normally
+- the agent keeps session context
+- but it will not read files, patch code, or run commands by default
+
+This is usually **not** a model problem. It is usually a **tool policy** problem.
+
+Official references:
+
+- [OpenClaw Tools docs](https://docs.openclaw.ai/tools)
+- [Configuration Reference](https://docs.openclaw.ai/gateway/configuration-reference)
+- [Updating and Migration](/guides/updating-and-migration)
+- [OpenClaw Configuration Guide](/guides/openclaw-configuration)
+
+## Quick answer
+
+If you trust this machine and want the classic “coding agent” behavior back, set:
+
+```json5
+{
+  tools: {
+    profile: "coding"
+  }
+}
+```
+
+Then restart the gateway and test again.
+
+If you want to stay closer to the new safer default, keep `messaging` and add only what you need:
+
+```json5
+{
+  tools: {
+    profile: "messaging",
+    allow: ["group:fs", "group:runtime"]
+  }
+}
+```
+
+That usually restores file access and command execution without opening everything.
+
+## 1) Confirm it is really a tools problem
+
+Before you change config, make sure you are fixing the right thing.
+
+This guide applies if OpenClaw can still chat, but you notice behavior like:
+
+- “I can explain how to edit the file, but I can’t modify it.”
+- “I don’t have permission to run that command.”
+- “I can suggest a patch, but I can’t apply it.”
+- “I can describe the next step, but I can’t inspect your workspace.”
+
+This guide does **not** solve issues like:
+
+- the gateway is down
+- the model is failing to respond
+- channel messages are not arriving
+- auth or provider setup is broken
+
+If OpenClaw is not responding at all, start with:
+
+- [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
+- [/guides/updating-and-migration](/guides/updating-and-migration)
+
+## 2) Inspect your current config
+
+Most users should check the config file first:
+
+- default path: `~/.openclaw/openclaw.json`
+
+You can inspect it directly, or use the CLI:
+
+```bash
+openclaw config get tools.profile
+openclaw config get tools.allow
+openclaw config get tools.deny
+```
+
+What you are looking for:
+
+- `tools.profile: "messaging"`
+- an aggressive `tools.deny`
+- a narrow `tools.allow` that excludes runtime or filesystem tools
+
+According to the official docs, the key profiles are:
+
+- `minimal`: only status-style access
+- `messaging`: chat-oriented tools and session tools
+- `coding`: filesystem, runtime, sessions, memory, and image
+- `full`: no profile restriction
+
+### Important rule
+
+`tools.profile` is only the **base allowlist**. After that:
+
+- `tools.allow` can add or narrow tools depending on your setup
+- `tools.deny` still wins if it blocks something explicitly
+
+So if you set `profile: "coding"` and still cannot use `exec`, check whether `tools.deny` is blocking it.
+
+## 3) Choose the right fix
+
+There is no single best setting for everyone. Pick the smallest change that matches how you use OpenClaw.
+
+## Fix A: Restore the classic coding-agent experience
+
+Use this if:
+
+- OpenClaw runs on your own laptop or dev box
+- you want it to read files, write files, and run commands
+- you already trusted the old default behavior
+
+Config:
+
+```json5
+{
+  tools: {
+    profile: "coding"
+  }
+}
+```
+
+What this typically restores:
+
+- `group:fs` → `read`, `write`, `edit`, `apply_patch`
+- `group:runtime` → `exec`, `process`
+- `group:sessions`
+- `group:memory`
+
+This is the simplest fix for most solo developers.
+
+## Fix B: Keep the safer default, add only the missing groups
+
+Use this if:
+
+- you like the new security posture
+- you only want OpenClaw to act in limited ways
+- you want a smaller blast radius than full coding mode
+
+Config:
+
+```json5
+{
+  tools: {
+    profile: "messaging",
+    allow: ["group:fs", "group:runtime"]
+  }
+}
+```
+
+This is a good middle ground for users who mainly want:
+
+- file inspection
+- patching
+- command execution
+
+but do not want to broaden everything else unnecessarily.
+
+## Fix C: Use `full` only if you know why
+
+Use this sparingly.
+
+```json5
+{
+  tools: {
+    profile: "full"
+  }
+}
+```
+
+`full` removes the profile restriction entirely. That can be appropriate for an isolated, trusted, personal environment, but it is usually **more permission than you need**.
+
+If your goal is simply “make the agent code again,” `coding` is usually the better answer.
+
+## 4) Restart OpenClaw and verify the fix
+
+After editing config, restart the running gateway so it reloads the new policy.
+
+A practical sequence is:
+
+```bash
+openclaw doctor
+openclaw gateway restart
+openclaw health
+```
+
+Then test with a real task instead of a theoretical one.
+
+Good verification prompts:
+
+- “Read `package.json` and summarize the scripts.”
+- “List files in the current workspace.”
+- “Run a safe command like `pwd`.”
+- “Edit this file and apply the patch.”
+
+If those now work, your problem was the tool profile.
+
+If the agent still refuses to act, keep going.
+
+## 5) Check for a deny rule or per-agent override
+
+Some setups have multiple layers of policy. The global config may look correct, but an individual agent can still be narrower.
+
+The official docs note that `agents.list[].tools.profile` can override the default profile for one agent.
+
+That means you may have:
+
+- a global `coding` profile
+- but one specific agent still pinned to `messaging`
+
+If you use multiple agents, inspect both:
+
+- global `tools.*`
+- agent-specific `agents.list[].tools.*`
+
+This is especially common after onboarding, experimentation, or copying config snippets from Discord, GitHub, or Reddit.
+
+## 6) Safe config examples you can copy
+
+## Example: local coding machine
+
+```json5
+{
+  tools: {
+    profile: "coding"
+  }
+}
+```
+
+Use this on a personal development machine where OpenClaw is supposed to behave like a hands-on coding assistant.
+
+## Example: messaging-first bot that can still patch code
+
+```json5
+{
+  tools: {
+    profile: "messaging",
+    allow: ["group:fs", "group:runtime"],
+    deny: ["browser", "cron"]
+  }
+}
+```
+
+Use this when you want code and shell help, but do not want UI automation or gateway automation exposed.
+
+## Example: split behavior by agent
+
+```json5
+{
+  tools: {
+    profile: "messaging"
+  },
+  agents: {
+    list: [
+      {
+        id: "coder",
+        tools: {
+          profile: "coding"
+        }
+      }
+    ]
+  }
+}
+```
+
+Use this when you want one agent to stay safe and chat-oriented, while another agent handles implementation tasks.
+
+## 7) Common mistakes
+
+### Mistake 1: Changing `tools.profile` but forgetting to restart
+
+If the gateway is already running, config edits may not affect the active process until restart.
+
+### Mistake 2: Setting `coding` but leaving a deny rule behind
+
+Example of a hidden blocker:
+
+```json5
+{
+  tools: {
+    profile: "coding",
+    deny: ["exec", "apply_patch"]
+  }
+}
+```
+
+This still blocks the exact tools most people expect to come back.
+
+### Mistake 3: Using `full` when `coding` is enough
+
+If you only need file + runtime actions, do not expand farther than necessary.
+
+### Mistake 4: Editing the wrong config file
+
+If you run OpenClaw via Docker, systemd, launchd, or a custom state directory, confirm you are editing the same config the gateway is actually using.
+
+If this sounds familiar, read:
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+
+## 8) When to use the interactive wizard instead
+
+If you do not want to edit JSON manually, use:
+
+```bash
+openclaw configure
+```
+
+The official CLI supports interactive configuration, and the docs explicitly recommend `openclaw config get|set|unset` for non-interactive edits.
+
+This is often the best route if:
+
+- you are not sure where your config lives
+- you recently reinstalled OpenClaw
+- you changed multiple parts of your setup during onboarding
+
+## 9) FAQ
+
+### Why did this happen after a recent update?
+
+Because recent onboarding and default flows moved more users toward `tools.profile: "messaging"`, which is safer but does not feel like the older “agent with hands” experience.
+
+### Is this a bug?
+
+Usually no. Most of the time it is an intentional policy change or a config migration side effect.
+
+### What profile should most developers use?
+
+If OpenClaw is running locally on a machine you trust and you mainly want coding help, `coding` is the most practical default.
+
+### Should I use `full`?
+
+Only when you understand why you need it. For most users, `coding` or `messaging` plus a small allowlist is the better tradeoff.
+
+## 10) Recommended next steps
+
+After restoring tool use, clean up the rest of your setup so the issue does not come back unexpectedly.
+
+Recommended reads:
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- [/guides/updating-and-migration](/guides/updating-and-migration)
+- [/guides/openclaw-skill-safety-and-prompt-injection](/guides/openclaw-skill-safety-and-prompt-injection)
+
+If you want a simple rule:
+
+- use `messaging` for low-risk channel bots
+- use `coding` for trusted local implementation work
+- use `full` only with intention

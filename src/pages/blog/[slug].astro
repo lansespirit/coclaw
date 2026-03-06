@@ -20,7 +20,9 @@ const { Content } = await entry.render();
 
 const { title, description, author, publishDate, lastUpdated, category, ogImage, keywords } =
   entry.data;
-const image = ogImage || '/images/og/og-main.png';
+const fallbackOgImage = '/images/og/og-main.png';
+const socialImage = ogImage || fallbackOgImage;
+const heroImage = ogImage || undefined;
 
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);
 const seedTokens = buildWeightedTokens([
@@ -61,7 +63,7 @@ const structuredData = {
   '@type': 'BlogPosting',
   headline: title,
   description,
-  image: [new URL(image, Astro.site).toString()],
+  image: [new URL(socialImage, Astro.site).toString()],
   author: { '@type': 'Person', name: author },
   publisher: { '@type': 'Organization', name: 'CoClaw', url: 'https://coclaw.com' },
   datePublished: publishDate.toISOString(),
@@ -73,7 +75,7 @@ const structuredData = {
 <BaseLayout
   title={`${title} | CoClaw Blog`}
   description={description}
-  ogImage={image}
+  ogImage={socialImage}
   keywords={keywords?.join(', ')}
   type="article"
 >
@@ -89,22 +91,48 @@ const structuredData = {
     </div>
 
     <!-- Hero Header -->
-    <header class="relative h-[60vh] min-h-[400px] w-full overflow-hidden">
-      <img src={image} alt={title} class="absolute inset-0 w-full h-full object-cover" />
-      <div
-        class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent"
-      >
-      </div>
+    <header
+      class={`relative w-full overflow-hidden ${
+        heroImage
+          ? 'h-[60vh] min-h-[400px]'
+          : 'border-b border-divider/50 bg-gradient-to-b from-primary/[0.08] via-background to-background'
+      }`}
+    >
+      {
+        heroImage ? (
+          <>
+            <img src={heroImage} alt={title} class="absolute inset-0 w-full h-full object-cover" />
+            <div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+          </>
+        ) : (
+          <div aria-hidden="true" class="absolute inset-0 overflow-hidden">
+            <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+            <div class="absolute -top-24 right-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+            <div class="absolute left-0 top-20 h-64 w-64 rounded-full bg-secondary/10 blur-3xl" />
+          </div>
+        )
+      }
 
-      <div class="absolute bottom-0 left-0 w-full p-6 md:p-12 lg:p-24">
+      <div
+        class={`w-full ${heroImage ? 'absolute bottom-0 left-0 p-6 md:p-12 lg:p-24' : 'relative px-6 pb-14 pt-24 md:px-12 md:pb-18 md:pt-28 lg:px-24 lg:pb-20 lg:pt-32'}`}
+      >
         <div class="max-w-4xl mx-auto overflow-visible">
-          <Chip color="primary" variant="shadow" className="mb-6">{category}</Chip>
+          <Chip color="primary" variant={heroImage ? 'shadow' : 'flat'} className="mb-6">
+            {category}
+          </Chip>
           <h1
-            class="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter text-foreground mb-8 line-clamp-3 leading-tight"
+            class={`font-black tracking-tighter text-foreground mb-8 line-clamp-3 leading-tight ${heroImage ? 'text-4xl md:text-6xl lg:text-7xl' : 'text-4xl md:text-5xl lg:text-6xl text-balance'}`}
           >
             {title}
           </h1>
-          <div class="flex items-center gap-6">
+          {
+            !heroImage ? (
+              <p class="max-w-3xl text-lg md:text-xl text-default-600 mb-8 leading-relaxed">
+                {description}
+              </p>
+            ) : null
+          }
+          <div class="flex flex-wrap items-center gap-6">
             <div class="flex items-center gap-3">
               <Avatar name={author} size="sm" isBordered color="primary" />
               <div>

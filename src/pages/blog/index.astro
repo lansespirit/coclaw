@@ -22,7 +22,7 @@ const blogPosts = entries
     }),
     keywords: entry.data.keywords,
     category: entry.data.category,
-    image: entry.data.ogImage || '/images/og/og-main.png',
+    image: entry.data.ogImage,
     href: `/blog/${entry.slug}`,
     featured: entry.data.featured,
   }));
@@ -62,31 +62,59 @@ const regularPosts = blogPosts.filter((post) => !post.featured);
 
       {
         featuredPost && (
-          <div class="group relative w-full h-[500px] md:h-[650px] rounded-[48px] overflow-hidden m-card-glass border border-white/10 shadow-2xl transition-all duration-700 hover:border-primary/30 mb-20 mb-32">
+          <div
+            class={`group relative w-full rounded-[48px] overflow-hidden border shadow-2xl transition-all duration-700 hover:border-primary/30 mb-20 mb-32 ${
+              featuredPost.image
+                ? 'h-[500px] md:h-[650px] m-card-glass border-white/10'
+                : 'm-card-surface border-divider/60 px-8 py-10 md:px-16 md:py-16'
+            }`}
+          >
             <a href={featuredPost.href} class="absolute inset-0 z-20" />
-            <img
-              src={featuredPost.image}
-              alt={featuredPost.title}
-              class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-60 group-hover:opacity-80"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent z-10" />
+            {featuredPost.image ? (
+              <>
+                <img
+                  src={featuredPost.image}
+                  alt={featuredPost.title}
+                  class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000 opacity-60 group-hover:opacity-80"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent z-10" />
+              </>
+            ) : (
+              <div aria-hidden="true" class="absolute inset-0 overflow-hidden">
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+                <div class="absolute -right-16 top-0 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+                <div class="absolute -left-12 bottom-0 h-56 w-56 rounded-full bg-secondary/10 blur-3xl" />
+              </div>
+            )}
 
-            <div class="absolute bottom-0 left-0 w-full p-8 md:p-16 z-30">
+            <div
+              class={`w-full z-30 ${featuredPost.image ? 'absolute bottom-0 left-0 p-8 md:p-16' : 'relative'}`}
+            >
               <div class="max-w-3xl">
                 <Chip
                   color="primary"
-                  variant="shadow"
+                  variant={featuredPost.image ? 'shadow' : 'flat'}
                   className="mb-6 font-bold uppercase tracking-wider"
                 >
                   FEATURED STORY
                 </Chip>
-                <h2 class="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight leading-tight">
+                <h2
+                  class={`font-black mb-6 tracking-tight leading-tight ${
+                    featuredPost.image
+                      ? 'text-4xl md:text-6xl text-white'
+                      : 'text-4xl md:text-5xl text-foreground'
+                  }`}
+                >
                   {featuredPost.title}
                 </h2>
-                <p class="text-white/70 text-lg md:text-xl mb-8 line-clamp-2 max-w-2xl font-medium">
+                <p
+                  class={`text-lg md:text-xl mb-8 line-clamp-2 max-w-2xl font-medium ${
+                    featuredPost.image ? 'text-white/70' : 'text-default-600'
+                  }`}
+                >
                   {featuredPost.excerpt}
                 </p>
-                <div class="flex items-center gap-4">
+                <div class="flex flex-wrap items-center gap-4">
                   <Button
                     radius="full"
                     color="primary"
@@ -94,7 +122,9 @@ const regularPosts = blogPosts.filter((post) => !post.featured);
                   >
                     Read Article
                   </Button>
-                  <span class="text-white/40 text-sm font-bold">
+                  <span
+                    class={`text-sm font-bold ${featuredPost.image ? 'text-white/40' : 'text-default-500'}`}
+                  >
                     {featuredPost.date} • 12 MIN READ
                   </span>
                 </div>
