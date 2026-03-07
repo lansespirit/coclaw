@@ -1,0 +1,87 @@
+---
+title: "Control UI WebChat: queued user messages are processed but do not appear in the thread"
+description: "Work around the Control UI limitation where a message sent during an active reply is queued internally but not rendered back into the WebChat conversation."
+kind: "solution"
+component: "web-ui"
+severity: "low"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "queued message not displayed"
+  - "input clears but message disappears"
+  - "webchat"
+keywords:
+  - "control ui"
+  - "webchat"
+  - "queued messages"
+  - "collect mode"
+  - "message disappears"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 38884
+  docs:
+    - "https://docs.openclaw.ai/web/control-ui"
+  guides:
+    - "/guides/openclaw-no-response-and-rate-limit-troubleshooting"
+    - "/guides/openclaw-operability-and-observability"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- In Control UI WebChat, you send a second message while the agent is still replying.
+- The input box clears, but your message does **not** show up in the conversation thread.
+- Later, the agent still answers that queued message, which proves the backend did receive it.
+- This often looks like “my message vanished”, even though it was actually queued.
+
+## Cause
+
+This is usually a **frontend rendering limitation**, not a broken queue.
+
+When WebChat is already streaming a reply:
+
+1. your second message is accepted into the internal queue,
+2. the agent processes it later,
+3. but the WebChat UI does not immediately re-render that queued user message into the visible thread.
+
+So the queue works, but the conversation view fails to echo the pending input back to you.
+
+## Fix
+
+### 1) Avoid sending the next message until the current turn finishes
+
+In practice, the safest workaround is:
+
+- wait until the typing/streaming indicator disappears,
+- then send the next message.
+
+Why this helps: messages sent after the current turn completes go through the normal visible render path instead of the queued path.
+
+### 2) Use another surface if you need reliable visible history during rapid back-and-forth
+
+If your workflow depends on seeing every queued user message immediately, prefer a client/surface that persists chat history more explicitly than Control UI WebChat.
+
+Control UI is best treated as an admin/debug surface, not the most robust high-traffic chat frontend.
+
+## Verify
+
+- Send one message and wait for the reply to finish.
+- Send the next message only after the stream/typing indicator is gone.
+- Confirm the second message now appears normally in the thread.
+
+If messages still disappear even when you wait for idle, that points to a different bug. In that case, capture:
+
+- whether `queue mode` is still `collect`,
+- whether the same message appears in session transcripts,
+- and whether the problem reproduces in a non-WebChat surface.
+
+## Related
+
+- [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
+- [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability)
+

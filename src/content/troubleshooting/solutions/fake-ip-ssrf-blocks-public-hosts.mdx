@@ -1,0 +1,135 @@
+---
+title: "OpenClaw: fake-IP / TUN DNS makes public hosts fail SSRF checks"
+description: "Fix `Blocked: resolves to private/internal/special-use IP address` when a VPN or proxy rewrites public domains to fake-IP ranges like `198.18.x.x` before OpenClaw applies proxying."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "Blocked: resolves to private/internal/special-use IP address"
+  - "SsrFBlockedError"
+  - "198.18."
+keywords:
+  - "fake-ip"
+  - "tun"
+  - "198.18"
+  - "ssrf"
+  - "clash"
+  - "shadowrocket"
+  - "vpn dns"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 32873
+    - 33086
+    - 38986
+  docs:
+    - "https://docs.openclaw.ai/cli/config"
+    - "https://docs.openclaw.ai/gateway/configuration"
+  guides:
+    - "/guides/openclaw-configuration"
+    - "/guides/openclaw-no-response-and-rate-limit-troubleshooting"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- `web_fetch`, OAuth login, or attachment fetch fails with:
+
+```text
+Blocked: resolves to private/internal/special-use IP address
+```
+
+- The blocked hostname is actually public, but local DNS resolves it to a fake-IP such as `198.18.x.x`.
+- `curl` or a browser may still work through the same proxy, which makes OpenClaw look broken or inconsistent.
+- Common affected flows include:
+  - `web_fetch`
+  - provider OAuth logins
+  - channel attachment fetches such as Discord CDN URLs
+
+## Cause
+
+This is usually a **network rewriting** issue, not a bad token or a broken provider config.
+
+The failure order matters:
+
+1. OpenClaw resolves the hostname first.
+2. Your VPN / proxy DNS / fake-IP mode rewrites that hostname to a special-use address such as `198.18.x.x`.
+3. OpenClaw’s SSRF guard blocks that address before the HTTP proxy path is used.
+
+So even if `HTTP_PROXY` / `HTTPS_PROXY` is configured correctly, OpenClaw can still reject the request earlier if the local resolver returns a fake-IP.
+
+## Fix
+
+### 1) Confirm the gateway host is seeing fake-IP answers
+
+Run the lookup on the **same machine** that runs OpenClaw:
+
+```bash
+dig oauth2.googleapis.com
+```
+
+or:
+
+```bash
+nslookup cdn.discordapp.com
+```
+
+or:
+
+```bash
+getent ahosts example.com
+```
+
+If you see `198.18.x.x` or another private/special-use range for a public host, continue below.
+
+### 2) Move OpenClaw off fake-IP / TUN DNS for the affected hosts
+
+The most reliable workaround is to make the OpenClaw runtime use **real DNS answers** for the affected domains.
+
+Depending on your stack, that usually means one of these:
+
+- disable fake-IP mode for the OpenClaw host,
+- switch from full TUN mode to a rule/direct mode for the gateway process,
+- or add no-fake-ip / DIRECT rules for the affected domains.
+
+Typical domains to exempt:
+
+- `oauth2.googleapis.com`
+- `accounts.google.com`
+- `cdn.discordapp.com`
+- `media.discordapp.net`
+- the exact host your failing `web_fetch` target uses
+
+Why this helps: OpenClaw only needs the resolver to return a normal public destination. Once that happens, the SSRF guard stops rejecting the request preflight.
+
+### 3) Restart the gateway after changing DNS/proxy mode
+
+```bash
+openclaw gateway restart
+```
+
+Then rerun the exact failing command.
+
+## Verify
+
+- DNS lookups on the gateway host no longer return `198.18.x.x` for the affected public host.
+- The original OpenClaw command no longer throws `Blocked: resolves to private/internal/special-use IP address`.
+- If you still use a proxy, the request now fails later for normal reasons only (auth, 404, rate limit, etc.), which means the SSRF preflight is no longer the blocker.
+
+If it still fails, capture:
+
+- the exact blocked hostname,
+- the resolved IP shown by your local DNS tools,
+- and whether fake-IP / TUN mode is still enabled on that machine.
+
+## Related
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
+

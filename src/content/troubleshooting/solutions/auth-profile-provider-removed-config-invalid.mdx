@@ -1,0 +1,104 @@
+---
+title: "OpenClaw config becomes invalid after you remove a provider but keep its auth profile"
+description: "Fix config validation failures caused by orphaned `auth.profiles` entries that still reference a provider removed from `models.providers`."
+kind: "solution"
+component: "config"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "auth.profiles"
+  - "Invalid input: expected string, received undefined"
+  - "provider"
+keywords:
+  - "auth.profiles"
+  - "provider removed"
+  - "config validation"
+  - "oauth"
+  - "openclaw.json"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 38913
+  docs:
+    - "https://docs.openclaw.ai/cli/config"
+    - "https://docs.openclaw.ai/gateway/configuration"
+  guides:
+    - "/guides/openclaw-configuration"
+    - "/troubleshooting/solutions/config-validation-failed"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- `openclaw logs`, `openclaw status`, or other CLI commands suddenly fail after you delete a provider from config.
+- Validation errors mention an auth profile even though the provider itself is already gone.
+- A common message looks like:
+
+```text
+auth.profiles.<name>.provider: Invalid input: expected string, received undefined
+```
+
+## Cause
+
+OpenClaw can keep loading `auth.profiles` entries even after you removed the matching provider from `models.providers`.
+
+That leaves an **orphaned auth profile** behind.
+
+In practice, this often happens when:
+
+- you previously configured OAuth for a provider such as `qwen-portal`,
+- later removed `models.providers.qwen-portal`,
+- but did **not** remove `auth.profiles["qwen-portal:default"]`.
+
+Because the profile key still implies the provider, config loading can fail before the CLI gets to normal runtime behavior.
+
+## Fix
+
+### 1) Remove the orphaned auth profile entry
+
+If you know the exact profile key, delete it directly:
+
+```bash
+openclaw config unset 'auth.profiles["qwen-portal:default"]'
+```
+
+Repeat for any other profiles that still point to removed providers.
+
+### 2) Validate the config immediately
+
+```bash
+openclaw config validate
+```
+
+Why this helps: it confirms you removed the actual blocking entry before you restart the gateway.
+
+### 3) Restart the gateway after cleanup
+
+```bash
+openclaw gateway restart
+```
+
+## Verify
+
+- `openclaw config validate` passes.
+- `openclaw logs` and `openclaw status` work again.
+- `openclaw config get auth.profiles` no longer shows entries for providers you already removed from `models.providers`.
+
+If validation still fails, inspect the remaining auth profiles:
+
+```bash
+openclaw config get auth.profiles
+```
+
+Then compare those profile keys with the provider keys still present under `models.providers`.
+
+## Related
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- [/troubleshooting/solutions/config-validation-failed](/troubleshooting/solutions/config-validation-failed)
+
