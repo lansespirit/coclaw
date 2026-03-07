@@ -8,7 +8,7 @@ export const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <div className="flex items-center gap-2 font-bold text-inherit">
-                <span className="text-2xl">🦀</span>
+                <span className="text-2xl">🦞</span>
                 <span className="text-xl tracking-tight">CoClaw</span>
               </div>
               <p className="text-sm text-default-800 dark:text-default-600">
