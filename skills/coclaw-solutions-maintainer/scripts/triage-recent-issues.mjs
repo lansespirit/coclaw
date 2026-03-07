@@ -32,6 +32,7 @@ function parseArgs(argv) {
     stateFile: path.resolve('.cache', 'coclaw-solutions-maintainer', 'state.json'),
     dryRun: false,
     includeUpdated: false,
+    stateFilter: 'open',
     json: false,
   };
 
@@ -74,6 +75,18 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === '--state-filter') {
+      const value = String(argv[i + 1] ?? '')
+        .trim()
+        .toLowerCase();
+      i += 1;
+      if (!['open', 'closed', 'all'].includes(value)) {
+        throw new Error(`Invalid --state-filter: ${value}`);
+      }
+      args.stateFilter = value;
+      continue;
+    }
+
     if (arg === '--json') {
       args.json = true;
       continue;
@@ -87,6 +100,7 @@ Options:
   --since-hours <n>      Only include issues updated within the last N hours (default: 72)
   --issues <path>        Override issues dataset path (default: skills/coclaw-solutions-maintainer/data/openclaw-issues.json)
   --include-updated      Include already-processed issues if updatedAt advanced since last run
+  --state-filter <mode>  Issue state filter: open|closed|all (default: open)
   --state <path>         Override state file path (default: .cache/coclaw-solutions-maintainer/state.json)
   --dry-run              Do not write state
   --json                 Emit machine-readable JSON only
@@ -115,11 +129,56 @@ async function loadState(stateFile) {
     const json = JSON.parse(raw);
     return {
       lastRunAt: typeof json?.lastRunAt === 'string' ? json.lastRunAt : null,
-      processed: typeof json?.processed === 'object' && json?.processed ? json.processed : {},
+      processed: normalizeProcessedMap(json?.processed),
     };
   } catch {
     return { lastRunAt: null, processed: {} };
   }
+}
+
+function normalizeProcessedMap(processed) {
+  if (typeof processed !== 'object' || !processed) return {};
+
+  return Object.fromEntries(
+    Object.entries(processed).map(([issueNumber, value]) => [
+      issueNumber,
+      normalizeProcessedEntry(value),
+    ])
+  );
+}
+
+function normalizeProcessedEntry(value) {
+  if (typeof value === 'string') {
+    return {
+      updatedAt: value,
+      state: null,
+      commentsCount: null,
+      lastCommentedAt: null,
+      lastSeenAt: null,
+      lastTriagedAt: null,
+    };
+  }
+
+  if (typeof value === 'object' && value) {
+    const commentsCount = Number.parseInt(String(value.commentsCount ?? ''), 10);
+    return {
+      updatedAt: typeof value.updatedAt === 'string' ? value.updatedAt : null,
+      state: typeof value.state === 'string' ? value.state : null,
+      commentsCount: Number.isFinite(commentsCount) && commentsCount >= 0 ? commentsCount : null,
+      lastCommentedAt: typeof value.lastCommentedAt === 'string' ? value.lastCommentedAt : null,
+      lastSeenAt: typeof value.lastSeenAt === 'string' ? value.lastSeenAt : null,
+      lastTriagedAt: typeof value.lastTriagedAt === 'string' ? value.lastTriagedAt : null,
+    };
+  }
+
+  return {
+    updatedAt: null,
+    state: null,
+    commentsCount: null,
+    lastCommentedAt: null,
+    lastSeenAt: null,
+    lastTriagedAt: null,
+  };
 }
 
 async function saveState(stateFile, state) {
@@ -136,6 +195,38 @@ function commentsCount(issue) {
   if (Array.isArray(issue?.commentsData)) return issue.commentsData.length;
   const raw = Number.parseInt(String(issue?.comments ?? ''), 10);
   return Number.isFinite(raw) && raw >= 0 ? raw : 0;
+}
+
+function issueState(issue) {
+  const state = String(issue?.state ?? '')
+    .trim()
+    .toLowerCase();
+  return state === 'closed' ? 'closed' : 'open';
+}
+
+function lastCommentedAt(issue) {
+  if (!Array.isArray(issue?.commentsData) || issue.commentsData.length === 0) return null;
+  return issue.commentsData.reduce((latest, comment) => {
+    const current =
+      typeof comment?.updatedAt === 'string' ? comment.updatedAt : (comment?.createdAt ?? null);
+    if (!current) return latest;
+    if (!latest || current > latest) return current;
+    return latest;
+  }, null);
+}
+
+function snapshotIssue(issue) {
+  return {
+    updatedAt: typeof issue?.updatedAt === 'string' ? issue.updatedAt : null,
+    state: issueState(issue),
+    commentsCount: commentsCount(issue),
+    lastCommentedAt: lastCommentedAt(issue),
+  };
+}
+
+function matchesStateFilter(state, stateFilter) {
+  if (stateFilter === 'all') return true;
+  return state === stateFilter;
 }
 
 async function main() {
@@ -163,15 +254,30 @@ async function main() {
   const selectedIssues = recentIssues
     .map((issue) => {
       const numberKey = String(issue.number);
-      const previousUpdatedAt = state.processed?.[numberKey] ?? null;
-      const updatedAt = typeof issue.updatedAt === 'string' ? issue.updatedAt : '';
+      const previous = normalizeProcessedEntry(state.processed?.[numberKey] ?? null);
+      const snapshot = snapshotIssue(issue);
 
-      if (!previousUpdatedAt) {
-        return { issue, triageState: 'new' };
+      if (!matchesStateFilter(snapshot.state, args.stateFilter)) {
+        return null;
       }
 
-      if (args.includeUpdated && updatedAt > String(previousUpdatedAt)) {
-        return { issue, triageState: 'updated' };
+      if (!previous.updatedAt) {
+        return { issue, triageState: 'new', snapshot };
+      }
+
+      if (previous.state === 'closed' && snapshot.state === 'open') {
+        return { issue, triageState: 'reopened', snapshot };
+      }
+
+      const materiallyUpdated =
+        (snapshot.updatedAt && previous.updatedAt && snapshot.updatedAt > previous.updatedAt) ||
+        snapshot.commentsCount > (previous.commentsCount ?? -1) ||
+        (snapshot.lastCommentedAt &&
+          (!previous.lastCommentedAt || snapshot.lastCommentedAt > previous.lastCommentedAt)) ||
+        (previous.state && snapshot.state !== previous.state);
+
+      if (args.includeUpdated && materiallyUpdated) {
+        return { issue, triageState: 'updated', snapshot };
       }
 
       return null;
@@ -185,15 +291,24 @@ async function main() {
     htmlUrl: issue.htmlUrl ?? null,
     createdAt: issue.createdAt ?? null,
     updatedAt: issue.updatedAt ?? null,
+    state: issueState(issue),
     labels: normalizeLabels(issue.labels),
     commentsCount: commentsCount(issue),
+    lastCommentedAt: lastCommentedAt(issue),
     triageState,
   }));
+
+  const countByTriageState = out.reduce((acc, issue) => {
+    acc[issue.triageState] = (acc[issue.triageState] ?? 0) + 1;
+    return acc;
+  }, {});
 
   const payload = {
     cutoffIso,
     count: out.length,
+    countByTriageState,
     lastRunAt: state.lastRunAt,
+    stateFilter: args.stateFilter,
     issues: out,
   };
 
@@ -209,8 +324,10 @@ async function main() {
       console.log(`#${issue.number} [${issue.triageState}] ${issue.title}`);
       if (issue.htmlUrl) console.log(`- issue: ${issue.htmlUrl}`);
       if (issue.updatedAt) console.log(`- updatedAt: ${issue.updatedAt}`);
+      console.log(`- state: ${issue.state}`);
       if (issue.labels.length) console.log(`- labels: ${issue.labels.join(', ')}`);
       console.log(`- comments: ${issue.commentsCount}`);
+      if (issue.lastCommentedAt) console.log(`- lastCommentedAt: ${issue.lastCommentedAt}`);
       console.log('');
     }
   }
@@ -221,8 +338,18 @@ async function main() {
       processed: { ...(state.processed ?? {}) },
     };
 
-    for (const { issue } of selectedIssues) {
-      nextState.processed[String(issue.number)] = issue.updatedAt ?? new Date().toISOString();
+    for (const issue of recentIssues) {
+      const snapshot = snapshotIssue(issue);
+      nextState.processed[String(issue.number)] = {
+        updatedAt: snapshot.updatedAt ?? new Date().toISOString(),
+        state: snapshot.state,
+        commentsCount: snapshot.commentsCount,
+        lastCommentedAt: snapshot.lastCommentedAt,
+        lastSeenAt: new Date().toISOString(),
+        lastTriagedAt: selectedIssues.some((item) => item.issue.number === issue.number)
+          ? new Date().toISOString()
+          : normalizeProcessedEntry(nextState.processed[String(issue.number)]).lastTriagedAt,
+      };
     }
 
     await saveState(args.stateFile, nextState);

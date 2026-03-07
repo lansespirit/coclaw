@@ -36,6 +36,7 @@
 ## 2) 范围与上限（Scope & Limits）
 
 - 数据范围：默认最近 72h 更新的 issues（由 runbook 决定具体参数）。
+- issue 状态范围：**默认只处理 open issues**；closed issues 仅用于对账、回溯、分析，不进入本轮默认回帖队列。
 - 仅处理 OpenClaw 的“使用问题”相关 issue：
   - `usage_config` / `usage_deploy` / `usage_channel` / `usage_other`
   - `known_bug_with_workaround`（仅当 workaround 稳定可执行）
@@ -54,6 +55,7 @@
 
 1. 生成候选队列（sync/ref/triage/classify）→ 得到 `classification-latest.json`
 2. 从队列中识别“使用问题”issues（usage\_\* / known_bug_with_workaround）
+   - 默认只看 open issues；reopened issue 视为优先级上调
 3. 为本轮选择**最多 10 条**要处理的 issues（优先信息完整、影响面大、可给出确定步骤的）
 4. 对每条 issue 完整阅读（主贴 + 全部评论；必要时查 `.ref/openclaw`）
 5. 回帖前阅读 KB 索引（避免凭记忆挑链接/猜配置）：
@@ -62,6 +64,8 @@
    - OpenClaw 溯源入口：`docs/kb/openclaw-ref-entrypoints.md`（用于快速定位 `.ref/openclaw` 里最权威的配置/渠道/技能源码与文档入口）
 6. 草拟高价值回复（步骤 + 因果 + 需要补充的信息）
 7. 匹配并选择 1–2 个 `coclaw.com` 站内页面作为“推荐链接”（默认需要）
+   - 可先用脚本生成候选：`node skills/coclaw-solutions-maintainer/scripts/recommend-site-links.mjs --issue <ISSUE_NUMBER>`
+   - 脚本候选仅供参考，最终仍需人工/AI 结合 issue 上下文决定
 8. **立即发布评论（逐条，不要批量等到最后）**：
    - 每完成 1 条 issue 的最终回复文本后，立刻执行 `gh issue comment` 发布到对应 issue
    - 不要把回复写进“comment 草稿文档”后再让用户手动执行命令；由 Agent 直接提交
@@ -83,6 +87,14 @@
 - 必要时参考 `.ref/openclaw` 相关实现/配置
 
 然后按以下规则决定“是否写/改站内内容”，并形成最终回复：
+
+额外判断规则（建议默认执行）：
+
+- reopened issue > 一般 updated issue
+- open + 信息完整 + 能给明确步骤 > open 但信息不足
+- 已知 bug 只有在 **workaround 稳定且可执行** 时，才归入 `known_bug_with_workaround`
+  - 这里的“稳定且可执行”至少意味着：能明确指出命令、配置位点、降级/切换动作，或已有可复用的站内页面可承接
+- 若更像源码缺陷、且 workaround 需要“猜测”而非可验证步骤，宁可归为 `code_bug` / 延后，也不要强行回帖
 
 默认动作（对每条被处理 issue）：
 

@@ -41,6 +41,7 @@ function parseArgs(argv) {
     issuesFile: DEFAULT_ISSUES_FILE,
     outputFile: null,
     limit: null,
+    includeClosed: false,
     json: false,
   };
 
@@ -80,6 +81,11 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === '--include-closed') {
+      args.includeClosed = true;
+      continue;
+    }
+
     if (arg === '--json') {
       args.json = true;
       continue;
@@ -94,6 +100,7 @@ Options:
   --issues <path>       Full issues dataset path (default: skills/coclaw-solutions-maintainer/data/openclaw-issues.json)
   --output <path>       Also write result JSON to this path
   --limit <n>           Only include first N triage items
+  --include-closed      Keep closed issues in the queue (default: false)
   --json                Print machine-readable JSON
 `);
       process.exit(0);
@@ -120,6 +127,55 @@ function hasAny(text, patterns) {
   return patterns.some((pattern) => pattern.test(text));
 }
 
+function countMatches(text, patterns) {
+  return patterns.reduce((count, pattern) => count + (pattern.test(text) ? 1 : 0), 0);
+}
+
+function detectStableWorkaround(text) {
+  const workaroundSignals = [
+    /\bworkaround\b/,
+    /\btemporary fix\b/,
+    /\bmitigation\b/,
+    /\bknown issue\b/,
+    /\bdowngrad(e|ed|ing)\b/,
+    /\bpinn?(ed|ing)?\b/,
+    /\bfor now\b/,
+    /\buntil fixed\b/,
+    /\bswitch to\b/,
+    /\buse .* instead\b/,
+  ];
+  const actionableSignals = [
+    /```[\s\S]*?```/,
+    /`openclaw [^`]+`/,
+    /\/model\s+[^\s`]+/,
+    /openclaw\s+[a-z][a-z0-9:-]*/,
+    /\b(run|set|change|disable|enable|restart|reinstall|switch|pin)\b.{0,48}\b(to|with|on|via)?/,
+    /\n\s*(?:1\.|2\.|- )\s+/,
+    /openclaw\.json/,
+    /agents?\.defaults\./,
+    /channels?\./,
+    /models?\./,
+  ];
+
+  const workaroundCount = countMatches(text, workaroundSignals);
+  const actionableCount = countMatches(text, actionableSignals);
+
+  if (workaroundCount === 0) {
+    return { ok: false, reasons: [] };
+  }
+
+  if (actionableCount === 0) {
+    return { ok: false, reasons: ['workaround mentioned but no concrete steps/config evidence'] };
+  }
+
+  return {
+    ok: true,
+    reasons: [
+      `stable workaround evidence: workaround=${workaroundCount}, actionable=${actionableCount}`,
+    ],
+  };
+}
+
 function classifyIssue(issue, triageItem) {
   const labels = Array.isArray(issue?.labels)
     ? issue.labels.map((x) => String(x).toLowerCase())
@@ -128,6 +184,7 @@ function classifyIssue(issue, triageItem) {
   const title = lowerText(issue?.title);
 
   const reasons = [];
+  const stableWorkaround = detectStableWorkaround(text);
 
   if (labels.some((label) => /enhancement|feature/.test(label)) || /^\[?feature\]?/i.test(title)) {
     reasons.push('feature label/title hint');
@@ -162,12 +219,17 @@ function classifyIssue(issue, triageItem) {
     };
   }
 
-  // Downgrade/pin is a strong user-actionable workaround signal, even if the issue is a regression.
-  if (hasAny(text, [/\bdowngrad(e|ed|ing)\b/, /\bpinned?\b/, /\binstall(?:ed)? .*@\\d{4}\\./])) {
+  // Only treat workaround issues as actionable when there is both a workaround signal and
+  // evidence of concrete steps/commands/config changes.
+  if (
+    stableWorkaround.ok &&
+    hasAny(text, [/\bdowngrad(e|ed|ing)\b/, /\bpinned?\b/, /\binstall(?:ed)? .*@\\d{4}\\./])
+  ) {
     reasons.push('downgrade/pin workaround detected');
+    reasons.push(...stableWorkaround.reasons);
     return {
       suggestedType: 'known_bug_with_workaround',
-      confidence: 0.72,
+      confidence: 0.82,
       suggestedAction: 'link_or_create_solution',
       reasons,
     };
@@ -196,19 +258,12 @@ function classifyIssue(issue, triageItem) {
     };
   }
 
-  if (
-    hasAny(text, [
-      /\bworkaround\b/,
-      /\btemporary fix\b/,
-      /\bmitigation\b/,
-      /\bstill broken but\b/,
-      /\bknown issue\b/,
-    ])
-  ) {
+  if (stableWorkaround.ok) {
     reasons.push('workaround/known-issue signal detected');
+    reasons.push(...stableWorkaround.reasons);
     return {
       suggestedType: 'known_bug_with_workaround',
-      confidence: 0.72,
+      confidence: 0.78,
       suggestedAction: 'link_or_create_solution',
       reasons,
     };
@@ -348,6 +403,7 @@ function classifyIssue(issue, triageItem) {
 
 function pickPriority(issue, triageItem, classification) {
   const labelText = (triageItem?.labels ?? []).map((x) => String(x).toLowerCase()).join(',');
+  if (String(triageItem?.triageState ?? '') === 'reopened') return 'high';
   if (/critical|p0|high/.test(labelText)) return 'high';
   if (
     classification.suggestedAction === 'link_or_create_solution' &&
@@ -368,7 +424,11 @@ async function main() {
   const issues = Array.isArray(issuesRaw?.issues) ? issuesRaw.issues : [];
   const issuesByNumber = new Map(issues.map((issue) => [String(issue.number), issue]));
 
-  const limitedItems = args.limit ? triageItems.slice(0, args.limit) : triageItems;
+  const filteredByState = args.includeClosed
+    ? triageItems
+    : triageItems.filter((item) => String(item?.state ?? 'open').toLowerCase() !== 'closed');
+
+  const limitedItems = args.limit ? filteredByState.slice(0, args.limit) : filteredByState;
 
   const queue = limitedItems.map((triageItem) => {
     const numberKey = String(triageItem.number);
@@ -382,6 +442,8 @@ async function main() {
       title: triageItem.title,
       htmlUrl: triageItem.htmlUrl,
       updatedAt: triageItem.updatedAt,
+      state: triageItem.state ?? fullIssue?.state ?? 'open',
+      lastCommentedAt: triageItem.lastCommentedAt ?? null,
       triageState: triageItem.triageState,
       commentsCount: triageItem.commentsCount,
       labels: triageItem.labels,
@@ -406,6 +468,7 @@ async function main() {
       issuesFile: args.issuesFile,
       triageCutoffIso: triageRaw?.cutoffIso ?? null,
       triageCount: triageRaw?.count ?? triageItems.length,
+      inputCountAfterStateFilter: filteredByState.length,
       classifiedCount: queue.length,
     },
     queue,

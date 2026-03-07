@@ -63,6 +63,16 @@ const COMMENTS_MAX_PER_ISSUE =
     ? Number.parseInt(process.env.OPENCLAW_ISSUES_COMMENTS_MAX_PER_ISSUE ?? '', 10)
     : 50;
 
+async function loadPreviousDataset(filePath) {
+  try {
+    const raw = await fs.readFile(filePath, 'utf8');
+    const json = JSON.parse(raw);
+    return Array.isArray(json?.issues) ? json : { issues: [] };
+  } catch {
+    return { issues: [] };
+  }
+}
+
 function getAuthHeader() {
   const envToken = process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim();
   if (envToken) return { Authorization: `Bearer ${envToken}` };
@@ -297,8 +307,33 @@ function normalizeIssueComment(comment) {
   };
 }
 
+function lastCommentedAt(issue) {
+  if (!Array.isArray(issue?.commentsData) || issue.commentsData.length === 0) return null;
+  return issue.commentsData.reduce((latest, comment) => {
+    const current =
+      typeof comment?.updatedAt === 'string' ? comment.updatedAt : (comment?.createdAt ?? null);
+    if (!current) return latest;
+    if (!latest || current > latest) return current;
+    return latest;
+  }, null);
+}
+
+function canReuseComments(previousIssue, currentIssue) {
+  if (!previousIssue || !Array.isArray(previousIssue.commentsData)) return false;
+  if ((previousIssue.comments ?? 0) !== (currentIssue.comments ?? 0)) return false;
+  if (!previousIssue.updatedAt || !currentIssue.updatedAt) return false;
+  return previousIssue.updatedAt === currentIssue.updatedAt;
+}
+
 async function main() {
   const channelTaxonomy = await loadChannelTaxonomyFromRef();
+  const previousDataset = await loadPreviousDataset(OUT_FILE);
+  const previousIssuesByNumber = new Map(
+    (Array.isArray(previousDataset?.issues) ? previousDataset.issues : []).map((issue) => [
+      String(issue.number),
+      issue,
+    ])
+  );
   const startUrl = `https://api.github.com/repos/${OWNER}/${REPO}/issues?state=all&per_page=100&sort=updated&direction=desc`;
   const sinceDate = resolveSinceDate();
 
@@ -338,16 +373,30 @@ async function main() {
 
   if (INCLUDE_COMMENTS) {
     const issuesWithComments = out.filter((i) => (i.comments || 0) > 0 && i._commentsUrl);
+    let reusedCount = 0;
+    let fetchedCount = 0;
+
     await runWithConcurrency(issuesWithComments, COMMENTS_CONCURRENCY, async (issue) => {
+      const previous = previousIssuesByNumber.get(String(issue.number));
+      if (canReuseComments(previous, issue)) {
+        issue.commentsData = previous.commentsData;
+        reusedCount += 1;
+        return;
+      }
+
       const commentUrl = withQuery(issue._commentsUrl, { per_page: 100 });
       const rawComments = await fetchAllPages(commentUrl);
       const normalized = rawComments.map(normalizeIssueComment);
       issue.commentsData =
         COMMENTS_MAX_PER_ISSUE === 0 ? normalized : normalized.slice(-COMMENTS_MAX_PER_ISSUE);
+      fetchedCount += 1;
     });
+
+    console.log(`Comments: reused ${reusedCount}, fetched ${fetchedCount}`);
   }
 
   for (const i of out) {
+    i.lastCommentedAt = lastCommentedAt(i);
     delete i._commentsUrl;
   }
 

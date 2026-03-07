@@ -8,9 +8,10 @@
 node skills/coclaw-solutions-maintainer/scripts/sync-openclaw-ref.mjs
 ```
 
-### Step 0.5：生成 KB 索引文档（推荐）
+### Step 0.5：生成 KB 索引文档（评论前必做）
 
 用于让 sub-agent 在回帖/写作前快速获取“站内页面链接 + OpenClaw 溯源入口”的上下文。
+如果这一轮会撰写或发布 GitHub comment，这一步应视为必做。
 
 ```bash
 pnpm kb:build
@@ -38,8 +39,10 @@ node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs --json 
 
 说明：
 
-- 默认只输出“新出现”issues
+- 默认只输出 **open issues** 里的“新出现”issues
 - 若要把“已处理但有新更新”的 issue 也纳入，可加 `--include-updated`
+- 若要排查 closed issues / 对账历史，可加 `--state-filter all`
+- state 文件现在会持久化更丰富的 issue 快照（`updatedAt/state/commentsCount/lastCommentedAt/...`），用于识别 reopened 与真正有新信息的 issue
 
 ### Step 3：生成分类建议队列
 
@@ -53,6 +56,19 @@ node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs \
 
 - 这是“建议”，不是最终结论
 - 最终动作必须基于完整阅读后决策
+- 默认会排除 closed issues；如要对账历史可加 `--include-closed`
+
+### Step 3.2：为具体 issue 推荐站内链接候选（强烈推荐）
+
+```bash
+node skills/coclaw-solutions-maintainer/scripts/recommend-site-links.mjs --issue <ISSUE_NUMBER>
+```
+
+说明：
+
+- 该脚本只输出候选链接与匹配理由，不替代人工判断
+- 适合在完整阅读 issue 后、撰写评论前使用
+- 若脚本给出的候选明显不贴题，以人工判断为准
 
 ### Step 3.5：可选生成分析报告
 
@@ -129,6 +145,7 @@ node skills/coclaw-solutions-maintainer/scripts/sync-openclaw-ref.mjs
 OPENCLAW_ISSUES_SINCE_HOURS=72 pnpm sync:issues
 node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs --json > .cache/coclaw-solutions-maintainer/triage-latest.json
 node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs --triage .cache/coclaw-solutions-maintainer/triage-latest.json --output .cache/coclaw-solutions-maintainer/classification-latest.json
+node skills/coclaw-solutions-maintainer/scripts/recommend-site-links.mjs --issue <ISSUE_NUMBER>
 pnpm analyze:issues
 ```
 
@@ -136,10 +153,12 @@ pnpm analyze:issues
 
 ```bash
 node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs --include-updated --json
+node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs --state-filter all --json
 ```
 
 ### classify 参数
 
 ```bash
 node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs --limit 50 --json
+node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs --include-closed --limit 50 --json
 ```

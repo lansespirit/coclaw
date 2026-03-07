@@ -15,6 +15,7 @@
     "astro": "astro",
     "tokens:check": "node scripts/check-tokens.mjs",
     "sync:issues": "node skills/coclaw-solutions-maintainer/scripts/sync-openclaw-issues.mjs",
+    "recommend:issue-links": "node skills/coclaw-solutions-maintainer/scripts/recommend-site-links.mjs",
     "generate:troubleshooting-stubs": "node scripts/generate-troubleshooting-stubs.mjs",
     "analyze:issues": "node skills/coclaw-solutions-maintainer/scripts/analyze-openclaw-issues.mjs",
     "test:config-generator": "tsx scripts/test-openclaw-config-generator.ts",

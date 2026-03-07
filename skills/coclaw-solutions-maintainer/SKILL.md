@@ -10,6 +10,7 @@ description: 'Maintain CoClaw troubleshooting content from recent OpenClaw issue
 - 每轮先同步 `.ref/openclaw` 到最新
 - 脚本只做“数据同步 + 初步分类建议”，不自动发评论
 - 增量 triage 与分类仅输出“建议队列”，不做最终决策
+- 站内链接推荐允许脚本给出候选，但最终贴哪个链接仍由人工/AI 决定
 
 ## 强约束（必须遵守）
 
@@ -27,6 +28,8 @@ description: 'Maintain CoClaw troubleshooting content from recent OpenClaw issue
   - `node skills/coclaw-solutions-maintainer/scripts/triage-recent-issues.mjs`
 - 分类建议（本 skill）
   - `node skills/coclaw-solutions-maintainer/scripts/classify-issues.mjs`
+- 站内链接候选推荐（本 skill）
+  - `node skills/coclaw-solutions-maintainer/scripts/recommend-site-links.mjs --issue <number>`
 - 趋势分析（可选，本 skill）
   - `node skills/coclaw-solutions-maintainer/scripts/analyze-openclaw-issues.mjs`
 
@@ -42,6 +45,8 @@ description: 'Maintain CoClaw troubleshooting content from recent OpenClaw issue
   - 仅负责 issues 同步与增量 triage
 - Agent C（Classifier）
   - 仅负责分类建议输出
+- Agent C2（Link Recommender）
+  - 仅负责为指定 issue 产出 1–5 个站内页面候选与匹配理由
 - Agent D（Resolver）
   - 逐条 issue 深读，给出最终动作建议
 - Agent E（Author）
