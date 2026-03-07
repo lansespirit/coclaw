@@ -1,0 +1,120 @@
+---
+title: "Telegram: preview streaming causes duplicate-looking replies or NO_REPLY flashes"
+description: "Fix Telegram preview-stream side effects by switching `channels.telegram.streaming` away from `partial`, restarting the gateway, and retesting with a clean session."
+kind: "solution"
+component: "channel"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "telegram"
+errorSignatures:
+  - "Telegram duplicate messages"
+  - "two messages appear, then one is deleted"
+  - "NO_REPLY"
+keywords:
+  - "telegram"
+  - "streaming"
+  - "partial"
+  - "preview"
+  - "duplicate reply"
+publishDate: 2026-03-07
+lastUpdated: 2026-03-07
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 38681
+    - 38603
+  docs:
+    - "https://docs.openclaw.ai/channels/telegram"
+    - "https://docs.openclaw.ai/cli/config"
+  guides:
+    - "/guides/telegram-setup"
+    - "/guides/openclaw-configuration"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- In Telegram, **two replies briefly appear and then one disappears**.
+- Or a reply that should end in `NO_REPLY` **flashes visible text first**, then gets suppressed.
+- The same agent turn may look normal in Web UI / Control UI, but look duplicated or flickery only in Telegram.
+- The problem is most likely when `channels.telegram.streaming` is `true`, `partial`, or another preview-streaming mode.
+
+## Cause
+
+Telegram preview streaming is a separate delivery path from the final reply.
+
+On current OpenClaw builds:
+
+- DMs can use Telegram native draft streaming (`sendMessageDraft`).
+- Groups/topics can use a preview message plus `editMessageText`.
+- `channels.telegram.streaming: "partial"` enables that live preview path.
+- `channels.telegram.streaming: "block"` skips preview streaming to avoid double-streaming.
+
+When the preview path and the final delivery/cleanup path overlap, Telegram can show a **temporary second visible message** or a **brief flash of text** before the final state settles.
+
+## Fix
+
+### 1) Switch Telegram to a non-preview mode
+
+Safest workaround:
+
+```bash
+openclaw config set channels.telegram.streaming "off"
+openclaw gateway restart
+```
+
+If you still want streaming-like behavior without the live preview path, try:
+
+```bash
+openclaw config set channels.telegram.streaming "block"
+openclaw gateway restart
+```
+
+Why this helps:
+
+- `off` removes the preview path entirely.
+- `block` avoids Telegram preview streaming while still keeping a cleaner final-delivery path than `partial`.
+
+### 2) Avoid legacy boolean/implicit streaming values
+
+If your config still uses an old boolean form such as `streaming: true`, normalize it to an explicit enum:
+
+```bash
+openclaw config set channels.telegram.streaming "off"
+```
+
+or:
+
+```bash
+openclaw config set channels.telegram.streaming "block"
+```
+
+This removes ambiguity around legacy auto-mapping.
+
+### 3) If your flow intentionally ends with `NO_REPLY`, keep the final text clean
+
+If an agent uses the `message` tool and then suppresses the final chat response, make sure the final assistant text is exactly `NO_REPLY` with no extra narration before it.
+
+That reduces the chance that Telegram preview streaming shows text that was never meant to become a visible final reply.
+
+## Verify
+
+- Send one plain-text Telegram prompt in a **fresh** DM or a single group/topic thread.
+- Confirm you now see **one stable visible reply only**.
+- Confirm the old symptom no longer happens:
+  - no second temporary reply,
+  - no “one message gets deleted a moment later”,
+  - no flash before `NO_REPLY` suppression.
+
+If the problem still happens with `channels.telegram.streaming: "off"`, it is more likely a **real duplicate-send bug** than a preview artifact. At that point, capture one clean repro with gateway/channel logs.
+
+## Related
+
+- [/guides/telegram-setup](/guides/telegram-setup)
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- OpenClaw docs: Telegram channel
+

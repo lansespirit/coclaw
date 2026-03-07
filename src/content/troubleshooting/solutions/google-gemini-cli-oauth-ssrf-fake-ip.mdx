@@ -1,0 +1,129 @@
+---
+title: "Google Gemini CLI OAuth: SSRF blocked because Google resolves to fake-ip/private addresses"
+description: "Fix `google-gemini-cli` login failures where OAuth domains resolve to special-use addresses by verifying DNS on the gateway host and disabling fake-ip/proxy rewriting for Google OAuth hosts."
+kind: "solution"
+component: "model"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "SsrFBlockedError"
+  - "Blocked: resolves to private/internal/special-use IP address"
+  - "oauth2.googleapis.com"
+keywords:
+  - "google-gemini-cli"
+  - "oauth"
+  - "ssrf"
+  - "fake-ip"
+  - "clash"
+publishDate: 2026-03-07
+lastUpdated: 2026-03-07
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 32873
+  docs:
+    - "https://docs.openclaw.ai/concepts/model-providers"
+    - "https://docs.openclaw.ai/cli/config"
+  guides:
+    - "/guides/openclaw-configuration"
+    - "/guides/openclaw-no-response-and-rate-limit-troubleshooting"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- `openclaw models auth login --provider google-gemini-cli --set-default` fails before OAuth completes.
+- Logs show:
+
+```text
+SsrFBlockedError: Blocked: resolves to private/internal/special-use IP address
+```
+
+- The blocked URL is often a Google OAuth/token host such as `oauth2.googleapis.com`.
+- Other tools on the same machine may still seem “online”, which makes this look confusing at first.
+
+## Cause
+
+This is usually **not** a bad Google token or a broken OpenClaw auth profile.
+
+The failure happens earlier:
+
+1. OpenClaw resolves a public Google OAuth hostname.
+2. Your local DNS/proxy layer rewrites that hostname to a **private or special-use address**.
+3. OpenClaw’s SSRF guard correctly rejects the request as unsafe.
+
+This often happens when the gateway host uses:
+
+- Clash or another fake-ip mode,
+- DNS hijacking/proxy DNS,
+- or a network stack that rewrites Google domains away from real public IPs.
+
+## Fix
+
+### 1) Verify what the gateway host resolves for Google OAuth
+
+On the same machine that runs OpenClaw, check the DNS answer first:
+
+```bash
+getent ahosts oauth2.googleapis.com
+```
+
+or:
+
+```bash
+dig oauth2.googleapis.com
+```
+
+or on Windows:
+
+```bash
+nslookup oauth2.googleapis.com
+```
+
+If the result is a private/special-use address instead of a normal public Google IP, continue below.
+
+### 2) Disable fake-ip / proxy rewriting for Google OAuth hosts
+
+If you use Clash or a similar DNS/proxy stack, move Google OAuth domains to a **real-IP / DIRECT / no-fake-ip** path.
+
+At minimum, test with:
+
+- `oauth2.googleapis.com`
+- `accounts.google.com`
+- `*.googleapis.com`
+
+Then rerun the login:
+
+```bash
+openclaw models auth login --provider google-gemini-cli --set-default
+```
+
+Why this helps: OpenClaw will only proceed when the resolved address looks like a real safe public destination.
+
+### 3) If you need a temporary fallback, use a non-OAuth provider path first
+
+If you need the environment working immediately, temporarily switch to an API-key-based provider while fixing DNS/proxy rules for `google-gemini-cli`.
+
+That lets you separate “overall OpenClaw config is healthy” from “Gemini CLI OAuth path is being rewritten locally”.
+
+## Verify
+
+- DNS lookup for `oauth2.googleapis.com` returns a normal public address on the gateway host.
+- `openclaw models auth login --provider google-gemini-cli --set-default` completes without `SsrFBlockedError`.
+- The resulting auth profile is available to the gateway host.
+
+If it still fails, capture:
+
+- the resolved IPs for `oauth2.googleapis.com`,
+- whether Clash/fake-ip/TUN/proxy DNS is enabled,
+- and the exact blocked host printed by OpenClaw.
+
+## Related
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
+- OpenClaw docs: Model providers
+

@@ -1,0 +1,129 @@
+---
+title: "macOS: gateway stays down after VPN reconnect"
+description: "Fix macOS cases where the OpenClaw gateway does not recover after a VPN/network drop by clearing cold-start config blockers and refreshing the launchd service install."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "macos"
+errorSignatures:
+  - "Gateway does not auto-recover after VPN reconnection"
+  - "launchd"
+keywords:
+  - "macos"
+  - "vpn"
+  - "launchd"
+  - "gateway restart"
+  - "doctor"
+publishDate: 2026-03-07
+lastUpdated: 2026-03-07
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 38682
+  docs:
+    - "https://docs.openclaw.ai/cli/doctor"
+    - "https://docs.openclaw.ai/install/updating"
+    - "https://docs.openclaw.ai/channels/telegram"
+  guides:
+    - "/guides/new-user-checklist"
+    - "/guides/updating-and-migration"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- A VPN drop or network interruption causes the gateway to stop.
+- After connectivity comes back, the gateway **does not recover by itself**.
+- `openclaw gateway restart` may help once, but the problem returns after the next drop.
+- On macOS, this often shows up as a **launchd-supervised gateway** that looks installed but does not reliably come back to a healthy running state.
+- In some setups, a config problem only becomes visible on cold start, so the gateway cannot self-heal after the VPN outage.
+
+## Cause
+
+This is usually **two problems stacked together**:
+
+1. The VPN/network outage is the first trigger that stops or destabilizes the gateway.
+2. When the gateway tries to come back, one of these recovery blockers prevents self-healing:
+   - **cold-start config validation fails**, or
+   - the macOS **launchd service install/runtime is stale** after updates or path changes.
+
+One common cold-start blocker is Telegram DM config:
+
+- if `channels.telegram.dmPolicy` is `"open"`, then `channels.telegram.allowFrom` must include `"*"`.
+
+If that invariant is broken, the gateway may seem fine while already running, but fail when it needs a clean restart after the VPN event.
+
+## Fix
+
+### 1) Make sure the gateway can cold-start cleanly
+
+Run doctor first:
+
+```bash
+openclaw doctor
+```
+
+If it reports repairable config issues, apply them:
+
+```bash
+openclaw doctor --fix
+```
+
+If you intentionally use Telegram DMs with `dmPolicy: "open"`, verify the allowlist is compatible:
+
+```bash
+openclaw config get channels.telegram.dmPolicy
+openclaw config get channels.telegram.allowFrom
+```
+
+If `dmPolicy` is `"open"`, ensure the running config includes `"*"` in `channels.telegram.allowFrom`.
+
+Why this helps: after a VPN drop, the gateway can only self-heal if a **clean restart path** is valid.
+
+### 2) Refresh the macOS supervised service install
+
+Rewrite the gateway service to current defaults, then restart it:
+
+```bash
+openclaw gateway install --force
+openclaw gateway restart
+```
+
+If you originally installed the daemon via onboarding, rerunning this is also fine:
+
+```bash
+openclaw onboard --install-daemon
+```
+
+Why this helps: if launchd is supervising an old runtime path, old package root, or stale service definition, a plain restart may not be enough.
+
+### 3) Re-test one network-loss cycle after both fixes
+
+Once config validity and service installation are both clean, reproduce one VPN disconnect/reconnect cycle and watch the gateway state:
+
+```bash
+openclaw gateway status
+openclaw status --deep
+```
+
+## Verify
+
+- `openclaw doctor` no longer reports blocking config errors.
+- `openclaw gateway status` shows the service as running after a restart.
+- After one VPN reconnect test, the gateway comes back without needing manual intervention.
+- Telegram/WhatsApp/other channels recover once the network path is back.
+
+If the gateway still stays down, collect:
+
+- `openclaw doctor` output,
+- `openclaw gateway status`,
+- `openclaw status --deep`,
+- and the first gateway logs after the VPN reconnect.
+
+## Related
+
+- [/guides/updating-and-migration](/guides/updating-and-migration)
+- [/guides/new-user-checklist](/guides/new-user-checklist)
+- [/troubleshooting/solutions/config-validation-failed](/troubleshooting/solutions/config-validation-failed)
+
