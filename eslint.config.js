@@ -5,7 +5,7 @@ import tsparser from '@typescript-eslint/parser';
 export default [
   // Generated / vendored output should never be linted.
   {
-    ignores: ['dist/**', '.astro/**', 'node_modules/**', '.ref/**'],
+    ignores: ['dist/**', '.astro/**', 'node_modules/**', '.ref/**', '.tmp-openclaw-inspect/**'],
   },
   ...eslintPluginAstro.configs.recommended,
   {

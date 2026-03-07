@@ -84,6 +84,7 @@ wrangler.toml.local
 
 # Local reference repos (cloned for offline source analysis)
 .ref/
+.tmp-openclaw-inspect/
 
 # Husky (keep the directory but ignore generated files)
 .husky/_/

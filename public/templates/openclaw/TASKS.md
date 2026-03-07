@@ -26,37 +26,37 @@ Tip: if you can’t answer “what happened?” from this file + artifacts, the 
 ### Backlog
 
 - [ ] **ID:** `T-000` **Title:** Replace with your task title  
-      **Owner:** `you|agent` **Created:** `YYYY-MM-DD` **Updated:** `YYYY-MM-DD`  
-      **Definition of done:** (one sentence, testable)  
-      **Inputs:** (links, file paths)  
-      **Notes:**  
-      **Artifacts:** (add paths as they are produced)
+       **Owner:** `you|agent` **Created:** `YYYY-MM-DD` **Updated:** `YYYY-MM-DD`  
+       **Definition of done:** (one sentence, testable)  
+       **Inputs:** (links, file paths)  
+       **Notes:**  
+       **Artifacts:** (add paths as they are produced)
 
 ### Doing
 
 - [ ] **ID:** `T-001` **Title:** Example: Daily email digest  
-      **Owner:** `cron` **Created:** `YYYY-MM-DD` **Updated:** `YYYY-MM-DD`  
-      **Definition of done:** A report file exists for today and a summary was delivered.  
-      **Inputs:** `inbox:automation@domain`, `filter:label=alerts`  
-      **Notes:** Keep this read-only unless you have explicit approval gates.  
-      **Artifacts:**
+       **Owner:** `cron` **Created:** `YYYY-MM-DD` **Updated:** `YYYY-MM-DD`  
+       **Definition of done:** A report file exists for today and a summary was delivered.  
+       **Inputs:** `inbox:automation@domain`, `filter:label=alerts`  
+       **Notes:** Keep this read-only unless you have explicit approval gates.  
+       **Artifacts:**
   - `reports/email-digest/2026-03-02.md`
 
 ### Blocked
 
 - [ ] **ID:** `T-002` **Title:** Example: Browser automation keeps timing out  
-      **Owner:** `you` **Created:** `YYYY-MM-DD` **Updated:** `YYYY-MM-DD`  
-      **Blocked on:** Missing deps / rate limit / site protection / unclear repro  
-      **Next step:** Reduce to minimal repro and capture logs.  
-      **Artifacts:**
+       **Owner:** `you` **Created:** `YYYY-MM-DD` **Updated:** `YYYY-MM-DD`  
+       **Blocked on:** Missing deps / rate limit / site protection / unclear repro  
+       **Next step:** Reduce to minimal repro and capture logs.  
+       **Artifacts:**
   - `reports/browser/timeout-repro.md`
 
 ### Done
 
 - [x] **ID:** `T-003` **Title:** Example: Telegram bot enabled and responding  
-      **Owner:** `you` **Created:** `YYYY-MM-DD` **Updated:** `YYYY-MM-DD`  
-      **Definition of done:** `openclaw channels status --probe` reports healthy and bot responds in DM.  
-      **Artifacts:**
+       **Owner:** `you` **Created:** `YYYY-MM-DD` **Updated:** `YYYY-MM-DD`  
+       **Definition of done:** `openclaw channels status --probe` reports healthy and bot responds in DM.  
+       **Artifacts:**
   - `reports/telegram/verification.md`
 
 ---
