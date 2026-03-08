@@ -1,0 +1,107 @@
+---
+title: "Document uploads (XLS/XLSX) blow out the context window"
+description: "Work around spreadsheet uploads that explode the context window by avoiding raw XLS/XLSX injection, using smaller intermediary formats such as CSV, and proving the failure with run/log evidence."
+kind: "solution"
+component: "model"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "context limit exceeded"
+  - "content_size="
+  - "XLS/XLSX"
+keywords:
+  - "xlsx"
+  - "xls"
+  - "document upload"
+  - "context window"
+  - "discord"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 39180
+  docs:
+    - "https://docs.openclaw.ai/nodes/media-understanding"
+    - "https://docs.openclaw.ai/help/troubleshooting"
+  guides:
+    - "/guides/openclaw-no-response-and-rate-limit-troubleshooting"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Uploading an `.xls` or `.xlsx` file makes the session suddenly become huge, slow, or unstable.
+- The agent appears to lose context, reset, or fail before it can meaningfully process the document.
+- Logs or run evidence show extremely large content blocks, for example a giant `content_size=` entry.
+- This is especially painful when the real goal was simple, such as “summarize this spreadsheet” or “extract a few rows.”
+
+## Cause
+
+In affected flows, the spreadsheet content gets converted into a **very large text block too early** and injected directly into the model context.
+
+That means the agent does **not** get a chance to choose a smarter path first (for example: save to disk, convert to CSV, read only selected rows, or use a tool on demand). Instead, the whole document can be expanded into context immediately.
+
+For large spreadsheets, that can exceed practical context limits or consume so much context budget that the rest of the turn becomes unreliable.
+
+## Fix
+
+### 1) Prefer CSV when possible
+
+If the file is under your control, convert or export it to CSV before upload.
+
+Why this helps: CSV is easier to chunk, inspect, and process predictably than raw XLS/XLSX conversions that can produce huge text payloads.
+
+### 2) Avoid “inject the whole spreadsheet into chat” workflows
+
+For large files, prefer workflows where the file is handled as a file/tool input rather than as raw full-text chat content.
+
+High-value pattern:
+
+- keep the spreadsheet as a file,
+- convert/extract only the sheet or range you need,
+- then pass the smaller result into the model.
+
+Why this helps: it keeps the model context focused on the useful subset instead of spending tokens on the entire workbook.
+
+### 3) Prove the failure mode with logs before changing many settings
+
+If you suspect raw spreadsheet injection, capture evidence that the context ballooned immediately after upload.
+
+Look for:
+
+- a huge `content_size=` entry,
+- session resets right after the attachment,
+- or turns where the model never reaches the intended task because the upload itself consumed the context budget.
+
+Why this helps: it distinguishes “this file exploded the context window” from unrelated issues such as bad model auth, rate limits, or a broken channel.
+
+### 4) Treat media/document size settings carefully
+
+If you try generic size limits and files simply disappear or are silently dropped, that may not mean the root problem is solved. It may only mean the file is being blocked earlier.
+
+The real goal is not just “make the error disappear.” The goal is to keep a usable workflow for structured data.
+
+## Verify
+
+- The same task works when the spreadsheet is reduced to CSV or a smaller extracted subset.
+- Uploading the smaller file no longer causes an immediate context blow-up or unstable turn.
+- Logs/runs no longer show the giant `content_size=` spike from the original spreadsheet.
+
+If the problem persists, collect:
+
+- the file type and approximate size,
+- the channel used,
+- one log snippet showing the oversized content block,
+- and whether the same task works when the sheet is converted to CSV first.
+
+## Related
+
+- [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- [/troubleshooting/solutions/model-outputs-historical-context-tool-call-text](/troubleshooting/solutions/model-outputs-historical-context-tool-call-text)
+- [/troubleshooting/solutions/discord-connected-but-no-replies-in-guild](/troubleshooting/solutions/discord-connected-but-no-replies-in-guild)

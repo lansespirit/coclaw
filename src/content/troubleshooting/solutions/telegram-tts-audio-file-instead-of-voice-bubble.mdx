@@ -1,0 +1,135 @@
+---
+title: "Telegram TTS: audio is sent as a file instead of a voice bubble (or gets sent twice)"
+description: "Fix Telegram TTS replies that arrive as normal audio files instead of voice bubbles, or that produce both an audio attachment and a second narrative message, by checking provider/output format and per-session TTS prefs."
+kind: "solution"
+component: "channel"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "telegram"
+errorSignatures:
+  - "voice bubble"
+  - "audio file instead of voice note"
+  - "duplicate replies"
+keywords:
+  - "tts"
+  - "telegram"
+  - "voice bubble"
+  - "edge tts"
+  - "audio_as_voice"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 39194
+  docs:
+    - "https://docs.openclaw.ai/tts"
+    - "https://docs.openclaw.ai/channels/telegram"
+  guides:
+    - "/guides/telegram-setup"
+    - "/guides/openclaw-configuration"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- You enable TTS in Telegram and receive a **normal audio file** instead of a round **voice bubble**.
+- Or one agent reply turns into **two visible outputs**, for example:
+  - one audio attachment,
+  - plus a second narrative text reply.
+- Changing `~/.openclaw/settings/tts.json` or main config seems inconsistent, and it is not obvious which setting actually won.
+- This often shows up when using **Edge TTS** for Telegram.
+
+## Cause
+
+This is usually a combination of **output format mismatch** and **TTS mode confusion**.
+
+There are three important pieces here:
+
+1. **Provider / output format**
+   - Telegram voice-note UX works best when the TTS result is Telegram-friendly voice media.
+   - Edge TTS defaults to an MP3-style output format, which Telegram can treat as a normal audio file instead of a voice bubble.
+2. **Per-session TTS preferences**
+   - `/tts` commands write local overrides to `~/.openclaw/settings/tts.json`.
+   - Those local prefs can override `messages.tts.*` in the main config on that host.
+3. **Auto-TTS behavior**
+   - If auto-TTS is always on, the agent may produce an audio result and still emit normal narrative text, which can look like a duplicate reply.
+
+So the problem is not always “Telegram is broken.” It is often:
+
+- the wrong output format for Telegram voice-note UX,
+- plus a TTS mode that is too eager for the workflow.
+
+## Fix
+
+### 1) Check which provider and mode are actually active
+
+In Telegram, run:
+
+```text
+/tts status
+```
+
+If the provider/mode shown there is not what you expected, remember that `/tts` prefs can override your main config.
+
+Why this helps: it tells you whether you are debugging the main config or a per-session override.
+
+### 2) If you want Telegram voice bubbles, avoid Edge's default MP3-style output
+
+If you want the most predictable Telegram voice-note behavior, prefer a provider/output that produces Telegram-friendly voice media.
+
+If you are testing Edge specifically, set an OGG/Opus-style output format in your config and restart the gateway.
+
+Why this helps: Edge's default output format is commonly treated as a normal audio file, not a voice bubble.
+
+### 3) Reduce accidental double-send behavior
+
+If you are seeing both audio and text, switch from always-on auto TTS to a more controlled mode such as tagged or one-off usage.
+
+Examples:
+
+```text
+/tts tagged
+```
+
+or use one-off generation only when you want audio:
+
+```text
+/tts audio 你好，这是测试。
+```
+
+Why this helps: it prevents every reply from automatically trying to become audio while the agent also emits normal text narration.
+
+### 4) If `/tts` preferences are stale, reset them intentionally
+
+Because `/tts` commands write local prefs, it is easy to think a config edit failed when a local override is still active.
+
+Re-run the exact `/tts` commands you want for the current session, then re-check:
+
+```text
+/tts status
+```
+
+## Verify
+
+- Telegram now shows a **voice bubble** when you expect one, instead of a generic audio file.
+- One assistant turn no longer produces both an audio send and a second unwanted narrative reply.
+- `/tts status` matches the provider/mode you intended.
+
+If it still fails, collect these exact details:
+
+- `/tts status`
+- your `messages.tts.*` config block
+- whether the problem happens only with Edge or also with OpenAI/ElevenLabs
+- whether the reply was generated with `/tts audio`, `always`, `inbound`, or `tagged`
+
+## Related
+
+- [/guides/telegram-setup](/guides/telegram-setup)
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- [/troubleshooting/solutions/telegram-preview-streaming-duplicate-or-flash](/troubleshooting/solutions/telegram-preview-streaming-duplicate-or-flash)
+- OpenClaw docs: TTS

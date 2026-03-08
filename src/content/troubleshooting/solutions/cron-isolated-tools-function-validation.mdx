@@ -1,0 +1,106 @@
+---
+title: "Cron: isolated jobs fail with 'Field required' on tools.function"
+description: "Work around isolated cron job failures that reject tool definitions with `Field required` on `tools.function` by temporarily switching the job to the main-session systemEvent path."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "Field required"
+  - "tools.function"
+  - "sessionTarget: \"isolated\""
+keywords:
+  - "cron"
+  - "isolated"
+  - "agentTurn"
+  - "tools.function"
+  - "validation"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 39359
+  docs:
+    - "https://docs.openclaw.ai/automation/cron-jobs"
+    - "https://docs.openclaw.ai/cli/cron"
+  guides:
+    - "/guides/openclaw-cron-and-heartbeat-24x7"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- A cron job is configured with `sessionTarget: "isolated"`.
+- The run fails before the agent turn really starts.
+- Logs or run details show validation errors like:
+  - `Field required`
+  - `tools.function`
+- This usually appears on jobs using `payload.kind: "agentTurn"`.
+
+## Cause
+
+This is usually a regression in the **isolated cron session path**, not a bad prompt.
+
+Main-session cron jobs and isolated cron jobs do **not** go through exactly the same execution path:
+
+- `sessionTarget: "main"` uses a `systemEvent` payload routed through the main heartbeat/session flow.
+- `sessionTarget: "isolated"` uses a dedicated isolated agent-turn path.
+
+In affected versions, the isolated path can reject tool definitions with a stricter or mismatched schema expectation, so the run fails on `tools[*].function` before normal execution begins.
+
+## Fix
+
+### 1) Move the job to the main session temporarily
+
+Edit the job so it runs on the main session instead of the isolated one:
+
+```bash
+openclaw cron edit <job-id> --session main --system-event "<your existing prompt text>"
+```
+
+If the job was previously created with `--message`, convert that message into the `--system-event` text you want the main agent to receive.
+
+Why this helps: the main-session `systemEvent` path avoids the isolated tool-schema validation path that is currently failing.
+
+### 2) If the job had announce delivery enabled, disable it while testing
+
+```bash
+openclaw cron edit <job-id> --no-deliver
+```
+
+Why this helps: announce delivery is only relevant to isolated-style output delivery. Turning it off removes one extra moving part while you verify the core cron run works again.
+
+### 3) Run the job manually and inspect run history
+
+```bash
+openclaw cron run <job-id>
+openclaw cron runs --id <job-id> --limit 20
+```
+
+If the job must remain isolated long-term, keep the old config notes somewhere safe and switch back only after the upstream fix lands.
+
+## Verify
+
+- `openclaw cron run <job-id>` completes without the `tools.function` validation error.
+- `openclaw cron runs --id <job-id> --limit 20` shows a successful run.
+- The job now leaves evidence in the main session path (system event, output artifact, explicit message, or whatever your workflow expects).
+
+If it still fails after switching to `main + systemEvent`, collect:
+
+- `openclaw cron get <job-id>` output,
+- the latest `openclaw cron runs --id <job-id> --limit 20`,
+- and the exact validation error text.
+
+That usually means the problem is no longer isolated to the isolated-session path.
+
+## Related
+
+- [/guides/openclaw-cron-and-heartbeat-24x7](/guides/openclaw-cron-and-heartbeat-24x7)
+- [/troubleshooting/solutions/cron-jobs-not-firing-next-run-advances](/troubleshooting/solutions/cron-jobs-not-firing-next-run-advances)
+- [/troubleshooting/solutions/cron-announce-sends-summary-instead-of-full-output](/troubleshooting/solutions/cron-announce-sends-summary-instead-of-full-output)
+- OpenClaw docs: Cron Jobs

@@ -273,6 +273,18 @@ Dedicated fix page:
 
 - [/troubleshooting/solutions/telegram-plugin-configured-but-disabled](/troubleshooting/solutions/telegram-plugin-configured-but-disabled)
 
+### Pitfall: "TTS arrives as an audio file" / "Telegram sends two outputs"
+
+If Telegram TTS sends a normal audio file instead of a round voice bubble, or one turn produces both audio and a second narrative reply, the problem is usually one of these:
+
+- Edge TTS output format is not ideal for Telegram voice-note UX
+- `/tts` local prefs are overriding the main config
+- auto-TTS mode is too aggressive for the workflow
+
+Dedicated fix page:
+
+- [/troubleshooting/solutions/telegram-tts-audio-file-instead-of-voice-bubble](/troubleshooting/solutions/telegram-tts-audio-file-instead-of-voice-bubble)
+
 ### Pitfall: "`setMyCommands failed` / `sendMessage` failures"
 
 This usually means the gateway host cannot reliably reach `api.telegram.org`:

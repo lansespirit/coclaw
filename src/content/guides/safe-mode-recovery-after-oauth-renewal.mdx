@@ -1,0 +1,176 @@
+---
+title: "OpenClaw Safe Mode Recovery After OAuth Renewal: auth-profiles.json vs provisioned copy"
+description: "Understand why OpenClaw recovery can keep looping after a successful OAuth renewal, and how to resync the live auth file, the provisioned copy, and safe-mode markers."
+category: "advanced"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows"
+  - "Docker"
+  - "Self-hosted"
+time: "15 min"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+steps:
+  - title: "Understand the two auth files"
+    content: "Recovery can read a different file than the live gateway writes."
+  - title: "Resync live auth into the provisioned copy"
+    content: "After renewal, copy the fresh auth state into the file recovery prefers."
+  - title: "Clear stale safe-mode markers"
+    content: "Otherwise recovery may keep re-entering the same loop even after auth is fixed."
+  - title: "Probe before declaring success"
+    content: "Verify both auth and recovery state, not just one of them."
+keywords:
+  - "oauth"
+  - "safe mode"
+  - "recovery"
+  - "auth-profiles.json"
+  - "auth-profiles.provisioned.json"
+---
+
+When OAuth renewal “works” but the host still keeps falling back into recovery or safe mode, the problem is often **not** that the new token is bad.
+
+The more common failure is: **the gateway updated the live auth file, but recovery still reads an older provisioned copy**.
+
+This guide explains the two-file model and the minimal recovery procedure that usually gets the system healthy again.
+
+---
+
+## 1) The symptom pattern
+
+A common sequence looks like this:
+
+1. You run a successful OAuth renewal or `openclaw onboard` flow.
+2. The gateway starts using the refreshed credential in the live runtime path.
+3. Later, safe-mode recovery or a repair script runs.
+4. Recovery reads an older auth snapshot and decides auth is still broken.
+5. The machine falls back into the same recovery loop again.
+
+From the operator point of view, this feels like:
+
+- “OAuth renewal succeeded, but the machine still thinks auth is broken.”
+- “I fixed it once, but the next recovery cycle undid it.”
+- “The gateway and the recovery script seem to disagree about which auth state is real.”
+
+---
+
+## 2) The two-file model
+
+In affected setups, there are effectively **two sources of truth** for auth state:
+
+- `~/.openclaw/agents/main/agent/auth-profiles.json`
+  - the **live** copy
+  - the gateway reads/writes this during normal operation
+- `~/.openclaw/agents/main/agent/auth-profiles.provisioned.json`
+  - the **provisioned / golden** copy
+  - recovery may prefer this file because it is intended to survive bad runtime persistence or partial shutdowns
+
+That design can be reasonable, but it creates an operational trap:
+
+- successful re-auth may update the **live** file,
+- while recovery still trusts the **provisioned** file,
+- so the next recovery cycle reintroduces stale auth state.
+
+If you do not keep the two in sync after renewal, recovery can keep using old credentials even though the gateway had already moved on.
+
+---
+
+## 3) Minimal recovery procedure after OAuth renewal
+
+### 3.1 Copy the fresh live auth file into the provisioned copy
+
+After a successful renewal, sync the two files:
+
+```bash
+cp ~/.openclaw/agents/main/agent/auth-profiles.json \
+   ~/.openclaw/agents/main/agent/auth-profiles.provisioned.json
+```
+
+Why this helps: it makes the next recovery cycle read the same fresh auth state the gateway is already using.
+
+### 3.2 Clear stale safe-mode markers if your environment uses them
+
+If the host is already stuck in a recovery loop, clear the markers that keep forcing re-entry:
+
+```bash
+sudo rm -f /var/lib/init-status/safe-mode
+echo 0 | sudo tee /var/lib/init-status/recovery-attempts
+```
+
+Why this helps: even after auth is fixed, some environments will keep re-running the recovery path until the safe-mode marker and attempt counter are cleared.
+
+### 3.3 Re-run your normal recovery/restart path
+
+Depending on your host, that might be:
+
+- a supervisor restart,
+- a recovery script,
+- or a service restart that performs a health check and exits safe mode.
+
+The exact command varies by deployment, but the key idea is: **resync files first, clear stale state second, restart third**.
+
+---
+
+## 4) How to verify the fix actually stuck
+
+Do not stop at “the copy command succeeded.” Verify all three layers:
+
+### 4.1 Verify the auth files now match
+
+Check timestamps and, if needed, compare contents:
+
+```bash
+ls -l ~/.openclaw/agents/main/agent/auth-profiles*.json
+```
+
+### 4.2 Verify model auth from OpenClaw itself
+
+```bash
+openclaw models status --probe
+```
+
+You want to confirm the provider is usable, not just that files exist.
+
+### 4.3 Verify recovery stops re-entering safe mode
+
+After the next restart or repair cycle:
+
+- the host should stay out of safe mode,
+- the same broken auth diagnosis should not immediately return,
+- and model calls should keep succeeding.
+
+---
+
+## 5) When this guide applies vs when it does not
+
+This guide is a good fit when:
+
+- renewal/auth setup appears successful,
+- but later recovery still behaves like auth is stale,
+- especially on hosts with custom recovery scripts or hardened safe-mode flows.
+
+This guide is **not** the main fix when:
+
+- the provider token itself is actually expired or invalid,
+- you never successfully renewed auth in the first place,
+- or your config points at the wrong provider/profile entirely.
+
+In those cases, start with the shorter auth troubleshooting pages first.
+
+---
+
+## 6) Operational habit to adopt
+
+If your deployment uses a provisioned/golden auth copy, treat OAuth renewal as a **two-step** operation:
+
+1. renew the live auth,
+2. resync the provisioned copy.
+
+That small habit prevents a lot of “it was fixed until the next recovery cycle” incidents.
+
+## Related
+
+- [/troubleshooting/solutions/oauth-token-refresh-failed](/troubleshooting/solutions/oauth-token-refresh-failed)
+- [/troubleshooting/solutions/auth-profile-provider-removed-config-invalid](/troubleshooting/solutions/auth-profile-provider-removed-config-invalid)
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)

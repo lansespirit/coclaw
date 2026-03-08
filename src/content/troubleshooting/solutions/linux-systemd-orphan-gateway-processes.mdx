@@ -1,0 +1,126 @@
+---
+title: "Linux/systemd: OpenClaw leaves orphan gateway processes or port 18789 conflicts"
+description: "Fix Linux hosts where CLI-triggered gateway respawn collides with a systemd-managed OpenClaw gateway, causing orphan processes, EADDRINUSE, or 'another gateway instance is already listening'."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "linux"
+channel: []
+errorSignatures:
+  - "another gateway instance is already listening"
+  - "Gateway already running locally"
+  - "Port 18789 is already in use"
+keywords:
+  - "systemd"
+  - "openclaw-gateway.service"
+  - "OPENCLAW_NO_RESPAWN"
+  - "EADDRINUSE"
+  - "gateway restart"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 39222
+  docs:
+    - "https://docs.openclaw.ai/gateway"
+    - "https://docs.openclaw.ai/platforms/linux"
+    - "https://docs.openclaw.ai/vps"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- You already have a systemd-managed OpenClaw gateway running.
+- After certain CLI flows, you see extra `openclaw` / `openclaw-gateway` processes.
+- Gateway operations begin failing with messages like:
+  - `another gateway instance is already listening`
+  - `Gateway already running locally`
+  - `Port 18789 is already in use`
+- The problem often appears after commands such as:
+  - `openclaw gateway restart`
+  - `openclaw agent --local ...`
+  - gateway failure/fallback paths that try to recover automatically
+
+## Cause
+
+On Linux hosts that already use `systemd --user` to supervise the gateway, the safest owner of the gateway process is **systemd**.
+
+In affected setups, a CLI-triggered restart/fallback path can still attempt a local respawn or detached child process. That creates two competing worlds:
+
+- the **real** systemd-managed gateway,
+- and an extra CLI-spawned gateway process.
+
+When both try to own the same state and port (`18789` by default), you get duplicate processes, port conflicts, or confusing probe results.
+
+## Fix
+
+### 1) Restart the gateway through systemd, not through a generic CLI restart path
+
+Use:
+
+```bash
+systemctl --user restart openclaw-gateway.service
+```
+
+Then verify:
+
+```bash
+systemctl --user status openclaw-gateway.service
+openclaw gateway status
+```
+
+Why this helps: systemd already owns the long-running gateway. Restarting through the supervisor keeps process ownership consistent.
+
+### 2) Disable CLI self-respawn in your shell/session
+
+Export this before running OpenClaw commands on that host:
+
+```bash
+export OPENCLAW_NO_RESPAWN=1
+```
+
+If this is your normal server workflow, add it to the shell profile used for maintenance.
+
+Why this helps: it prevents CLI-triggered self-respawn from creating extra unmanaged gateway children that collide with the supervised service.
+
+### 3) Avoid `--local` fallback flows on the affected host until fixed
+
+If a command path tends to fall back into local execution or local gateway startup, avoid that path temporarily and prefer:
+
+- the already running gateway,
+- supervisor restarts,
+- and explicit service checks.
+
+## Verify
+
+Check that only one gateway owner remains:
+
+```bash
+systemctl --user status openclaw-gateway.service
+ps -ef | grep openclaw
+```
+
+Healthy state usually looks like:
+
+- one systemd-managed gateway service,
+- no extra detached `openclaw-gateway` child from a previous CLI restart,
+- no more `EADDRINUSE` / `already listening` errors.
+
+If duplicates still appear, collect immediately after reproducing:
+
+```bash
+ps -ef | grep openclaw
+systemctl --user status openclaw-gateway.service
+openclaw gateway status
+```
+
+That usually reveals whether the extra process came from systemd, a second install path, or a CLI self-respawn path.
+
+## Related
+
+- [/troubleshooting/solutions/linux-gateway-service-not-installed](/troubleshooting/solutions/linux-gateway-service-not-installed)
+- [/troubleshooting/solutions/gateway-lock-eaddrinuse](/troubleshooting/solutions/gateway-lock-eaddrinuse)
+- [/troubleshooting/solutions/gateway-service-running-but-probe-fails](/troubleshooting/solutions/gateway-service-running-but-probe-fails)
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)

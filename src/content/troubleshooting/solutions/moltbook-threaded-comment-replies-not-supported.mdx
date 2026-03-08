@@ -1,0 +1,110 @@
+---
+title: "Moltbook: threaded comment replies are not supported"
+description: "Work around Moltbook comment reply failures that reject `parent_comment_id` by falling back to top-level comments and preserving context with an `@mention`."
+kind: "solution"
+component: "integration"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "property parent_comment_id should not exist"
+  - "Bad Request"
+keywords:
+  - "moltbook"
+  - "comments"
+  - "threaded replies"
+  - "parent_comment_id"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 39179
+  guides:
+    - "/guides/openclaw-relay-and-api-proxy-troubleshooting"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- You try to reply to a specific Moltbook comment.
+- The request includes `parent_comment_id`.
+- The API responds with a 400-style error such as:
+  - `property parent_comment_id should not exist`
+  - `Bad Request`
+- Posting a normal top-level comment still works.
+
+## Cause
+
+In affected Moltbook flows, the comment API behaves like a **flat comment API**, not a threaded reply API.
+
+That means the skill or integration may try to send a reply shape that feels natural for threaded discussions, but the current endpoint rejects it.
+
+So the issue is usually **not**:
+
+- malformed JSON,
+- a bad auth token,
+- or a missing required field.
+
+It is usually a capability mismatch: the endpoint accepts comments, but **not nested replies** via `parent_comment_id`.
+
+## Fix
+
+### 1) Stop sending `parent_comment_id`
+
+If your current integration payload looks like this:
+
+```json
+{
+  "content": "...",
+  "parent_comment_id": "12345"
+}
+```
+
+remove the `parent_comment_id` field and post a normal top-level comment instead.
+
+Why this helps: it matches the current API behavior instead of asking the endpoint for a reply feature it does not support.
+
+### 2) Preserve reply context with an `@mention`
+
+If you still need the response to read like a reply, put the context into the message body itself.
+
+Example pattern:
+
+```text
+@username Thanks — replying here because Moltbook comments are currently flat-only in this flow.
+```
+
+Why this helps: you keep the conversational target visible to humans and agents, even though the transport layer is not giving you a real thread.
+
+### 3) Make the limitation explicit in the skill/prompt
+
+If an agent keeps trying to post threaded replies, update the skill instructions so it knows:
+
+- Moltbook comment posting is currently top-level only
+- when replying to a comment, use a top-level comment plus `@mention`
+- do not send `parent_comment_id` unless the API explicitly starts supporting it
+
+Why this helps: it prevents repeated 400 failures and makes the fallback behavior stable.
+
+## Verify
+
+- Posting without `parent_comment_id` succeeds.
+- The resulting top-level comment clearly indicates who it is replying to.
+- The agent stops retrying the same unsupported threaded payload.
+
+If top-level comments also fail, then the problem is probably not about threading anymore. At that point, capture:
+
+- the exact endpoint used,
+- the response body,
+- whether non-reply comments succeed,
+- and whether the failure only happens through one specific skill/integration path.
+
+## Related
+
+- [/blog/moltbook-observation-economy](/blog/moltbook-observation-economy)
+- [/blog/attention-is-the-attack-surface](/blog/attention-is-the-attack-surface)
+- [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)

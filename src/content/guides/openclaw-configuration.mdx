@@ -441,6 +441,8 @@ When you share logs publicly, redact:
 | `/model` says "model not allowed" | `agents.defaults.models` allowlist blocks selection | `openclaw config get agents.defaults.models` | [/troubleshooting/solutions/model-not-allowed/](/troubleshooting/solutions/model-not-allowed/) |
 | Ollama configured but runtime still falls back | Endpoint unreachable from gateway runtime, or model catalog mismatch | Probe: `openclaw models status --probe` | [/troubleshooting/solutions/ollama-configured-but-falls-back-to-anthropic/](/troubleshooting/solutions/ollama-configured-but-falls-back-to-anthropic/) |
 | Docker shows `openclaw.json.*.tmp` EACCES | Bind-mounted state dir isn't writable by container uid | Fix uid/gid or mount ownership | [/troubleshooting/solutions/docker-eacces-openclaw-config-dir/](/troubleshooting/solutions/docker-eacces-openclaw-config-dir/) |
+| OAuth renewal succeeded but recovery still loops | Live auth updated, but recovery still trusts stale provisioned auth/safe-mode state | Resync auth files, clear stale safe-mode markers, then probe again | [/guides/safe-mode-recovery-after-oauth-renewal](/guides/safe-mode-recovery-after-oauth-renewal) |
+| Linux host keeps spawning duplicate gateways | CLI respawn path is colliding with a systemd-managed gateway | Restart through `systemctl --user` and set `OPENCLAW_NO_RESPAWN=1` | [/troubleshooting/solutions/linux-systemd-orphan-gateway-processes](/troubleshooting/solutions/linux-systemd-orphan-gateway-processes) |
 | Telegram bot \"connects\" but nothing arrives | Bot not in group / privacy mode / mis-set group policy | Follow Telegram guide + validate updates | [/guides/telegram-setup](/guides/telegram-setup) |
 | You want a safe config without hand-editing JSON | You need a schema-aligned baseline | Use the generator, then iterate with CLI edits | [/openclaw-config-generator](/openclaw-config-generator) |
 
@@ -454,6 +456,10 @@ When you share logs publicly, redact:
   - [/troubleshooting/solutions/model-not-allowed/](/troubleshooting/solutions/model-not-allowed/)
 - Telegram setup:
   - [/guides/telegram-setup](/guides/telegram-setup)
+- OAuth recovery loops after renewal:
+  - [/guides/safe-mode-recovery-after-oauth-renewal](/guides/safe-mode-recovery-after-oauth-renewal)
+- Linux/systemd duplicate gateway processes:
+  - [/troubleshooting/solutions/linux-systemd-orphan-gateway-processes](/troubleshooting/solutions/linux-systemd-orphan-gateway-processes)
 - WhatsApp setup:
   - [/guides/whatsapp-setup](/guides/whatsapp-setup)
 
