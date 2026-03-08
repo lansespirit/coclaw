@@ -2,170 +2,559 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
-import { UserStoryCard } from '../../components/UserStoryCard';
-import { Button } from '@heroui/react';
-import { IconQuote } from '../../components/icons';
+import {
+  IconArrowRight,
+  IconCollection,
+  IconDocumentText,
+  IconQuote,
+  IconShieldCheckSolid,
+} from '../../components/icons';
 
 const storyEntries = await getCollection('stories', ({ data }) => !data.draft);
-const userStories = storyEntries
-  .sort((a, b) => {
-    if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
-    return b.data.publishDate.getTime() - a.data.publishDate.getTime();
+const dateFormatter = new Intl.DateTimeFormat('en', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
+
+const stories = storyEntries
+  .sort((leftEntry, rightEntry) => {
+    if (leftEntry.data.featured !== rightEntry.data.featured) {
+      return leftEntry.data.featured ? -1 : 1;
+    }
+
+    return rightEntry.data.publishDate.getTime() - leftEntry.data.publishDate.getTime();
   })
   .map((entry) => ({
     name: entry.data.name,
     role: entry.data.role,
+    company: entry.data.company,
     quote: entry.data.quote,
+    summary: entry.data.summary,
     href: `/stories/${entry.slug}`,
     featured: entry.data.featured,
     avatar: entry.data.avatar,
+    coverImage: entry.data.coverImage,
+    publishDate: entry.data.publishDate,
+    publishLabel: dateFormatter.format(entry.data.publishDate),
+    sourceCount: entry.data.sources?.length ?? 0,
+    keywords:
+      entry.data.keywords
+        ?.split(',')
+        .map((keyword) => keyword.trim())
+        .filter(Boolean)
+        .slice(0, 3) ?? [],
   }));
 
-const mainStory = userStories.find((s) => s.featured);
-const otherStories = userStories.filter((s) => !s.featured);
+const spotlightStory = stories.find((story) => story.featured) ?? stories[0];
+const archiveStories = stories.filter((story) => story.href !== spotlightStory?.href);
+const latestStory = [...stories].sort(
+  (leftStory, rightStory) => rightStory.publishDate.getTime() - leftStory.publishDate.getTime()
+)[0];
+const totalSources = stories.reduce((count, story) => count + story.sourceCount, 0);
+
+const editorialPillars = [
+  {
+    title: 'OpenClaw-first context',
+    description: 'Why this matters to setup, trust, and day-two operations.',
+  },
+  {
+    title: 'Source-backed reporting',
+    description: 'Public posts, docs, and issue threads readers can verify themselves.',
+  },
+  {
+    title: 'Security takeaways',
+    description: 'Practical lessons for ClawHub, tools, tokens, and deployment risk.',
+  },
+];
+
+const seoTopics = [
+  'OpenClaw case studies',
+  'OpenClaw security lessons',
+  'ClawHub governance',
+  'AI assistant deployment stories',
+];
+
+const heroMeta = [
+  `${stories.length} source-backed stories`,
+  `${totalSources} public references`,
+  latestStory ? `Latest update ${latestStory.publishLabel}` : 'Latest update TBD',
+];
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: 'Stories & Case Studies',
+  name: 'OpenClaw Stories, Case Studies & Security Lessons',
   description:
-    'Real-world stories about OpenClaw—from press-covered builds to community security lessons.',
+    'CoClaw curates source-backed OpenClaw stories, case studies, ClawHub governance moments, and security lessons for real operators.',
   url: canonicalURL.toString(),
-  hasPart: userStories.map((s) => ({
+  hasPart: stories.map((story) => ({
     '@type': 'WebPage',
-    name: s.name,
-    url: new URL(s.href, Astro.site).toString(),
-    description: s.quote,
+    name: story.name,
+    url: new URL(story.href, Astro.site).toString(),
+    description: story.summary,
   })),
 };
 ---
 
 <BaseLayout
-  title="Stories & Case Studies | CoClaw"
-  description="Real-world stories about OpenClaw—from press-covered builds to community security lessons. Each story includes sources."
-  keywords="OpenClaw stories, OpenClaw case studies, OpenClaw users, OpenClaw security"
+  title="OpenClaw Stories, Case Studies & Security Lessons | CoClaw"
+  description="CoClaw curates source-backed OpenClaw stories, case studies, ClawHub governance moments, and security lessons for operators who care about trust, deployment, and day-two reality."
+  keywords="OpenClaw stories, OpenClaw case studies, OpenClaw security, ClawHub, CoClaw, AI assistant deployment, OpenClaw community"
 >
-  <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
-  <div class="bg-background min-h-screen relative pb-24">
-    <!-- Fluid Background Elements -->
-    <div
-      class="absolute top-0 left-0 w-full h-[1000px] bg-gradient-to-b from-secondary/5 to-transparent -z-10"
-    >
-    </div>
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600;700&family=Prata&display=swap"
+      rel="stylesheet"
+    />
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+  </Fragment>
 
-    <!-- Hero Header -->
-    <Section py="pt-32 pb-16">
-      <div class="text-center max-w-4xl mx-auto mb-24">
-        <h1
-          class="text-6xl md:text-9xl font-black tracking-tighter mb-8 leading-[0.8] text-foreground"
-        >
-          Built by you. <br />
-          <span class="text-secondary italic">Driven by AI.</span>
-        </h1>
-        <p class="text-2xl text-default-500 font-medium max-w-2xl mx-auto leading-relaxed">
-          Press-covered builds, founder notes, and community lessons about running OpenClaw safely.
-        </p>
-        <p class="mt-6 text-sm text-default-600 max-w-2xl mx-auto">
-          We avoid unverifiable claims. Each story links to public sources (press articles or user
-          posts). If you'd like to submit a case study, email <strong>contact@coclaw.com</strong>.
-        </p>
+  <div
+    class="stories-editorial relative min-h-screen overflow-x-hidden bg-background pb-24 text-foreground"
+  >
+    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+      <div
+        class="absolute inset-x-0 top-0 h-[40rem] bg-gradient-to-b from-secondary/8 via-transparent to-transparent dark:from-secondary/14"
+      >
       </div>
-
-      {
-        mainStory && (
-          <div class="relative w-full rounded-[64px] bg-content1 border border-divider p-12 md:p-24 overflow-hidden mb-32 group transition-all duration-500 hover:border-secondary/30 hover:shadow-2xl hover:shadow-secondary/10">
-            <a
-              href={mainStory.href}
-              class="absolute inset-0 z-20"
-              aria-label={`Read ${mainStory.name}'s story`}
-            />
-
-            <div class="absolute top-0 right-0 p-12 opacity-5 scale-150 rotate-12 select-none group-hover:scale-175 transition-transform duration-1000">
-              <IconQuote className="w-64 h-64 text-secondary fill-current" aria-hidden="true" />
-            </div>
-
-            <div class="flex flex-col lg:flex-row items-center gap-16 relative z-10">
-              <div class="flex-1 text-center lg:text-left">
-                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 text-secondary font-black text-xs mb-8 uppercase tracking-widest">
-                  Spotlight Story
-                </div>
-                <blockquote class="text-4xl md:text-5xl font-black italic tracking-tight text-foreground mb-12 leading-[1.1]">
-                  "{mainStory.quote}"
-                </blockquote>
-                <div class="flex flex-col md:flex-row items-center justify-between gap-12">
-                  <div class="flex flex-col lg:flex-row items-center gap-6">
-                    <span class="flex relative justify-center items-center box-border overflow-hidden align-middle rounded-full ring-2 ring-offset-2 ring-offset-background dark:ring-offset-background-dark ring-secondary w-20 h-20 bg-content2">
-                      <img
-                        src={mainStory.avatar}
-                        alt={`${mainStory.name} avatar`}
-                        class="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </span>
-                    <div class="text-center lg:text-left">
-                      <p class="text-2xl font-black text-foreground">{mainStory.name}</p>
-                      <p class="text-secondary font-bold text-lg">{mainStory.role}</p>
-                    </div>
-                  </div>
-
-                  <Button
-                    radius="full"
-                    color="secondary"
-                    variant="shadow"
-                    className="font-bold px-10 h-14 text-white z-30"
-                    as="a"
-                    href={mainStory.href}
-                  >
-                    Read Full Story
-                  </Button>
-                </div>
-              </div>
-            </div>
+      <div
+        class="absolute -left-20 top-12 h-72 w-72 rounded-full bg-primary/10 blur-3xl dark:bg-primary/18"
+      >
+      </div>
+      <div
+        class="absolute right-0 top-28 h-72 w-72 rounded-full bg-secondary/10 blur-3xl dark:bg-secondary/18"
+      >
+      </div>
+      <div
+        class="absolute left-1/3 top-[26rem] h-60 w-60 rounded-full bg-accent/8 blur-3xl dark:bg-accent/14"
+      >
+      </div>
+      <div class="stories-grid absolute inset-0 opacity-40 dark:opacity-25"></div>
+    </div>
+    <Section py="pt-28 pb-8 md:pt-40 md:pb-10" containerClass="relative z-10">
+      <div class="grid gap-12 xl:grid-cols-[minmax(0,1.35fr)_18rem] xl:items-center">
+        <div class="max-w-4xl animate-rise">
+          <div
+            class="stories-kicker border border-divider bg-content1/70 text-default-700 dark:bg-content1/60 dark:text-default-500"
+          >
+            CoClaw editorial archive
           </div>
-        )
-      }
+          <h1
+            class="stories-display mt-7 max-w-4xl text-5xl leading-[0.97] tracking-[-0.04em] text-foreground md:text-7xl xl:text-[5.2rem]"
+          >
+            Understand OpenClaw
+            <span class="text-secondary">in the real world.</span>
+          </h1>
+          <p
+            class="mt-6 max-w-3xl text-lg leading-8 text-default-800 dark:text-default-600 md:text-[1.3rem]"
+          >
+            CoClaw curates source-backed OpenClaw stories, ClawHub governance moments, and security
+            lessons that help operators understand how real deployments succeed, drift, or fail.
+          </p>
+          <p
+            class="mt-4 max-w-3xl text-sm leading-7 text-default-600 dark:text-default-500 md:text-base"
+          >
+            A focused entry point for readers comparing <strong>OpenClaw case studies</strong>,
+            <strong>OpenClaw security lessons</strong>, and the community signals behind day-two
+            operations.
+          </p>
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+            <a
+              href="#featured-story"
+              class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-primary-600"
+            >
+              Read featured case study
+              <IconArrowRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+            <a
+              href="#story-archive"
+              class="inline-flex items-center justify-center gap-2 rounded-full border border-divider bg-content1/75 px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-content2 dark:bg-content1/60"
+            >
+              Browse all stories
+            </a>
+          </div>
+          <div
+            class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-divider pt-5 text-sm text-default-600 dark:text-default-500"
+          >
+            {
+              heroMeta.map((item) => (
+                <span class="inline-flex items-center gap-2">
+                  <span class="h-1.5 w-1.5 rounded-full bg-secondary/70" />
+                  <span>{item}</span>
+                </span>
+              ))
+            }
+          </div>
+        </div>
 
-      <div class="columns-1 md:columns-2 lg:columns-3 gap-8 space-y-8">
+        <aside
+          class="animate-rise-delay rounded-[1.75rem] border border-divider bg-content1/75 p-5 shadow-[0_18px_60px_-34px_rgb(0_0_0/0.22)] dark:bg-content1/60 dark:shadow-[0_22px_70px_-36px_rgb(0_0_0/0.65)] backdrop-blur-2xl"
+        >
+          <p class="stories-mono text-xs uppercase tracking-[0.28em] text-default-500">
+            Why CoClaw curates this
+          </p>
+          <div
+            class="mt-4 rounded-[1.25rem] border border-divider bg-content2/55 p-4 dark:bg-content2/35"
+          >
+            <ul class="space-y-4">
+              {
+                editorialPillars.map((pillar) => (
+                  <li class="border-b border-divider/70 pb-4 last:border-b-0 last:pb-0">
+                    <div class="flex items-center gap-3 text-sm font-semibold text-foreground">
+                      <IconShieldCheckSolid className="h-4 w-4 text-primary" aria-hidden="true" />
+                      <span>{pillar.title}</span>
+                    </div>
+                    <p class="mt-2 text-sm leading-6 text-default-600 dark:text-default-500">
+                      {pillar.description}
+                    </p>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </Section>
+
+    <Section py="pt-0 pb-10 md:pb-12" containerClass="relative z-10">
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="stories-mono text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
+          Explore by signal
+        </span>
         {
-          otherStories.map((story) => (
-            <div class="break-inside-avoid">
-              <UserStoryCard {...story} client:load />
-            </div>
+          seoTopics.map((topic) => (
+            <span class="inline-flex items-center rounded-full border border-divider bg-content1/75 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-default-700 dark:bg-content1/60 dark:text-default-500">
+              {topic}
+            </span>
           ))
         }
       </div>
     </Section>
 
-    <!-- Map CTA -->
-    <Section py="py-24">
-      <div
-        class="rounded-[52px] bg-secondary p-12 md:p-20 text-center text-white relative overflow-hidden shadow-2xl shadow-secondary/20"
-      >
-        <div
-          class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"
-        >
+    {
+      spotlightStory && (
+        <Section id="featured-story" py="py-10 md:py-14" containerClass="relative z-10">
+          <div class="grid gap-8 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] xl:items-stretch">
+            <article class="group animate-rise overflow-hidden rounded-[2.4rem] border border-divider bg-content1/80 shadow-[0_28px_90px_-45px_rgb(0_0_0/0.35)] backdrop-blur-2xl dark:bg-content1/65 dark:shadow-[0_28px_110px_-48px_rgb(0_0_0/0.8)]">
+              <div class="relative min-h-[18rem] overflow-hidden border-b border-divider bg-content2 dark:bg-content2/60">
+                {spotlightStory.coverImage ? (
+                  <img
+                    src={spotlightStory.coverImage}
+                    alt={`${spotlightStory.name} cover`}
+                    class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+                    loading="eager"
+                  />
+                ) : (
+                  <div class="absolute inset-0 bg-gradient-to-br from-primary/15 via-content2 to-secondary/10 dark:from-primary/18 dark:via-content2/70 dark:to-secondary/16" />
+                )}
+                <div class="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent dark:from-background/60" />
+                <div class="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full border border-divider bg-content1/80 px-4 py-2 text-[0.72rem] uppercase tracking-[0.24em] text-default-700 backdrop-blur dark:bg-content1/60 dark:text-default-500">
+                  <IconCollection className="h-4 w-4 text-secondary" aria-hidden="true" />
+                  Featured OpenClaw case study
+                </div>
+              </div>
+
+              <div class="grid gap-8 p-8 md:p-10 xl:grid-cols-[minmax(0,1fr)_18rem]">
+                <div>
+                  <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.24em] text-default-500">
+                    <span>{spotlightStory.publishLabel}</span>
+                    <span class="h-1 w-1 rounded-full bg-default-400" />
+                    <span>{spotlightStory.sourceCount} sources</span>
+                    <span class="h-1 w-1 rounded-full bg-default-400" />
+                    <span>{spotlightStory.company}</span>
+                  </div>
+                  <h2 class="stories-display mt-5 text-4xl leading-tight text-foreground md:text-5xl">
+                    {spotlightStory.name}
+                  </h2>
+                  <p class="mt-3 text-base font-medium text-secondary md:text-lg">
+                    {spotlightStory.role}
+                  </p>
+                  <p class="mt-6 max-w-3xl text-base leading-8 text-default-800 dark:text-default-600 md:text-lg">
+                    {spotlightStory.summary}
+                  </p>
+                  <blockquote class="mt-8 border-l border-secondary/30 pl-5 text-2xl leading-relaxed text-foreground md:text-[2rem]">
+                    <span class="inline-flex align-top text-secondary">
+                      <IconQuote className="mr-3 h-7 w-7" aria-hidden="true" />
+                    </span>
+                    {spotlightStory.quote}
+                  </blockquote>
+                </div>
+
+                <div class="flex flex-col justify-between gap-6 rounded-[1.8rem] border border-divider bg-content2/55 p-6 dark:bg-content2/35">
+                  <div>
+                    <p class="stories-mono text-xs uppercase tracking-[0.28em] text-default-500">
+                      Why CoClaw picked it
+                    </p>
+                    <ul class="mt-4 space-y-3 text-sm leading-7 text-default-700 dark:text-default-500">
+                      <li>
+                        Shows how OpenClaw adoption collides with real governance and trust
+                        questions.
+                      </li>
+                      <li>
+                        Gives readers concrete security or deployment lessons, not just a dramatic
+                        timeline.
+                      </li>
+                      <li>
+                        Works as an entry point into broader CoClaw guides on operations, safety,
+                        and setup.
+                      </li>
+                    </ul>
+                  </div>
+                  <a
+                    href={spotlightStory.href}
+                    class="inline-flex items-center justify-between rounded-full border border-secondary/25 bg-secondary/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-secondary transition duration-300 hover:-translate-y-0.5 hover:bg-secondary/15"
+                  >
+                    Read full case study
+                    <IconArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                </div>
+              </div>
+            </article>
+
+            <aside class="grid gap-4">
+              {archiveStories.slice(0, 2).map((story, storyIndex) => (
+                <article
+                  class="animate-rise rounded-[1.9rem] border border-divider bg-content1/75 p-6 shadow-[0_18px_70px_-35px_rgb(0_0_0/0.3)] backdrop-blur-xl dark:bg-content1/60 dark:shadow-[0_20px_80px_-36px_rgb(0_0_0/0.75)]"
+                  style={`animation-delay:${storyIndex * 120 + 80}ms`}
+                >
+                  <div class="flex items-start justify-between gap-4">
+                    <div>
+                      <p class="stories-mono text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
+                        {story.publishLabel}
+                      </p>
+                      <h3 class="mt-3 text-2xl font-semibold leading-tight text-foreground">
+                        {story.name}
+                      </h3>
+                    </div>
+                    <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-xs uppercase tracking-[0.18em] text-default-600 dark:bg-content2/35 dark:text-default-500">
+                      {story.sourceCount} sources
+                    </span>
+                  </div>
+                  <p class="mt-3 text-sm font-medium text-secondary">{story.role}</p>
+                  <p class="mt-4 text-sm leading-7 text-default-700 dark:text-default-500">
+                    {story.summary}
+                  </p>
+                  <a
+                    href={story.href}
+                    class="mt-6 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-foreground transition hover:text-secondary"
+                  >
+                    Open story
+                    <IconArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                </article>
+              ))}
+            </aside>
+          </div>
+        </Section>
+      )
+    }
+
+    <Section id="story-archive" py="py-12 md:py-16" containerClass="relative z-10">
+      <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div class="max-w-3xl">
+          <p class="stories-mono text-xs uppercase tracking-[0.28em] text-default-500">
+            OpenClaw archive
+          </p>
+          <h2 class="stories-display mt-3 text-4xl leading-tight text-foreground md:text-5xl">
+            CoClaw turns story pages into
+            <span class="text-primary"> searchable operator context.</span>
+          </h2>
         </div>
-        <h2 class="text-4xl md:text-7xl font-black mb-8 tracking-tighter">
-          150+ Countries. <br />Unlimited Potential.
-        </h2>
-        <p class="text-xl text-white/80 font-medium mb-12 max-w-2xl mx-auto">
-          Ready to deploy your node and join the movement? Start building your autonomous future
-          today.
+        <p class="max-w-xl text-base leading-8 text-default-700 dark:text-default-500">
+          This archive is optimized for readers comparing OpenClaw community stories, security
+          incidents, deployment patterns, and ClawHub lessons—without digging through scattered
+          posts and screenshots.
         </p>
-        <div class="flex justify-center gap-6">
-          <Button
-            variant="solid"
-            radius="full"
-            size="lg"
-            className="bg-white text-secondary font-black px-12 h-16 text-lg"
-            as="a"
-            href="/getting-started"
-          >
-            Deploy Your Node
-          </Button>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
+        {
+          archiveStories.map((story, storyIndex) => (
+            <article
+              class="group animate-rise flex h-full flex-col overflow-hidden rounded-[2rem] border border-divider bg-content1/80 shadow-[0_18px_70px_-36px_rgb(0_0_0/0.25)] backdrop-blur-xl dark:bg-content1/60 dark:shadow-[0_20px_90px_-40px_rgb(0_0_0/0.75)]"
+              style={`animation-delay:${storyIndex * 90}ms`}
+            >
+              <div class="relative aspect-[16/10] overflow-hidden border-b border-divider bg-content2 dark:bg-content2/50">
+                {story.coverImage ? (
+                  <img
+                    src={story.coverImage}
+                    alt={`${story.name} cover`}
+                    class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div class="absolute inset-0 bg-gradient-to-br from-primary/12 via-content2 to-secondary/10 dark:from-primary/18 dark:via-content2/70 dark:to-secondary/16" />
+                )}
+                <div class="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent dark:from-background/55" />
+              </div>
+
+              <div class="flex flex-1 flex-col p-6">
+                <div class="flex flex-wrap items-center gap-3 text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
+                  <span>{story.publishLabel}</span>
+                  <span class="h-1 w-1 rounded-full bg-default-400" />
+                  <span>{story.company}</span>
+                </div>
+                <h3 class="mt-4 text-2xl font-semibold leading-tight text-foreground">
+                  {story.name}
+                </h3>
+                <p class="mt-2 text-sm font-medium text-secondary">{story.role}</p>
+                <p class="mt-4 text-sm leading-7 text-default-700 dark:text-default-500">
+                  {story.summary}
+                </p>
+                <blockquote class="mt-5 text-base leading-7 text-foreground">
+                  “{story.quote}”
+                </blockquote>
+                <div class="mt-5 flex flex-wrap gap-2">
+                  {story.keywords.map((keyword) => (
+                    <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-[0.72rem] uppercase tracking-[0.16em] text-default-600 dark:bg-content2/35 dark:text-default-500">
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+                <div class="mt-6 flex items-center justify-between gap-4 border-t border-divider pt-5">
+                  <span class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-default-500">
+                    <IconDocumentText className="h-4 w-4 text-primary" aria-hidden="true" />
+                    {story.sourceCount} linked sources
+                  </span>
+                  <a
+                    href={story.href}
+                    class="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-foreground transition hover:text-primary"
+                  >
+                    Read story
+                    <IconArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                </div>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </Section>
+
+    <Section py="pt-6 pb-24 md:pt-10 md:pb-28" containerClass="relative z-10">
+      <div
+        class="overflow-hidden rounded-[2.4rem] border border-divider bg-content1/80 p-8 shadow-[0_24px_100px_-45px_rgb(0_0_0/0.25)] backdrop-blur-2xl dark:bg-content1/60 dark:shadow-[0_28px_110px_-48px_rgb(0_0_0/0.8)] md:p-12"
+      >
+        <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-end">
+          <div>
+            <p class="stories-mono text-xs uppercase tracking-[0.28em] text-default-500">
+              Contribute
+            </p>
+            <h2
+              class="stories-display mt-4 max-w-3xl text-4xl leading-tight text-foreground md:text-5xl"
+            >
+              Have an OpenClaw story or security lesson
+              <span class="text-secondary"> worth documenting?</span>
+            </h2>
+            <p class="mt-5 max-w-3xl text-lg leading-8 text-default-800 dark:text-default-600">
+              CoClaw is interested in source-backed OpenClaw case studies: community deployments,
+              ClawHub moderation events, governance disputes, marketplace lessons, and operator
+              writeups that can help the next person make a better decision.
+            </p>
+          </div>
+          <div class="space-y-4">
+            <a
+              href="mailto:contact@coclaw.com"
+              class="inline-flex w-full items-center justify-center rounded-full border border-secondary/25 bg-secondary/10 px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-secondary transition duration-300 hover:-translate-y-0.5 hover:bg-secondary/15"
+            >
+              Submit an OpenClaw lead
+            </a>
+            <a
+              href="/resources"
+              class="inline-flex w-full items-center justify-center rounded-full border border-divider bg-content2/60 px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-content2"
+            >
+              Browse related CoClaw guides
+            </a>
+          </div>
         </div>
       </div>
     </Section>
   </div>
 </BaseLayout>
+
+<style>
+  .stories-editorial {
+    --stories-display: 'Prata', 'Times New Roman', serif;
+    --stories-sans: 'Instrument Sans', 'Helvetica Neue', sans-serif;
+    --stories-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+    font-family: var(--stories-sans);
+  }
+
+  .stories-display {
+    font-family: var(--stories-display);
+  }
+
+  .stories-mono,
+  .stories-kicker {
+    font-family: var(--stories-mono);
+  }
+
+  .stories-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 1rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    backdrop-filter: blur(18px);
+  }
+
+  .stories-kicker::before {
+    content: '';
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow: 0 0 20px color-mix(in srgb, currentColor 35%, transparent);
+  }
+
+  .stories-grid {
+    background-image:
+      linear-gradient(to right, rgb(0 0 0 / 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(0 0 0 / 0.04) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(180deg, rgb(0 0 0 / 0.28), transparent 82%);
+  }
+
+  :global(html.dark) .stories-grid {
+    background-image:
+      linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  }
+
+  .animate-rise,
+  .animate-rise-delay,
+  [style*='animation-delay'] {
+    animation: stories-rise 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-rise-delay {
+    animation-delay: 140ms;
+  }
+
+  @keyframes stories-rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 22px, 0);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-rise,
+    .animate-rise-delay,
+    [style*='animation-delay'] {
+      animation: none;
+    }
+  }
+</style>
