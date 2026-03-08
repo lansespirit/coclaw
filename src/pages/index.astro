@@ -4,9 +4,66 @@ import Hero from '../components/marketing/Hero.astro';
 import FeaturesDetailed from '../components/marketing/FeaturesDetailed.astro';
 import BentoGrid from '../components/marketing/BentoGrid.astro';
 import Community from '../components/marketing/Community.astro';
+import LatestResourcesSection from '../components/marketing/LatestResourcesSection.astro';
 import Section from '../components/layout/Section.astro';
 import AnnouncementBar from '../components/layout/AnnouncementBar.astro';
 import { IconGithub } from '../components/icons';
+import { getLatestHomepageContent } from '../lib/latest-content';
+
+const latestResources = await getLatestHomepageContent();
+const homepageStructuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      name: 'CoClaw',
+      url: 'https://coclaw.com',
+      logo: 'https://coclaw.com/logo.svg',
+      description:
+        'Community-driven platform for OpenClaw users providing guides, troubleshooting, and tools',
+      sameAs: [
+        'https://github.com/openclaw/openclaw',
+        'https://discord.gg/clawd',
+        'https://forum.coclaw.com',
+      ],
+    },
+    {
+      '@type': 'WebSite',
+      name: 'CoClaw',
+      url: 'https://coclaw.com',
+      description: 'OpenClaw Community & Support Platform',
+    },
+    {
+      '@type': 'SoftwareApplication',
+      name: 'OpenClaw',
+      applicationCategory: 'ProductivityApplication',
+      operatingSystem: 'macOS, Linux, Windows',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'USD',
+      },
+      description:
+        'A personal AI assistant that runs on your computer or server and connects Claude, GPT, or local models to your favorite messaging apps',
+      softwareVersion: 'latest',
+      url: 'https://github.com/openclaw/openclaw',
+      downloadUrl: 'https://github.com/openclaw/openclaw',
+      installUrl: 'https://coclaw.com/getting-started',
+    },
+    {
+      '@type': 'ItemList',
+      name: 'Latest OpenClaw resources on CoClaw',
+      itemListOrder: 'https://schema.org/ItemListOrderDescending',
+      numberOfItems: latestResources.length,
+      itemListElement: latestResources.map((item, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: item.title,
+        url: new URL(item.href, Astro.site).toString(),
+      })),
+    },
+  ],
+};
 ---
 
 <BaseLayout
@@ -18,47 +75,7 @@ import { IconGithub } from '../components/icons';
   <script
     type="application/ld+json"
     slot="head"
-    set:html={JSON.stringify({
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'Organization',
-          name: 'CoClaw',
-          url: 'https://coclaw.com',
-          logo: 'https://coclaw.com/logo.svg',
-          description:
-            'Community-driven platform for OpenClaw users providing guides, troubleshooting, and tools',
-          sameAs: [
-            'https://github.com/openclaw/openclaw',
-            'https://discord.gg/clawd',
-            'https://forum.coclaw.com',
-          ],
-        },
-        {
-          '@type': 'WebSite',
-          name: 'CoClaw',
-          url: 'https://coclaw.com',
-          description: 'OpenClaw Community & Support Platform',
-        },
-        {
-          '@type': 'SoftwareApplication',
-          name: 'OpenClaw',
-          applicationCategory: 'ProductivityApplication',
-          operatingSystem: 'macOS, Linux, Windows',
-          offers: {
-            '@type': 'Offer',
-            price: '0',
-            priceCurrency: 'USD',
-          },
-          description:
-            'A personal AI assistant that runs on your computer or server and connects Claude, GPT, or local models to your favorite messaging apps',
-          softwareVersion: 'latest',
-          url: 'https://github.com/openclaw/openclaw',
-          downloadUrl: 'https://github.com/openclaw/openclaw',
-          installUrl: 'https://coclaw.com/getting-started',
-        },
-      ],
-    })}
+    set:html={JSON.stringify(homepageStructuredData)}
   />
 
   <AnnouncementBar slot="topbar" />
@@ -66,6 +83,8 @@ import { IconGithub } from '../components/icons';
     <Hero />
 
     <FeaturesDetailed />
+
+    <LatestResourcesSection items={latestResources} />
 
     <BentoGrid />
 

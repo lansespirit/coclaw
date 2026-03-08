@@ -1,0 +1,78 @@
+---
+import Section from '../layout/Section.astro';
+import { IconArrowRight } from '../icons';
+import type { LatestContentItem, LatestContentKind } from '../../lib/latest-content';
+
+interface Props {
+  items: LatestContentItem[];
+}
+
+const { items } = Astro.props;
+
+const badgeClasses: Record<LatestContentKind, string> = {
+  blog: 'text-primary',
+  guide: 'text-secondary',
+  troubleshooting: 'text-warning-700 dark:text-warning',
+  story: 'text-success-700 dark:text-success',
+};
+---
+
+{
+  items.length > 0 ? (
+    <Section as="section" py="py-18 md:py-20" class="overflow-hidden" containerClass="relative">
+      <div class="mb-8 flex flex-col gap-4 md:mb-10 lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-3xl">
+          <span class="inline-flex items-center rounded-full border border-divider bg-content1/60 px-4 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-default-600 dark:text-default-500">
+            Fresh on CoClaw
+          </span>
+          <h2
+            id="latest-resources"
+            class="mt-4 text-3xl font-bold tracking-tight text-balance md:text-4xl"
+          >
+            Latest Guides, Fixes &amp; Stories
+          </h2>
+        </div>
+
+        <a
+          href="/resources"
+          class="group inline-flex items-center gap-2 self-start text-sm font-semibold text-default-700 transition-colors hover:text-foreground dark:text-default-500 dark:hover:text-foreground"
+        >
+          Browse all resources
+          <IconArrowRight
+            className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+            aria-hidden="true"
+          />
+        </a>
+      </div>
+
+      <ol class="grid grid-cols-1 gap-x-10 md:grid-cols-2 md:gap-x-12">
+        {items.map((item) => (
+          <li class="border-t border-divider/80 py-4 md:py-5">
+            <article class="min-w-0">
+              <div
+                class={`text-[11px] font-bold uppercase tracking-[0.22em] ${badgeClasses[item.kind]}`}
+              >
+                {item.badge}
+              </div>
+
+              <h3 class="mt-2 text-base font-semibold leading-snug tracking-tight md:text-lg">
+                <a
+                  href={item.href}
+                  class="line-clamp-2 text-foreground transition-colors hover:text-primary"
+                >
+                  {item.title}
+                </a>
+              </h3>
+            </article>
+          </li>
+        ))}
+      </ol>
+
+      <div slot="background" class="absolute inset-0 -z-10 overflow-hidden">
+        <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        <div class="absolute -top-24 left-[10%] h-40 w-40 rounded-full bg-primary/6 blur-3xl" />
+        <div class="absolute bottom-0 right-[10%] h-48 w-48 rounded-full bg-secondary/6 blur-3xl" />
+      </div>
+    </Section>
+  ) : null
+}
