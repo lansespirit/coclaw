@@ -1,0 +1,278 @@
+---
+title: 'Google Chat'
+description: 'Google Chat setup for OpenClaw covers Chat API apps, webhook delivery, workspace permissions, and a clean verification path for internal rollouts.'
+category: 'Channel Integration'
+subcategory: 'Core Channel'
+platform: 'Google Chat'
+difficulty: 'intermediate'
+estimatedTime: '25–35 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+featured: false
+keywords:
+  - 'openclaw google chat'
+  - 'google chat api'
+  - 'google chat webhook'
+  - 'google workspace chat app'
+  - 'google chat pairing'
+  - 'google chat spaces'
+---
+
+> Google Chat is a strong **internal operator lane** for OpenClaw when your team already lives inside Google Workspace. The catch is that it is not a token-only chat connector. You are operating a **public HTTPS webhook path** for inbound events while keeping the rest of the gateway private.
+
+## Why choose Google Chat
+
+Google Chat fits best when you want OpenClaw inside an existing Workspace footprint instead of introducing a new chat surface.
+
+Its strengths are practical:
+
+- **DMs and spaces are both supported** through the Google Chat API webhook flow
+- **Identity is more structured** than public chat networks because allowlists can target `users/<userId>` and spaces can target `spaces/<spaceId>`
+- **Inbound trust is explicit** because webhook requests are verified against a configured audience
+- **Default behavior is conservative** because DMs pair by default and spaces require an @-mention by default
+
+That makes Google Chat a good lane for internal assistants, team-specific spaces, and controlled Workspace rollouts where you want the bot to be present but not casually exposed.
+
+## What makes this lane different
+
+Telegram usually teaches operators to separate platform visibility from OpenClaw policy. Google Chat adds a third concern: **webhook exposure**.
+
+This channel works only when three boundaries are aligned:
+
+1. **Google Chat app configuration** decides where events are delivered.
+2. **The public webhook endpoint** decides whether inbound requests can reach the gateway safely.
+3. **OpenClaw policy** decides who can actually trigger the bot in DMs and spaces.
+
+If one layer is wrong, the symptoms can look similar: the app exists, the space exists, and yet nothing useful happens.
+
+## The mental model: public webhook, private control plane
+
+The upstream docs are unusually clear on the safe posture here:
+
+- Google Chat requires a **public HTTPS endpoint** for webhook delivery.
+- You should **only expose the webhook path** publicly.
+- The dashboard and other sensitive gateway endpoints should stay **private**.
+
+In practice, treat this as two systems with different exposure rules.
+
+### Layer 1: Google sends signed requests to one narrow path
+
+OpenClaw supports Google Chat through HTTP webhooks. The usual path is `/googlechat`, and the upstream docs recommend exposing only that path to the internet.
+
+When a request arrives, OpenClaw verifies the bearer token against your configured:
+
+- `audienceType`
+- `audience`
+
+That means the webhook is not just “some public POST URL.” It is a public endpoint with a specific trust contract.
+
+### Layer 2: OpenClaw still decides who may talk
+
+After the webhook is accepted, routing and policy still apply:
+
+- DMs default to **pairing**
+- spaces are routed separately from DMs
+- spaces require **@-mention** by default
+- `groupPolicy`, `groups`, and per-space user controls still determine what is allowed
+
+So a working webhook does not mean an open bot. It only means Google Chat can reach the gateway.
+
+## Fastest safe baseline
+
+For most teams, the safest first rollout looks like this:
+
+- **DMs:** keep the default pairing behavior
+- **Spaces:** allowlist only the spaces you intend to support
+- **Replies in spaces:** keep mention-only behavior first
+- **Exposure:** publish only `/googlechat`, not `/`
+
+### Minimal config
+
+```json5
+{
+  channels: {
+    googlechat: {
+      enabled: true,
+      serviceAccountFile: '/path/to/service-account.json',
+      audienceType: 'app-url',
+      audience: 'https://gateway.example.com/googlechat',
+      webhookPath: '/googlechat',
+      dm: {
+        policy: 'pairing',
+      },
+      groupPolicy: 'allowlist',
+      groups: {
+        'spaces/AAAA': {
+          allow: true,
+          requireMention: true,
+          users: ['users/1234567890'],
+        },
+      },
+    },
+  },
+}
+```
+
+Why this is a good starting shape:
+
+- the service account path is explicit,
+- audience verification matches the exact webhook target,
+- unknown DM senders do not become trusted automatically,
+- and spaces stay narrow until you have verified the lane under real traffic.
+
+## Step 1: Create the Google-side application deliberately
+
+According to the official setup flow, you need:
+
+- a Google Cloud project,
+- the Google Chat API enabled,
+- a service account JSON credential,
+- and a Google Chat app configured to use an **HTTP endpoint URL**.
+
+Two operational details matter early:
+
+- the app can be private, and upstream notes it will not appear in the Marketplace browse list,
+- the webhook target should be the gateway’s public URL followed by `/googlechat` unless you deliberately changed `webhookPath`.
+
+Do not move on until you know exactly which project, service account, and app configuration own this lane.
+
+## Step 2: Configure audience verification on purpose
+
+Google Chat webhook auth is part of the channel design, not an optional hardening step.
+
+OpenClaw supports two audience modes documented upstream:
+
+- `audienceType: 'app-url'` where the audience is the webhook URL itself
+- `audienceType: 'project-number'` where the audience is the Google Cloud project number
+
+The important point is consistency:
+
+- your Google Chat app config,
+- your public webhook URL,
+- and your `audienceType` / `audience`
+
+must agree.
+
+If they do not, the bot can look reachable while authentication fails before useful routing ever starts.
+
+## Step 3: Separate DM trust from space rollout
+
+Google Chat supports both direct messages and spaces, but they should not be rolled out as if they were the same risk surface.
+
+### DMs: pairing is the right default
+
+Upstream documents DMs as pairing by default. Unknown senders receive a pairing code, and you approve them explicitly.
+
+```bash
+openclaw pairing approve googlechat <CODE>
+```
+
+That is a clean default for internal deployments because it lets you open the lane without silently trusting every first contact.
+
+If you already know the exact Workspace principals that should be able to use the bot, you can make that policy more explicit with `allowFrom` on the DM side.
+
+### Spaces: start narrow and mention-only
+
+Spaces are group surfaces, so the upstream defaults are intentionally more restrained:
+
+- group routing is separate from DM routing,
+- spaces require an @-mention by default,
+- and allowlist-first rollout is supported through `groupPolicy` and `groups`.
+
+This is the right order for a first production rehearsal:
+
+1. one DM,
+2. one controlled space,
+3. then broader adoption only after you understand the real traffic pattern.
+
+If mention detection needs help, the docs note that `botUser` can be set to the app’s user name.
+
+## Verification drill
+
+A Google Chat channel is only really working when all of these checks pass in sequence.
+
+### 1. Verify the public path, not the whole gateway
+
+Confirm that the webhook URL you configured is the one Google Chat is using, and that only the webhook path is publicly exposed.
+
+If you are publishing the entire gateway surface instead of just `/googlechat`, fix that first.
+
+### 2. Verify webhook auth and config health
+
+Run:
+
+```bash
+openclaw channels status --probe
+```
+
+The upstream docs specifically call this out for catching auth errors and missing audience configuration.
+
+### 3. Verify one DM from an unpaired sender
+
+Your first DM test should prove the actual default trust model:
+
+- send a DM from a user who is not yet approved,
+- confirm a pairing flow is triggered,
+- approve the request,
+- re-test the same DM.
+
+That tells you message delivery and DM policy are both working.
+
+### 4. Verify one allowlisted space
+
+Add the app to one known space and test with an explicit @-mention.
+
+This step should prove:
+
+- the webhook path is alive,
+- the space is actually allowlisted,
+- mention handling works,
+- and the bot replies in the intended group session instead of behaving like a DM lane.
+
+## What usually breaks first
+
+The official docs point to a small set of high-value failure patterns.
+
+### 405 Method Not Allowed
+
+Upstream documents a `405 Method Not Allowed` case from Google Cloud Logs Explorer when the webhook handler is not registered correctly.
+
+The common meaning is simple: Google can hit something, but OpenClaw is not serving the expected Google Chat handler at that path.
+
+Start by checking whether `channels.googlechat` is actually configured.
+
+### Audience mismatch
+
+If the webhook is public but auth is misaligned, the likely issue is not “networking” in general. It is that `audienceType` and `audience` do not match the Google-side configuration you actually deployed.
+
+### The bot is in the space, but stays silent
+
+When the app exists and the webhook is healthy, silence often comes from policy, not transport:
+
+- the space is not allowlisted,
+- the sender is not allowed for that space,
+- or the message did not satisfy mention gating.
+
+That is why Google Chat rollout is easier when you keep one DM and one space as the initial proof set.
+
+## Operator notes that are easy to forget
+
+A few documented details are worth making explicit because they shape long-term maintenance:
+
+- the default webhook path is `/googlechat` if you do not override it,
+- DMs and spaces use different session keys internally,
+- `users/<userId>` is the stable allowlist target for direct users,
+- raw email matching is mutable and only re-enabled through `dangerouslyAllowNameMatching`,
+- and attachments, typing indicators, and reactions exist, but they should be treated as second-phase rollout concerns after the base lane is stable.
+
+The disciplined move is to validate delivery, auth, and policy first, then add richer behavior later.
+
+## Continue from here
+
+If you are using Google Chat as part of a broader internal rollout, the next two topics usually matter most:
+
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+- [/troubleshooting/solutions/control-ui-pairing-required](/troubleshooting/solutions/control-ui-pairing-required)
+
+Those are not Google Chat-specific, but they matter the moment your operators start approving users or managing the gateway remotely.

@@ -1,0 +1,485 @@
+---
+title: 'Telegram'
+description: 'Telegram Bot setup for OpenClaw: BotFather token handling, DM versus group policy, privacy mode, verification, streaming behavior, and the failure patterns operators hit first.'
+category: 'Channel Integration'
+subcategory: 'Core Channel'
+platform: 'Telegram'
+difficulty: 'beginner'
+estimatedTime: '20–30 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-09
+featured: true
+keywords:
+  - 'openclaw telegram'
+  - 'telegram bot api'
+  - 'telegram privacy mode'
+  - 'telegram group permissions'
+  - 'telegram pairing'
+  - 'telegram streaming'
+---
+
+> Telegram is the cleanest **day-0 channel** for OpenClaw: no QR login, no tenant admin gauntlet, and a fast path from token to working conversations. It is also the channel where new operators most often confuse **Telegram-side visibility** with **OpenClaw-side policy**.
+
+## Why start with Telegram
+
+Telegram is usually the best first channel when you want to validate your OpenClaw deployment quickly without sacrificing operational control.
+
+It gives you a strong default mix:
+
+- **Simple authentication** via BotFather token
+- **Good DM ergonomics** for one-owner or small-team setups
+- **Good group support** once mention rules and privacy mode are understood
+- **Clear policy knobs** for pairing, allowlists, group scope, and streaming behavior
+
+If you only ship one first channel before expanding into Slack, WhatsApp, Signal, or WebChat, Telegram is usually the least confusing place to build confidence.
+
+## What to decide before launch
+
+Use this guide when Telegram is likely to be your first operational lane and you want the DM policy, group posture, and verification drill locked down before real users arrive.
+
+You are deciding:
+
+- whether Telegram should be your first or fallback lane,
+- how to keep DMs safe by default,
+- how to make groups work without turning the bot loose everywhere,
+- how to verify the lane in a way that survives first contact with real users,
+- and which Telegram-specific breakpoints matter enough to document from day one.
+
+If you want a shorter task-oriented walkthrough, also read:
+
+- [/guides/telegram-setup](/guides/telegram-setup)
+
+## The mental model: Telegram has two gates
+
+Most “Telegram is broken” reports are really a mix of **two different systems**.
+
+### Gate 1: Telegram decides what the bot can see
+
+Telegram itself controls message visibility through:
+
+- **privacy mode**,
+- **group admin status**,
+- and whether the bot is allowed in groups at all.
+
+If Telegram does not deliver the message to the bot, OpenClaw never gets a chance to evaluate your config.
+
+### Gate 2: OpenClaw decides what the bot is allowed to answer
+
+Once Telegram delivers the message, OpenClaw still evaluates:
+
+- `dmPolicy`
+- `allowFrom`
+- `groups`
+- `groupPolicy`
+- `groupAllowFrom`
+- `requireMention`
+
+That means a bot can be perfectly connected and still stay silent **by policy**.
+
+This distinction matters because the fixes are totally different:
+
+- Telegram visibility problems are fixed in **BotFather / group settings / admin status**.
+- OpenClaw policy problems are fixed in **config and routing rules**.
+
+## Fastest safe baseline
+
+If you want a sensible starting point, use this model:
+
+- **DMs:** `pairing`
+- **Groups:** allow only the groups you mean to support
+- **Replies in groups:** mention-only at first
+- **Streaming:** keep the default unless preview behavior becomes distracting
+
+### Minimal config
+
+```json5
+{
+  channels: {
+    telegram: {
+      enabled: true,
+      botToken: '123:abc',
+      dmPolicy: 'pairing',
+      groups: {
+        '*': { requireMention: true },
+      },
+      groupPolicy: 'open',
+    },
+  },
+}
+```
+
+Why this is a good first shape:
+
+- unknown DM senders are not trusted automatically,
+- the bot can enter groups without becoming “always on” everywhere,
+- and mention-only behavior keeps accidental group spam low while you validate the lane.
+
+## Step 1: Create the bot token correctly
+
+Open Telegram and chat with `@BotFather`.
+
+Run:
+
+```bash
+/newbot
+```
+
+Then:
+
+1. choose a display name,
+2. choose a username ending in `bot`,
+3. copy the Bot API token,
+4. store it like a real secret.
+
+Useful BotFather toggles to decide early:
+
+- `/setjoingroups` — whether the bot can be added to groups
+- `/setprivacy` — whether it sees only mentions/replies or all group messages
+
+## Step 2: Put credentials in config, not in muscle memory
+
+Telegram does **not** use an interactive channel login flow like WhatsApp.
+
+That means your working setup should come from config or env, not from a remembered one-time wizard state.
+
+Recommended:
+
+```json5
+{
+  channels: {
+    telegram: {
+      enabled: true,
+      botToken: '123:abc',
+    },
+  },
+}
+```
+
+Env fallback exists for the default account:
+
+```bash
+export TELEGRAM_BOT_TOKEN="123:abc"
+```
+
+But for long-term operations, config is usually easier to reason about than shell state.
+
+## Step 3: Choose the DM trust model on purpose
+
+Telegram direct messages are the fastest path to “it works,” but they are also where trust decisions get fuzzy if you do not choose a policy explicitly.
+
+### Option A: `pairing` — best default
+
+`pairing` is the safest general-purpose starting point.
+
+When an unknown sender DMs the bot:
+
+- OpenClaw creates a pairing request,
+- the sender is not trusted yet,
+- you approve them explicitly.
+
+Useful commands:
+
+```bash
+openclaw pairing list telegram
+openclaw pairing approve telegram <CODE>
+```
+
+This is a strong default for solo operators, family bots, small teams, and test environments.
+
+### Option B: `allowlist` — best when ownership is already known
+
+If you already know exactly who should be able to DM the bot, `allowlist` is more durable than relying on pairing history.
+
+```json5
+{
+  channels: {
+    telegram: {
+      dmPolicy: 'allowlist',
+      allowFrom: ['tg:123456789'],
+    },
+  },
+}
+```
+
+This keeps your access policy visible in config instead of leaving it buried in previous approvals.
+
+### Option C: `open` — only when you really mean it
+
+`open` should be treated as a deliberate public-access posture, not a convenience toggle.
+
+If you use it, make sure your `allowFrom` model reflects that intent and that the bot is not carrying sensitive capabilities by default.
+
+## Step 4: Make groups work without losing control
+
+Telegram groups are where most first-week confusion happens.
+
+### Telegram-side requirement: privacy mode
+
+By default, Telegram bots often only receive:
+
+- mentions,
+- commands,
+- replies to the bot.
+
+If you want the bot to see **all** messages in a group, you generally need one of these:
+
+- disable privacy mode via `/setprivacy`, or
+- make the bot a group admin.
+
+Important operational note:
+
+> If you change privacy mode, remove and re-add the bot to the group so Telegram applies the change.
+
+### OpenClaw-side requirement: groups are a policy surface
+
+There are two separate decisions in OpenClaw group behavior:
+
+1. **Which groups are allowed at all**
+2. **Who inside those groups is allowed to trigger replies**
+
+That is why these fields matter so much:
+
+- `channels.telegram.groups`
+- `channels.telegram.groupPolicy`
+- `channels.telegram.groupAllowFrom`
+- `requireMention`
+
+### A good first group posture
+
+If you want the bot available in groups but still conservative:
+
+```json5
+{
+  channels: {
+    telegram: {
+      groups: {
+        '*': { requireMention: true },
+      },
+      groupPolicy: 'open',
+    },
+  },
+}
+```
+
+This means:
+
+- any allowed group can host the bot,
+- but the bot only replies when mentioned,
+- which dramatically reduces accidental chatter.
+
+### A specific always-on group
+
+If you want one specific group to act more like a shared workspace:
+
+```json5
+{
+  channels: {
+    telegram: {
+      groups: {
+        '-1001234567890': {
+          requireMention: false,
+        },
+      },
+      groupPolicy: 'open',
+    },
+  },
+}
+```
+
+Only do this when you are sure about Telegram-side visibility and you actually want ambient replies.
+
+## Step 5: Verify the lane like an operator
+
+Do not stop at “the bot replied once.”
+
+Run a four-part verification drill:
+
+### 1. DM contact
+
+- DM the bot
+- confirm it either pairs or answers exactly as your policy expects
+- confirm the session survives a second message
+
+### 2. Group mention
+
+- add the bot to a test group
+- mention the bot explicitly
+- verify that it replies in the expected thread/context
+
+### 3. Group non-mention behavior
+
+This is the decisive test for whether you actually understand your setup.
+
+- If `requireMention: true`, the bot should stay quiet when not mentioned.
+- If `requireMention: false`, confirm Telegram is truly delivering those messages.
+
+### 4. Restart and retest
+
+Restart the gateway and retest the same flows:
+
+```bash
+openclaw gateway restart
+```
+
+If the lane only works before a restart, you do not yet have an operationally stable setup.
+
+## Advanced behaviors worth knowing early
+
+### Long polling vs webhook mode
+
+Upstream Telegram support is production-ready and defaults to **long polling**.
+
+Webhook mode is optional.
+
+That means most operators should not introduce webhook complexity unless there is a deployment-specific reason to do so.
+
+Start with the default transport first; add webhook mode only when you need it.
+
+### Preview streaming
+
+Telegram can show partial replies while the model is still generating.
+
+The relevant setting is:
+
+```json5
+channels.telegram.streaming
+```
+
+Supported modes include:
+
+- `off`
+- `partial`
+- `block`
+- `progress`
+
+Operationally:
+
+- `partial` is expressive and responsive,
+- but can sometimes feel visually noisy,
+- especially in groups or topics where previews edit in place.
+
+If users report duplicate-looking or flashing replies, test:
+
+```json5
+channels.telegram.streaming: "off"
+```
+
+or:
+
+```json5
+channels.telegram.streaming: "block"
+```
+
+Related fix:
+
+- [/troubleshooting/solutions/telegram-preview-streaming-duplicate-or-flash](/troubleshooting/solutions/telegram-preview-streaming-duplicate-or-flash)
+
+### Command menu registration
+
+Telegram command menus are registered through `setMyCommands` at startup.
+
+If command registration fails, the issue is often **network/DNS/HTTPS reachability to `api.telegram.org`**, not your command names.
+
+Related fix:
+
+- [/troubleshooting/solutions/telegram-setmycommands-failed](/troubleshooting/solutions/telegram-setmycommands-failed)
+
+### Forum topics
+
+Telegram forum topics are worth planning for if you expect a team to operate the bot inside a supergroup.
+
+Upstream behavior is powerful:
+
+- topics can keep **isolated session keys**,
+- topic config can inherit from group settings,
+- and per-topic routing can map different topics to different agents.
+
+That makes Telegram more than a “simple bot channel” once you move into structured team operations.
+
+## The first five Telegram failures to expect
+
+### 1. Connected but receives no messages
+
+Usually one of these:
+
+- privacy mode / visibility mismatch,
+- webhook vs polling conflict,
+- or network reachability to Telegram.
+
+Start here:
+
+- [/troubleshooting/solutions/telegram-bot-connected-but-no-messages](/troubleshooting/solutions/telegram-bot-connected-but-no-messages)
+
+### 2. Bot is in the group but never responds
+
+Usually one of these:
+
+- the group is not actually allowed,
+- `requireMention` is still in effect,
+- privacy mode is still on,
+- or admin rights are missing.
+
+Start here:
+
+- [/troubleshooting/solutions/telegram-bot-in-group-no-response](/troubleshooting/solutions/telegram-bot-in-group-no-response)
+
+### 3. Bot API calls fail with network / DNS / IPv6 errors
+
+This is especially common on VPSes, proxies, or hosts with bad IPv6 assumptions.
+
+Start here:
+
+- [/troubleshooting/solutions/telegram-network-request-failed-ipv6-dns](/troubleshooting/solutions/telegram-network-request-failed-ipv6-dns)
+
+### 4. Voice or audio messages are ignored
+
+If users send voice notes and nothing happens, the problem is usually media/transcription policy, not Telegram identity.
+
+Start here:
+
+- [/troubleshooting/solutions/telegram-audio-only-messages-no-response](/troubleshooting/solutions/telegram-audio-only-messages-no-response)
+- [/troubleshooting/solutions/telegram-voice-ogg-corrupts-history-file-block](/troubleshooting/solutions/telegram-voice-ogg-corrupts-history-file-block)
+
+### 5. Telegram looks configured but behaves disabled
+
+That usually means config precedence, enablement, or runtime state is not what you think it is.
+
+Start here:
+
+- [/troubleshooting/solutions/telegram-plugin-configured-but-disabled](/troubleshooting/solutions/telegram-plugin-configured-but-disabled)
+
+## Recommended production posture
+
+If you want a pragmatic, low-surprise Telegram deployment, this is a good default posture:
+
+| Surface       | Recommendation                                         | Why                                            |
+| ------------- | ------------------------------------------------------ | ---------------------------------------------- |
+| DMs           | `pairing` or explicit `allowlist`                      | Keeps trust visible and intentional            |
+| Groups        | allowlist only the groups you mean to support          | Avoids “why is it answering here?” drift       |
+| Group replies | mention-only at first                                  | Safer for live communities                     |
+| Streaming     | keep default, disable only if preview UX becomes noisy | Better responsiveness without extra complexity |
+| Transport     | start with long polling                                | Fewer moving parts than webhook mode           |
+
+## Where Telegram fits in a broader channel strategy
+
+Telegram is often best used as one of these three roles:
+
+### Primary day-0 lane
+
+Use it when you need the fastest path to a working bot.
+
+### Operator fallback lane
+
+Even if your main surface is Slack, Signal, or WhatsApp, Telegram is often a strong operator backchannel because setup is fast and access controls are clear.
+
+### Shared-team lane via topics
+
+When you need multiple structured discussion spaces with isolated sessions, Telegram topics can become surprisingly strong lightweight routing surfaces.
+
+## Continue the Telegram path
+
+- Shorter setup walkthrough: [/guides/telegram-setup](/guides/telegram-setup)
+- Pairing trust model: [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+- Group failure diagnosis: [/troubleshooting/solutions/telegram-bot-in-group-no-response](/troubleshooting/solutions/telegram-bot-in-group-no-response)
+- Network/API failures: [/troubleshooting/solutions/telegram-network-request-failed-ipv6-dns](/troubleshooting/solutions/telegram-network-request-failed-ipv6-dns)

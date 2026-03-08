@@ -1,0 +1,413 @@
+---
+title: 'Feishu'
+description: 'Feishu integration for OpenClaw focuses on plugin installation, WebSocket bot setup, tenant permissions, verification, and team rollout hygiene.'
+category: 'Channel Integration'
+subcategory: 'Community Plugin'
+platform: 'Feishu'
+difficulty: 'intermediate'
+estimatedTime: '30–45 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-09
+featured: false
+keywords:
+  - 'openclaw feishu'
+  - 'feishu openclaw'
+  - 'plugin install'
+  - 'tenant app'
+  - 'websocket bot'
+  - 'workspace permissions'
+---
+
+> Feishu is a good OpenClaw lane for teams already living inside Feishu or Lark, but it is not a “paste one token and go” surface. The real trust boundary is the combination of **plugin installation**, **tenant app permissions**, **event subscription mode**, and **OpenClaw DM / group policy**.
+
+## Why this lane is different
+
+Feishu is documented upstream as a separate plugin channel, not a core bundled lane.
+
+That matters operationally because there are two distinct setup layers:
+
+- **OpenClaw must have the plugin installed** via `@openclaw/feishu`
+- **Feishu/Lark must have a published app** with the right bot capability, permissions, and event subscription
+
+If either layer is incomplete, the bot can look “configured” while still receiving nothing useful.
+
+For teams on the international Lark tenant, there is a second difference worth calling out early: the docs require `domain: "lark"` when you are not on the default Feishu domain.
+
+## Official support snapshot
+
+The Feishu plugin currently supports:
+
+- direct messages and group chats,
+- message receive and send flows for common media types,
+- streaming replies through interactive cards,
+- and multiple accounts plus explicit bindings for routing.
+
+The default event transport is **WebSocket long connection**, which is the cleanest beginner path because it avoids exposing a public webhook URL.
+
+Webhook mode exists, but it adds more surface area and requires a `verificationToken`.
+
+## The mental model: tenant-side gate, then OpenClaw-side gate
+
+Feishu failures usually come from mixing two separate systems together.
+
+### Gate 1: Feishu decides whether your app receives events at all
+
+Before OpenClaw policy matters, Feishu must accept and deliver events to the app.
+
+That means the following have to be true first:
+
+- the plugin is installed,
+- the app exists and has a valid **App ID** and **App Secret**,
+- bot capability is enabled,
+- permissions were granted,
+- the event subscription includes `im.message.receive_v1`,
+- and the app has been published.
+
+The Feishu docs also warn that long-connection event subscription may fail to save if the gateway is not already running.
+
+### Gate 2: OpenClaw decides who is allowed to get replies
+
+Once messages reach the gateway, OpenClaw still evaluates channel policy:
+
+- `dmPolicy`
+- `allowFrom`
+- `groupPolicy`
+- `groupAllowFrom`
+- `groups.<chat_id>.requireMention`
+- sender-level allowlists for specific groups
+
+So a connected Feishu bot can still stay quiet by design.
+
+## Plugin and trust boundary
+
+Put these facts near the top of your operator notes because they shape every later decision:
+
+- Install the plugin first: `openclaw plugins install @openclaw/feishu`
+- Prefer **WebSocket long connection** first; only move to webhook mode if you have a clear reason
+- Treat the app secret like a real secret
+- Treat app permissions as part of the bot’s effective capability surface
+- Treat group access as a separate policy surface from direct messages
+
+For Lark tenants, explicitly set the domain rather than assuming the default Feishu endpoint is correct.
+
+## Fastest safe baseline
+
+The upstream docs show `dmPolicy: "pairing"` as the default DM stance. That is still the best first move here.
+
+For groups, a safer first production posture is stricter than the documented default:
+
+- keep DMs on `pairing`,
+- allow only the specific groups you intend to support,
+- require `@mention` in those groups,
+- and only widen sender scope if you have a concrete reason.
+
+### Conservative baseline config
+
+```json5
+{
+  channels: {
+    feishu: {
+      enabled: true,
+      dmPolicy: 'pairing',
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['oc_team_room'],
+      accounts: {
+        main: {
+          appId: 'cli_xxx',
+          appSecret: 'xxx',
+          botName: 'Ops Assistant',
+        },
+      },
+      groups: {
+        oc_team_room: {
+          requireMention: true,
+        },
+      },
+    },
+  },
+}
+```
+
+Why this is a good starting shape:
+
+- unknown DM senders are not trusted automatically,
+- the bot does not wake up in every group it joins,
+- and mention-gating keeps shared chats quiet while you validate behavior.
+
+### Lark tenant variant
+
+If the tenant is on Lark rather than Feishu, add the domain explicitly:
+
+```json5
+{
+  channels: {
+    feishu: {
+      domain: 'lark',
+      accounts: {
+        main: {
+          appId: 'cli_xxx',
+          appSecret: 'xxx',
+        },
+      },
+    },
+  },
+}
+```
+
+## Step 1: install the plugin before touching tenant config
+
+This channel is not bundled with core OpenClaw.
+
+Install it first:
+
+```bash
+openclaw plugins install @openclaw/feishu
+```
+
+If you are operating from a local checkout, the docs also support:
+
+```bash
+openclaw plugins install ./extensions/feishu
+```
+
+Only after that should you run:
+
+```bash
+openclaw onboard
+```
+
+or:
+
+```bash
+openclaw channels add
+```
+
+The official docs explicitly list both onboarding and CLI-based setup.
+
+## Step 2: create the app carefully on Feishu Open Platform
+
+The upstream doc’s order matters here:
+
+1. Create an enterprise app
+2. Copy the **App ID** and **App Secret**
+3. Batch-import the documented permission set
+4. Enable **Bot** capability
+5. Configure event subscription with **Use long connection to receive events**
+6. Add the event `im.message.receive_v1`
+7. Publish the app
+
+Two operator notes matter more than they look:
+
+- app publish is part of message delivery, not just cosmetic release management
+- long-connection setup depends on the gateway already running
+
+If you skip either, you can spend a long time debugging the wrong layer.
+
+## Step 3: keep connection mode decisions boring
+
+The documented default is WebSocket long connection. For most operators, that should remain the first path.
+
+Use webhook mode only if you actually need it.
+
+If you do move to webhook mode, the docs require:
+
+- `connectionMode: "webhook"`
+- `verificationToken`
+- and awareness that the webhook server binds to `127.0.0.1` by default unless you intentionally change `webhookHost`
+
+That default bind behavior is a good example of why webhook mode should be treated as an explicit infrastructure choice, not just another toggle.
+
+## Step 4: decide group posture before inviting the bot widely
+
+Feishu’s group support is powerful enough to become noisy if you leave policy vague.
+
+The local official docs describe three layers you should separate mentally:
+
+### 1. Group admission policy
+
+`channels.feishu.groupPolicy` supports:
+
+- `open`
+- `allowlist`
+- `disabled`
+
+The docs mark `open` as the default, but many teams will want `allowlist` first.
+
+### 2. Mention requirement inside a group
+
+Per-group `requireMention` defaults to `true`.
+
+That default is useful. Keep it until the bot has earned ambient presence in shared rooms.
+
+### 3. Sender-level gating inside a group
+
+The docs also support `groups.<chat_id>.allowFrom`, which gates all processed messages in that group by sender `open_id`.
+
+That is stronger than a control-command allowlist. Use it when a room itself is valid but only a subset of members should drive the bot.
+
+## Step 5: use quota flags intentionally, not reactively
+
+The Feishu docs expose two API-usage controls:
+
+- `typingIndicator`
+- `resolveSenderNames`
+
+Defaults are `true`.
+
+If you want to reduce platform API usage, you can disable one or both.
+
+```json5
+{
+  channels: {
+    feishu: {
+      typingIndicator: false,
+      resolveSenderNames: false,
+    },
+  },
+}
+```
+
+This is not mandatory tuning, but it is worth documenting because operators often discover API-call volume only after rollout.
+
+## Verification drill
+
+Do not stop at “the app saved.” Feishu is one of the channels where admin-side configuration can make a broken lane look healthy.
+
+### 1. Verify the gateway is actually up
+
+The upstream docs call out these checks repeatedly:
+
+```bash
+openclaw gateway status
+openclaw logs --follow
+```
+
+Also keep the broader observability checklist nearby:
+
+- [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability)
+- [/guides/new-user-checklist](/guides/new-user-checklist)
+
+### 2. Send the first DM and approve pairing
+
+The official test flow is simple:
+
+1. send a direct message to the bot,
+2. expect a pairing code by default,
+3. approve it.
+
+```bash
+openclaw pairing list feishu
+openclaw pairing approve feishu <CODE>
+```
+
+If you are unsure what pairing is actually proving, read:
+
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+
+### 3. Test one group by mention only
+
+After DM flow works, add exactly one shared group and keep it narrow:
+
+- confirm the bot is added to the group,
+- `@mention` it,
+- verify the group `chat_id` matches the intended allowlist entry,
+- and watch logs while the event is processed.
+
+### 4. Restart once before calling it done
+
+Feishu long-connection behavior is tied to the running gateway, so do one deliberate restart and repeat the DM plus one group test.
+
+That catches a surprising number of “worked during setup only” failures.
+
+## What usually breaks first
+
+### 1. Bot does not respond in group chats
+
+The official doc’s first checks are the right first checks:
+
+- confirm the bot is in the group,
+- confirm you are `@mention`ing it when `requireMention` is still true,
+- confirm `groupPolicy` is not effectively blocking the group,
+- then inspect `openclaw logs --follow`.
+
+### 2. Bot does not receive messages at all
+
+The local docs point to the usual suspects:
+
+- event subscription not configured correctly,
+- gateway not running when long connection was set up,
+- app permissions incomplete,
+- or the app not actually published.
+
+This is why “credentials look correct” is not a meaningful Feishu health check by itself.
+
+### 3. Lark tenant configured against the wrong domain
+
+For international Lark tenants, the docs explicitly require `domain: "lark"`.
+
+If everything else looks normal but the tenant context is wrong, fix the domain before inventing a deeper explanation.
+
+### 4. Message send failures after inbound starts working
+
+The official doc specifically calls out:
+
+- missing `im:message:send_as_bot` permission,
+- or the app not being published.
+
+That is a good reminder that inbound success does not prove outbound permission symmetry.
+
+### 5. App Secret leak or rotation event
+
+The doc has a dedicated App Secret leak section. Treat that seriously:
+
+1. rotate the secret in Feishu Open Platform,
+2. update OpenClaw config,
+3. restart the gateway.
+
+## Message behavior worth knowing early
+
+The official capability section is useful because it tells you what not to over-expect:
+
+- Feishu supports text and several common media types in both directions
+- rich text send support is only partial
+- outbound text chunking defaults to `2000`
+- media size limits default to `30MB`
+- streaming is supported through interactive cards
+
+That makes Feishu stronger than a plain text-only bot lane, but you should still verify the exact message surface you care about before promising it internally.
+
+## Multi-account and routing role
+
+Feishu is one of the channels where explicit routing can matter quickly in a real company environment.
+
+The official local docs support:
+
+- `defaultAccount`
+- multiple Feishu accounts under `accounts`
+- and `bindings` keyed by direct user or group identifiers
+
+That makes Feishu viable as more than a single catch-all bot, but only if you treat account identity and routing as separate design decisions.
+
+For the routing model itself, keep this nearby:
+
+- [/guides/openclaw-multi-agent-routing](/guides/openclaw-multi-agent-routing)
+
+## When Feishu is a good fit
+
+Feishu is a strong fit when:
+
+- the team already operates inside Feishu or Lark,
+- a WebSocket-first inbound path is operationally attractive,
+- you want stricter control over DMs and group rollout,
+- and you are willing to manage the tenant app lifecycle properly.
+
+It is a weaker first lane if you want the absolute shortest possible day-0 setup with almost no platform admin work.
+
+## Related guides
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability)
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+- [/guides/openclaw-multi-agent-routing](/guides/openclaw-multi-agent-routing)
+- [/guides/new-user-checklist](/guides/new-user-checklist)

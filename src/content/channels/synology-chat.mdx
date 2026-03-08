@@ -1,0 +1,313 @@
+---
+title: 'Synology Chat'
+description: 'Synology Chat setup for OpenClaw: plugin install, outgoing versus incoming webhook roles, DM policy, user-ID allowlists, SSL posture, verification, and multi-account webhook routing.'
+category: 'Channel Integration'
+subcategory: 'Community Plugin'
+platform: 'Synology Chat'
+difficulty: 'intermediate'
+estimatedTime: '25–40 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-09
+featured: false
+keywords:
+  - 'openclaw synology chat'
+  - 'synology webhook'
+  - 'synology chat allowlist'
+  - 'synology nas bot'
+  - 'synology chat dm'
+  - 'openclaw webhook path'
+---
+
+> Synology Chat is a **webhook-operated DM lane**. The important operator distinction is that inbound trust, outbound delivery, and OpenClaw user policy are three different things, and you need all three aligned before the channel feels reliable.
+
+## Why choose Synology Chat
+
+Synology Chat is a good fit when OpenClaw needs to live close to an existing NAS-centered environment instead of a public cloud chat platform.
+
+That gives you a distinctive shape:
+
+- inbound messages arrive through a **Synology outgoing webhook**,
+- replies leave through a **Synology incoming webhook**,
+- and sender control happens in OpenClaw with **DM policy plus user-ID rules**.
+
+This is not a QR-login channel and not a tenant app-registration gauntlet. It is a routing-heavy integration, which means the operator work is less about “logging in” and more about getting the webhook topology right.
+
+## What this page is for
+
+Use this dossier when you need to decide:
+
+- whether Synology Chat should be a local-team or NAS-adjacent operator surface,
+- how to separate webhook wiring from user authorization,
+- what a safe first config looks like,
+- how to verify both directions of delivery,
+- and which misconfigurations make the route fail before a user ever sends a message.
+
+## The mental model: this lane has two webhooks and one policy layer
+
+Most first-run issues come from mixing up the channel's three control points.
+
+### Gate 1: Synology must deliver inbound messages to OpenClaw
+
+The outgoing webhook in Synology Chat sends inbound messages to your Gateway.
+
+By default, OpenClaw expects:
+
+- `https://gateway-host/webhook/synology`
+
+You can change that with `channels.synology-chat.webhookPath`, but then Synology must point to the same custom path.
+
+### Gate 2: OpenClaw must be able to send replies back to Synology Chat
+
+Replies use the Synology Chat incoming webhook URL configured in `incomingUrl`.
+
+If inbound routing works but outbound replies do not, the problem is often here rather than in DM policy.
+
+### Gate 3: OpenClaw still decides who may use the lane
+
+The official docs make the intended production posture clear:
+
+- `dmPolicy: "allowlist"` is the recommended default,
+- `allowedUserIds` holds Synology user IDs,
+- `open` allows any sender,
+- `disabled` blocks DMs,
+- and pairing approvals are also supported for this channel.
+
+This distinction matters because a valid webhook does not mean an authorized sender, and an authorized sender does not help if the webhook route never started.
+
+## Fastest safe baseline
+
+For a first real deployment, use:
+
+- plugin installed and enabled,
+- default webhook path unless you truly need a custom one,
+- a real outgoing token,
+- a real incoming webhook URL,
+- `dmPolicy: "allowlist"`,
+- a non-empty `allowedUserIds` list.
+
+### Minimal config
+
+```json5
+{
+  channels: {
+    'synology-chat': {
+      enabled: true,
+      token: 'synology-outgoing-token',
+      incomingUrl: 'https://nas.example.com/webapi/entry.cgi?api=SYNO.Chat.External&method=incoming&version=2&token=...',
+      webhookPath: '/webhook/synology',
+      dmPolicy: 'allowlist',
+      allowedUserIds: ['123456'],
+      rateLimitPerMinute: 30,
+      allowInsecureSsl: false,
+    },
+  },
+}
+```
+
+This is a good baseline because it keeps the route narrow and explicit:
+
+- inbound requests are token verified,
+- replies have a single known target webhook,
+- unauthorized senders are excluded by default,
+- and SSL is still strict unless you deliberately relax it.
+
+## Step 1: install the plugin and wire both webhook directions
+
+Synology Chat is plugin-based rather than core.
+
+Install from a local checkout with:
+
+```bash
+openclaw plugins install ./extensions/synology-chat
+```
+
+Then in Synology Chat integrations:
+
+1. create an **incoming webhook** and copy its URL,
+2. create an **outgoing webhook** and choose your secret token,
+3. point the outgoing webhook to your Gateway,
+4. make sure the Gateway path matches `webhookPath`.
+
+If you keep the default path, the outgoing webhook should target:
+
+```text
+https://gateway-host/webhook/synology
+```
+
+## Step 2: put credentials in config or env, but know the precedence
+
+The official docs list env vars for the default account:
+
+- `SYNOLOGY_CHAT_TOKEN`
+- `SYNOLOGY_CHAT_INCOMING_URL`
+- `SYNOLOGY_NAS_HOST`
+- `SYNOLOGY_ALLOWED_USER_IDS`
+- `SYNOLOGY_RATE_LIMIT`
+- `OPENCLAW_BOT_NAME`
+
+Config values override env vars.
+
+That means env is useful for bootstrap, but config is usually the clearer long-term source of truth for webhook routing and account-specific behavior.
+
+## Step 3: choose the DM trust model carefully
+
+### `allowlist`: recommended production default
+
+This is the strongest general-purpose posture for internal or semi-internal deployments.
+
+```json5
+{
+  channels: {
+    'synology-chat': {
+      dmPolicy: 'allowlist',
+      allowedUserIds: ['123456', '789012'],
+    },
+  },
+}
+```
+
+The official docs also make one operational rule explicit:
+
+> in `allowlist` mode, an empty `allowedUserIds` list is treated as misconfiguration and the webhook route will not start.
+
+That is a very useful property because it fails closed instead of silently becoming open.
+
+### `open`: only when any sender should reach the bot
+
+`open` is available, but it is the opposite of the documented recommended default.
+
+Use it only when broad inbound access is intentional.
+
+### Pairing: supported when you want an approval workflow
+
+The docs include pairing commands for this channel:
+
+```bash
+openclaw pairing list synology-chat
+openclaw pairing approve synology-chat <CODE>
+```
+
+If you want approval-based onboarding rather than a hard-coded allowlist, pairing is available, but the official production recommendation still leans toward allowlist.
+
+## Step 4: keep SSL posture strict unless you truly trust the NAS cert
+
+`allowInsecureSsl` exists for a reason, but the docs are cautious about it.
+
+Recommended posture:
+
+- keep `allowInsecureSsl: false`,
+- only set it to `true` when you explicitly trust a self-signed local NAS certificate.
+
+This is a classic local-infrastructure tradeoff: convenience can mask certificate mistakes. Default strictness is the better habit.
+
+## Verification drill: prove inbound and outbound separately
+
+Do not treat “one message seemed to work” as full validation. This lane is safest to verify in two halves.
+
+### Inbound proof
+
+1. Restart the Gateway after plugin install and config.
+2. Confirm Synology Chat is sending to the exact configured `webhookPath`.
+3. Send a DM to the Synology Chat bot.
+4. Confirm the sender is allowed by your chosen policy.
+
+### Outbound proof
+
+The official docs provide a direct send test using numeric Synology Chat user IDs:
+
+```bash
+openclaw message send --channel synology-chat --target 123456 --text "Hello from OpenClaw"
+openclaw message send --channel synology-chat --target synology-chat:123456 --text "Hello again"
+```
+
+If this works while inbound does not, your outbound webhook is probably fine and the problem is on the incoming route or token side.
+
+The docs also note that media sends are supported through URL-based file delivery.
+
+## What usually breaks first
+
+The official docs give enough to identify the common first failures without guessing.
+
+### 1. Route never starts in allowlist mode
+
+If `dmPolicy` is `allowlist` and `allowedUserIds` is empty, the route is treated as misconfigured and does not start.
+
+That is the first thing to inspect before chasing generic webhook failures.
+
+### 2. Webhook path mismatch
+
+If Synology points to `/webhook/synology` but your config changed `webhookPath`, inbound requests will miss the route.
+
+This is one of the easiest mistakes to create during iterative setup.
+
+### 3. SSL trust mismatch in NAS environments
+
+If you are using a self-signed local NAS certificate, strict SSL can block delivery until you either trust the certificate properly or deliberately set `allowInsecureSsl: true`.
+
+The docs recommend keeping that flag off unless you explicitly trust the environment.
+
+### 4. Token and sender checks are doing their job
+
+The plugin verifies inbound webhook tokens and rate-limits per sender.
+
+That is good for production, but it also means a copied URL alone is not enough if the token or sender expectations are wrong.
+
+## Multi-account and routing notes
+
+Synology Chat supports multiple accounts under `channels.synology-chat.accounts`.
+
+That matters when you want to separate:
+
+- different NAS environments,
+- different webhook paths,
+- or different user allowlists.
+
+Example from the official docs:
+
+```json5
+{
+  channels: {
+    'synology-chat': {
+      enabled: true,
+      accounts: {
+        default: {
+          token: 'token-a',
+          incomingUrl: 'https://nas-a.example.com/...token=...',
+        },
+        alerts: {
+          token: 'token-b',
+          incomingUrl: 'https://nas-b.example.com/...token=...',
+          webhookPath: '/webhook/synology-alerts',
+          dmPolicy: 'allowlist',
+          allowedUserIds: ['987654'],
+        },
+      },
+    },
+  },
+}
+```
+
+For operators, the main takeaway is simple: if you split accounts, give each one a webhook path and policy you can reason about independently.
+
+## Recommended production posture
+
+A stable Synology Chat deployment usually means:
+
+- `allowlist` as the default trust model,
+- numeric user IDs documented and versioned with config,
+- one clearly owned outgoing token per account,
+- one clearly owned incoming webhook URL per account,
+- strict SSL unless you consciously accept a self-signed setup.
+
+This channel rewards disciplined webhook ownership more than improvisation.
+
+## Where Synology Chat fits in a channel strategy
+
+Synology Chat is a strong fit for:
+
+- NAS-centered teams,
+- internal operator workflows,
+- and environments where local infrastructure matters more than public-platform reach.
+
+It is less compelling as a first public-facing assistant surface. Its strength is controlled routing, not broad consumer messaging ergonomics.

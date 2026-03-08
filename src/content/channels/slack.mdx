@@ -1,0 +1,315 @@
+---
+title: 'Slack'
+description: 'Slack Bot setup for OpenClaw: scopes, Socket Mode or Events API behavior, thread policy, workspace rollout, and troubleshooting for silent bots.'
+category: 'Channel Integration'
+subcategory: 'Core Channel'
+platform: 'Slack'
+difficulty: 'intermediate'
+estimatedTime: '35–50 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+featured: true
+keywords:
+  - 'openclaw slack'
+  - 'slack openclaw'
+  - 'oauth scopes'
+  - 'socket mode'
+  - 'events api'
+  - 'threading'
+---
+
+> Slack is where OpenClaw stops feeling like a personal bot and starts feeling like a **workspace system**. That is exactly why the setup is more demanding than Telegram: you are not just connecting a bot, you are defining how a workspace should expose messages, threads, app events, and trust boundaries to an agent.
+
+## Why choose Slack
+
+Slack is a strong lane when OpenClaw needs to live inside an internal operating environment instead of acting as a lightweight personal messenger.
+
+It is especially good for:
+
+- product and engineering teams that already coordinate in threads,
+- support and operations teams that need persistent channel context,
+- organizations that want one app surface across DMs, channels, and workflow-like interactions,
+- and teams that care more about **structured access** than the fastest possible first reply.
+
+Slack is not the fastest first channel. It is one of the best **team channels** once the policy and app model are set correctly.
+
+## The mental model: Slack has an app layer and a conversation layer
+
+Most Slack failures come from collapsing two different systems into one.
+
+### Layer 1: Slack app registration and event delivery
+
+Slack decides whether your OpenClaw app:
+
+- has the right scopes,
+- is installed in the right workspace,
+- is allowed to receive events,
+- and can actually connect via **Socket Mode** or **HTTP Events API**.
+
+If this layer is wrong, OpenClaw may look healthy locally but never see the events you expect.
+
+### Layer 2: OpenClaw conversation policy and routing
+
+Once Slack does deliver events, OpenClaw still decides:
+
+- whether DMs require pairing,
+- which channels are allowed,
+- whether mentions are required,
+- which senders can trigger the bot,
+- and how thread or agent routing should behave.
+
+That is why “the bot is installed” and “the bot is allowed to answer here” are not the same thing.
+
+## The safest baseline posture
+
+For most teams, a good first Slack rollout is:
+
+- **Mode:** Socket Mode
+- **DMs:** pairing or explicit allowlist
+- **Channels:** allowlist or narrow scope at first
+- **Replies in channels:** mention-gated by default
+- **Verification:** DM, channel mention, private channel, and one thread test
+
+### Minimal Socket Mode baseline
+
+```json5
+{
+  channels: {
+    slack: {
+      enabled: true,
+      mode: 'socket',
+      appToken: 'xapp-...',
+      botToken: 'xoxb-...',
+      dmPolicy: 'pairing',
+    },
+  },
+}
+```
+
+Why start here:
+
+- Socket Mode removes inbound public-webhook complexity while you validate the lane.
+- Pairing keeps direct-message trust explicit.
+- Mention gating keeps channels from becoming ambient bot spaces before you mean them to.
+
+## Step 1: Create the Slack app deliberately
+
+In Slack app settings, create or prepare an app for the exact workspace you intend to support.
+
+For **Socket Mode**:
+
+1. enable **Socket Mode**,
+2. create an **App Token** (`xapp-...`) with `connections:write`,
+3. install the app and copy the **Bot Token** (`xoxb-...`).
+
+For **HTTP mode**:
+
+1. configure **Event Subscriptions**,
+2. copy the **Signing Secret**,
+3. point request URLs to your OpenClaw webhook path,
+4. use unique webhook paths when multiple Slack accounts are involved.
+
+## Step 2: Choose Socket Mode unless HTTP is truly required
+
+Upstream OpenClaw supports both:
+
+- **Socket Mode** — default, simpler for first deployment
+- **HTTP Events API** — useful when your deployment model already expects inbound webhooks
+
+For most CoClaw readers, Socket Mode is the safer first move because it reduces ingress, reverse-proxy, and signing-secret complexity.
+
+Use HTTP mode when you already know why your environment needs it.
+
+### HTTP mode example
+
+```json5
+{
+  channels: {
+    slack: {
+      enabled: true,
+      mode: 'http',
+      botToken: 'xoxb-...',
+      signingSecret: 'your-signing-secret',
+      webhookPath: '/slack/events',
+    },
+  },
+}
+```
+
+## Step 3: Get scopes and events right before testing behavior
+
+Slack often fails in ways that look like routing bugs but are really **scope / event subscription** problems.
+
+A practical first checklist:
+
+- install the app into the correct workspace,
+- subscribe to the required message events,
+- make sure the app is actually invited to the channel,
+- confirm App Home messages are enabled if you expect DM behavior,
+- and only then move on to thread or policy debugging.
+
+This is the channel where a bot can be “present” but functionally deaf.
+
+## Step 4: Decide the DM trust model
+
+Slack DMs default to pairing semantics upstream, and that is usually a good first posture.
+
+### Pairing for DMs
+
+Use pairing when:
+
+- one operator owns the bot,
+- the workspace is shared,
+- or you want explicit approval before a DM session becomes trusted.
+
+### Allowlist for known owners
+
+If the set of allowed DM users is already known, keep it in config instead of relying on approval history.
+
+That makes the access model durable and inspectable.
+
+## Step 5: Decide what channels are allowed to become agent surfaces
+
+Slack channels should not be treated as a flat on/off surface.
+
+Important decisions:
+
+- Which channels should the bot ever answer in?
+- Is mention gating required?
+- Are private channels supported yet?
+- Which users or user classes are allowed to trigger responses?
+- Do you want one channel to behave like a high-context team room or a quiet helper?
+
+A conservative first pattern is:
+
+- allow the bot in one public channel,
+- one private channel,
+- and DMs,
+- with **mention-gated replies** in channels.
+
+That gives you enough signal without letting the bot become noisy or surprising.
+
+## Step 6: Verify Slack like a real workspace rollout
+
+Do not stop after the first DM succeeds.
+
+### Verification drill
+
+1. **DM test**
+   - send a direct message
+   - confirm pairing or allowlist behavior is exactly what you intended
+   - verify the second message routes to the same expected session
+
+2. **Public channel mention**
+   - invite the app to a channel
+   - mention the bot directly
+   - confirm the bot replies in the right place and with the right policy behavior
+
+3. **Private channel test**
+   - explicitly invite the app
+   - repeat the mention flow
+   - verify that private-channel visibility is not being assumed incorrectly
+
+4. **Thread test**
+   - reply in a thread where the bot was already involved
+   - verify that thread behavior matches the workspace expectation
+
+5. **Restart test**
+   - restart the gateway
+   - confirm DM and channel behavior still work the same way
+
+If Slack only works in one surface, you do not yet have a workspace-grade rollout.
+
+## The first Slack failures to expect
+
+### 1. Bot works in DMs but not in channels
+
+This is the classic Slack first-week failure.
+
+Common causes:
+
+- app not invited to the channel,
+- mention gating behaving exactly as configured,
+- missing scopes or events,
+- channel policy or allowlist too narrow.
+
+Start here:
+
+- [/troubleshooting/solutions/slack-bot-not-responding-in-channels](/troubleshooting/solutions/slack-bot-not-responding-in-channels)
+
+### 2. Socket Mode auth or connection fails
+
+Usually one of these:
+
+- `xapp` / `xoxb` token mismatch,
+- Socket Mode not really enabled,
+- reinstall needed after scope changes.
+
+Start here:
+
+- [/troubleshooting/solutions/slack-socket-mode-auth-failed](/troubleshooting/solutions/slack-socket-mode-auth-failed)
+
+### 3. Silent event loss after app edits
+
+Slack is particularly vulnerable to “we changed something small in the app config and now channels feel broken.”
+
+When scopes, events, or request-mode settings change, verify the app installation and subscriptions again before debugging OpenClaw logic.
+
+## Advanced Slack notes that matter earlier than people expect
+
+### Socket Mode vs HTTP is not just transport
+
+It changes what you need to operate:
+
+- Socket Mode emphasizes app tokens and outbound connectivity.
+- HTTP mode emphasizes signing secret validation, webhook routing, and ingress correctness.
+
+Choose the mode whose failure model your team can actually support.
+
+### User tokens are a separate decision
+
+If you introduce `userToken` for directory reads or richer operations, treat it as a deliberate expansion of the trust surface.
+
+Do not quietly add it just because a feature looks convenient.
+
+### Name matching is riskier than it feels
+
+Slack name and channel resolution can look friendly during setup but become fragile later.
+
+Where possible, think in IDs and resolved workspace entities rather than display names.
+
+## Recommended production posture
+
+If you want a low-surprise first production Slack deployment:
+
+| Surface      | Recommendation                           | Why                                      |
+| ------------ | ---------------------------------------- | ---------------------------------------- |
+| Transport    | Socket Mode first                        | Less ingress complexity                  |
+| DMs          | pairing or explicit allowlist            | Clear owner trust model                  |
+| Channels     | narrow initial allowlist                 | Prevents accidental workspace sprawl     |
+| Replies      | mention-gated at first                   | Better for noisy team spaces             |
+| Verification | DM + public + private + thread + restart | Catches the real workspace failure modes |
+
+## Where Slack fits in a broader channel strategy
+
+Slack is often best as one of these roles:
+
+### Primary internal team lane
+
+Use it when OpenClaw is meant to be embedded in a company or project workspace.
+
+### Shared operations lane
+
+Slack is a good place for incident triage, support handling, and project-context replies where thread structure matters.
+
+### Paired with Telegram or WebChat for operator fallback
+
+Teams often benefit from Slack as the shared lane and Telegram or WebChat as the low-friction operator lane when Slack app policy becomes the blocker.
+
+## Continue the Slack path
+
+- Config fundamentals: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- Pairing model: [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+- Channel non-response fix: [/troubleshooting/solutions/slack-bot-not-responding-in-channels](/troubleshooting/solutions/slack-bot-not-responding-in-channels)
+- Socket auth fix: [/troubleshooting/solutions/slack-socket-mode-auth-failed](/troubleshooting/solutions/slack-socket-mode-auth-failed)

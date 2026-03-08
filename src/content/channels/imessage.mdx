@@ -1,0 +1,284 @@
+---
+title: 'iMessage'
+description: 'Legacy iMessage support for OpenClaw via imsg: transition guidance, risk notes, verification expectations, and when to prefer BlueBubbles instead.'
+category: 'Channel Integration'
+subcategory: 'Legacy Integration'
+platform: 'iMessage'
+difficulty: 'advanced'
+estimatedTime: 'Legacy path'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+featured: false
+keywords:
+  - 'openclaw imessage'
+  - 'imessage openclaw'
+  - 'imsg cli'
+  - 'legacy bridge'
+  - 'macOS host'
+  - 'bluebubbles migration'
+---
+
+> OpenClaw’s `imessage` channel is a **legacy compatibility lane** built on `imsg` JSON-RPC over stdio. The upstream docs are explicit: **new iMessage deployments should use BlueBubbles instead**. Treat this page as maintenance guidance for an existing path, not as the default way to add Apple messaging.
+
+## The first decision: should you use this at all
+
+For a new deployment, the answer is usually no.
+
+The official channel docs say two things very clearly:
+
+- `imessage` is legacy support via `imsg`
+- new setups should use [/channels/bluebubbles](/channels/bluebubbles)
+
+That recommendation should stay visible throughout the entire operator flow because it changes how you judge this lane.
+
+Use `imessage` only when one of these is true:
+
+- you are maintaining an older integration that already depends on `imsg`,
+- you need a short-term compatibility bridge before migrating,
+- or you cannot move to BlueBubbles immediately for a documented reason.
+
+If you are choosing from scratch, BlueBubbles is the better starting point.
+
+## Why this lane is harder than it looks
+
+Legacy iMessage can feel deceptively simple because there is no public webhook service to stand up and no separate daemon port to expose.
+
+But the channel still depends on a stack of local assumptions:
+
+- a macOS host signed into Messages,
+- an `imsg` binary that OpenClaw can run,
+- the right macOS permissions for the exact process context,
+- and OpenClaw policy for DMs and groups.
+
+The gateway spawns `imsg rpc` over stdio. That means the integration is not “set a token and move on.” It is a host-coupled runtime lane.
+
+## The mental model: four layers must agree
+
+### Layer 1: Messages state on the Mac
+
+The Mac has to be signed into Messages for the identity you intend to operate.
+
+If the Apple identity or Messages state is wrong, later routing or allowlist debugging is wasted motion.
+
+### Layer 2: process permissions in the right context
+
+The official docs call out two requirements that matter operationally:
+
+- Full Disk Access is required for the process context that runs OpenClaw / `imsg`
+- first-run approvals may depend on the same interactive context if you run through LaunchAgent, SSH, or another headless path
+
+This is a classic macOS footgun: permissions are granted to a process context, not to your abstract intent.
+
+### Layer 3: stdio execution path
+
+OpenClaw only needs a stdio-compatible `cliPath`, which is why the docs allow either:
+
+- a local `imsg` binary path,
+- or a wrapper script that SSHes to a remote Mac and runs `imsg` there.
+
+That flexibility is useful, but it also means reliability depends on the exact wrapper and host context you chose.
+
+### Layer 4: OpenClaw routing and policy
+
+Once messages arrive, normal channel policy still applies:
+
+- DMs default to pairing,
+- groups have their own `groupPolicy`, `groupAllowFrom`, and `groups` controls,
+- group sessions are isolated from DM sessions.
+
+So even a healthy Mac host can still produce intentional silence if policy is restrictive.
+
+## Fastest safe baseline
+
+If you must keep this lane alive, keep the first configuration narrow and explicit.
+
+### Minimal local-Mac config
+
+```json5
+{
+  channels: {
+    imessage: {
+      enabled: true,
+      cliPath: '/usr/local/bin/imsg',
+      dbPath: '/Users/<you>/Library/Messages/chat.db',
+    },
+  },
+}
+```
+
+### Install and verify the runtime first
+
+The upstream docs document the basic local setup as:
+
+```bash
+brew install steipete/tap/imsg
+imsg rpc --help
+```
+
+If `imsg rpc --help` is not healthy, do not continue into policy work. Fix the runtime first.
+
+## Step 1: choose the Mac operating model deliberately
+
+The official docs recommend a dedicated Apple identity and even a dedicated macOS user when you want cleaner isolation.
+
+That recommendation is not cosmetic. It changes the operational risk profile:
+
+- bot traffic is separated from a personal Messages profile,
+- access approvals are easier to reason about,
+- and migration or retirement becomes cleaner later.
+
+If this lane matters enough to keep, it matters enough to isolate.
+
+## Step 2: verify permissions in the same process context
+
+This is the highest-value legacy iMessage check.
+
+The docs note that Full Disk Access is required for the process context running OpenClaw / `imsg`, and that a one-time interactive command in that same context may be needed to trigger prompts.
+
+That means these are not equivalent:
+
+- testing interactively in Terminal,
+- then running the gateway headlessly through another user, SSH session, or launch context.
+
+If the runtime context changes, re-validate permissions there.
+
+## Step 3: keep DMs on pairing until you have a reason not to
+
+The default DM trust model is pairing, and the official setup flow explicitly includes approving the first DM.
+
+```bash
+openclaw pairing list imessage
+openclaw pairing approve imessage <CODE>
+```
+
+That is the right posture for a legacy lane because it makes trust decisions visible while you assess whether the channel should remain in service at all.
+
+## Step 4: handle groups as a separate problem
+
+The iMessage docs expose several group-specific details that are easy to miss if you treat everything as “just chats.”
+
+### Group policy is separate from DM policy
+
+The documented group modes are:
+
+- `allowlist`
+- `open`
+- `disabled`
+
+Group sender control uses `groupAllowFrom`.
+
+The docs also note a runtime fallback: if `groupAllowFrom` is unset, group sender checks fall back to `allowFrom` when available.
+
+That is useful, but it is safer to configure group intent explicitly instead of relying on fallback behavior.
+
+### Mention gating is weaker here than on richer platforms
+
+The official docs are explicit:
+
+- iMessage has no native mention metadata
+- mention detection uses regex patterns
+- with no configured patterns, mention gating cannot be enforced
+
+That is a real operational limitation. If group behavior matters to you, document the mention pattern strategy instead of assuming iMessage will behave like Slack or Telegram.
+
+### Some multi-participant threads are group-like but arrive as `is_group=false`
+
+Upstream also documents a subtle compatibility case:
+
+- some multi-participant threads can arrive with `is_group=false`
+- if the `chat_id` is explicitly configured under `channels.imessage.groups`, OpenClaw treats it as group traffic
+
+That is exactly the kind of legacy edge case that should push new deployments toward BlueBubbles.
+
+## Remote Mac operation is possible, but more fragile
+
+The docs support pointing `cliPath` at an SSH wrapper so OpenClaw can run `imsg` on a remote Mac.
+
+That is useful for keeping the gateway off the Mac, but it introduces more moving parts:
+
+- SSH must be non-interactive,
+- host trust must already be established,
+- and `remoteHost` matters when attachments are involved.
+
+This is a good example of why `imessage` should be judged as a maintenance lane. It can work, but the operational surface grows faster than the interface suggests.
+
+## Verification drill
+
+If you keep legacy iMessage alive, verify it like infrastructure, not like a demo.
+
+### 1. Verify `imsg` itself
+
+Confirm both of these are true in the actual runtime context:
+
+- `imsg` is callable from the configured `cliPath`
+- Messages is signed in and accessible from that context
+
+### 2. Verify one fresh DM
+
+Use the documented pairing path to validate the default trust model, not just raw send/receive.
+
+That tells you the runtime can both observe and route a new conversation.
+
+### 3. Verify one known group thread
+
+If you support group threads, test one explicitly configured thread and confirm the intended policy path:
+
+- allowlist behavior,
+- sender checks,
+- and mention expectations if you are relying on regex-based mention patterns.
+
+### 4. Re-test after a restart
+
+A legacy host-coupled lane is not really verified until it survives one deliberate restart of the gateway or runtime context.
+
+That check matters more here than on channels with simpler hosted APIs.
+
+## What usually breaks first
+
+The official docs imply a few consistent failure zones.
+
+### Permissions are correct in one context, wrong in another
+
+This is the most common class of macOS-hosted integration bug.
+
+The fix is usually not “change the prompt.” It is to grant Full Disk Access and related approvals to the same execution context that actually runs OpenClaw / `imsg`.
+
+### The Mac identity is wrong or mixed with personal state
+
+When the bot shares a personal Messages profile, troubleshooting gets messy quickly.
+
+That is why the docs recommend a dedicated Apple ID and macOS user for bot traffic.
+
+### Group behavior is assumed, not configured
+
+Legacy iMessage groups are where hidden assumptions pile up:
+
+- group policy may be missing,
+- mention detection may not be enforceable without regex patterns,
+- and some multi-participant threads may need explicit `groups` configuration to be treated as groups.
+
+### Remote wrappers add invisible failure modes
+
+If you run through SSH, the wrapper can fail independently of OpenClaw policy.
+
+When attachments are enabled, `remoteHost` and SCP behavior become part of the lane whether you intended that complexity or not.
+
+## When to migrate instead of tuning further
+
+The cleanest rule is this:
+
+- if you are still designing the Apple messaging lane, choose BlueBubbles now;
+- if you are repeatedly debugging host context, permissions, or legacy thread semantics, migrate sooner rather than later.
+
+The legacy `imessage` path can still be useful, but every extra workaround is a signal to ask whether you are preserving compatibility or just extending maintenance debt.
+
+## Continue from here
+
+The most relevant follow-up pages are:
+
+- [/channels/bluebubbles](/channels/bluebubbles)
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+- [/troubleshooting/solutions/control-ui-pairing-required](/troubleshooting/solutions/control-ui-pairing-required)
+
+The first is the recommended replacement path. The latter two help once you are approving devices or operating the gateway remotely while you maintain or migrate this lane.

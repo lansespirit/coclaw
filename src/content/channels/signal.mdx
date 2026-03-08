@@ -1,0 +1,380 @@
+---
+title: 'Signal'
+description: 'Signal for OpenClaw: signal-cli setup, linked-device or dedicated-number decisions, daemon health, DM and group policy, and the recovery posture privacy-focused operators should expect.'
+category: 'Channel Integration'
+subcategory: 'Core Channel'
+platform: 'Signal'
+difficulty: 'advanced'
+estimatedTime: '35–50 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+featured: true
+keywords:
+  - 'openclaw signal'
+  - 'signal-cli'
+  - 'linked device'
+  - 'daemon health'
+  - 'signal pairing'
+  - 'number model'
+---
+
+> Signal is the privacy-first lane in OpenClaw, but it asks for more infrastructure honesty than most messaging surfaces. You are not only configuring a channel; you are choosing a **number model, a device model, and a daemon model**. That is why Signal setups should be documented like operator runbooks, not lightweight “connect your bot” tutorials.
+
+## Why Signal needs a different mindset
+
+Signal is rarely the fastest channel to stand up. It is often the most intentional.
+
+You choose Signal when you care about:
+
+- a stronger privacy story,
+- a cleaner trust boundary than mainstream consumer chat,
+- and explicit control over where the messaging state lives.
+
+But you pay for that clarity with extra operational ceremony:
+
+- `signal-cli` must exist and stay healthy,
+- the daemon model must make sense for your host,
+- and the device/number ownership model must be written down before rollout.
+
+## The mental model: three layers have to agree
+
+### Gate 1: account and number ownership
+
+Before OpenClaw matters, you need to know what account model this lane uses.
+
+Typical questions:
+
+- Is this a dedicated bot number or a linked device of an existing Signal account?
+- Who owns recovery if the number changes, re-registration is needed, or the host is rebuilt?
+- Does the operator understand the difference between linking a device and registering a full phone account?
+
+If this layer is fuzzy, every other configuration decision becomes fragile.
+
+### Gate 2: `signal-cli` and daemon health
+
+OpenClaw talks to Signal through `signal-cli` over HTTP JSON-RPC + SSE.
+
+That means the channel depends on:
+
+- a valid `signal-cli` installation,
+- a reachable daemon,
+- a compatible host runtime,
+- and a stable state directory for keys and account data.
+
+This is why Signal failures often feel infrastructural rather than “chat platform” specific.
+
+### Gate 3: OpenClaw policy and routing
+
+Only after account ownership and daemon health are correct does OpenClaw policy take over:
+
+- `dmPolicy`
+- `allowFrom`
+- `groupPolicy`
+- `groupAllowFrom`
+- history limits and group context behavior
+
+If Signal is connected but messages are ignored, this is often the layer that decides whether the silence is intentional or not.
+
+## First strategic decision: linked device or dedicated bot number
+
+This is the defining Signal choice.
+
+### Recommended for most operators: dedicated bot number
+
+A dedicated number gives you:
+
+- clearer operational ownership,
+- less ambiguity around account state,
+- and fewer surprises if registration or recovery is needed later.
+
+It is usually the cleanest production story.
+
+### Alternative: linked device mode
+
+Linked-device mode can be appropriate when you need to keep an existing Signal account model, but it comes with a more delicate maintenance story.
+
+You must document:
+
+- which primary device owns the relationship,
+- who can relink the lane,
+- and how host migration affects the linked state.
+
+If this information is tribal knowledge, the lane is not production-ready.
+
+## Safe baseline posture
+
+A strong first Signal posture looks like this:
+
+- **Use a dedicated number if possible**
+- **Keep DMs on `pairing` by default**
+- **Treat groups as opt-in, not automatic**
+- **Verify daemon health before testing policy behavior**
+- **Write down re-link and migration expectations immediately**
+
+### Conservative baseline config
+
+```json5
+{
+  channels: {
+    signal: {
+      enabled: true,
+      cliPath: 'signal-cli',
+      dmPolicy: 'pairing',
+    },
+  },
+}
+```
+
+Why this works well:
+
+- it keeps DM access conservative,
+- it assumes host infrastructure matters and must be healthy,
+- and it gives you a channel that is secure by default while you prove out the rest of the lane.
+
+## Step 1: choose how the account will exist
+
+There are two valid setup paths.
+
+### Path A: link a device
+
+This is the lower-friction path if you already operate a Signal identity and want OpenClaw to attach as a device.
+
+Typical flow:
+
+- run the link command,
+- scan the QR from Signal,
+- verify the linked device becomes usable from the gateway host.
+
+### Path B: register a dedicated number
+
+This is often the better long-term production story, but it is a stronger commitment because the number and the runtime become part of the assistant’s operational identity.
+
+Important upstream warning:
+
+> Registering a phone-number account with `signal-cli` can de-authenticate the main Signal app session for that number.
+
+That is why a dedicated bot number is usually the safest production decision.
+
+## Step 2: make daemon health explicit
+
+Signal is not “done” when `signal-cli` is installed.
+
+You need to know whether the gateway will:
+
+- auto-start the daemon,
+- or connect to an external daemon via `httpUrl`.
+
+### Default style: local daemon managed by OpenClaw
+
+This is the simplest story if the gateway host is stable and you want a single-box deployment.
+
+### External daemon mode
+
+Use external daemon mode when:
+
+- cold start time matters,
+- you want tighter control over `signal-cli`,
+- or the host/runtime environment makes self-managed startup less predictable.
+
+Either way, the important thing is not which mode you pick; it is whether the team can explain **why that mode exists** and how to recover it.
+
+## Step 3: choose the DM trust model deliberately
+
+### Recommended default: `pairing`
+
+Signal is a strong fit for pairing because the channel often exists precisely for deliberate, trusted conversations.
+
+```json5
+{
+  channels: {
+    signal: {
+      dmPolicy: 'pairing',
+    },
+  },
+}
+```
+
+Useful commands:
+
+```bash
+openclaw pairing list signal
+openclaw pairing approve signal <CODE>
+```
+
+This gives you a conservative default without requiring you to pre-load every possible sender.
+
+### Use `allowlist` when you already know the participants
+
+If the lane is strictly for known users, `allowlist` is more durable than relying only on past pair approvals.
+
+```json5
+{
+  channels: {
+    signal: {
+      dmPolicy: 'allowlist',
+      allowFrom: ['+15551234567'],
+    },
+  },
+}
+```
+
+Signal has no casual username model here, so prefer explicit phone numbers or UUIDs.
+
+## Step 4: keep groups separate in your mental model
+
+Signal groups are not just “DMs with more people.”
+
+They have their own:
+
+- `groupPolicy`,
+- `groupAllowFrom`,
+- history limits,
+- and isolated session behavior.
+
+A clean starting rule is:
+
+- get DMs stable first,
+- then add one group deliberately,
+- then test sender policy and context behavior independently.
+
+If group behavior matters to your rollout, write that policy down explicitly instead of assuming DMs and groups should behave the same way.
+
+## Step 5: verify like an operator
+
+Signal needs a more serious verification drill than most channels.
+
+### 1. Daemon health first
+
+Before testing messages, confirm the daemon model is actually healthy.
+
+Useful checks:
+
+```bash
+openclaw status
+openclaw gateway status
+openclaw channels status --probe
+openclaw logs --follow
+```
+
+If the daemon layer is wrong, message tests are just noise.
+
+### 2. First DM
+
+- send one DM from a sender that should pair or already be allowed,
+- confirm reply behavior,
+- then send a second message to prove the lane is not only half-initialized.
+
+### 3. Pairing path
+
+If you use `pairing`, verify the trust story explicitly:
+
+- confirm the sender receives the pairing flow,
+- approve the request,
+- confirm replies start after approval and not before.
+
+### 4. Restart path
+
+Restart the gateway and verify the lane again:
+
+```bash
+openclaw gateway restart
+```
+
+If replies disappear after restart, the lane is not operationally ready.
+
+### 5. Group path, only if needed
+
+Only after daemon and DM flow are stable:
+
+- test one group,
+- confirm sender gating behaves as expected,
+- and verify group history / context behavior if that matters to your rollout.
+
+## The biggest Signal mistake: under-documenting ownership
+
+A lot of Signal pain does not come from syntax errors. It comes from missing operational ownership.
+
+If no one can answer these questions quickly, the lane is still fragile:
+
+- Which number or linked identity owns the assistant?
+- Where does the Signal state live?
+- Who can re-link or recover it?
+- Is the daemon local or external?
+- What happens when the host is rebuilt?
+
+That is why Signal documentation needs more runbook energy than most channels.
+
+## Common failure patterns
+
+### 1. `signal-cli` not found or daemon will not start
+
+This is the foundational Signal failure. If the host cannot run or reach `signal-cli`, the lane never really came up.
+
+Start here:
+
+- [/troubleshooting/solutions/signal-cli-not-found-or-daemon-wont-start](/troubleshooting/solutions/signal-cli-not-found-or-daemon-wont-start)
+
+### 2. Group sends fail because the group ID was normalized incorrectly
+
+Signal group IDs are case-sensitive enough that sloppy handling can break targeting.
+
+Start here:
+
+- [/troubleshooting/solutions/signal-group-id-lowercased-group-not-found](/troubleshooting/solutions/signal-group-id-lowercased-group-not-found)
+
+### 3. DMs are ignored even though the daemon is healthy
+
+This is often not transport failure. It is usually pairing or allowlist policy doing exactly what you configured it to do.
+
+Check:
+
+```bash
+openclaw pairing list signal
+```
+
+### 4. Groups appear silent
+
+This often points to group sender gating or group policy assumptions rather than a broken Signal transport layer.
+
+Re-check:
+
+- `channels.signal.groupPolicy`
+- `channels.signal.groupAllowFrom`
+- whether the group path was actually meant to be enabled yet
+
+## Recommended production posture
+
+If you want the least surprising Signal deployment, use this posture:
+
+| Surface  | Recommendation                         | Why                                              |
+| -------- | -------------------------------------- | ------------------------------------------------ |
+| Identity | Dedicated bot number if possible       | Clean ownership and easier recovery              |
+| DMs      | `pairing` by default                   | Conservative and privacy-aligned                 |
+| Groups   | Add later and intentionally            | Keeps debugging layered and understandable       |
+| Daemon   | Choose local or external on purpose    | Avoids invisible host assumptions                |
+| Recovery | Document relink / migration on day one | Signal pain is usually operational, not cosmetic |
+
+## Where Signal fits in a broader channel strategy
+
+Signal is best when the channel itself is part of the trust story.
+
+That makes it a strong fit for:
+
+- privacy-sensitive operators,
+- internal or high-trust conversations,
+- and deployments where convenience matters less than explicit control.
+
+A practical mix is often:
+
+- **Signal for privacy-sensitive conversations**
+- **Telegram or WebChat for operator fallback**
+- **Slack or Discord for broader team collaboration**
+
+That keeps Signal focused on the conversations where its extra ceremony is justified.
+
+## Continue the Signal path
+
+- Pairing trust model: [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+- Daemon startup failure: [/troubleshooting/solutions/signal-cli-not-found-or-daemon-wont-start](/troubleshooting/solutions/signal-cli-not-found-or-daemon-wont-start)
+- Group targeting bug: [/troubleshooting/solutions/signal-group-id-lowercased-group-not-found](/troubleshooting/solutions/signal-group-id-lowercased-group-not-found)

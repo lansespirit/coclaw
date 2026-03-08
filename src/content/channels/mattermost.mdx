@@ -1,0 +1,232 @@
+---
+title: 'Mattermost'
+description: 'Mattermost support for OpenClaw covers plugin installation, bot token and base URL setup, channel chat modes, slash-command callbacks, and self-hosted workspace routing boundaries.'
+category: 'Channel Integration'
+subcategory: 'Community Plugin'
+platform: 'Mattermost'
+difficulty: 'intermediate'
+estimatedTime: '20–35 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-09
+featured: false
+keywords:
+  - 'openclaw mattermost'
+  - 'mattermost openclaw'
+  - 'mattermost bot token'
+  - 'mattermost slash commands'
+  - 'mattermost self-hosted chat'
+---
+
+Mattermost is the lane for operators who already run a **self-hosted workspace** and want OpenClaw to behave like a controlled team bot rather than a public-facing assistant surface. The plugin is straightforward to start, but it rewards being explicit about where responsibility sits: Mattermost governs visibility and callback reachability; OpenClaw governs trust policy and routing.
+
+## Why start with Mattermost
+
+The official plugin supports **channels, groups, and DMs** using a **bot token + WebSocket events** model. That makes it a pragmatic fit for internal teams: real-time enough to feel native, but still grounded in a server the operator usually owns.
+
+It is also a good example of a lane where “connected” does not mean “correctly scoped.” A bot can be logged in and still stay silent because the wrong `chatmode`, channel membership, or callback URL blocked the path before the model ever had a chance to answer.
+
+## The mental model: one workspace, two boundaries
+
+Mattermost is easiest to run when you separate two boundaries cleanly:
+
+1. **Workspace-side visibility** decides whether Mattermost will deliver the event at all.
+2. **OpenClaw-side policy and routing** decide whether that event becomes an assistant response.
+
+On the Mattermost side, the key controls are:
+
+- whether the bot is in the channel,
+- whether channel replies are driven by `chatmode`,
+- and whether slash-command or interaction callbacks can reach the gateway.
+
+On the OpenClaw side, the key controls are:
+
+- `dmPolicy`,
+- `groupPolicy` and `groupAllowFrom`,
+- and, if you run multiple accounts, explicit account-to-agent bindings.
+
+Treat those as separate systems and troubleshooting becomes much faster.
+
+## Fastest safe baseline
+
+Start with the smallest possible configuration that proves login and one deliberate channel posture:
+
+```json5
+{
+  channels: {
+    mattermost: {
+      enabled: true,
+      botToken: 'mm-token',
+      baseUrl: 'https://chat.example.com',
+      dmPolicy: 'pairing',
+      groupPolicy: 'allowlist',
+      chatmode: 'oncall',
+    },
+  },
+}
+```
+
+That baseline does three useful things:
+
+- keeps DMs in the default **pairing** flow,
+- keeps channels on an explicit **allowlist** posture,
+- and keeps channel responses mention-gated through `chatmode: "oncall"`.
+
+Do not enable native slash commands or button-heavy flows first. Mattermost is much calmer when you prove the plain conversational lane before adding callback dependencies.
+
+## Step 1: Get the bot token and base URL right
+
+The official quick setup is intentionally simple:
+
+1. install the plugin,
+2. create a Mattermost bot account,
+3. copy the **bot token**,
+4. copy the Mattermost **base URL**,
+5. configure OpenClaw and start the gateway.
+
+If you prefer environment variables, the plugin supports:
+
+- `MATTERMOST_BOT_TOKEN`
+- `MATTERMOST_URL`
+
+But the docs are explicit that env vars apply only to the **default** account. If you later move to `channels.mattermost.accounts`, put those extra accounts in config instead of assuming env-based inheritance.
+
+## Step 2: Choose channel behavior on purpose
+
+Mattermost responds to DMs automatically. Channel behavior is the real design choice, and the plugin exposes it as `chatmode`:
+
+- `oncall` — reply only when the bot is @mentioned in channels
+- `onmessage` — reply to every channel message
+- `onchar` — reply when a message starts with a trigger prefix
+
+For most workspaces, `oncall` is the sober default. It preserves a clear boundary between ordinary team chat and assistant activation.
+
+If you need a command-style lane, `onchar` is safer than `onmessage` because it still keeps activation explicit. Reserve `onmessage` for rooms that exist specifically for the bot.
+
+## Step 3: Keep access control separate from chat mode
+
+`chatmode` controls **how** the bot is invoked in channels. It does not replace the trust model.
+
+The trust model still lives in OpenClaw policy:
+
+- `channels.mattermost.dmPolicy = "pairing"` by default for DMs,
+- `channels.mattermost.groupPolicy = "allowlist"` by default for channels/groups,
+- `groupAllowFrom` can narrow which senders may trigger the bot.
+
+The docs also call out a risky escape hatch: `dangerouslyAllowNameMatching`. Leave it off unless you have a specific operational reason to tolerate mutable `@username` matching. User IDs are the steadier control surface.
+
+## Step 4: Add native slash commands only when the callback path is operationally real
+
+Mattermost native slash commands are opt-in, and that is a good thing. They introduce an external callback path that must remain reachable from the Mattermost server.
+
+A minimal native command setup looks like this:
+
+```json5
+{
+  channels: {
+    mattermost: {
+      commands: {
+        native: true,
+        nativeSkills: true,
+        callbackPath: '/api/channels/mattermost/command',
+        callbackUrl: 'https://gateway.example.com/api/channels/mattermost/command',
+      },
+    },
+  },
+}
+```
+
+The official constraints are worth following literally:
+
+- do not point `callbackUrl` at `localhost` unless Mattermost and OpenClaw share the same host or network namespace,
+- do not point `callbackUrl` at the Mattermost base URL unless that path is reverse-proxied back to OpenClaw,
+- and if the callback target is private or tailnet-only, add the host to Mattermost `ServiceSettings.AllowedUntrustedInternalConnections`.
+
+The recommended spot check is excellent: a GET to the callback endpoint should return **`405 Method Not Allowed`**, not `404`. That proves the route exists before you debug command registration.
+
+## Step 5: Verify the lane in layers
+
+A clean Mattermost verification pass is short and specific:
+
+1. **Send a DM from an unknown user** and confirm the pairing behavior.
+2. **Approve the user** and confirm DM replies work normally.
+3. **Mention the bot in one allowlisted channel** and confirm `oncall` behavior.
+4. If using `onchar`, **test a configured prefix** such as `>` or `!`.
+5. Only after that, test **native slash commands** and then any **button interactions**.
+
+That order avoids collapsing three different problems into one: bot login, channel invocation rules, and callback reachability.
+
+## Advanced behaviors worth knowing early
+
+Mattermost has several advanced features that are valuable, but only after the core lane is stable.
+
+### Native slash commands are a separate delivery path
+
+They are not just a prettier way to send text. They depend on callback registration, per-command token validation, and network reachability from the Mattermost server to the gateway.
+
+### Multi-account can separate operational roles
+
+The plugin supports `channels.mattermost.accounts`, which is useful when one workspace or cluster needs more than one bot identity. If you do this, follow the local routing guide's advice and make account-to-agent bindings explicit. A second account is a second ingress identity, not an automatic second routing policy.
+
+### Reactions and directory resolution are built in
+
+The plugin supports reaction add/remove actions and forwards reaction events as system events to the routed session. It also includes a directory adapter so `#channel-name` and `@username` targets can be resolved through the Mattermost API for outbound delivery.
+
+### Buttons are strict about payload shape
+
+The docs are very specific here, especially for direct API integrations:
+
+- button actions must live in `props.attachments`,
+- each action needs `type: "button"`,
+- each action needs an `id`,
+- button IDs must be **alphanumeric only**,
+- `context.action_id` must match the button `id`,
+- and external scripts must include a valid HMAC `_token`.
+
+That is an operator gift: most “buttons are broken” bugs reduce to malformed payloads or signing mismatches, not mysterious frontend behavior.
+
+## The first five Mattermost failures to expect
+
+The official docs point to a clear early failure pattern:
+
+1. **No replies in channels** because the bot is not in the channel or `chatmode` does not match the way you are invoking it.
+2. **Auth errors** because the bot token or base URL is wrong.
+3. **Multi-account confusion** because env vars only configure the `default` account.
+4. **Slash commands or button clicks do nothing** because the callback URL is unreachable or not allowed by Mattermost server settings.
+5. **Buttons render but fail on click** because IDs contain hyphens/underscores or the HMAC `_token` was generated incorrectly.
+
+These failures are all upstream-documented, which is exactly why Mattermost should be run with a written callback runbook rather than “it worked once on localhost.”
+
+## Recommended production posture
+
+The calm default for most teams is:
+
+- `dmPolicy: "pairing"`
+- `groupPolicy: "allowlist"`
+- `chatmode: "oncall"`
+- slash commands off until callback reachability is proven
+- button interactions only after the lane has one stable callback path
+
+If you need broader activation, prefer a dedicated bot room with `onmessage` over turning every shared channel into an always-on assistant surface.
+
+## Where Mattermost fits in a broader channel strategy
+
+Mattermost works best as an **internal workspace lane**. It is especially good when the same operators already control the server, membership, and network edges.
+
+The durable boundary is this:
+
+- **Mattermost membership and callback delivery** decide whether an event reaches the gateway,
+- **OpenClaw policy** decides whether the assistant should answer,
+- and **bindings** decide which worker or agent owns that answer.
+
+That makes Mattermost a good companion to more public or cross-boundary channels. Keep the self-hosted workspace for internal work, and let another lane handle external reach.
+
+## Continue the Mattermost path
+
+After first rollout, keep these references nearby:
+
+- plugin installation and callback details in `/tools/plugin`
+- shared channel options in `/gateway/configuration`
+- routing discipline in `/guides/openclaw-multi-agent-routing`
+
+There is no Mattermost-specific CoClaw troubleshooting note in `src/content/troubleshooting/solutions` yet, so keep the upstream callback and button rules in your operator runbook until a local note exists.

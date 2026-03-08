@@ -1,0 +1,237 @@
+---
+title: 'Microsoft Teams'
+description: 'Microsoft Teams support for OpenClaw covers plugin-backed Azure Bot setup, Teams app manifest and RSC permissions, Graph-dependent media behavior, and tenant-scoped routing boundaries.'
+category: 'Channel Integration'
+subcategory: 'Community Plugin'
+platform: 'Microsoft Teams'
+difficulty: 'advanced'
+estimatedTime: '45–90 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-09
+featured: false
+keywords:
+  - 'openclaw msteams'
+  - 'microsoft teams openclaw'
+  - 'azure bot'
+  - 'teams app manifest'
+  - 'bot framework'
+---
+
+Microsoft Teams is the lane where operators most often confuse **bot credentials** with **deployment readiness**. The official plugin can work well, but only when you treat Azure Bot registration, Teams app packaging, tenant permissions, and OpenClaw policy as one coordinated rollout rather than one config block.
+
+## Why start with Microsoft Teams
+
+Teams is worth the effort when the organization already lives inside **Microsoft 365** and wants the assistant to meet users in the same place they already handle direct chats, team channels, and group chats.
+
+The official status is intentionally specific:
+
+- text is supported,
+- **DM attachments** are supported,
+- **channel/group file sending** requires `sharePointSiteId` plus Graph permissions,
+- and polls are sent via **Adaptive Cards**.
+
+That means Teams is absolutely usable, but it should be run with a clear understanding of what comes from **RSC permissions**, what additionally needs **Microsoft Graph**, and what still depends on Teams client behavior.
+
+## The mental model: Teams has three systems, not one
+
+A stable Teams rollout has three distinct systems:
+
+1. **Azure Bot + webhook reachability** — the bot must exist, and Teams must be able to hit the messaging endpoint.
+2. **Teams app manifest + scopes + permissions** — the app package decides where the bot can live and what it may do.
+3. **OpenClaw policy and reply behavior** — `dmPolicy`, group allowlists, `requireMention`, and `replyStyle` decide how the lane behaves once messages arrive.
+
+Most Teams confusion comes from mixing those layers together. For example:
+
+- a webhook can be healthy while the app manifest is wrong,
+- the app can be installed while channel behavior is still blocked by mention requirements,
+- and channel media can still fail because Graph permissions were never granted.
+
+## Fastest safe baseline
+
+Start with a text-first baseline that proves the bot identity and one DM before you optimize anything else:
+
+```json5
+{
+  channels: {
+    msteams: {
+      enabled: true,
+      appId: '<APP_ID>',
+      appPassword: '<APP_PASSWORD>',
+      tenantId: '<TENANT_ID>',
+      webhook: { port: 3978, path: '/api/messages' },
+      dmPolicy: 'pairing',
+      groupPolicy: 'allowlist',
+      requireMention: true,
+      replyStyle: 'thread',
+    },
+  },
+}
+```
+
+That baseline is intentionally conservative:
+
+- DMs stay in **pairing** by default,
+- group and channel traffic stay on **allowlist**,
+- mentions remain required,
+- and reply style stays on the safe default until you verify the target channel UI.
+
+Also keep the first pass **RSC-only** unless you already know you need channel media, historical catch-up, or broader user lookup.
+
+## Step 1: Treat Azure Bot setup as real infrastructure
+
+The official quick start is clear:
+
+1. install the plugin,
+2. create an **Azure Bot**,
+3. collect `appId`, `appPassword`, and `tenantId`,
+4. expose `/api/messages`,
+5. install the Teams app package,
+6. start the gateway.
+
+The docs also recommend **Single Tenant** for new bots and note that new multi-tenant bot creation was deprecated after **July 31, 2025**. That matters because Teams is not just a messaging connector here; it inherits tenant-level decisions from Azure.
+
+Before touching the Teams app package, confirm two things:
+
+- the bot exists with the right credentials,
+- and the Azure Bot messaging endpoint points to your real webhook URL.
+
+For local development, the docs recommend a tunnel such as **ngrok** or **Tailscale Funnel** because Teams cannot call `localhost` directly.
+
+## Step 2: Build the Teams app package carefully
+
+Teams does not discover your bot automatically. You need a Teams app package whose manifest lines up with the Azure Bot registration.
+
+The official must-have fields are worth following exactly:
+
+- `bots[].botId` must match the Azure Bot **App ID**,
+- `webApplicationInfo.id` must also match that **App ID**,
+- `bots[].scopes` must include the surfaces you plan to use: `personal`, `team`, `groupChat`,
+- `supportsFiles: true` is required for **personal scope file handling**,
+- and the manifest zip must contain `manifest.json`, `outline.png`, and `color.png`.
+
+If you do not want to hand-edit the manifest ZIP, the docs point to the **Teams Developer Portal** as a valid alternative workflow.
+
+## Step 3: Decide whether RSC is enough before you ask Graph to do more
+
+The official docs draw a useful line between **Teams RSC only** and **Teams RSC + Microsoft Graph**.
+
+With **RSC only**, you get:
+
+- real-time channel message text,
+- channel text sending,
+- and personal-scope file attachments in DMs.
+
+Without Graph, you do **not** get:
+
+- channel or group image/file contents,
+- downloads from SharePoint or OneDrive-backed attachments,
+- or historical message access.
+
+Add Graph only when the operator actually needs those capabilities. The docs specifically call out:
+
+- `ChannelMessage.Read.All` for channel attachments and history,
+- `Chat.Read.All` or `ChatMessage.Read.All` for group chats,
+- and `User.Read.All` if you need to dynamically search and mention users outside the current conversation.
+
+That separation keeps the first rollout smaller and the permission conversation with tenant admins much easier.
+
+## Step 4: Set OpenClaw policy in stable identities, not loose names
+
+Teams supports DMs, group chats, and channels, but the official docs consistently steer operators toward stable IDs.
+
+For DMs:
+
+- default is `channels.msteams.dmPolicy = "pairing"`,
+- `allowFrom` should use stable **AAD object IDs**,
+- name matching is intentionally disabled unless you enable `dangerouslyAllowNameMatching`.
+
+For groups and channels:
+
+- default is `channels.msteams.groupPolicy = "allowlist"`,
+- `groupAllowFrom` controls who may trigger in group chats and channels,
+- `teams` and nested `channels` let you scope the exact places where the lane is allowed to operate.
+
+The docs allow names in some places and describe resolution behavior when Graph can help, but the operator-safe rule is the same as elsewhere: use names for setup convenience, use stable IDs for durable policy.
+
+## Step 5: Verify webhook, then DM, then one team/channel
+
+The official testing flow recommends **Azure Web Chat** as the first check. That is smart because it validates the webhook path before you debug Teams packaging.
+
+A disciplined verification sequence looks like this:
+
+1. **Test in Azure Web Chat** to prove the webhook is reachable.
+2. **Install the Teams app** and verify one DM.
+3. **Approve or allow the sender** if DM policy requires it.
+4. **Install into one team** and verify one channel or group-chat path.
+5. If the channel uses the newer linear Threads UI, set `replyStyle` accordingly and retest.
+
+The docs also call out an easy ID mistake: the `groupId` query parameter in Teams URLs is **not** the team ID used for config. Team and channel IDs come from the URL path segment and should be URL-decoded there.
+
+## Advanced behaviors worth knowing early
+
+### Reply style is a real channel-level setting
+
+Teams now has both classic **Posts** style and newer **Threads** style channels, but the API does not tell OpenClaw which UI style a channel uses. The plugin therefore exposes `replyStyle` and per-team/per-channel overrides.
+
+That makes reply layout an operator decision, not something to leave to guesswork.
+
+### History and media are separate concerns
+
+The docs distinguish live webhook handling from historical access. `historyLimit` and `dmHistoryLimit` shape prompt context, but true historical recovery and channel attachment downloads still require Graph permissions.
+
+### Proactive messaging has a bootstrap requirement
+
+Proactive messages are only possible **after** a user has interacted, because the plugin stores conversation references at that point. That is a subtle but important operational boundary for alerting and follow-up workflows.
+
+### Private channels remain a constrained surface
+
+The docs describe private-channel support as limited. Real-time webhook behavior and bot accessibility may differ from standard channels, even when Graph history access is possible. Treat private channels as an exception case, not your first production validation target.
+
+## The first five Teams failures to expect
+
+The official docs already tell you where the sharp edges are:
+
+1. **No response in a channel** because mentions are required by default.
+2. **Images or files do not resolve in channels** because Graph permissions or admin consent are missing.
+3. **Teams still behaves like the old app manifest** because the version was not bumped, the app was not reinstalled, or the client cache was not cleared.
+4. **Webhook tests return 401** when hit manually without Azure JWTs — which the docs note is expected and only proves auth failed, not that the route is missing.
+5. **Channel targeting is inconsistent** because the wrong team or channel ID was copied from `groupId` instead of the URL path.
+
+These are not cosmetic issues. They are the normal interaction between Azure, Teams, Graph, and the gateway.
+
+## Recommended production posture
+
+For most teams, the safest rollout looks like this:
+
+- ship a **text-first** deployment first,
+- keep `dmPolicy: "pairing"`,
+- keep `groupPolicy: "allowlist"`,
+- keep `requireMention: true`,
+- validate one DM and one intentionally chosen team/channel,
+- add Graph only when you need channel media, history, or richer lookup,
+- and after any manifest permission change, **bump the manifest version, re-upload, reinstall, and fully relaunch Teams**.
+
+This is the channel where operational patience saves the most time.
+
+## Where Teams fits in a broader channel strategy
+
+Teams is strongest when the assistant is meant to live inside an existing **enterprise collaboration estate** with tenant governance, admin consent, and formal app distribution.
+
+The useful boundary is:
+
+- **Azure Bot + Teams app installation** decide whether the conversation can reach OpenClaw,
+- **tenant permissions and Graph consent** decide how rich that conversation can be,
+- and **OpenClaw routing** decides which agent and workspace own the response.
+
+That makes Teams a powerful internal lane, but not a casual one. It should be treated like an application rollout with messaging behavior, not just like “another bot token.”
+
+## Continue the Teams path
+
+After the first rollout, keep these references close:
+
+- plugin installation and shared channel settings in `/tools/plugin` and `/gateway/configuration`
+- routing discipline in `/guides/openclaw-multi-agent-routing`
+- the Teams manifest, permission, and reply-style notes from the upstream plugin docs
+
+There is no Teams-specific CoClaw troubleshooting note in `src/content/troubleshooting/solutions` yet, so keep the upstream verification sequence and manifest checklist in your operator runbook until a local note exists.

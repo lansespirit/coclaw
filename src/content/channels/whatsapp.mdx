@@ -1,0 +1,373 @@
+---
+title: 'WhatsApp'
+description: 'WhatsApp for OpenClaw: QR linking, session ownership, account-safety posture, DM and group policy, and the failure modes operators need to plan for before going live.'
+category: 'Channel Integration'
+subcategory: 'Core Channel'
+platform: 'WhatsApp'
+difficulty: 'intermediate'
+estimatedTime: '30–45 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+featured: true
+keywords:
+  - 'openclaw whatsapp'
+  - 'whatsapp web'
+  - 'qr pairing'
+  - 'session health'
+  - 'listener state'
+  - 'ban prevention'
+---
+
+> WhatsApp is the highest-reach consumer channel in the OpenClaw stack, but it is also the one where operators can hurt themselves fastest. The happy path is deceptively simple: scan a QR code, send a message, watch it work. The real work is deciding **which account should own the lane, where the session lives, and how conservative your operating posture needs to be**.
+
+## Why WhatsApp is different
+
+Telegram feels like credentials. Slack feels like scopes. Signal feels like host infrastructure.
+
+WhatsApp feels like all three at once.
+
+That is why WhatsApp pages need to be read less like a generic setup guide and more like an **operations brief**. The two big questions are not only “how do I connect it?” but also:
+
+- **Which account should take the risk?**
+- **Who owns the linked session over time?**
+- **How quickly can I recover if the session drops or re-auth is required?**
+
+If you treat WhatsApp as just another Bot API surface, you will probably end up debugging the wrong layer.
+
+## The mental model: there are two systems to keep stable
+
+### Gate 1: WhatsApp Web session state
+
+OpenClaw uses the WhatsApp Web style flow. That means the lane depends on a linked session that belongs to a specific runtime and a specific state directory.
+
+The key operational questions are:
+
+- Which phone account is linked?
+- Which gateway process owns the session files?
+- Is the active listener still connected?
+- Will a restart preserve the same linked state?
+
+If this layer breaks, outbound sends often fail even though your config still looks correct.
+
+### Gate 2: OpenClaw access policy and routing
+
+After the session is healthy, OpenClaw still decides:
+
+- who can DM the assistant,
+- whether pairing or allowlist rules apply,
+- what groups are allowed,
+- and whether self-chat or personal-number behavior changes the reply model.
+
+A working session does **not** mean your routing posture is correct. A correctly written policy does **not** mean your linked session is still alive.
+
+That split is the heart of WhatsApp operations.
+
+## First strategic decision: dedicated number or personal number
+
+This is the most important WhatsApp decision you make.
+
+### Recommended: dedicated number
+
+A dedicated number gives you:
+
+- cleaner routing boundaries,
+- lower chance of self-chat confusion,
+- less risk to your personal account,
+- and easier recovery if you need to re-link or rotate the lane.
+
+It also makes the documentation cleaner because the assistant behaves like a distinct endpoint instead of sharing identity with the operator.
+
+### Allowed but riskier: personal number
+
+Running OpenClaw on your personal number can work, but it changes the operating assumptions.
+
+You must think about:
+
+- self-chat mode,
+- loop protection,
+- whether the bot should reply inside your existing account context,
+- and how much experimentation you are comfortable doing with an account you actually depend on.
+
+If you use a personal number, treat that as a deliberate exception, not the default recommendation.
+
+## Safe baseline posture
+
+If you want the least surprising starting point, use this posture:
+
+- **Use a dedicated number if possible**
+- **Start with DMs only**
+- **Use `allowlist` or `pairing`, not `open`**
+- **Do one narrow verification run before any wider automation**
+- **Document re-link and restart expectations immediately**
+
+### Conservative baseline config
+
+```json5
+{
+  channels: {
+    whatsapp: {
+      dmPolicy: 'allowlist',
+      allowFrom: ['+15551234567'],
+    },
+  },
+}
+```
+
+Why this is a strong first posture:
+
+- the lane works only for explicitly trusted senders,
+- you do not depend on remembered pairing history to enforce access,
+- and you reduce the blast radius while you test linked-session reliability.
+
+### Friendlier baseline when you expect changing DM senders
+
+If you want tighter operational control but easier onboarding for new senders:
+
+```json5
+{
+  channels: {
+    whatsapp: {
+      dmPolicy: 'pairing',
+    },
+  },
+}
+```
+
+This is often better than `open`, especially for early rollout.
+
+## Step 1: connect the lane deliberately
+
+If the lane is not already linked, start the login flow:
+
+```bash
+openclaw channels login --channel whatsapp
+```
+
+Then scan the QR code from WhatsApp:
+
+- **Settings**
+- **Linked Devices**
+- **Link a device**
+
+If you use a named account:
+
+```bash
+openclaw channels login --channel whatsapp --account work
+```
+
+This matters because the linked account identity and the runtime state directory are part of the channel itself.
+
+## Step 2: choose the inbound trust model on purpose
+
+### Option A: `allowlist`
+
+Best when the assistant is for a known small set of people.
+
+```json5
+{
+  channels: {
+    whatsapp: {
+      dmPolicy: 'allowlist',
+      allowFrom: ['+15551234567'],
+    },
+  },
+}
+```
+
+This is the most durable setup because your trust boundary lives in config.
+
+### Option B: `pairing`
+
+Best when the lane may receive first contact from people you have not pre-listed.
+
+```json5
+{
+  channels: {
+    whatsapp: {
+      dmPolicy: 'pairing',
+    },
+  },
+}
+```
+
+Useful commands:
+
+```bash
+openclaw pairing list whatsapp
+openclaw pairing approve whatsapp <CODE>
+```
+
+This makes first contact safer without turning the channel into a public endpoint.
+
+### Option C: personal number with self-chat mode
+
+If you insist on running on your own number, make the special case explicit:
+
+```json5
+{
+  channels: {
+    whatsapp: {
+      selfChatMode: true,
+      dmPolicy: 'allowlist',
+      allowFrom: ['+15551234567'],
+    },
+  },
+}
+```
+
+This is not the preferred production story, but it can be a pragmatic testing mode if you understand the trade-off.
+
+Related fix:
+
+- [/troubleshooting/solutions/whatsapp-personal-number-no-replies-self-chat-mode](/troubleshooting/solutions/whatsapp-personal-number-no-replies-self-chat-mode)
+
+## Step 3: keep groups out of the first test unless you need them
+
+WhatsApp groups are useful, but they compound the verification burden.
+
+Start with DMs first unless your actual use case is group-first.
+
+The reason is simple:
+
+- group visibility,
+- group sender policy,
+- and session reliability
+
+are easier to reason about after you already trust the DM lane.
+
+If your rollout genuinely depends on groups, write down three separate decisions:
+
+1. which groups are allowed,
+2. who inside those groups is allowed to trigger replies,
+3. and whether that behavior should mirror DM access or diverge from it.
+
+## Step 4: verify like an operator, not like a demo
+
+A WhatsApp lane is not “done” when the QR scan succeeds.
+
+Run this verification drill instead.
+
+### 1. First DM
+
+- send one DM from an allowed or paired number,
+- confirm the assistant replies,
+- send a second message to confirm the session is genuinely stable.
+
+### 2. Wrong-sender behavior
+
+- message the bot from a number that should **not** be allowed,
+- confirm the lane blocks or pairs exactly as expected.
+
+### 3. Restart behavior
+
+Restart the gateway:
+
+```bash
+openclaw gateway restart
+```
+
+Then re-test the same DM flow.
+
+If the lane works only before restart, your operational setup is incomplete.
+
+### 4. Listener ownership
+
+Verify that the process which should own the WhatsApp socket actually owns it.
+
+This is especially important if you run multiple hosts, restart frequently, or share a state directory incorrectly.
+
+### 5. Group behavior, only if needed
+
+Only after DM stability is proven:
+
+- test one controlled group,
+- confirm expected sender behavior,
+- and verify the lane does not answer outside the intended policy surface.
+
+## The biggest WhatsApp mistake: treating QR login like the whole setup
+
+QR login is only the beginning.
+
+The more important questions are:
+
+- where the session is stored,
+- who owns the runtime,
+- how quickly you can re-link,
+- and whether your access policy still makes sense after the lane becomes reachable.
+
+This is why WhatsApp needs more explicit operational notes than Telegram.
+
+Telegram usually fails in policy or visibility. WhatsApp often fails in **session continuity**.
+
+## Common failure patterns
+
+### 1. `401 No cookie auth credentials found`
+
+This usually means the runtime no longer has the valid WhatsApp Web credentials it needs.
+
+Start here:
+
+- [/troubleshooting/solutions/whatsapp-401-no-cookie-auth-credentials](/troubleshooting/solutions/whatsapp-401-no-cookie-auth-credentials)
+
+### 2. Login fails with `408` or WebSocket errors
+
+This often points to network path problems, WebSocket-hostile proxies, or trying to perform login on the wrong machine.
+
+Start here:
+
+- [/troubleshooting/solutions/whatsapp-login-timeout-408-websocket-error](/troubleshooting/solutions/whatsapp-login-timeout-408-websocket-error)
+
+### 3. `No active WhatsApp Web listener`
+
+This usually means the lane is configured, but the runtime that should own the active socket is not healthy.
+
+Start here:
+
+- [/troubleshooting/solutions/whatsapp-no-active-listener](/troubleshooting/solutions/whatsapp-no-active-listener)
+
+### 4. Personal number but no replies
+
+When personal-number mode is involved, self-chat assumptions and loop protections become part of the configuration story.
+
+Start here:
+
+- [/troubleshooting/solutions/whatsapp-personal-number-no-replies-self-chat-mode](/troubleshooting/solutions/whatsapp-personal-number-no-replies-self-chat-mode)
+
+## Recommended production posture
+
+If you want the most stable real-world WhatsApp rollout, bias toward this posture:
+
+| Surface  | Recommendation                            | Why                                                    |
+| -------- | ----------------------------------------- | ------------------------------------------------------ |
+| Account  | Dedicated number                          | Cleaner trust boundary and lower personal-account risk |
+| DMs      | `allowlist` or `pairing`                  | Avoids accidental public access                        |
+| Groups   | Add later and intentionally               | Reduces early debugging complexity                     |
+| Session  | One runtime owns the linked state         | Prevents listener confusion and stale session drift    |
+| Recovery | Re-link procedure documented from day one | WhatsApp failures often become session failures        |
+
+## Where WhatsApp fits in a broader channel strategy
+
+WhatsApp is best used when you need **reach**, not when you need the simplest operational story.
+
+That makes it a strong choice for:
+
+- external-facing assistant lanes,
+- customer or community contact surfaces,
+- or a primary consumer-facing channel paired with a quieter operator fallback like Telegram or WebChat.
+
+A common architecture is:
+
+- **WhatsApp for reach**
+- **Telegram or WebChat for operator fallback**
+- **Slack for internal team coordination**
+
+That mix lets you preserve reliability even when WhatsApp needs re-linking or session repair.
+
+## Continue the WhatsApp path
+
+- Short setup guide: [/guides/whatsapp-setup](/guides/whatsapp-setup)
+- Self-chat mode caveat: [/troubleshooting/solutions/whatsapp-personal-number-no-replies-self-chat-mode](/troubleshooting/solutions/whatsapp-personal-number-no-replies-self-chat-mode)
+- Re-link / missing credentials: [/troubleshooting/solutions/whatsapp-401-no-cookie-auth-credentials](/troubleshooting/solutions/whatsapp-401-no-cookie-auth-credentials)
+- Login transport failure: [/troubleshooting/solutions/whatsapp-login-timeout-408-websocket-error](/troubleshooting/solutions/whatsapp-login-timeout-408-websocket-error)
+- Runtime listener failure: [/troubleshooting/solutions/whatsapp-no-active-listener](/troubleshooting/solutions/whatsapp-no-active-listener)

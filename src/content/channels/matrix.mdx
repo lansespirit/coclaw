@@ -1,0 +1,227 @@
+---
+title: 'Matrix'
+description: 'Matrix support for OpenClaw covers plugin installation, homeserver login, DM and room policy, E2EE device verification, and federated routing boundaries.'
+category: 'Channel Integration'
+subcategory: 'Community Plugin'
+platform: 'Matrix'
+difficulty: 'advanced'
+estimatedTime: '25–45 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-09
+featured: false
+keywords:
+  - 'openclaw matrix'
+  - 'matrix openclaw'
+  - 'matrix homeserver'
+  - 'matrix e2ee'
+  - 'matrix rooms'
+---
+
+Matrix is the right lane when the operator is entering an existing **federated messaging estate**, not inventing a new front door. OpenClaw logs in as a real Matrix **user** on a homeserver, so account credentials, room membership, and device trust are part of the deployment story.
+
+## Why start with Matrix
+
+The official Matrix plugin is one of the more capable OpenClaw lanes: it supports **DMs, rooms, threads, media, reactions, polls, location, and E2EE**. That breadth makes it attractive, but it also means the operator has to be explicit about which parts belong to Matrix itself and which parts belong to OpenClaw policy.
+
+Use Matrix when you already operate in **Element**, **Beeper**, or another Matrix client footprint and you want the assistant to behave like a room participant instead of a webhook-only bot surface.
+
+## The mental model: Matrix has three gates
+
+The clean way to run Matrix is to think in three separate gates:
+
+1. **Homeserver login and device state** decide whether OpenClaw can log in as the bot user at all.
+2. **OpenClaw DM and room policy** decide who is allowed to trigger the assistant once events arrive.
+3. **Room behavior** such as threading, auto-join, and encryption decide how the lane behaves after it is live.
+
+That separation matters in practice. A room can be reachable in Matrix but still blocked by `groupPolicy`, or a DM can arrive but still wait in `pairing`. Likewise, an encrypted room can be visible but unusable until the device is verified.
+
+## Fastest safe baseline
+
+Start with a configuration that proves login, DM policy, and one room allowlist before you enable anything more ambitious:
+
+```json5
+{
+  channels: {
+    matrix: {
+      enabled: true,
+      homeserver: 'https://matrix.example.org',
+      accessToken: 'syt_***',
+      dm: { policy: 'pairing' },
+      groupPolicy: 'allowlist',
+      groups: {
+        '#ops:example.org': { allow: true },
+      },
+      autoJoin: 'allowlist',
+      autoJoinAllowlist: ['#ops:example.org'],
+    },
+  },
+}
+```
+
+That baseline matches the official docs in spirit:
+
+- keep **DMs gated** with pairing,
+- keep **rooms gated** with an explicit allowlist,
+- and leave `encryption` **off** until plain-text behavior is verified.
+
+If you need Beeper as a client, note the official caveat: **Beeper requires E2EE**, so encryption becomes part of first-run setup rather than an optional later improvement.
+
+## Step 1: Choose the credential path deliberately
+
+The Matrix plugin supports two credential paths:
+
+- an **access token** with `homeserver`, or
+- `userId` + `password`, where OpenClaw performs the login and stores the resulting token under `~/.openclaw/credentials/matrix/credentials.json`.
+
+For operators, the practical rule is simple: use an **access token** when you already manage the bot account lifecycle outside OpenClaw; use `userId` + `password` only when you want OpenClaw to own the login exchange.
+
+If `userId` is set in config, it should be the **full Matrix ID** such as `@bot:example.org`, not a display name or localpart.
+
+## Step 2: Set the trust boundary in Matrix IDs, not friendly names
+
+Matrix is forgiving in the client UI and strict in policy matching. The docs are explicit about this, and it is worth following exactly.
+
+For DMs:
+
+- default is `channels.matrix.dm.policy = "pairing"`,
+- unknown senders receive a pairing code,
+- approval happens with `openclaw pairing list matrix` and `openclaw pairing approve matrix <CODE>`.
+
+For rooms:
+
+- default is `channels.matrix.groupPolicy = "allowlist"`,
+- allowlist with `channels.matrix.groups`,
+- restrict room senders further with `groupAllowFrom` or per-room `users`.
+
+Use **full Matrix user IDs** for allowlists. The official docs explicitly warn against display names and bare localparts because they are ambiguous and ignored for matching. The same operator instinct applies to rooms: prefer room IDs or aliases, and treat name-based resolution as a convenience only when the match is exact and unique.
+
+## Step 3: Only then turn on encryption
+
+Matrix E2EE is supported, but it is not a cosmetic checkbox. It changes the operator runbook.
+
+Enable it with:
+
+```json5
+{
+  channels: {
+    matrix: {
+      encryption: true,
+    },
+  },
+}
+```
+
+Once enabled, the official docs say to expect the following:
+
+- encrypted rooms decrypt only if the crypto module loads correctly,
+- OpenClaw requests **device verification** from your other Matrix sessions,
+- outbound media is encrypted for encrypted rooms,
+- and if the access token changes, a **new crypto store** is created and the bot must be verified again.
+
+This is why Matrix should be rolled out in two passes: first prove plain-text DM and room behavior, then enable E2EE and verify the device from Element or another trusted client. If you skip that sequencing, you end up debugging trust-state issues as if they were routing issues.
+
+## Step 4: Make rooms safe before you make them convenient
+
+Matrix defaults to auto-joining invites, which is convenient in a lab and sloppy in production. The safer pattern is:
+
+- keep `groupPolicy: "allowlist"`,
+- switch `autoJoin` to `allowlist`,
+- and use `autoJoinAllowlist` for the exact room IDs or aliases you expect.
+
+That makes the boundary clear:
+
+- **Matrix** decides whether the bot account is invited or present,
+- **OpenClaw** decides whether the room is trusted enough to answer,
+- and your `bindings` decide which agent owns the resulting traffic.
+
+That last point matters most in federated teams. Per the local multi-agent routing guide, the ingress identity should stay obvious and intentional. If you later add `channels.matrix.accounts`, route them deliberately with `bindings[].match.accountId` instead of relying on an implicit default.
+
+## Step 5: Verify the lane like an operator
+
+Run the official troubleshooting ladder first:
+
+```bash
+openclaw status
+openclaw gateway status
+openclaw logs --follow
+openclaw doctor
+openclaw channels status --probe
+```
+
+Then verify Matrix in this order:
+
+1. **DM from an unapproved user** and confirm the pairing flow behaves as expected.
+2. **Approve the sender** and confirm replies stay in the DM lane.
+3. **Invite the bot to one allowlisted room** and confirm mention-gated behavior.
+4. **Reply inside a thread** and confirm `threadReplies` behaves the way you intend.
+5. If encryption is enabled, **verify the device** and repeat the same tests in an encrypted room.
+
+This sequence is deliberately narrow. It isolates login, policy, room membership, and encryption into separate checks so you know which gate failed.
+
+## Advanced behaviors worth knowing early
+
+A few Matrix capabilities are strong enough to influence architecture decisions:
+
+### Multi-account is real, but keep it explicit
+
+The plugin supports `channels.matrix.accounts`, with each account inheriting top-level settings and overriding them per account. That is useful when you want a separate Matrix user for a specialized role, but it should be paired with explicit bindings so one account equals one intended agent route.
+
+### Threads are configurable
+
+The docs expose both:
+
+- `threadReplies`: `off | inbound | always`
+- `replyToMode`: `off | first | all`
+
+That means Matrix can be tuned for teams that want strict threaded behavior versus lighter reply metadata. Do not leave that decision to accident if rooms are used for ongoing operational work.
+
+### Polls and location are supported, with limits
+
+Matrix can send polls and represent inbound poll starts as text. It can also handle location via geo URI. The important nuance is that not every higher-level interaction is symmetrical: inbound poll responses and ends are not treated the same way as sending a poll.
+
+## The first five Matrix failures to expect
+
+These are the early failures the official docs already point toward:
+
+1. **DMs are ignored** because the sender is still pending approval under `pairing`.
+2. **Room messages are ignored** because the room is blocked by `groupPolicy` or missing from the allowlist.
+3. **Encrypted rooms fail** because crypto support did not load or the device is not yet verified.
+4. **Allowlists appear correct but still fail** because display names were used instead of full Matrix IDs.
+5. **Previously working encrypted rooms break after token rotation** because a new token creates a new crypto store and requires re-verification.
+
+None of these are exotic. They are the normal cost of running a federated, user-authenticated lane.
+
+## Recommended production posture
+
+For most operators, the calm starting posture is:
+
+- `dm.policy: "pairing"`
+- `groupPolicy: "allowlist"`
+- `autoJoin: "allowlist"`
+- one verified plain-text room before E2EE
+- one verified encrypted room only after device trust is established
+
+If you need multiple Matrix identities, use separate accounts for separate operational purposes and keep the routing contract visible in bindings, as the local guide recommends.
+
+## Where Matrix fits in a broader channel strategy
+
+Matrix is strongest when the organization already thinks in **rooms, federation, and user-owned clients**. It is less about mass reach and more about operating inside a messaging environment that already has its own trust model.
+
+The useful boundary to remember is this:
+
+- **homeserver membership and encryption** are Matrix concerns,
+- **who may trigger the assistant** is an OpenClaw policy concern,
+- and **which agent answers** is a routing concern.
+
+When those three layers are kept separate, Matrix becomes a dependable internal lane instead of a mysterious encrypted sidecar.
+
+## Continue the Matrix path
+
+After the first rollout, keep these references close:
+
+- official plugin install and options in `/tools/plugin`
+- shared channel settings in `/gateway/configuration`
+- multi-agent boundary design in `/guides/openclaw-multi-agent-routing`
+
+There is no Matrix-specific CoClaw troubleshooting note in `src/content/troubleshooting/solutions` yet, so the safest operator move is to keep the upstream troubleshooting ladder in your runbook until one exists.

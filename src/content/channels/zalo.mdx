@@ -1,0 +1,317 @@
+---
+title: 'Zalo'
+description: 'Zalo Bot API support for OpenClaw covers plugin-backed setup, bot credentials, local rollout conventions, and verification tuned for Vietnam-focused deployments.'
+category: 'Channel Integration'
+subcategory: 'Community Plugin'
+platform: 'Zalo'
+difficulty: 'intermediate'
+estimatedTime: '25–40 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-09
+featured: false
+keywords:
+  - 'openclaw zalo'
+  - 'zalo openclaw'
+  - 'zalo bot api'
+  - 'regional rollout'
+  - 'plugin install'
+  - 'bot credentials'
+---
+
+> Zalo is an experimental **Bot API** lane for operators serving Zalo-first audiences. The important distinction is not just the token; it is the operating model around **pairing by default**, **fail-closed group behavior**, and a deliberate choice between **long-polling** and **webhook delivery**.
+
+## Why run Zalo
+
+Zalo matters when the user base is already there.
+
+The official OpenClaw docs position it as a plugin-backed bot integration that is well suited to deterministic routing for direct conversations and support-style traffic. That gives it a practical place in the channel mix:
+
+- replies route back to the same Zalo chat,
+- DMs are supported directly,
+- groups exist but need explicit policy decisions,
+- images are supported,
+- and the channel can run either in long-poll mode or webhook mode.
+
+This is not the lane to treat as a Telegram clone. The official docs emphasize different defaults and a narrower capability surface.
+
+## What this page is for
+
+Use this dossier when you need to decide:
+
+- whether Zalo should be a primary local-market lane or a secondary routing target,
+- how to stand it up without overexposing DMs or groups,
+- when long-polling is sufficient and when webhook mode is worth the extra moving parts,
+- how to validate the first production-like interaction,
+- and which Zalo-specific limits matter enough to design around early.
+
+## The mental model: Zalo has two major operator decisions
+
+### Decision 1: how events reach OpenClaw
+
+The official docs support two transport modes:
+
+- **Long-polling by default**
+- **Webhook mode** with `webhookUrl` and `webhookSecret`
+
+If you do not need public inbound delivery, long-polling is the easier baseline. If you do need webhooks, HTTPS and secret handling become part of the operating surface immediately.
+
+### Decision 2: who is allowed to trigger the bot
+
+Zalo can be connected and still stay silent by policy.
+
+The main controls are:
+
+- `dmPolicy`
+- `allowFrom`
+- `groupPolicy`
+- `groupAllowFrom`
+
+The upstream docs are explicit that:
+
+- DMs default to `pairing`
+- groups default to fail-closed `allowlist`
+- `groupAllowFrom` falls back to `allowFrom` if unset
+- `groupPolicy: "open"` allows any group member, but remains mention-gated
+
+That means “bot is online” and “bot is supposed to answer here” are separate questions.
+
+## Fastest safe baseline
+
+For most first deployments, the safest starting posture is:
+
+- install the plugin,
+- put the bot token in config,
+- keep DMs on `pairing`,
+- and leave groups off your critical path until DM behavior is verified.
+
+### Minimal config
+
+```json5
+{
+  channels: {
+    zalo: {
+      enabled: true,
+      botToken: '12345689:abc-xyz',
+      dmPolicy: 'pairing',
+    },
+  },
+}
+```
+
+Why this is a good first shape:
+
+- it matches the upstream default trust model,
+- it avoids premature group assumptions,
+- and it gives you a clean way to test whether the token and delivery path are actually healthy.
+
+## Step 1: Install the plugin and create the token
+
+Zalo is not bundled with core OpenClaw.
+
+Install it first:
+
+```bash
+openclaw plugins install @openclaw/zalo
+```
+
+From source checkout, the docs also allow:
+
+```bash
+openclaw plugins install ./extensions/zalo
+```
+
+Then create a bot token through the official Zalo Bot Platform:
+
+1. go to [bot.zaloplatforms.com](https://bot.zaloplatforms.com),
+2. sign in,
+3. create the bot,
+4. copy the token.
+
+The docs describe the token format as something like `12345689:abc-xyz`.
+
+## Step 2: Put credentials in config, not in guesswork
+
+The official docs support both env and config:
+
+- `ZALO_BOT_TOKEN=...`
+- or `channels.zalo.botToken`
+
+For steady-state operation, config is usually easier to audit than shell state:
+
+```json5
+{
+  channels: {
+    zalo: {
+      enabled: true,
+      botToken: '12345689:abc-xyz',
+      dmPolicy: 'pairing',
+    },
+  },
+}
+```
+
+The docs also note that env works only for the default account, which is another reason to prefer config once the lane matters.
+
+## Step 3: Choose the DM posture deliberately
+
+### Best default: `pairing`
+
+The official docs make `pairing` the default for a reason.
+
+Unknown senders do not become trusted automatically. Instead they receive a pairing code, and their messages are ignored until approved.
+
+Approve with:
+
+```bash
+openclaw pairing list zalo
+openclaw pairing approve zalo <CODE>
+```
+
+The docs also note that pairing codes expire after one hour.
+
+### When access is already known: `allowlist`
+
+If the sender set is already fixed, use `allowFrom` with numeric Zalo user IDs.
+
+Be careful here: the official docs are explicit that Zalo does **not** support username lookup for this field.
+
+### `open` means truly open
+
+The config reference notes that `open` requires `"*"` in `allowFrom`. Only use that when you really mean to accept broad inbound DM traffic.
+
+## Step 4: Keep groups narrow until you need them
+
+Zalo group support exists, but the docs clearly frame it as policy-driven, not something to enable casually.
+
+### The default is fail-closed
+
+If you do nothing, groups default to `allowlist` behavior.
+
+That is the right baseline for an experimental channel.
+
+### A cautious group posture
+
+If you need groups, start by deciding which sender IDs are allowed to trigger the bot:
+
+```json5
+{
+  channels: {
+    zalo: {
+      dmPolicy: 'pairing',
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['123456789'],
+    },
+  },
+}
+```
+
+If `groupAllowFrom` is omitted, runtime falls back to `allowFrom`, which can be useful when the same small set of known people is allowed in both DMs and groups.
+
+### Open groups are still mention-gated
+
+The official docs explicitly say that `groupPolicy: 'open'` allows any group member, but only in a mention-gated way.
+
+That makes `open` less reckless than “reply to everything,” but it is still broader than most first rollouts need.
+
+## Step 5: Only add webhook mode when it solves a real problem
+
+Long-polling is the default, and it avoids public ingress.
+
+Use webhook mode when you specifically need it, and then satisfy the upstream requirements exactly:
+
+- set `channels.zalo.webhookUrl`
+- set `channels.zalo.webhookSecret`
+- keep the secret between 8 and 256 characters
+- use HTTPS
+- ensure the gateway path matches `webhookPath` behavior
+
+The docs also call out a hard constraint: polling and webhook mode are mutually exclusive per the Zalo API.
+
+## Step 6: Verify the lane like an operator
+
+### 1. Probe health and token validity
+
+Start with:
+
+```bash
+openclaw channels status --probe
+openclaw logs --follow
+```
+
+The official troubleshooting section points here first when the bot stays silent.
+
+### 2. Test the first DM from an unapproved sender
+
+This verifies the real default: pairing should happen, not silent broad access.
+
+### 3. Approve and retest
+
+Approve the pairing code, then confirm the bot responds in the same DM thread.
+
+### 4. If using groups, test the exact policy you chose
+
+Do not just add the bot to a chat and assume the result proves anything.
+
+Validate one message from an allowed sender under the chosen `groupPolicy`, or one mention in `open` mode if that is the posture you selected.
+
+### 5. If using webhooks, test after disabling polling assumptions
+
+Because polling and webhooks are mutually exclusive, a webhook validation should include one clean end-to-end event with the expected HTTPS endpoint and secret handling.
+
+## Capability edges worth knowing early
+
+The official docs support a narrower feature set than some mainstream bot ecosystems:
+
+- **Text** is supported, with outbound chunking at 2000 characters
+- **Images** are supported
+- **Stickers** are logged but not fully processed
+- **Reactions are not supported**
+- **Threads are not supported**
+- **Polls are not supported**
+- **Native commands are not supported**
+- **Streaming is blocked by default** because the message limit makes it less useful
+
+If your workflow depends heavily on threaded moderation, reactions, or streaming-heavy UX, document that constraint before rollout rather than after user disappointment.
+
+## The first four Zalo failures to expect
+
+### 1. The bot does not respond at all
+
+The official troubleshooting sequence starts with token validity, sender approval, and gateway logs.
+
+### 2. The token is fine, but the sender still gets silence
+
+That is often policy, not transport. Check `dmPolicy`, `allowFrom`, and whether pairing approval actually happened.
+
+### 3. Webhook delivery never arrives
+
+The upstream docs call out three common causes first:
+
+- no HTTPS,
+- invalid secret length,
+- or an unreachable gateway path.
+
+### 4. Webhooks seem configured, but nothing works consistently
+
+Make sure polling is not still assumed somewhere. The docs are explicit that polling and webhook mode cannot run together.
+
+## Recommended production posture
+
+A restrained Zalo rollout usually looks like this:
+
+- start with long-polling unless webhook mode is required,
+- keep DMs on `pairing` first,
+- keep groups fail-closed until there is a real operational need,
+- use numeric IDs for allowlists,
+- and design around the feature limits that the official docs actually guarantee.
+
+That is a better fit for the current channel than trying to import Slack or Telegram habits unchanged.
+
+## Continue the Zalo path
+
+If you need the raw configuration surface, continue with:
+
+- [/gateway/configuration](/gateway/configuration)
+- [/tools/plugin](/tools/plugin)
+- [/channels/pairing](/channels/pairing)

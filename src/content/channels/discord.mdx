@@ -1,0 +1,262 @@
+---
+title: 'Discord'
+description: 'Discord Bot setup for OpenClaw: gateway intents, role permissions, DM versus guild behavior, verification drills, and moderation-aware rollout patterns.'
+category: 'Channel Integration'
+subcategory: 'Core Channel'
+platform: 'Discord'
+difficulty: 'intermediate'
+estimatedTime: '25–40 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+featured: true
+keywords:
+  - 'openclaw discord'
+  - 'discord openclaw'
+  - 'gateway intents'
+  - 'guild roles'
+  - 'slash commands'
+  - 'moderation'
+---
+
+> Discord is not just “Slack for communities.” For OpenClaw, it is a **permission-shaped public surface** where one missing intent or one misplaced role can make a perfectly connected bot look dead. That is why the guide has to teach Discord’s trust model first, not only the invite flow.
+
+## Why choose Discord
+
+Discord is a strong channel when OpenClaw needs to operate in:
+
+- developer communities,
+- shared hobby or project servers,
+- support and devrel environments,
+- or structured team spaces where public and private channels need different boundaries.
+
+It is especially strong when you want:
+
+- clear separation between DMs and guild channels,
+- slash commands and interactive surfaces,
+- thread/forum support,
+- and explicit moderation-aware bot behavior.
+
+Discord is not difficult because of message sending. It is difficult because **permissions and intents are the product surface**.
+
+## The mental model: Discord has three gates
+
+Discord failures become much easier to debug when you think in three gates.
+
+### Gate 1: App and intent configuration
+
+Discord decides whether your app is allowed to receive the events you expect.
+
+This depends on:
+
+- bot token validity,
+- enabled gateway intents,
+- app install state,
+- and whether privileged intents like **Message Content Intent** are enabled where required.
+
+If this gate is wrong, the bot may appear online while seeing almost nothing useful.
+
+### Gate 2: Guild and role permissions
+
+Even with correct intents, the bot still needs the right effective permissions in the server:
+
+- channel visibility,
+- send-message rights,
+- thread interaction,
+- slash command access,
+- and a role position that does not silently block required actions.
+
+### Gate 3: OpenClaw conversation policy
+
+Once Discord actually delivers the event and permissions allow action, OpenClaw still decides:
+
+- whether DMs are paired,
+- whether guild channels require mention gating,
+- what tools and prompts apply in channel context,
+- and how routing or session isolation should behave.
+
+That is why “bot is online” is far from the same thing as “bot is operational.”
+
+## A safe first posture
+
+For most Discord rollouts, a good first configuration posture is:
+
+- **DMs:** pairing or explicit owner-only access
+- **Guild channels:** mention-gated at first
+- **Intents:** only what is required for the workflows you actually need
+- **Permissions:** narrow role scope before broadening it
+- **Verification:** DM, one standard text channel, one restricted channel, and one restart test
+
+Discord rewards narrow first deployment much more than broad first deployment.
+
+## Step 1: Create the app and token deliberately
+
+In the Discord developer portal:
+
+1. create the application,
+2. create the bot,
+3. copy the bot token,
+4. enable only the intents you truly need,
+5. generate the invite URL with the right bot scopes and permissions.
+
+Do not enable privileged intents “just in case.” On Discord, that habit makes later debugging harder, not easier.
+
+## Step 2: Start from a narrow config posture
+
+A minimal first-pass configuration should bias toward safety and clarity.
+
+Conceptually, you want:
+
+- a valid bot token,
+- DMs that do not trust strangers by default,
+- guild channels that only respond when intentionally engaged,
+- and a test server where you control the permission surface.
+
+That lets you separate app-level success from community-level rollout.
+
+## Step 3: Treat intents as feature switches, not boilerplate
+
+One of the most important Discord lessons is that intents are not decorative setup checkboxes.
+
+They are closer to **capability gates**.
+
+If your bot connects but does not reply in guild channels, the problem is often not message formatting or OpenClaw routing — it is that the app never saw the event in the first place.
+
+That is why Discord needs a stronger “platform-side first” explanation than Telegram or WebChat.
+
+## Step 4: Treat role placement and channel permissions as part of setup
+
+Discord bots often fail because operators assume:
+
+- “invited to the server” means “can see and respond everywhere”, or
+- “has the right permission checkbox” means “effective permissions are correct in this channel.”
+
+In reality, Discord behavior depends on:
+
+- role placement,
+- per-channel overrides,
+- thread/forum-specific behavior,
+- and whether the target surface is a DM, guild channel, or a more constrained space.
+
+If you do not verify channel-level permissions explicitly, you are guessing.
+
+## Step 5: Verify Discord like a moderated community surface
+
+Do not stop after one command works in one room.
+
+### Verification drill
+
+1. **DM test**
+   - send a direct message
+   - confirm pairing or DM policy behaves exactly as intended
+   - verify the second message routes predictably
+
+2. **Standard guild channel test**
+   - mention the bot in a normal text channel
+   - verify it sees the event and can respond
+   - confirm mention gating works as expected
+
+3. **Restricted-channel test**
+   - use a channel with stricter visibility or permission rules
+   - verify the bot’s actual effective permissions rather than assuming them
+
+4. **Slash command test**
+   - verify slash commands register and execute as expected in the target server
+
+5. **Restart test**
+   - restart the gateway
+   - confirm the bot returns online and behavior remains stable across DM and guild surfaces
+
+If Discord only works in one channel type, you do not yet have a production-ready deployment.
+
+## The first Discord failures to expect
+
+### 1. Bot is online but does not reply in guild channels
+
+Common causes:
+
+- missing channel permissions,
+- mention gating doing exactly what you configured,
+- the bot was invited but not actually able to see the channel,
+- or guild-level setup was never verified after the invite.
+
+Start here:
+
+- [/troubleshooting/solutions/discord-connected-but-no-replies-in-guild](/troubleshooting/solutions/discord-connected-but-no-replies-in-guild)
+
+### 2. "Used disallowed intents"
+
+This is one of the clearest Discord-specific failures and a good example of why platform-side diagnosis matters.
+
+Start here:
+
+- [/troubleshooting/solutions/discord-used-disallowed-intents](/troubleshooting/solutions/discord-used-disallowed-intents)
+
+### 3. Failed to resolve application id
+
+That usually points to bot token or network/API reachability problems on the host running the gateway.
+
+Start here:
+
+- [/troubleshooting/solutions/discord-failed-to-resolve-application-id](/troubleshooting/solutions/discord-failed-to-resolve-application-id)
+
+## Advanced Discord notes that matter earlier than people expect
+
+### Guild channels are a different operating surface from DMs
+
+Discord DMs and guild channels should not be mentally grouped together.
+
+A bot that behaves correctly in DMs may still fail in guilds because:
+
+- intents differ,
+- channel visibility differs,
+- mention expectations differ,
+- and moderation constraints differ.
+
+Treat them as separate validation surfaces.
+
+### Forum and media channels are structurally different
+
+Discord forum/media channels only accept thread posts. If you want OpenClaw to operate there, validate that surface intentionally instead of assuming normal channel rules apply.
+
+### Slash commands are their own trust surface
+
+Slash commands can feel more reliable than freeform message handling, but they still depend on correct app registration, availability, and policy expectations.
+
+Use them deliberately; do not let them become a substitute for validating the main messaging lane.
+
+## Recommended production posture
+
+If you want a low-surprise Discord deployment:
+
+| Surface        | Recommendation                                               | Why                                |
+| -------------- | ------------------------------------------------------------ | ---------------------------------- |
+| Intents        | enable only required ones                                    | Makes failures diagnosable         |
+| DMs            | pairing or explicit owner scope                              | Safer direct-message posture       |
+| Guild channels | mention-gated at first                                       | Better for public/community spaces |
+| Permissions    | verify per channel, not just per role                        | Discord permissions are contextual |
+| Validation     | DM + standard channel + restricted channel + slash + restart | Covers the real failure modes      |
+
+## Where Discord fits in a broader channel strategy
+
+Discord is often best as one of these roles:
+
+### Primary community lane
+
+Use it when OpenClaw is meant to live inside a public or semi-public server environment.
+
+### Moderated support lane
+
+Discord works well for structured community support when you want threads, slash commands, and channel separation.
+
+### Paired with a calmer operator lane
+
+Many teams benefit from Discord as the public/community surface and WebChat or Telegram as the lower-friction operator surface for testing, maintenance, or fallback workflows.
+
+## Continue the Discord path
+
+- Config fundamentals: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- Pairing model: [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+- Guild reply failure: [/troubleshooting/solutions/discord-connected-but-no-replies-in-guild](/troubleshooting/solutions/discord-connected-but-no-replies-in-guild)
+- Intent failure: [/troubleshooting/solutions/discord-used-disallowed-intents](/troubleshooting/solutions/discord-used-disallowed-intents)
+- Startup / application-id failure: [/troubleshooting/solutions/discord-failed-to-resolve-application-id](/troubleshooting/solutions/discord-failed-to-resolve-application-id)

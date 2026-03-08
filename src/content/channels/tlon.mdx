@@ -1,0 +1,333 @@
+---
+title: 'Tlon'
+description: 'Tlon/Urbit support for OpenClaw covers plugin-backed setup, identity assumptions, group access, and verification tailored to that ecosystem.'
+category: 'Channel Integration'
+subcategory: 'Community Plugin'
+platform: 'Tlon'
+difficulty: 'advanced'
+estimatedTime: '35–50 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-09
+featured: false
+keywords:
+  - 'openclaw tlon'
+  - 'tlon openclaw'
+  - 'urbit identity'
+  - 'tlon rooms'
+  - 'plugin install'
+  - 'shared spaces'
+---
+
+> Tlon is the right OpenClaw lane when your real operating surface is already **Urbit-native**. The setup is not hard, but it is different from mainstream bot platforms: trust is expressed through **ship identity**, **channel discovery**, and an explicit **owner ship** that can approve activity.
+
+## Why run Tlon
+
+Tlon is not a generic “chat connector.” It is a plugin-backed channel for operators who already live inside the Urbit/Tlon model and want the assistant to behave like a participant in that environment.
+
+The upstream channel documentation supports a clear value proposition:
+
+- **Direct messages work** once the plugin is installed and the ship can be reached
+- **Group chat works** with mention-gated replies by default
+- **Thread replies are preserved** when the inbound conversation is already in-thread
+- **Rich text and images work** in ways that map to Tlon's native message model
+- **Authorization stays explicit** through `ownerShip`, `dmAllowlist`, and per-channel rules
+
+If your community is already organized around ships and nests, Tlon can feel more native than forcing users into a separate fallback messenger.
+
+## What this page is for
+
+Use this dossier when you need to decide:
+
+- whether Tlon should be a primary lane or a community-specific surface,
+- how to connect a ship without weakening local-network safety accidentally,
+- how to let trusted people DM the bot without opening the lane broadly,
+- how to make groups work without losing control of channel scope,
+- and how to verify that the lane really survives first contact with real chats.
+
+## The mental model: Tlon has three gates
+
+Most Tlon issues come from mixing together three separate concerns.
+
+### Gate 1: OpenClaw has to reach the ship
+
+The plugin needs four practical facts to line up:
+
+- `ship`
+- `url`
+- `code`
+- and, in most real setups, a sensible `ownerShip`
+
+If the ship URL is wrong, unreachable, or private without an explicit opt-in, nothing else matters.
+
+### Gate 2: Tlon has to discover or know the channel
+
+For groups, the bot can only work in places it knows about.
+
+The upstream docs describe two patterns:
+
+- **Auto-discovery on** for a lower-friction setup
+- **Pinned `groupChannels`** when you want deterministic scope
+
+If a group message is ignored, discovery is one of the first things to check.
+
+### Gate 3: OpenClaw still decides who is allowed
+
+Even when the ship is reachable and the channel is known, the bot may stay silent by policy.
+
+The main controls are:
+
+- `dmAllowlist`
+- `defaultAuthorizedShips`
+- `authorization.channelRules`
+- `ownerShip`
+
+This matters because Tlon can look connected while still behaving correctly by refusing unauthorized DMs or group activity.
+
+## Fastest safe baseline
+
+For most operators, the best first posture is:
+
+- set a real `ownerShip`,
+- keep DMs restricted unless you know who should be allowed,
+- leave group replies mention-gated,
+- and start with either auto-discovery plus a small test group, or explicit `groupChannels` if you want tighter control.
+
+### Minimal config
+
+```json5
+{
+  channels: {
+    tlon: {
+      enabled: true,
+      ship: '~sampel-palnet',
+      url: 'https://your-ship-host',
+      code: 'lidlut-tabwed-pillex-ridrup',
+      ownerShip: '~your-main-ship',
+    },
+  },
+}
+```
+
+Why this is a strong first shape:
+
+- `ownerShip` is automatically authorized everywhere,
+- the owner receives approval requests when other ships try to interact,
+- and you can validate the lane without opening DMs or channels more broadly than necessary.
+
+## Step 1: Install the plugin and gather the ship facts
+
+Tlon is not bundled into core OpenClaw.
+
+Install the plugin first:
+
+```bash
+openclaw plugins install @openclaw/tlon
+```
+
+Or, from a local checkout:
+
+```bash
+openclaw plugins install ./extensions/tlon
+```
+
+Then confirm you have the three facts the connector actually needs:
+
+- your bot ship name,
+- the ship URL,
+- and the current login code.
+
+If you already know who should approve requests, set `ownerShip` immediately instead of treating it as optional cleanup.
+
+## Step 2: Treat private ship URLs as a deliberate exception
+
+The official docs are explicit here: OpenClaw blocks private and internal destinations by default for SSRF protection.
+
+If your ship runs on localhost, a LAN IP, or an internal hostname, you must opt in explicitly:
+
+```json5
+{
+  channels: {
+    tlon: {
+      url: 'http://localhost:8080',
+      allowPrivateNetwork: true,
+    },
+  },
+}
+```
+
+Use this only when you trust the network path. The point is not convenience; it is a conscious exception to the default protection model.
+
+## Step 3: Choose the DM trust model on purpose
+
+Tlon DMs are not open by default.
+
+That is usually the right behavior.
+
+### Best default: owner-led approval flow
+
+If you set `ownerShip`, unauthorized DM attempts can turn into approval requests sent to the owner ship.
+
+That is a good operational baseline because:
+
+- the owner is always authorized,
+- DM invites for the owner are auto-accepted,
+- and you do not need to pre-fill a long allowlist before first contact.
+
+### When you already know the senders: `dmAllowlist`
+
+If the lane is meant for a known set of ships, keep the policy explicit:
+
+```json5
+{
+  channels: {
+    tlon: {
+      dmAllowlist: ['~zod', '~nec'],
+      autoAcceptDmInvites: true,
+    },
+  },
+}
+```
+
+The docs are clear that an empty `dmAllowlist` means no DMs are allowed unless you rely on the `ownerShip` approval flow.
+
+## Step 4: Make groups work without turning the lane loose
+
+Tlon group support is powerful, but it is easiest to operate safely when you separate **channel discovery** from **authorization**.
+
+### Discovery posture
+
+If you want low friction, keep auto-discovery enabled.
+
+If you want a narrower surface, pin the exact nests:
+
+```json5
+{
+  channels: {
+    tlon: {
+      groupChannels: ['chat/~host-ship/general', 'chat/~host-ship/support'],
+      autoDiscoverChannels: false,
+    },
+  },
+}
+```
+
+### Authorization posture
+
+Group authorization is restricted by default. A good first pattern is:
+
+```json5
+{
+  channels: {
+    tlon: {
+      defaultAuthorizedShips: ['~zod'],
+      authorization: {
+        channelRules: {
+          'chat/~host-ship/general': {
+            mode: 'restricted',
+            allowedShips: ['~zod', '~nec'],
+          },
+          'chat/~host-ship/announcements': {
+            mode: 'open',
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+Two practical reminders from the official docs:
+
+- group replies require an `@` mention by default,
+- and if the inbound message is in a thread, OpenClaw replies in-thread.
+
+That combination is a good fit for communities that want the assistant present without making every group message actionable.
+
+## Step 5: Verify the lane like an operator
+
+Do not stop at “the plugin started.” Run a small operational drill.
+
+### 1. Confirm gateway health
+
+Start with the upstream troubleshooting ladder:
+
+```bash
+openclaw status
+openclaw gateway status
+openclaw logs --follow
+openclaw doctor
+```
+
+### 2. Validate DM behavior
+
+Test one DM from the owner ship or an allowlisted ship.
+
+What you are checking is not just “reply received,” but whether the bot follows the trust model you intended.
+
+### 3. Validate one group mention
+
+Mention the bot in a known group channel.
+
+If you operate in threads, verify one in-thread reply as well. Tlon explicitly supports thread replies, so this is worth checking early.
+
+### 4. Validate one image-bearing response if your workflow needs it
+
+The docs say image URLs are uploaded to Tlon storage and embedded as image blocks. If image delivery matters for your channel, test it now rather than assuming Markdown-only validation is enough.
+
+### 5. Restart once and retest
+
+Because ship reachability, login code validity, and discovery state are all easy to over-assume, do one deliberate restart and repeat the DM and group check.
+
+## Capabilities worth knowing early
+
+A few Tlon-specific behaviors are worth documenting from day one:
+
+- **Rich text** is converted from Markdown into Tlon format
+- **Images** are uploaded into Tlon storage and embedded as image blocks
+- **Reactions** are available via the bundled Tlon skill, not as a general inline channel feature claim for everything else
+- **Polls are not yet supported**
+- **Native commands are supported**, with owner-only defaults called out in the capability table
+
+If you operate Tlon heavily, the bundled Tlon skill can inspect contacts, channels, groups, DMs, reactions, and settings from the same installation.
+
+## The first four Tlon failures to expect
+
+### 1. DMs are ignored
+
+The official docs point to the most common reason first: the sender is not in `dmAllowlist`, and no `ownerShip` is configured for approval flow.
+
+### 2. Group messages are ignored
+
+Usually either the channel was not discovered, or the sender is not authorized under the current group rules.
+
+### 3. Connection errors appear even though the ship is local
+
+That often means the URL is on localhost, LAN, or another internal hostname and `allowPrivateNetwork` was never enabled.
+
+### 4. Auth suddenly fails after a previously working setup
+
+The docs explicitly call out rotating login codes. If authentication breaks, verify the code is still current before chasing more exotic causes.
+
+## Recommended production posture
+
+For most real Tlon deployments, a disciplined starting shape looks like this:
+
+- install the plugin explicitly and keep its presence documented,
+- set `ownerShip` from the beginning,
+- keep DMs restricted unless there is a real reason to broaden them,
+- use a small number of pinned or intentionally discovered channels first,
+- and treat private-network access as an exception that must be justified.
+
+That posture matches the upstream model better than trying to force Tlon into a mainstream “drop in a bot token and let it roam” workflow.
+
+## Continue the Tlon path
+
+If you need the raw configuration surface, continue with:
+
+- [/gateway/configuration](/gateway/configuration)
+- [/tools/plugin](/tools/plugin)
+
+If you plan to use approval-driven DM onboarding or similar trust flows, also review:
+
+- [/channels/pairing](/channels/pairing)

@@ -1,0 +1,367 @@
+---
+title: 'LINE'
+description: 'LINE Messaging API setup for OpenClaw: plugin installation, webhook wiring, channel credentials, verification drills, and rollout notes for supported regions.'
+category: 'Channel Integration'
+subcategory: 'Community Plugin'
+platform: 'LINE'
+difficulty: 'intermediate'
+estimatedTime: '25–40 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-09
+featured: false
+keywords:
+  - 'openclaw line'
+  - 'line openclaw'
+  - 'line messaging api'
+  - 'webhook verify'
+  - 'plugin install'
+  - 'template limits'
+---
+
+> LINE is a webhook-first OpenClaw lane. The trust boundary is not just the bot token: it is the combination of **plugin installation**, **HTTPS webhook reachability**, **signature verification with the raw request body**, and **OpenClaw DM / group policy**.
+
+## Why this lane is different
+
+LINE is documented upstream as a plugin channel built on the LINE Messaging API.
+
+That gives it a different operational feel from Telegram or Feishu:
+
+- inbound delivery depends on LINE reaching your webhook,
+- webhook verification depends on the exact raw request body and `channelSecret`,
+- and richer message surfaces such as Flex or template messages sit on top of the same webhook plumbing.
+
+So if the webhook layer is unstable, the rest of the experience is unstable too.
+
+## Official support snapshot
+
+The local official docs describe LINE as supported via plugin with these capabilities:
+
+- direct messages,
+- group chats,
+- media,
+- locations,
+- Flex messages,
+- template messages,
+- and quick replies.
+
+The same docs also state the two important limits clearly:
+
+- **reactions are not supported**
+- **threads are not supported**
+
+That should shape expectations early, especially if your team is comparing LINE to workspace-style chat tools.
+
+## Plugin and trust boundary
+
+Do not bury these facts below the fold:
+
+- install the plugin first: `openclaw plugins install @openclaw/line`
+- LINE requires an **HTTPS webhook URL**
+- inbound verification depends on `channelSecret`
+- OpenClaw applies strict pre-auth body limits and timeout before signature verification because LINE’s HMAC check is body-dependent
+- DM and group trust still depend on OpenClaw policy after webhook auth succeeds
+
+That means “LINE can hit my endpoint” and “OpenClaw should answer this sender” are separate questions.
+
+## The mental model: webhook integrity first, policy second
+
+### Gate 1: LINE must be able to verify and reach the webhook
+
+The docs require:
+
+- a Messaging API channel,
+- a **Channel access token**,
+- a **Channel secret**,
+- **Use webhook** enabled,
+- and an HTTPS webhook URL that matches the configured path.
+
+If that layer is wrong, OpenClaw never gets a meaningful inbound event.
+
+### Gate 2: OpenClaw decides whether the sender is allowed through
+
+Once LINE events arrive, OpenClaw still evaluates:
+
+- `dmPolicy`
+- `allowFrom`
+- `groupPolicy`
+- `groupAllowFrom`
+- `groups.<groupId>.allowFrom`
+
+So a webhook can be perfectly healthy while the bot remains silent on purpose.
+
+## Fastest safe baseline
+
+The official minimal config is already conservative where it matters most: DMs default to pairing.
+
+For a practical first rollout, keep the lane narrow:
+
+- use one account first,
+- keep DMs on `pairing`,
+- keep group handling deliberate rather than ambient,
+- and avoid promising rich message polish until plain text round-trips are boring.
+
+### Conservative baseline config
+
+```json5
+{
+  channels: {
+    line: {
+      enabled: true,
+      channelAccessToken: 'LINE_CHANNEL_ACCESS_TOKEN',
+      channelSecret: 'LINE_CHANNEL_SECRET',
+      dmPolicy: 'pairing',
+      groupPolicy: 'allowlist',
+    },
+  },
+}
+```
+
+Why this is a sensible first shape:
+
+- unknown DM senders still require approval,
+- group rollout does not silently expand before you are ready,
+- and the config makes the trust model visible instead of hiding it in prior webhook success.
+
+### Secret file variant
+
+The local docs also support file-backed secrets:
+
+```json5
+{
+  channels: {
+    line: {
+      tokenFile: '/path/to/line-token.txt',
+      secretFile: '/path/to/line-secret.txt',
+    },
+  },
+}
+```
+
+That is often a better operational posture than copying long-lived secrets into ad hoc shell state.
+
+## Step 1: create the LINE Messaging API channel correctly
+
+The official order is straightforward and worth following literally:
+
+1. open the LINE Developers Console,
+2. create or choose a Provider,
+3. add a **Messaging API** channel,
+4. copy the **Channel access token** and **Channel secret**,
+5. enable **Use webhook**,
+6. set the webhook URL.
+
+The default documented path is:
+
+```text
+https://gateway-host/line/webhook
+```
+
+If you customize the path, the docs require that `channels.line.webhookPath` or `channels.line.accounts.<id>.webhookPath` match the URL you entered in LINE.
+
+## Step 2: keep the first account boring
+
+The docs support multiple LINE accounts, but most operators should prove one account first.
+
+Minimal config is enough to get started:
+
+```json5
+{
+  channels: {
+    line: {
+      enabled: true,
+      channelAccessToken: 'LINE_CHANNEL_ACCESS_TOKEN',
+      channelSecret: 'LINE_CHANNEL_SECRET',
+      dmPolicy: 'pairing',
+    },
+  },
+}
+```
+
+Environment variables also exist for the default account:
+
+- `LINE_CHANNEL_ACCESS_TOKEN`
+- `LINE_CHANNEL_SECRET`
+
+Use envs if you need them, but long-term operators usually reason more clearly from config or secret files.
+
+## Step 3: choose access control on purpose
+
+The official docs expose the usual OpenClaw trust knobs, but LINE adds one subtle operational detail: IDs are case-sensitive.
+
+The same local docs say valid IDs look like:
+
+- user IDs: `U` + 32 hex characters
+- group IDs: `C` + 32 hex characters
+- room IDs: `R` + 32 hex characters
+
+That matters because a policy mistake can look like a webhook bug when the real issue is a mismatched identifier.
+
+### DMs
+
+Recommended starting point:
+
+- `dmPolicy: 'pairing'`
+
+Approve new senders with:
+
+```bash
+openclaw pairing list line
+openclaw pairing approve line <CODE>
+```
+
+### Groups and rooms
+
+The local docs support:
+
+- `channels.line.groupPolicy`
+- `channels.line.groupAllowFrom`
+- per-group `channels.line.groups.<groupId>.allowFrom`
+
+A practical first rollout is still to keep shared spaces tight until you have one known-good DM and one known-good group round-trip.
+
+### One easy-to-miss runtime note
+
+The docs explicitly warn that if `channels.line` is completely missing, runtime falls back to `groupPolicy="allowlist"` for group checks even if `channels.defaults.groupPolicy` is set.
+
+That is not a reason to overcomplicate config. It is a reason to make the channel block explicit when you are debugging group silence.
+
+## Step 4: prove plain text before fancy surfaces
+
+LINE supports richer presentation features, but the official docs are careful about how message behavior works:
+
+- text is chunked at `5000` characters,
+- Markdown formatting is stripped,
+- code blocks and tables are converted into Flex cards when possible,
+- streaming replies are buffered and sent as full chunks while showing a loading animation,
+- media downloads are capped by `channels.line.mediaMaxMb` with a default of `10`.
+
+That should change how you verify the lane.
+
+First prove:
+
+- a direct text message,
+- a paired reply,
+- a group or room round-trip,
+- and one media receive path if you care about attachments.
+
+Only then is it worth validating richer payloads.
+
+## Step 5: use rich message features deliberately
+
+The official docs support LINE-specific `channelData.line` for:
+
+- quick replies,
+- locations,
+- Flex cards,
+- and template messages.
+
+There is also a built-in `/card` command for Flex presets.
+
+That is a useful capability surface, but do not mistake it for baseline health. If the webhook path, secret, or policy is wrong, no amount of Flex payload tuning will save the lane.
+
+## Verification drill
+
+### 1. Make webhook verification pass first
+
+Before testing conversational behavior, confirm the webhook URL is correct, HTTPS, and bound to the expected path.
+
+The local docs say the gateway handles both:
+
+- webhook verification via `GET`
+- inbound events via `POST`
+
+If verification is failing, stop there and fix that first.
+
+### 2. Send the first DM and approve pairing
+
+Once webhook verification is healthy:
+
+1. send a direct message,
+2. expect a pairing code for unknown senders,
+3. approve the request.
+
+```bash
+openclaw pairing list line
+openclaw pairing approve line <CODE>
+```
+
+If pairing as a concept is fuzzy, use:
+
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+
+### 3. Add exactly one shared surface
+
+After DMs work, add one group or room and verify:
+
+- the ID used in policy is correct and case-sensitive,
+- the webhook path still matches the configured route,
+- the bot replies in the expected surface,
+- and the logs show the event landing where you think it is landing.
+
+### 4. Test one richer message surface
+
+After plain text is stable, test one richer surface only:
+
+- a quick reply,
+- a template message,
+- or a Flex card.
+
+That catches payload-shape mistakes without expanding the blast radius too early.
+
+### 5. Re-test after one restart
+
+Do one deliberate gateway restart and repeat the DM plus shared-surface test.
+
+Webhook-based lanes feel healthy only when they survive a simple lifecycle event.
+
+## What usually breaks first
+
+### 1. Webhook verification fails
+
+The local docs give the first checks directly:
+
+- confirm the webhook URL is HTTPS,
+- confirm the configured `channelSecret` matches the LINE console.
+
+Because signature verification depends on the raw body, do not assume reverse-proxy or middleware changes are neutral until you have re-tested.
+
+### 2. No inbound events arrive
+
+The docs point to two likely causes first:
+
+- the webhook path does not match `channels.line.webhookPath`,
+- or the gateway is not reachable from LINE.
+
+Those are better first hypotheses than blaming the model or the prompt.
+
+### 3. Media download errors
+
+The local docs are specific here too: raise `channels.line.mediaMaxMb` if the media exceeds the default limit.
+
+That is a real configuration problem, not a generic webhook failure.
+
+### 4. Policy is stricter than the operator remembers
+
+Because LINE DMs default to pairing and groups may be allowlisted, a healthy webhook can still produce no reply.
+
+Always separate **delivery succeeded** from **policy allowed a response**.
+
+## When LINE is a good fit
+
+LINE is a good fit when:
+
+- your audience already lives on LINE,
+- you can provide a reliable HTTPS webhook surface,
+- you want access to richer channel-native message types,
+- and you are comfortable treating webhook integrity as production infrastructure.
+
+It is a weaker first lane when you want a setup that avoids public ingress entirely.
+
+## Related guides
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability)
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+- [/guides/openclaw-multi-agent-routing](/guides/openclaw-multi-agent-routing)
+- [/guides/new-user-checklist](/guides/new-user-checklist)

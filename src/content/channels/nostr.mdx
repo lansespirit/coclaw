@@ -1,0 +1,344 @@
+---
+title: 'Nostr'
+description: 'Nostr DM setup for OpenClaw: plugin install, relay strategy, private-key handling, DM policy, profile metadata, verification, and the protocol limits operators should understand before rollout.'
+category: 'Channel Integration'
+subcategory: 'Community Plugin'
+platform: 'Nostr'
+difficulty: 'intermediate'
+estimatedTime: '15–30 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-09
+featured: false
+keywords:
+  - 'openclaw nostr'
+  - 'nostr dm bot'
+  - 'nip-04'
+  - 'nostr relay'
+  - 'nostr allowlist'
+  - 'nostr profile metadata'
+---
+
+> Nostr is not a mainstream bot API lane. It is a **protocol-native DM surface** where your real operational boundary is the combination of **private key custody**, **relay selection**, and **OpenClaw DM policy**.
+
+## Why choose Nostr
+
+Nostr makes sense when you want OpenClaw to participate in a decentralized messaging environment without relying on a single platform operator.
+
+That gives you a very different tradeoff from Telegram, Slack, or Discord:
+
+- there is **no tenant admin layer** to configure,
+- there is **no hosted bot dashboard** managing delivery for you,
+- and message reliability depends partly on the **relays you choose**.
+
+That is exactly why Nostr is appealing to some operators and awkward for others. If you want a portable, protocol-level lane for private conversations, it is strong. If you need groups, rich media, or polished platform-side controls, it is not the first channel to start with.
+
+## Where Nostr is a strong fit
+
+Choose Nostr when the real requirement is a **protocol-native DM lane** and you are willing to operate it with the same discipline you would apply to infrastructure.
+
+It is strongest when:
+
+- owner-held identity matters more than tenant-issued bot credentials,
+- direct messages are enough for the workflow,
+- relay selection and private-key handling can be documented explicitly,
+- and sender policy should stay narrow through `pairing` or `allowlist`.
+
+## The mental model: Nostr has three moving parts
+
+Most early Nostr problems are not “the bot is broken.” They come from mixing up three separate layers.
+
+### Layer 1: your key is the identity
+
+OpenClaw authenticates to Nostr with the channel private key.
+
+That means your operational identity is not a tenant token or bot object. It is the key itself.
+
+- `privateKey` is required.
+- Accepted formats are `nsec...` or 64-character hex.
+- If the key is wrong, the rest of the lane does not matter.
+
+### Layer 2: relays determine where the bot can read and write
+
+Nostr delivery depends on relay connectivity.
+
+By default, OpenClaw uses:
+
+- `wss://relay.damus.io`
+- `wss://nos.lol`
+
+You can replace or extend that list, but the official docs recommend restraint:
+
+- use **2–3 relays** for redundancy,
+- avoid too many relays because latency and duplication go up,
+- and use `wss://` for remote relays unless you are deliberately testing locally.
+
+### Layer 3: OpenClaw still decides who may talk to the bot
+
+Once a DM reaches the Gateway, OpenClaw enforces channel policy.
+
+The official policy modes are:
+
+- `pairing` — default, unknown senders get a pairing code,
+- `allowlist` — only keys in `allowFrom` may DM,
+- `open` — public inbound DMs, which requires `allowFrom: ["*"]`,
+- `disabled` — ignore inbound DMs.
+
+This is the core Nostr operator distinction: **relay reachability is not access control**. You still need to decide who is allowed to use the bot.
+
+## Know the protocol limits before rollout
+
+OpenClaw's current Nostr channel is intentionally narrow.
+
+Supported now:
+
+- **NIP-01** for basic event format and profile metadata,
+- **NIP-04** for encrypted direct messages.
+
+Planned, not current:
+
+- **NIP-17** gift-wrapped DMs,
+- **NIP-44** versioned encryption.
+
+Operationally important MVP limits:
+
+- **direct messages only**,
+- **no group chats**,
+- **no media attachments**.
+
+If your content or workflow assumes rooms, threaded group interaction, or file-heavy exchanges, choose another lane first.
+
+## Fastest safe baseline
+
+For most operators, the clean first deployment is:
+
+- plugin installed explicitly,
+- private key from environment,
+- 2–3 relays at most,
+- `dmPolicy: "allowlist"` for production or `pairing` for evaluation.
+
+### Minimal config
+
+```json5
+{
+  channels: {
+    nostr: {
+      enabled: true,
+      privateKey: '${NOSTR_PRIVATE_KEY}',
+      dmPolicy: 'pairing',
+      relays: ['wss://relay.damus.io', 'wss://nos.lol'],
+    },
+  },
+}
+```
+
+If you already know the allowed senders, move to an explicit allowlist:
+
+```json5
+{
+  channels: {
+    nostr: {
+      privateKey: '${NOSTR_PRIVATE_KEY}',
+      dmPolicy: 'allowlist',
+      allowFrom: ['npub1abc...', 'npub1xyz...'],
+    },
+  },
+}
+```
+
+Why this is a good starting shape:
+
+- the key stays out of the repo,
+- the relay footprint stays small enough to debug,
+- and inbound access remains deliberate.
+
+## Step 1: install the plugin deliberately
+
+Nostr is optional and disabled by default.
+
+Install it with:
+
+```bash
+openclaw plugins install @openclaw/nostr
+```
+
+In development, a local checkout can also be linked:
+
+```bash
+openclaw plugins install --link <path-to-openclaw>/extensions/nostr
+```
+
+After install or enablement, restart the Gateway.
+
+## Step 2: treat the key like production identity
+
+If you do not already have a Nostr keypair, the official docs suggest generating one with `nak`:
+
+```bash
+nak key generate
+```
+
+Then export the private key:
+
+```bash
+export NOSTR_PRIVATE_KEY="nsec1..."
+```
+
+The official security guidance here is straightforward and worth following literally:
+
+- never commit private keys,
+- prefer environment variables for keys,
+- and use `allowlist` for production when you can.
+
+## Step 3: pick the DM trust model on purpose
+
+### `pairing`: best for evaluation and small trusted rollouts
+
+`pairing` is the default. Unknown senders receive a pairing code instead of full access.
+
+That makes it a good fit when:
+
+- you are testing the lane with a few humans,
+- you want approvals without hard-coding every pubkey first,
+- or you are still deciding whether Nostr should be a primary operator lane.
+
+### `allowlist`: best when ownership is already known
+
+Use `allowlist` when you already know the exact sender keys that should reach the bot.
+
+Nostr accepts public keys in either format:
+
+- `npub...`
+- hex
+
+This keeps the policy durable and explicit in config.
+
+### `open`: only when you mean public inbound DMs
+
+The official docs require `allowFrom: ["*"]` for `open` mode.
+
+That is a meaningful signal: public inbound DMs are not a casual toggle. Use them only when you really want a public-facing bot surface.
+
+## Step 4: publish profile metadata without overselling it
+
+Nostr profile data is published as a NIP-01 `kind:0` event.
+
+You can manage it through the Control UI or set it in config.
+
+Example:
+
+```json5
+{
+  channels: {
+    nostr: {
+      privateKey: '${NOSTR_PRIVATE_KEY}',
+      profile: {
+        name: 'openclaw',
+        displayName: 'OpenClaw',
+        about: 'Personal assistant DM bot',
+        picture: 'https://example.com/avatar.png',
+        banner: 'https://example.com/banner.png',
+        website: 'https://example.com',
+        nip05: 'openclaw@example.com',
+        lud16: 'openclaw@example.com',
+      },
+    },
+  },
+}
+```
+
+Two operator notes from the official docs matter here:
+
+- profile URLs must use `https://`,
+- importing from relays merges fields and preserves local overrides.
+
+Profile metadata helps with identity presentation. It does **not** change who may DM the bot.
+
+## Verification drill: prove the lane with the smallest surface
+
+Use the simplest possible proof before you broaden the relay set.
+
+1. Install the plugin and restart the Gateway.
+2. Configure one known-good key and a short relay list.
+3. Note the bot pubkey (`npub`) from logs.
+4. Open a Nostr client such as Damus or Amethyst.
+5. Send the bot a DM.
+6. Verify the response.
+
+For local protocol testing, the docs also give a relay-first harness using `strfry`:
+
+```bash
+docker run -p 7777:7777 ghcr.io/hoytech/strfry
+```
+
+Then point the channel at a local relay:
+
+```json5
+{
+  channels: {
+    nostr: {
+      privateKey: '${NOSTR_PRIVATE_KEY}',
+      relays: ['ws://localhost:7777'],
+    },
+  },
+}
+```
+
+That is useful when you want to separate relay behavior from internet reachability.
+
+## What usually breaks first
+
+The official docs point to three early failure classes.
+
+### 1. Bot receives nothing
+
+Check the documented basics first:
+
+- the private key is valid,
+- relay URLs are reachable,
+- remote relays use `wss://` unless you are testing locally,
+- `enabled` is not `false`,
+- and Gateway logs do not show relay connection errors.
+
+### 2. Bot sees messages but does not answer
+
+The official troubleshooting notes focus on outbound relay behavior:
+
+- verify the relay accepts writes,
+- verify outbound connectivity,
+- check whether the relay is applying rate limits.
+
+### 3. Duplicate-looking delivery with multiple relays
+
+The docs call this out explicitly: duplicate responses are expected risk when multiple relays deliver the same event.
+
+OpenClaw deduplicates by event ID, and only the first delivery should trigger a response.
+
+That is why “more relays” is not automatically “better operations.”
+
+## Recommended production posture
+
+For a production Nostr lane, the restrained posture is usually best:
+
+- keep the private key in env,
+- prefer `allowlist` over `open`,
+- use a compact relay set,
+- and document the current feature limits clearly for users.
+
+If you need a broad, media-rich, group-oriented assistant surface, route that elsewhere and keep Nostr focused on private operator-grade DM exchanges.
+
+## Where Nostr fits in a channel strategy
+
+Nostr is best when you want:
+
+- a protocol-native DM lane,
+- self-directed identity management,
+- and minimal dependence on a single hosted messaging platform.
+
+It is a weaker fit when you need:
+
+- rich group workflows,
+- attachments,
+- or a polished admin console for end-user operators.
+
+That makes it a strong **specialized lane** rather than the most forgiving day-one channel.

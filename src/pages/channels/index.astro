@@ -1,0 +1,655 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+import {
+  IconArrowRight,
+  IconArrowTopRightOnSquare,
+  IconBolt,
+  IconChat,
+  IconCheck,
+  IconDiscord,
+  IconLockClosed,
+  IconShieldCheckSolid,
+  IconSlack,
+  IconTelegram,
+  IconWhatsApp,
+} from '../../components/icons';
+import {
+  channelBlueprints,
+  normalizeKeywords,
+  resolveChannelBlueprint,
+  sortChannelEntries,
+} from '../../lib/channels';
+
+const entries = sortChannelEntries(
+  await getCollection('channels', ({ data }) => !data.draft && !data.archived)
+);
+
+const knownBlueprintSlugs = new Set(channelBlueprints.map((channel) => channel.slug));
+const publishedBySlug = new Map(entries.map((entry) => [entry.slug, entry]));
+
+const blueprintCards = channelBlueprints.map((blueprint) => {
+  const entry = publishedBySlug.get(blueprint.slug);
+
+  return {
+    ...blueprint,
+    title: entry?.data.title ?? blueprint.title,
+    description: entry?.data.description ?? blueprint.summary,
+    category: entry?.data.category ?? 'Channel Integration',
+    estimatedTime: entry?.data.estimatedTime ?? blueprint.complexity,
+    keywords: normalizeKeywords(entry?.data.keywords ?? blueprint.focusAreas).slice(0, 4),
+    href: entry ? `/channels/${entry.slug}` : undefined,
+    statusLabel: entry?.data.subcategory ?? blueprint.kindLabel,
+    entry,
+  };
+});
+
+const extraCards = entries
+  .filter((entry) => !knownBlueprintSlugs.has(entry.slug))
+  .map((entry) => {
+    const blueprint = resolveChannelBlueprint(entry.slug, entry.data.title);
+
+    return {
+      ...blueprint,
+      title: entry.data.title,
+      description: entry.data.description,
+      category: entry.data.category,
+      estimatedTime: entry.data.estimatedTime ?? blueprint.complexity,
+      keywords: normalizeKeywords(entry.data.keywords ?? blueprint.focusAreas).slice(0, 4),
+      href: `/channels/${entry.slug}`,
+      statusLabel: entry.data.subcategory ?? blueprint.kindLabel,
+      entry,
+    };
+  });
+
+const showcaseChannels = [...blueprintCards, ...extraCards];
+const liveCount = entries.length;
+const stagedCount = showcaseChannels.length - liveCount;
+const topicCloud = Array.from(
+  new Set(showcaseChannels.flatMap((channel) => channel.keywords))
+).slice(0, 10);
+
+const heroMetrics = [
+  {
+    value: String(showcaseChannels.length).padStart(2, '0'),
+    label: 'routing lanes',
+    note: 'Each platform gets its own security posture, checklist, and troubleshooting spine.',
+  },
+  {
+    value: String(liveCount).padStart(2, '0'),
+    label: 'published dossiers',
+    note: liveCount
+      ? 'These routes are backed by local MDX dossiers, not placeholder copy.'
+      : 'No channel dossiers are published yet, so the section is still running on prepared lane metadata.',
+  },
+  {
+    value: String(stagedCount).padStart(2, '0'),
+    label: stagedCount ? 'staged lanes' : 'coverage gaps',
+    note: stagedCount
+      ? 'New channels can join the section without changing the layout or the review standard.'
+      : 'Every featured lane currently resolves to a live dossier.',
+  },
+];
+
+const routingPrinciples = [
+  'Authentication first, screenshots later.',
+  'Least privilege is the baseline configuration.',
+  'Every guide includes verification and break-fix paths.',
+  'Channel-specific risks stay visible above the fold.',
+];
+
+const operatorLanes = [
+  {
+    title: 'Credential handoff',
+    description: 'How tokens, QR sessions, OAuth scopes, or app secrets are created and stored.',
+    icon: IconLockClosed,
+  },
+  {
+    title: 'Safety envelope',
+    description:
+      'Permissions, pairing boundaries, and account-protection notes for the chosen platform.',
+    icon: IconShieldCheckSolid,
+  },
+  {
+    title: 'Delivery rehearsal',
+    description:
+      'A concrete test matrix covering first reply, room/thread behavior, and recovery checks.',
+    icon: IconCheck,
+  },
+];
+
+const choreography = [
+  {
+    step: '01',
+    title: 'Choose the lane',
+    description:
+      'Start with the platform whose permissions and audience match the real rollout target.',
+  },
+  {
+    step: '02',
+    title: 'Provision credentials',
+    description:
+      'Create the narrowest viable token, bot app, or session path before touching production spaces.',
+  },
+  {
+    step: '03',
+    title: 'Harden the envelope',
+    description:
+      'Set pairing, scopes, intents, roles, or moderation boundaries so defaults are safe.',
+  },
+  {
+    step: '04',
+    title: 'Rehearse delivery',
+    description:
+      'Verify direct messages, shared spaces, and one known failure path before declaring success.',
+  },
+];
+
+const iconMap = {
+  telegram: IconTelegram,
+  whatsapp: IconWhatsApp,
+  slack: IconSlack,
+  discord: IconDiscord,
+  generic: IconChat,
+} as const;
+
+const toneStyles = {
+  primary: {
+    pill: 'border-primary/20 bg-primary/10 text-primary-700 dark:text-primary-300',
+    icon: 'text-primary',
+    glow: 'bg-primary/14 dark:bg-primary/20',
+    line: 'from-primary/35 via-primary/10 to-transparent',
+    hover: 'group-hover:text-primary',
+    dot: 'bg-primary',
+  },
+  secondary: {
+    pill: 'border-secondary/20 bg-secondary/10 text-secondary-700 dark:text-secondary-300',
+    icon: 'text-secondary',
+    glow: 'bg-secondary/14 dark:bg-secondary/20',
+    line: 'from-secondary/35 via-secondary/10 to-transparent',
+    hover: 'group-hover:text-secondary',
+    dot: 'bg-secondary',
+  },
+  accent: {
+    pill: 'border-accent/20 bg-accent/10 text-accent-700 dark:text-accent-300',
+    icon: 'text-accent',
+    glow: 'bg-accent/14 dark:bg-accent/20',
+    line: 'from-accent/35 via-accent/10 to-transparent',
+    hover: 'group-hover:text-accent',
+    dot: 'bg-accent',
+  },
+  success: {
+    pill: 'border-success/20 bg-success/10 text-success-700 dark:text-success-300',
+    icon: 'text-success',
+    glow: 'bg-success/14 dark:bg-success/20',
+    line: 'from-success/35 via-success/10 to-transparent',
+    hover: 'group-hover:text-success',
+    dot: 'bg-success',
+  },
+  warning: {
+    pill: 'border-warning/20 bg-warning/10 text-warning-700 dark:text-warning-300',
+    icon: 'text-warning',
+    glow: 'bg-warning/14 dark:bg-warning/20',
+    line: 'from-warning/35 via-warning/10 to-transparent',
+    hover: 'group-hover:text-warning',
+    dot: 'bg-warning',
+  },
+  danger: {
+    pill: 'border-danger/20 bg-danger/10 text-danger-700 dark:text-danger-300',
+    icon: 'text-danger',
+    glow: 'bg-danger/14 dark:bg-danger/20',
+    line: 'from-danger/35 via-danger/10 to-transparent',
+    hover: 'group-hover:text-danger',
+    dot: 'bg-danger',
+  },
+} as const;
+---
+
+<BaseLayout
+  title="OpenClaw Channels | CoClaw"
+  description="Channel integration dossiers for Telegram, WhatsApp, Slack, Discord, and future OpenClaw messaging lanes. Each page centers authentication, safety, verification, and troubleshooting."
+>
+  <div class="channels-deck relative min-h-screen overflow-x-hidden bg-background">
+    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+      <div
+        class="absolute inset-x-0 top-0 h-[32rem] bg-[radial-gradient(circle_at_top,_hsl(var(--heroui-content1))_0%,_transparent_68%)] opacity-90"
+      >
+      </div>
+      <div
+        class="absolute left-[-8rem] top-24 h-72 w-72 rounded-full bg-primary/12 blur-3xl dark:bg-primary/18"
+      >
+      </div>
+      <div
+        class="absolute right-[8%] top-48 h-64 w-64 rounded-full bg-secondary/12 blur-3xl dark:bg-secondary/16"
+      >
+      </div>
+      <div
+        class="absolute bottom-24 right-[-7rem] h-72 w-72 rounded-full bg-accent/10 blur-3xl dark:bg-accent/14"
+      >
+      </div>
+      <div class="channels-grid absolute inset-0 opacity-55 dark:opacity-35"></div>
+      <div class="channels-scanline absolute inset-x-0 top-[18rem] h-px"></div>
+    </div>
+
+    <Section as="header" py="pt-28 pb-10 md:pt-36 md:pb-14" containerClass="relative z-10">
+      <div class="grid gap-10 xl:grid-cols-[minmax(0,1.35fr)_20rem] xl:items-start">
+        <div class="channel-rise max-w-[58rem]">
+          <div
+            class="channels-kicker border border-divider bg-content1/75 text-default-700 dark:bg-content1/60 dark:text-default-500"
+          >
+            Integration switchboard
+          </div>
+
+          <div class="mt-8 max-w-5xl">
+            <h1
+              class="channels-display text-6xl leading-[0.92] tracking-[-0.05em] text-foreground md:text-[5.55rem] xl:text-[7rem]"
+            >
+              Channels deserve
+              <span class="text-secondary"> more than setup notes.</span>
+              <br />
+              They need operator dossiers.
+            </h1>
+          </div>
+
+          <p
+            class="mt-8 max-w-3xl text-xl leading-9 text-default-700 dark:text-default-500 md:text-[1.38rem]"
+          >
+            This section works like an operator console: each platform gets its own visual tone,
+            safety posture, credential map, and verification ritual. The index collects live
+            dossiers today and keeps the same structure ready for the next channel that lands.
+          </p>
+
+          <div
+            class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-default-600 dark:text-default-500"
+          >
+            <span class="inline-flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-primary"></span>
+              Security-first defaults
+            </span>
+            <span class="inline-flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-secondary"></span>
+              Platform-specific onboarding
+            </span>
+            <span class="inline-flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-accent"></span>
+              Troubleshooting built into the route
+            </span>
+          </div>
+
+          <div class="mt-8 flex flex-wrap items-center gap-5 text-sm uppercase tracking-[0.18em]">
+            <a
+              href="#channel-lanes"
+              class="inline-flex items-center gap-2 font-semibold text-foreground transition hover:text-primary"
+            >
+              Browse platform lanes
+              <IconArrowRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+            <a
+              href="/troubleshooting/solutions?component=channel"
+              class="inline-flex items-center gap-2 text-default-600 transition hover:text-foreground dark:text-default-500"
+            >
+              Open troubleshooting routes
+              <IconArrowTopRightOnSquare className="h-4 w-4" aria-hidden="true" />
+            </a>
+          </div>
+        </div>
+
+        <aside
+          class="channel-rise-delay rounded-[1.8rem] border border-divider bg-content1/75 p-5 shadow-[0_24px_90px_-50px_rgb(0_0_0/0.35)] backdrop-blur-2xl dark:bg-content1/60 dark:shadow-[0_28px_100px_-52px_rgb(0_0_0/0.8)] xl:mt-10"
+        >
+          <p class="channels-mono text-xs uppercase tracking-[0.28em] text-default-500">
+            Design direction
+          </p>
+          <div
+            class="mt-4 rounded-[1.35rem] border border-divider bg-content2/55 p-5 dark:bg-content2/35"
+          >
+            <p class="channels-display text-2xl leading-tight text-foreground">Signal routing</p>
+            <p class="mt-3 text-sm leading-7 text-default-700 dark:text-default-500">
+              The memorable motif is a clean control room: editorial typography up front, telemetry
+              cards underneath, and a visible route from credentials to proof-of-delivery.
+            </p>
+            <ul class="mt-5 space-y-3 border-t border-divider pt-4">
+              {
+                routingPrinciples.map((principle) => (
+                  <li class="flex items-center gap-3 text-sm font-medium text-foreground">
+                    <IconBolt className="h-4 w-4 text-primary" aria-hidden="true" />
+                    <span>{principle}</span>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </Section>
+
+    <Section py="pt-0 pb-8 md:pb-10" containerClass="relative z-10">
+      <div class="grid gap-4 md:grid-cols-3">
+        {
+          heroMetrics.map((metric, index) => (
+            <article
+              class="channel-rise rounded-[1.6rem] border border-divider bg-content1/72 p-6 shadow-[0_18px_65px_-42px_rgb(0_0_0/0.28)] backdrop-blur-xl dark:bg-content1/60 dark:shadow-[0_22px_82px_-46px_rgb(0_0_0/0.75)]"
+              style={`animation-delay: ${index * 110}ms`}
+            >
+              <p class="channels-mono text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
+                {metric.label}
+              </p>
+              <p class="channels-display mt-3 text-5xl leading-none text-foreground">
+                {metric.value}
+              </p>
+              <p class="mt-4 text-sm leading-7 text-default-700 dark:text-default-500">
+                {metric.note}
+              </p>
+            </article>
+          ))
+        }
+      </div>
+    </Section>
+
+    <Section py="pt-0 pb-4 md:pb-6" containerClass="relative z-10">
+      <div class="flex flex-wrap items-center gap-3 border-t border-divider/80 pt-6">
+        <span class="channels-mono text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
+          Focus cloud
+        </span>
+        {
+          topicCloud.map((topic) => (
+            <span class="inline-flex items-center rounded-full border border-divider bg-content1/75 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-default-700 dark:bg-content1/60 dark:text-default-500">
+              {topic}
+            </span>
+          ))
+        }
+      </div>
+    </Section>
+
+    <Section id="channel-lanes" py="pt-6 pb-16 md:pb-20" containerClass="relative z-10">
+      <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="channels-mono text-xs uppercase tracking-[0.28em] text-default-500">
+            Platform lanes
+          </p>
+          <h2 class="channels-display mt-3 text-4xl leading-tight text-foreground md:text-5xl">
+            Operator dossiers for each messaging surface.
+          </h2>
+        </div>
+        <p class="max-w-2xl text-sm leading-7 text-default-700 dark:text-default-500">
+          Each card carries a distinct safety posture, auth model, and runtime stance while staying
+          inside one consistent editorial system.
+        </p>
+      </div>
+
+      {
+        liveCount === 0 && (
+          <div class="mt-8 rounded-[1.4rem] border border-divider bg-content1/72 px-5 py-4 text-sm leading-7 text-default-700 shadow-[0_16px_54px_-38px_rgb(0_0_0/0.24)] dark:bg-content1/58 dark:text-default-500 dark:shadow-[0_22px_70px_-42px_rgb(0_0_0/0.75)]">
+            No channel dossiers are published yet, so this index is showing prepared lane metadata
+            first. As soon as guides land in `src/content/channels`, these cards resolve to live
+            dossiers without changing the layout.
+          </div>
+        )
+      }
+
+      <div class="mt-8 grid gap-6 xl:grid-cols-2">
+        {
+          showcaseChannels.map((channel, index) => {
+            const CardIcon = iconMap[channel.iconKey] ?? IconChat;
+            const tone = toneStyles[channel.tone];
+            const cardClass =
+              'group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-divider bg-content1/78 p-6 shadow-[0_22px_78px_-44px_rgb(0_0_0/0.3)] backdrop-blur-2xl transition duration-300 hover:-translate-y-1 hover:bg-content1/85 dark:bg-content1/62 dark:shadow-[0_26px_95px_-48px_rgb(0_0_0/0.82)]';
+            const cardBody = (
+              <>
+                <div class={`absolute inset-x-0 top-0 h-px bg-gradient-to-r ${tone.line}`} />
+                <div
+                  class={`absolute -right-8 top-6 h-24 w-24 rounded-full blur-3xl ${tone.glow}`}
+                />
+
+                <div class="relative flex items-start justify-between gap-4">
+                  <div class="flex items-center gap-4">
+                    <span
+                      class={`inline-flex h-14 w-14 items-center justify-center rounded-[1.15rem] border border-divider bg-content2/70 ${tone.icon}`}
+                    >
+                      <CardIcon className="h-7 w-7" aria-hidden="true" />
+                    </span>
+                    <div>
+                      <span
+                        class={`inline-flex rounded-full border px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.24em] ${tone.pill}`}
+                      >
+                        {channel.statusLabel}
+                      </span>
+                      <h3
+                        class={`channels-display mt-4 text-3xl leading-tight text-foreground transition ${tone.hover}`}
+                      >
+                        {channel.title}
+                      </h3>
+                    </div>
+                  </div>
+
+                  {channel.href ? (
+                    <span class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-divider bg-content1/70 text-default-500 transition group-hover:text-foreground">
+                      <IconArrowRight className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                  ) : null}
+                </div>
+
+                <p class="mt-6 max-w-2xl text-base leading-8 text-default-700 dark:text-default-500">
+                  {channel.description}
+                </p>
+
+                <div class="mt-6 grid gap-3 sm:grid-cols-2">
+                  <div class="rounded-[1.25rem] border border-divider bg-content2/55 p-4 dark:bg-content2/35">
+                    <p class="channels-mono text-[0.68rem] uppercase tracking-[0.24em] text-default-500">
+                      Auth model
+                    </p>
+                    <p class="mt-3 text-sm leading-7 text-foreground">{channel.authModel}</p>
+                  </div>
+                  <div class="rounded-[1.25rem] border border-divider bg-content2/55 p-4 dark:bg-content2/35">
+                    <p class="channels-mono text-[0.68rem] uppercase tracking-[0.24em] text-default-500">
+                      Safety stance
+                    </p>
+                    <p class="mt-3 text-sm leading-7 text-foreground">{channel.safetyNote}</p>
+                  </div>
+                </div>
+
+                <div class="mt-5 flex flex-wrap gap-2">
+                  {channel.keywords.map((keyword) => (
+                    <span class="inline-flex items-center rounded-full border border-divider bg-content2/55 px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-default-600 dark:bg-content2/35 dark:text-default-500">
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+
+                <div class="mt-6 grid gap-4 border-t border-divider/80 pt-5 text-sm text-default-700 dark:text-default-500 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                  <div>
+                    <p class="channels-mono text-[0.68rem] uppercase tracking-[0.24em] text-default-500">
+                      Runtime stance
+                    </p>
+                    <p class="mt-2 leading-7">{channel.operatingMode}</p>
+                  </div>
+                  <div>
+                    <p class="channels-mono text-[0.68rem] uppercase tracking-[0.24em] text-default-500">
+                      Effort
+                    </p>
+                    <p class="mt-2 leading-7">{channel.estimatedTime}</p>
+                  </div>
+                  <div class="justify-self-start sm:justify-self-end">
+                    {channel.href ? (
+                      <span
+                        class={`inline-flex items-center gap-2 font-semibold text-foreground transition ${tone.hover}`}
+                      >
+                        Open dossier
+                        <IconArrowRight className="h-4 w-4" aria-hidden="true" />
+                      </span>
+                    ) : (
+                      <span class="inline-flex items-center gap-2 font-semibold text-default-500">
+                        Guide pending
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </>
+            );
+
+            return channel.href ? (
+              <a
+                href={channel.href}
+                class={cardClass}
+                style={`animation-delay: ${120 + index * 90}ms`}
+              >
+                {cardBody}
+              </a>
+            ) : (
+              <article class={cardClass} style={`animation-delay: ${120 + index * 90}ms`}>
+                {cardBody}
+              </article>
+            );
+          })
+        }
+      </div>
+    </Section>
+
+    <Section py="pt-0 pb-20 md:pb-24" containerClass="relative z-10">
+      <div class="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] xl:items-start">
+        <article
+          class="overflow-hidden rounded-[2rem] border border-divider bg-content1/78 p-6 shadow-[0_24px_90px_-48px_rgb(0_0_0/0.3)] backdrop-blur-2xl dark:bg-content1/62 dark:shadow-[0_28px_100px_-50px_rgb(0_0_0/0.82)] md:p-8"
+        >
+          <p class="channels-mono text-xs uppercase tracking-[0.28em] text-default-500">
+            Connection choreography
+          </p>
+          <h2
+            class="channels-display mt-3 max-w-3xl text-4xl leading-tight text-foreground md:text-5xl"
+          >
+            One route, four deliberate beats.
+          </h2>
+          <div class="mt-8 grid gap-6 md:grid-cols-2">
+            {
+              choreography.map((item) => (
+                <div class="relative rounded-[1.45rem] border border-divider bg-content2/50 p-5 dark:bg-content2/35">
+                  <span class="channels-mono text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
+                    Step {item.step}
+                  </span>
+                  <h3 class="mt-3 text-xl font-semibold text-foreground">{item.title}</h3>
+                  <p class="mt-3 text-sm leading-7 text-default-700 dark:text-default-500">
+                    {item.description}
+                  </p>
+                </div>
+              ))
+            }
+          </div>
+        </article>
+
+        <div class="grid gap-4">
+          {
+            operatorLanes.map((lane) => {
+              const LaneIcon = lane.icon;
+              return (
+                <article class="rounded-[1.55rem] border border-divider bg-content1/72 p-5 shadow-[0_18px_70px_-42px_rgb(0_0_0/0.24)] backdrop-blur-xl dark:bg-content1/58 dark:shadow-[0_24px_88px_-46px_rgb(0_0_0/0.78)]">
+                  <div class="flex items-start gap-4">
+                    <span class="inline-flex h-12 w-12 items-center justify-center rounded-[1rem] border border-divider bg-content2/60 text-primary dark:bg-content2/35">
+                      <LaneIcon className="h-5 w-5" aria-hidden="true" />
+                    </span>
+                    <div>
+                      <p class="channels-mono text-[0.68rem] uppercase tracking-[0.24em] text-default-500">
+                        Built into every page
+                      </p>
+                      <h3 class="mt-2 text-xl font-semibold text-foreground">{lane.title}</h3>
+                      <p class="mt-3 text-sm leading-7 text-default-700 dark:text-default-500">
+                        {lane.description}
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              );
+            })
+          }
+        </div>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>
+
+<style>
+  .channels-deck {
+    --channels-display: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+    --channels-sans: 'Avenir Next', 'Segoe UI', sans-serif;
+    --channels-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+    font-family: var(--channels-sans);
+  }
+
+  .channels-display {
+    font-family: var(--channels-display);
+  }
+
+  .channels-mono,
+  .channels-kicker {
+    font-family: var(--channels-mono);
+  }
+
+  .channels-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.72rem 1rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    backdrop-filter: blur(18px);
+  }
+
+  .channels-kicker::before {
+    content: '';
+    width: 0.58rem;
+    height: 0.58rem;
+    border-radius: 999px;
+    background: hsl(var(--heroui-primary) / 1);
+    box-shadow: 0 0 22px hsl(var(--heroui-primary) / 0.32);
+  }
+
+  .channels-grid {
+    background-image:
+      linear-gradient(to right, hsl(var(--heroui-divider) / 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--heroui-divider) / 0.08) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: linear-gradient(180deg, rgb(0 0 0 / 0.5), transparent 84%);
+  }
+
+  .channels-scanline {
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--heroui-primary) / 0.22),
+      hsl(var(--heroui-secondary) / 0.18),
+      transparent
+    );
+    box-shadow: 0 0 28px hsl(var(--heroui-primary) / 0.16);
+  }
+
+  .channel-rise,
+  .channel-rise-delay,
+  [style*='animation-delay'] {
+    animation: channel-rise 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .channel-rise-delay {
+    animation-delay: 140ms;
+  }
+
+  @keyframes channel-rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 22px, 0);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .channel-rise,
+    .channel-rise-delay,
+    [style*='animation-delay'] {
+      animation: none;
+    }
+  }
+</style>

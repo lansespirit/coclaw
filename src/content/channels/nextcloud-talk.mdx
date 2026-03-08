@@ -1,0 +1,328 @@
+---
+title: 'Nextcloud Talk'
+description: 'Nextcloud Talk for OpenClaw covers plugin setup, server credentials, room access, and a verification path tuned for self-hosted teams.'
+category: 'Channel Integration'
+subcategory: 'Community Plugin'
+platform: 'Nextcloud Talk'
+difficulty: 'intermediate'
+estimatedTime: '25–40 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-09
+featured: false
+keywords:
+  - 'openclaw nextcloud talk'
+  - 'nextcloud talk openclaw'
+  - 'nextcloud talk'
+  - 'self-hosted rooms'
+  - 'plugin install'
+  - 'room access'
+---
+
+> Nextcloud Talk is the self-hosted collaboration lane in this batch, but the important boundary is not “self-hosted therefore trusted.” The actual trust boundary is the combination of **plugin installation**, **Nextcloud bot registration**, **shared-secret webhook delivery**, **room enablement**, and **OpenClaw DM / room policy**.
+
+## Why this lane is different
+
+Nextcloud Talk is documented upstream as a plugin-backed webhook bot.
+
+That immediately gives it a different shape from cloud-bot lanes:
+
+- you operate both the chat system and the OpenClaw side,
+- the bot must be created on the Nextcloud server,
+- rooms have to be enabled intentionally,
+- and webhook reachability is your problem rather than the platform’s problem.
+
+That is good for privacy and control, but it also means “the server is ours” should not be confused with “the integration is simple.”
+
+## Official support snapshot
+
+The local official docs describe Nextcloud Talk as supporting:
+
+- direct messages,
+- rooms,
+- reactions,
+- and markdown messages.
+
+The same docs are equally clear about the limits:
+
+- **threads are not supported**
+- **media is URL-only**
+- **native commands are not supported**
+- **bots cannot initiate DMs**
+
+Those four facts shape both operator expectations and rollout design.
+
+## Plugin and trust boundary
+
+Keep these facts near the top of the dossier because they determine whether the lane is even alive:
+
+- install the plugin first: `openclaw plugins install @openclaw/nextcloud-talk`
+- create the bot on the Nextcloud server with `occ talk:bot:install`
+- enable the bot in the target room settings
+- configure `baseUrl` and `botSecret`
+- ensure the webhook URL is reachable from Nextcloud
+- set `webhookPublicUrl` if the gateway sits behind a proxy or internal bind address
+
+This is not a channel where “I set a token” proves very much.
+
+## The mental model: webhook bot with ambiguous room context
+
+There are two platform-specific details in the official docs that deserve special attention.
+
+### Detail 1: the bot cannot start the DM
+
+A user must message the bot first.
+
+That means “nothing happened when we tried to greet a user proactively” is not a bug according to the documented behavior.
+
+### Detail 2: webhook payloads do not distinguish DMs from rooms by themselves
+
+The official docs state that without `apiUser` and `apiPassword`, the webhook payload does not distinguish DMs from rooms and DMs are treated as rooms.
+
+That is a big operational clue.
+
+If you expect both direct messages and shared rooms to behave correctly, plan room-type lookup credentials from the start rather than discovering this after rollout.
+
+## Fastest safe baseline
+
+The official minimal config is enough to boot the lane, but a practical baseline should still be narrow.
+
+Recommended first posture:
+
+- keep DMs on `pairing`,
+- allow only the rooms you intend to support,
+- keep mention requirements on in shared rooms,
+- add room-type lookup credentials when you need reliable DM-versus-room detection,
+- and document the public webhook URL explicitly if a proxy sits in front.
+
+### Conservative baseline config
+
+```json5
+{
+  channels: {
+    'nextcloud-talk': {
+      enabled: true,
+      baseUrl: 'https://cloud.example.com',
+      botSecret: 'shared-secret',
+      dmPolicy: 'pairing',
+      groupPolicy: 'allowlist',
+      rooms: {
+        'room-token': { requireMention: true },
+      },
+    },
+  },
+}
+```
+
+### Baseline when you need DM / room detection to be reliable
+
+```json5
+{
+  channels: {
+    'nextcloud-talk': {
+      baseUrl: 'https://cloud.example.com',
+      botSecret: 'shared-secret',
+      apiUser: 'bot-api-user',
+      apiPasswordFile: '/path/to/nextcloud-app-password.txt',
+      webhookPublicUrl: 'https://gateway.example.com/nextcloud-talk-webhook',
+      dmPolicy: 'pairing',
+      groupPolicy: 'allowlist',
+      rooms: {
+        'room-token': { requireMention: true },
+      },
+    },
+  },
+}
+```
+
+That second shape is not mandatory for every deployment, but it is the safest documented posture when DMs and rooms both matter.
+
+## Step 1: install the plugin and register the bot on the server
+
+This channel is explicitly not bundled with core OpenClaw.
+
+Install the plugin first:
+
+```bash
+openclaw plugins install @openclaw/nextcloud-talk
+```
+
+Then create the bot on the Nextcloud server with the documented command:
+
+```bash
+./occ talk:bot:install "OpenClaw" "<shared-secret>" "<webhook-url>" --feature reaction
+```
+
+That command is worth documenting exactly because it establishes three things at once:
+
+- the bot identity,
+- the shared secret,
+- and the webhook URL Nextcloud will call.
+
+## Step 2: enable the bot in the actual rooms you care about
+
+The official docs say to enable the bot in the target room settings.
+
+That is easy to miss if you are thinking purely in gateway terms.
+
+A room can exist, the server can be up, and the webhook can be correct, yet the bot still will not participate if the room-level enablement step was skipped.
+
+## Step 3: configure OpenClaw with the server-facing facts, not assumptions
+
+The local docs call out the required baseline fields clearly:
+
+- `channels.nextcloud-talk.baseUrl`
+- `channels.nextcloud-talk.botSecret`
+
+From there, the most important optional fields are operational rather than decorative:
+
+- `apiUser`
+- `apiPassword` or `apiPasswordFile`
+- `webhookPublicUrl`
+
+That is the right order to think in as well: first make the server relationship real, then make DM / room detection and proxy reachability boring.
+
+## Step 4: choose DM and room policy explicitly
+
+### DMs
+
+The official default is:
+
+- `channels.nextcloud-talk.dmPolicy = "pairing"`
+
+Unknown senders get a pairing code and must be approved:
+
+```bash
+openclaw pairing list nextcloud-talk
+openclaw pairing approve nextcloud-talk <CODE>
+```
+
+The docs also note that `allowFrom` matches Nextcloud user IDs, not display names.
+
+That is important if you move from pairing to allowlists later.
+
+### Rooms
+
+The local docs document rooms as the central group-control surface:
+
+- default `groupPolicy` is `allowlist`
+- allowlisted rooms live under `channels.nextcloud-talk.rooms`
+- `requireMention` can be set per room
+- setting no rooms effectively means no room access unless you later open policy deliberately
+
+That makes Nextcloud Talk one of the easier channels to keep conservative by default.
+
+## Verification drill
+
+### 1. Confirm the bot can be reached from Nextcloud at all
+
+Before talking about prompt quality or model behavior, verify the infrastructure pieces:
+
+- the bot was installed on the Nextcloud server,
+- the webhook URL is the intended one,
+- the gateway can actually receive that webhook,
+- and `webhookPublicUrl` is set if the internal bind address is not externally reachable.
+
+For broader gateway checks, keep these nearby:
+
+- [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability)
+- [/guides/new-user-checklist](/guides/new-user-checklist)
+
+### 2. Test the first DM from the user side
+
+Because bots cannot initiate DMs, the first real proof is a user message to the bot.
+
+Expect pairing by default, then approve it:
+
+```bash
+openclaw pairing list nextcloud-talk
+openclaw pairing approve nextcloud-talk <CODE>
+```
+
+If pairing behavior needs a refresher:
+
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+
+### 3. Test one room with mention discipline
+
+After the DM works, enable exactly one room and verify:
+
+- the room token is the same one used in `channels.nextcloud-talk.rooms`,
+- the bot is enabled in that room’s settings,
+- mention behavior matches your `requireMention` posture,
+- and the event lands in the expected conversation boundary.
+
+### 4. Verify one capability the docs specifically promise
+
+The official docs say reactions are supported.
+
+So after plain text is stable, it is reasonable to test one reaction flow.
+
+That is a better checkpoint than testing unsupported features like threads.
+
+### 5. Re-test after a restart or proxy bounce
+
+Webhook lanes behind self-hosted infrastructure should survive a simple lifecycle event.
+
+Restart the gateway, or bounce the proxy if you have one, then repeat the DM and one-room test.
+
+## What usually breaks first
+
+### 1. The webhook URL is not actually reachable
+
+The official docs call this out directly and provide `webhookPublicUrl` for the behind-proxy case.
+
+If Nextcloud cannot reach the gateway on the URL it was given, nothing else matters.
+
+### 2. The bot was installed but not enabled in the room
+
+This is a very plausible first failure because bot registration and room enablement are separate steps in the documented flow.
+
+### 3. DMs behave strangely because they are being treated as rooms
+
+The local docs explicitly warn that this happens when `apiUser` and `apiPassword` are not set.
+
+If your operator notes mention “DMs seem to follow room logic,” this is the first supported explanation to check.
+
+### 4. Operators expect proactive outreach or thread support
+
+Those are expectation bugs, not implementation bugs, according to the official docs:
+
+- bots cannot initiate DMs,
+- threads are not supported,
+- media is URL-only.
+
+Document that early and you avoid a whole class of false incident reports.
+
+## When Nextcloud Talk is a good fit
+
+This lane is a strong fit when:
+
+- your organization already runs Nextcloud,
+- keeping collaboration traffic inside the self-hosted perimeter matters,
+- you are comfortable owning the webhook path end to end,
+- and room-level allowlisting is an advantage rather than a burden.
+
+It is a weaker first lane if you want a platform that handles most ingress complexity for you.
+
+## Multi-agent and routing role
+
+Nextcloud Talk will usually be a narrower internal lane rather than the broadest public ingress path.
+
+That makes it a good candidate for:
+
+- internal ops rooms,
+- self-hosted team workflows,
+- or a controlled secondary route alongside more public-facing channels.
+
+For the routing model itself, use:
+
+- [/guides/openclaw-multi-agent-routing](/guides/openclaw-multi-agent-routing)
+
+## Related guides
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability)
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+- [/guides/openclaw-multi-agent-routing](/guides/openclaw-multi-agent-routing)
+- [/guides/new-user-checklist](/guides/new-user-checklist)

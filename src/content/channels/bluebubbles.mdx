@@ -1,0 +1,322 @@
+---
+title: 'BlueBubbles'
+description: 'BlueBubbles for OpenClaw covers macOS server setup, REST connectivity, pairing boundaries, and advanced messaging behaviors for Apple-centric workflows.'
+category: 'Channel Integration'
+subcategory: 'Recommended Integration'
+platform: 'BlueBubbles'
+difficulty: 'intermediate'
+estimatedTime: '30–45 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+featured: true
+keywords:
+  - 'openclaw bluebubbles'
+  - 'bluebubbles openclaw'
+  - 'bluebubbles server'
+  - 'macOS host'
+  - 'iMessage delivery'
+  - 'reactions'
+---
+
+> BlueBubbles is the recommended iMessage path for OpenClaw because it gives you a richer API and a cleaner operational model than the legacy `imessage` lane. But it is still only as reliable as the **Mac host**, the **BlueBubbles server**, and the **webhook path** that ties incoming events back to your gateway.
+
+## Why BlueBubbles exists
+
+If WebChat is the most deceptively simple browser lane, BlueBubbles is the most deceptively simple native-host lane.
+
+It feels like “install a Mac helper and point OpenClaw at it,” but the actual system has four moving parts:
+
+- the macOS host and its Messages.app state,
+- the BlueBubbles server process,
+- the OpenClaw gateway making outbound REST calls,
+- and the webhook path carrying inbound events back into OpenClaw.
+
+That is exactly why upstream recommends BlueBubbles over the legacy `imessage` route: it is richer and easier to reason about, but it still requires an operator mindset.
+
+## The mental model: BlueBubbles has two directions
+
+Telegram taught us to separate platform visibility from OpenClaw policy. BlueBubbles adds a different operational split:
+
+### Direction 1: Outbound actions from OpenClaw to BlueBubbles
+
+OpenClaw sends text, typing, read state, reactions, and advanced actions to the BlueBubbles server over HTTP.
+
+When that path fails, the likely causes are:
+
+- wrong `serverUrl`,
+- wrong password,
+- the BlueBubbles server being down,
+- the Mac host being asleep or unhealthy,
+- or network reachability between gateway and Mac.
+
+### Direction 2: Inbound events from BlueBubbles back to OpenClaw
+
+Incoming messages depend on webhook delivery from BlueBubbles to your gateway.
+
+When this path fails, the likely causes are:
+
+- wrong webhook URL,
+- missing webhook password,
+- reverse proxy / host routing mistakes,
+- or the Mac host / BlueBubbles app silently falling idle.
+
+That means BlueBubbles is not just a “channel token” problem.
+
+> It is a bidirectional host integration. Outbound REST can look healthy while inbound webhooks are dead, and vice versa.
+
+## Safe baseline posture
+
+Treat the Mac host as infrastructure, not a convenience laptop.
+
+### Minimal starting config
+
+```json5
+{
+  channels: {
+    bluebubbles: {
+      enabled: true,
+      serverUrl: 'http://192.168.1.100:1234',
+      password: 'example-password',
+      webhookPath: '/bluebubbles-webhook',
+      dmPolicy: 'pairing',
+    },
+  },
+}
+```
+
+The safe operator defaults are:
+
+- explicit `serverUrl`,
+- a real password,
+- webhook auth always enabled,
+- and DM trust still controlled by pairing or allowlist.
+
+Do not treat BlueBubbles as trusted just because it lives on your network.
+
+## Step 1: Prepare the Mac host first
+
+Before touching OpenClaw config, decide what kind of Mac host this lane will run on:
+
+- a dedicated always-on Mac mini,
+- a user workstation that may sleep,
+- a VM,
+- or a less stable experimental setup.
+
+This matters because delivery quality depends on host behavior more than on message content.
+
+Upstream’s own recommendation is effectively “use a host you can trust to stay awake and healthy.”
+
+If you are building a durable Apple lane, a dedicated always-on host is the cleanest choice.
+
+## Step 2: Bring up BlueBubbles as a service, not a demo
+
+Install and configure the BlueBubbles server on macOS.
+
+The key operating decisions are:
+
+- enable the Web API,
+- set a password,
+- verify the REST endpoint responds,
+- and record the webhook path you want OpenClaw to accept.
+
+If your first validation is only “the Mac app opened,” you have not validated the lane yet.
+
+The actual first checkpoint is:
+
+- OpenClaw can reach `GET /api/v1/ping`
+- and BlueBubbles can reach your webhook path back on the gateway
+
+## Step 3: Treat webhook auth as mandatory
+
+This is one of the most important BlueBubbles-specific rules.
+
+Webhook authentication is not optional hardening. It is the baseline.
+
+OpenClaw rejects BlueBubbles webhook requests unless they include a password/guid that matches `channels.bluebubbles.password`.
+
+That means your webhook URL should be deliberate and documented, for example:
+
+```text
+https://your-gateway-host:3000/bluebubbles-webhook?password=<password>
+```
+
+If inbound messages stop, verify webhook auth before debugging anything more exotic.
+
+## Step 4: Choose the OpenClaw trust model
+
+BlueBubbles still uses the same OpenClaw trust concepts as other direct-message channels.
+
+### DMs
+
+Recommended default:
+
+- `dmPolicy: 'pairing'`
+
+That keeps unknown senders from automatically gaining conversational access just because the Apple-side integration is healthy.
+
+Useful commands:
+
+```bash
+openclaw pairing list bluebubbles
+openclaw pairing approve bluebubbles <CODE>
+```
+
+### Groups
+
+BlueBubbles also supports group policy and mention gating behavior.
+
+That means you should make the same explicit decisions you would make on Telegram or WhatsApp:
+
+- which group conversations are allowed,
+- whether group senders must be allowlisted,
+- and whether the lane is intended to behave ambiently or only under tighter conditions.
+
+## Step 5: Validate both directions separately
+
+This is the most important verification rule for BlueBubbles.
+
+Do not stop at “it sent one message.”
+
+### 1. Outbound REST test
+
+- send a simple message from OpenClaw
+- confirm it lands in the expected iMessage conversation
+- confirm timing feels normal
+
+### 2. Inbound webhook test
+
+- send a reply from the Apple side
+- confirm OpenClaw receives it without manual app nudging
+- verify the conversation state updates correctly
+
+### 3. Host-idle test
+
+Let the Mac host sit idle, then test again.
+
+This catches the common class of failures where Messages.app or the local automation path quietly stops producing events until foregrounded.
+
+### 4. Restart test
+
+- restart the gateway,
+- if possible also restart BlueBubbles,
+- then repeat both outbound and inbound validation.
+
+A lane that only works until one side restarts is not ready.
+
+## The Mac host is part of the product
+
+This is where BlueBubbles differs sharply from cloud-first bot lanes.
+
+The Mac host is not just “where the integration runs.” It is part of the user-visible system.
+
+That means these host conditions directly affect reliability:
+
+- sleep / idle behavior,
+- macOS upgrades,
+- Messages.app responsiveness,
+- background permissions,
+- LaunchAgent health,
+- and local network reachability.
+
+Upstream even documents a keepalive-style workaround for VM or headless setups where Messages.app goes idle. That alone tells you how important host behavior is.
+
+If you need production confidence, document the host assumptions explicitly.
+
+## Known platform-specific caveats worth documenting early
+
+BlueBubbles is rich, but the Apple stack still has quirks.
+
+Examples from upstream:
+
+- macOS Tahoe can break edit behavior,
+- some group icon updates may report success but not sync,
+- headless / VM-style setups can let Messages.app drift into a semi-idle state,
+- advanced actions make the lane powerful, but also widen the surface area you need to verify after upgrades.
+
+These are not reasons to avoid BlueBubbles.
+
+They are reasons to treat the lane like maintained infrastructure instead of a “set and forget” hobby integration.
+
+## The first failures to expect
+
+### 1. Outbound works, inbound does not
+
+This usually means webhook path, webhook auth, or gateway reachability is wrong.
+
+Start by verifying:
+
+- the exact webhook URL,
+- the password match,
+- and whether the gateway is reachable from the Mac host.
+
+### 2. Inbound works until the Mac sits idle
+
+This points to host-side health, not OpenClaw prompt logic.
+
+Look at:
+
+- whether Messages.app or BlueBubbles is drifting idle,
+- whether the host sleeps,
+- and whether your deployment needs a keepalive-style workaround.
+
+### 3. Delivery quality changes after a macOS upgrade
+
+This is a real Apple-platform risk, not operator superstition.
+
+Plan for regression checks after macOS updates, especially when you rely on advanced actions such as edit, reactions, group management, or effects.
+
+### 4. Gateway-side instability makes the webhook look broken
+
+If the gateway itself is flapping on macOS, fix the host/gateway base first.
+
+Start here:
+
+- [/troubleshooting/solutions/macos-gateway-stays-down-after-vpn-reconnect](/troubleshooting/solutions/macos-gateway-stays-down-after-vpn-reconnect)
+
+## Recommended operating posture
+
+If you want BlueBubbles to feel stable, this is a good baseline posture:
+
+| Concern     | Recommended posture                           | Why                                         |
+| ----------- | --------------------------------------------- | ------------------------------------------- |
+| Host        | Use a stable, always-on Mac when possible     | Host health determines message reliability  |
+| Auth        | Require BlueBubbles password and webhook auth | Inbound path must not be implicitly trusted |
+| DM trust    | Start with pairing                            | Keeps sender trust explicit                 |
+| Validation  | Test outbound and inbound separately          | BlueBubbles is bidirectional                |
+| Maintenance | Re-test after macOS / BlueBubbles upgrades    | Apple-side behavior can drift               |
+
+## BlueBubbles vs legacy iMessage
+
+If you are choosing between BlueBubbles and the legacy `imessage` lane, bias strongly toward BlueBubbles unless you have a specific compatibility reason not to.
+
+Why:
+
+- richer API,
+- cleaner operational model,
+- better advanced features,
+- easier setup,
+- and clearer upstream support story.
+
+The legacy lane should be treated as a compatibility path. BlueBubbles should be treated as the actual recommended Apple route.
+
+## Where BlueBubbles fits in a broader channel strategy
+
+BlueBubbles is strongest in three roles:
+
+### Primary Apple-facing channel
+
+Best when the audience already lives in iMessage and you need the highest-fidelity Apple experience.
+
+### Premium direct-message lane
+
+Useful when you want an Apple-native surface for a small, controlled group of trusted users.
+
+### Specialized companion lane
+
+Even if Telegram or WebChat is your main operator surface, BlueBubbles can be the “Apple-native” front door while internal debugging happens elsewhere.
+
+## Continue the BlueBubbles path
+
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+- [/troubleshooting/solutions/macos-gateway-stays-down-after-vpn-reconnect](/troubleshooting/solutions/macos-gateway-stays-down-after-vpn-reconnect)

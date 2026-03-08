@@ -1,0 +1,317 @@
+---
+title: 'Zalo Personal'
+description: 'Zalo Personal support for OpenClaw covers plugin-backed QR login, personal-account constraints, risk posture, and verification for cautious operators.'
+category: 'Channel Integration'
+subcategory: 'Community Plugin'
+platform: 'Zalo Personal'
+difficulty: 'advanced'
+estimatedTime: '35–50 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-09
+featured: false
+keywords:
+  - 'openclaw zalouser'
+  - 'zalo personal openclaw'
+  - 'qr login'
+  - 'personal account'
+  - 'session persistence'
+  - 'policy risk'
+---
+
+> `zalouser` is not just another login method. It is an **experimental, unofficial personal-account integration** powered by `zca-js`, and the upstream docs explicitly warn that it may lead to **account suspension or ban**. Treat it as a deliberate exception, not a quiet default.
+
+## Why this lane exists
+
+Use `zalouser` only when the real requirement is a personal-account lane and the official Bot API is not the path available to you.
+
+That makes it useful in a narrow set of situations:
+
+- you need a Zalo-native surface,
+- the workflow is tied to a personal account rather than an official bot,
+- and you are willing to accept the operational and policy risk that comes with that choice.
+
+It also has real strengths once you accept the posture:
+
+- login happens directly in OpenClaw via QR on the gateway machine,
+- peer and group discovery are available through the directory CLI,
+- group mention behavior is configurable,
+- and the channel supports typing events, reactions, and best-effort delivered/seen acknowledgements.
+
+But those conveniences should never hide the core tradeoff: this is an unofficial personal-account automation path.
+
+## What this page is for
+
+Use this dossier when you need to decide:
+
+- whether a personal-account lane is justified at all,
+- how to keep the initial rollout narrow enough to be supportable,
+- how to avoid surprising yourself with the default group posture,
+- how to verify QR login and session persistence on the real gateway machine,
+- and how to document the risk honestly before other operators inherit it.
+
+## The mental model: `zalouser` has three separate risks
+
+### Risk 1: account policy risk
+
+This is the one the upstream docs put in bold.
+
+The integration is unofficial and may cause suspension or ban. That means the first design decision is not technical; it is whether the account is truly expendable enough for this role.
+
+### Risk 2: login is local and stateful
+
+This channel does not use a bot token.
+
+It logs in through:
+
+```bash
+openclaw channels login --channel zalouser
+```
+
+Then a QR code must be scanned on the gateway machine. If that machine, session state, or reconnect behavior is not stable, the channel will not feel stable either.
+
+### Risk 3: group reach can be broader than you expect
+
+The official docs make an important point many operators would otherwise miss:
+
+- DMs default to `pairing`
+- but groups default to `open` unless you override the policy
+
+So a cautious rollout should almost always set the group posture deliberately rather than inheriting the default and discovering it later.
+
+## Fastest safe baseline
+
+The safest practical starting shape is:
+
+- install the plugin,
+- log in once on the real gateway machine,
+- keep DMs on `pairing`,
+- and explicitly disable groups until the session has survived a restart.
+
+### Minimal config
+
+```json5
+{
+  channels: {
+    zalouser: {
+      enabled: true,
+      dmPolicy: 'pairing',
+      groupPolicy: 'disabled',
+    },
+  },
+}
+```
+
+This is intentionally stricter than the default docs behavior for groups. The point is to make the personal-account risk posture visible in config instead of relying on a permissive default.
+
+## Step 1: Install the plugin and log in where it will really run
+
+`zalouser` is a plugin, not part of core.
+
+Install it first:
+
+```bash
+openclaw plugins install @openclaw/zalouser
+```
+
+Or from source checkout:
+
+```bash
+openclaw plugins install ./extensions/zalouser
+```
+
+Then log in directly in OpenClaw:
+
+```bash
+openclaw channels login --channel zalouser
+```
+
+The official docs are clear that no external `zca` or `openzca` CLI is required. Scan the QR code with the Zalo mobile app on the actual gateway machine you intend to operate.
+
+## Step 2: Choose the DM trust model explicitly
+
+The upstream docs support four DM modes:
+
+- `pairing`
+- `allowlist`
+- `open`
+- `disabled`
+
+### Best default: `pairing`
+
+Keep the first-contact behavior explicit:
+
+```bash
+openclaw pairing list zalouser
+openclaw pairing approve zalouser <code>
+```
+
+That gives you a narrow way to validate the account without assuming every inbound DM should be trusted.
+
+### When you already know the contacts: `allowFrom`
+
+`allowFrom` accepts user IDs or names, and the onboarding flow resolves names to IDs using the in-process contact lookup.
+
+That is convenient, but the docs also recommend numeric IDs or exact names when troubleshooting resolution issues. If the lane matters, numeric identifiers are the safer long-term record.
+
+## Step 3: Do not inherit the default group posture by accident
+
+This is the biggest operating trap in the official docs.
+
+If you leave group policy unset, `zalouser` defaults to `groupPolicy = 'open'` unless overridden through channel defaults.
+
+That is broader than many teams expect from a personal-account connector.
+
+### Safer first move: disable groups
+
+```json5
+{
+  channels: {
+    zalouser: {
+      groupPolicy: 'disabled',
+    },
+  },
+}
+```
+
+### Next step: allowlist groups deliberately
+
+When you are ready, move to a narrow group policy:
+
+```json5
+{
+  channels: {
+    zalouser: {
+      groupPolicy: 'allowlist',
+      groupAllowFrom: ['1471383327500481391'],
+      groups: {
+        '*': { allow: true, requireMention: true },
+        'Work Chat': { allow: true, requireMention: false },
+      },
+    },
+  },
+}
+```
+
+This example stays inside what the official docs actually support:
+
+- `groupPolicy: 'allowlist'`
+- `groupAllowFrom`
+- `groups`
+- `requireMention`
+
+The docs also note two important behaviors:
+
+- `groupAllowFrom` falls back to `allowFrom` when unset
+- names in allowlists and groups are resolved to IDs at startup and logged, while unresolved entries are kept as typed
+
+## Step 4: Use mention gating as a real control, not decoration
+
+`channels.zalouser.groups.<group>.requireMention` is one of the most useful controls in this channel.
+
+The official docs say:
+
+- it works in both allowlisted groups and open group mode,
+- it resolves by exact group id or name, then normalized slug, then `*`, then default,
+- and the default behavior is `true`.
+
+They also note that when a group message is skipped because mention is required, OpenClaw stores it as pending group history and includes it on the next processed group message.
+
+That is worth understanding early because it affects how group context feels once the bot does respond.
+
+## Step 5: Use directory discovery before hard-coding names blindly
+
+The upstream docs provide a better path than guessing IDs:
+
+```bash
+openclaw directory self --channel zalouser
+openclaw directory peers list --channel zalouser --query "name"
+openclaw directory groups list --channel zalouser --query "work"
+```
+
+Use these before writing allowlists or group rules. It reduces the chance of relying on an inexact display name that later fails resolution.
+
+## Step 6: Verify the lane like an operator
+
+A personal-account connector should not be considered healthy after QR login alone.
+
+### 1. Confirm the session is actually present
+
+Start with:
+
+```bash
+openclaw channels status --probe
+```
+
+### 2. Test the first DM through pairing
+
+Verify that the account receives the inbound message, creates the pairing flow you expect, and replies after approval.
+
+### 3. Restart and retest before trusting the lane
+
+The official troubleshooting section explicitly calls out login persistence. Do one deliberate restart and confirm the session still holds.
+
+### 4. If groups are enabled, test the exact mention posture
+
+Validate one allowed group message under your chosen `requireMention` rule. Do not assume “bot is in the group” proves anything about the real policy path.
+
+### 5. If reactions or delivery acknowledgements matter, test them directly
+
+The docs say reaction action `react` is supported, and delivered/seen acknowledgements are sent best-effort when inbound metadata is present. Those are real capabilities, but they should be confirmed in your environment if they matter operationally.
+
+## Capability edges worth knowing early
+
+The official docs support several specifics that matter more here than generic bot copy:
+
+- **Outbound text** is chunked to about 2000 characters
+- **Streaming is blocked by default**
+- **Typing events** are sent best-effort before replies
+- **Reaction actions** are supported
+- **Delivered and seen acknowledgements** are sent best-effort when metadata allows
+- **Multi-account mapping** is supported through `accounts.<id>.profile`
+
+Those details make `zalouser` feel more like a stateful client integration than a plain webhook bot.
+
+## The first four `zalouser` failures to expect
+
+### 1. Login does not stick
+
+The official docs give the recovery sequence directly:
+
+```bash
+openclaw channels status --probe
+openclaw channels logout --channel zalouser && openclaw channels login --channel zalouser
+```
+
+### 2. Allowlist or group entries never match
+
+The troubleshooting note is specific: use numeric IDs or exact friend and group names.
+
+### 3. Groups behave more broadly than expected
+
+That often means you inherited the default open group posture instead of setting `groupPolicy` deliberately.
+
+### 4. Old setup notes mention external CLI tooling
+
+The docs explicitly say the channel now runs fully inside OpenClaw and no longer depends on an external CLI process.
+
+## Recommended production posture
+
+For a disciplined `zalouser` rollout:
+
+- make the unofficial personal-account risk explicit in your internal docs,
+- use an account that can tolerate suspension risk,
+- keep DMs on `pairing` first,
+- override the default group posture instead of inheriting it silently,
+- prefer numeric IDs for durable allowlists,
+- and require one successful restart-and-retest cycle before calling the lane operational.
+
+If those constraints feel too heavy, that is often a sign that the official `zalo` Bot API channel is the better fit.
+
+## Continue the Zalo Personal path
+
+If you need the raw configuration surface, continue with:
+
+- [/gateway/configuration](/gateway/configuration)
+- [/tools/plugin](/tools/plugin)
+- [/channels/pairing](/channels/pairing)

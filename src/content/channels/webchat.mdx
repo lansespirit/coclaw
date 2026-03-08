@@ -1,0 +1,268 @@
+---
+title: 'WebChat'
+description: 'WebChat for OpenClaw covers browser access, WebSocket reachability, token bootstrap, pairing, and safe remote exposure for the built-in chat surface.'
+category: 'Channel Integration'
+subcategory: 'Browser Surface'
+platform: 'WebChat'
+difficulty: 'beginner'
+estimatedTime: '10–20 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+featured: true
+keywords:
+  - 'openclaw webchat'
+  - 'webchat openclaw'
+  - 'websocket'
+  - 'browser pairing'
+  - 'gateway token'
+  - 'remote access'
+---
+
+> WebChat is the most deceptively simple OpenClaw channel. It looks like “just a browser tab,” but in practice it is a three-part system: **gateway reachability**, **token authentication**, and **browser device trust**. Most WebChat failures are really confusion between those layers.
+
+## Why WebChat matters
+
+WebChat is the fastest route from a working gateway to a usable interface:
+
+- no third-party bot account,
+- no QR login,
+- no workspace admin round-trip,
+- and no separate mobile messenger to teach users first.
+
+That speed is exactly why operators underestimate it.
+
+When WebChat is local, it feels trivial. When it becomes remote, multi-browser, or reverse-proxied, it starts behaving like a real security surface. That is why this page treats WebChat as a **channel-grade operational lane**, not a convenience feature.
+
+## The mental model: WebChat has three gates
+
+If Telegram taught us to separate platform visibility from OpenClaw policy, WebChat teaches a slightly different split.
+
+### Gate 1: The browser must reach the intended gateway
+
+Before auth or pairing even matters, the browser must be talking to the right OpenClaw instance.
+
+This can break when you switch between:
+
+- `localhost`
+- SSH tunnels
+- a Tailscale / tailnet hostname
+- a reverse proxy
+- a container port mapping
+- or a stale bookmarked URL
+
+Many “WebChat auth” reports are actually simple reachability mistakes.
+
+### Gate 2: The browser must present the right token bootstrap
+
+WebChat and Control UI auth depend on opening the **right tokenized dashboard link**, not just any raw port.
+
+If the browser uses a stale URL or a mismatched token source, the result often looks like:
+
+- `unauthorized`
+- reconnect loops
+- a connection that almost works and then drops
+
+This is still not pairing. It is token auth.
+
+### Gate 3: The browser must satisfy device trust requirements
+
+Once the browser reaches the gateway and presents the right auth material, OpenClaw may still require **device identity** and **pairing approval**.
+
+That is why WebChat behaves differently when you switch:
+
+- browsers,
+- browser profiles,
+- machines,
+- protocols (`http` vs `https`),
+- or remote access paths.
+
+The key operator lesson is simple:
+
+> WebChat is not “just a UI.” The browser itself is part of the trust boundary.
+
+## A safe baseline posture
+
+For first-time setups, keep WebChat boring and predictable:
+
+- use the tokenized link from `openclaw dashboard`,
+- start on local access or an SSH tunnel,
+- approve pairing explicitly,
+- and do not debug remote TLS, reverse proxying, and browser trust all at once.
+
+### Recommended starting flow
+
+```bash
+openclaw gateway restart
+openclaw dashboard
+```
+
+Then:
+
+1. open the exact URL the CLI prints,
+2. complete any required pairing/device approval,
+3. send a message,
+4. restart the gateway once,
+5. reconnect using a fresh link if needed.
+
+The safest “first real remote test” is usually an SSH tunnel:
+
+```bash
+ssh -N -L 18789:127.0.0.1:18789 user@host
+```
+
+Then open the tokenized dashboard URL locally.
+
+That removes reverse proxy, public TLS, and host binding confusion from the first validation pass.
+
+## Local access and remote access are different products
+
+This is the most important WebChat lesson.
+
+### Local access hides complexity
+
+When you open WebChat on the same machine as the gateway, several hard problems are already solved for you:
+
+- you are almost certainly reaching the right host,
+- loopback binding is sufficient,
+- the tokenized dashboard bootstrap is easier to use correctly,
+- browser identity usually behaves predictably,
+- and there is no proxy rewriting or insecure transport confusion.
+
+That happy path is real, but it teaches the wrong mental model if you stop there.
+
+### Remote access exposes every assumption
+
+The moment you move WebChat to another machine or browser, you are now testing:
+
+- binding and routing,
+- token transport,
+- browser identity support,
+- secure context requirements,
+- and persistence of approved devices.
+
+This is why a remote WebChat failure can look chaotic even when the gateway itself is healthy.
+
+## Verification drill: treat WebChat like an operator surface
+
+Do not stop at “the chat box loaded.”
+
+Run this verification sequence:
+
+### 1. Fresh-link test
+
+- run `openclaw dashboard`
+- open the exact tokenized URL it prints
+- confirm the UI connects without manual URL editing
+
+### 2. First-message test
+
+- send one small text prompt
+- confirm the message appears in the thread
+- confirm the response renders normally
+
+### 3. Reconnect test
+
+- reload the page
+- confirm the session reconnects cleanly
+- if not, determine whether the break is auth, pairing, or reachability
+
+### 4. Restart test
+
+- restart the gateway
+- reconnect from the same browser profile
+- verify whether trust and session continuity behave as expected
+
+### 5. Remote-path test
+
+If you intend to use WebChat remotely, test the exact remote access path you plan to operate:
+
+- the same hostname,
+- the same protocol,
+- the same browser profile,
+- and the same proxy/tunnel topology.
+
+Do not call WebChat “ready” if you have only tested `localhost` but plan to use it through a different path.
+
+## The most common WebChat failures
+
+### 1. `unauthorized` or reconnect loop
+
+This usually means token bootstrap drift or that the browser is not actually hitting the gateway instance you think it is.
+
+Start here:
+
+- [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+- [/troubleshooting/solutions/control-ui-unauthorized](/troubleshooting/solutions/control-ui-unauthorized)
+
+### 2. `disconnected (1008): pairing required`
+
+This means the browser identity is not approved yet, or a scope upgrade now needs approval.
+
+Start here:
+
+- [/troubleshooting/solutions/control-ui-pairing-required](/troubleshooting/solutions/control-ui-pairing-required)
+- [/troubleshooting/solutions/gateway-pairing-required-scope-upgrade](/troubleshooting/solutions/gateway-pairing-required-scope-upgrade)
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+
+### 3. `device identity required`
+
+This is the classic remote HTTP / insecure-context failure.
+
+If the browser is opened over plain HTTP on a remote host, WebCrypto-backed identity can fail and the gateway rejects the connection.
+
+Start here:
+
+- [/troubleshooting/solutions/control-ui-device-identity-required](/troubleshooting/solutions/control-ui-device-identity-required)
+
+### 4. Queued messages processed but not visible in thread
+
+This is a UI-specific limitation, not a routing mystery.
+
+Start here:
+
+- [/troubleshooting/solutions/control-ui-webchat-queued-messages-not-visible](/troubleshooting/solutions/control-ui-webchat-queued-messages-not-visible)
+
+### 5. Dragging an image opens a new tab instead of uploading
+
+This is another WebChat-specific ergonomics issue, not a gateway failure.
+
+Start here:
+
+- [/troubleshooting/solutions/webchat-drag-drop-image-opens-new-tab](/troubleshooting/solutions/webchat-drag-drop-image-opens-new-tab)
+
+## Recommended operating posture
+
+If WebChat is your primary operator surface, treat these as baseline rules:
+
+| Concern       | Recommended posture                                                      | Why                                                         |
+| ------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------- |
+| First setup   | Use `openclaw dashboard` + local or tunneled access                      | Removes stale URL and proxy confusion                       |
+| Remote access | Prefer HTTPS or a trusted tunnel path                                    | Browser identity depends on secure context assumptions      |
+| Pairing       | Approve explicitly and retest after restart                              | Trust state matters more than a single successful page load |
+| Bookmarks     | Refresh from a fresh tokenized link when debugging auth                  | Old links cause misleading failures                         |
+| Validation    | Test the exact browser profile and access path you will actually operate | Device trust is browser-specific enough to matter           |
+
+## Where WebChat fits in a broader channel strategy
+
+WebChat is strongest in three roles:
+
+### Primary operator console
+
+Best for solo operators or small teams who want the shortest path to an OpenClaw-native interface.
+
+### Safe fallback lane
+
+Even if the “public” channel is Telegram, Slack, or WhatsApp, WebChat is often the cleanest fallback for debugging because it removes third-party platform variability.
+
+### Local-first admin surface
+
+When you want to keep the most powerful access path close to the gateway host or a trusted tunnel, WebChat is usually the right answer.
+
+## Continue the WebChat path
+
+- [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+- [/troubleshooting/solutions/control-ui-unauthorized](/troubleshooting/solutions/control-ui-unauthorized)
+- [/troubleshooting/solutions/control-ui-pairing-required](/troubleshooting/solutions/control-ui-pairing-required)
+- [/troubleshooting/solutions/control-ui-device-identity-required](/troubleshooting/solutions/control-ui-device-identity-required)

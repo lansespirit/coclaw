@@ -1,0 +1,292 @@
+---
+title: 'IRC'
+description: 'IRC for OpenClaw focuses on server connectivity, nick identity, channel versus DM rules, and allowlist-first operation on classic networks.'
+category: 'Channel Integration'
+subcategory: 'Core Channel'
+platform: 'IRC'
+difficulty: 'advanced'
+estimatedTime: '20–35 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+featured: false
+keywords:
+  - 'openclaw irc'
+  - 'irc allowlist'
+  - 'irc mention gating'
+  - 'irc nickserv'
+  - 'irc pairing'
+  - 'irc tls'
+---
+
+> IRC is a viable OpenClaw lane when you need a bot inside a classic text network, but it rewards operators who think in **explicit gates**. The connection can be healthy, the bot can join a channel, and it can still remain silent by design.
+
+## Why IRC still earns a place
+
+IRC is not the easiest first channel, but it is still useful when your real audience already lives on IRC or when you want a lightweight, scriptable network surface with stable room naming.
+
+What makes it attractive is also what makes it easy to misread:
+
+- transport is simple enough to feel familiar,
+- channels look open even when policy is not,
+- and sender identity can be stronger or weaker depending on how carefully you match it.
+
+Upstream’s default posture reflects that reality:
+
+- `dmPolicy` defaults to `pairing`
+- `groupPolicy` defaults to `allowlist`
+- TLS is recommended with `channels.irc.tls=true`
+
+Those defaults are conservative for a reason. IRC can become noisy very quickly if you treat joined channels as automatically trusted.
+
+## The mental model: IRC has three gates
+
+The official docs describe two explicit access gates, but in practice operators should think in three layers.
+
+### Gate 1: transport and identity
+
+Before policy matters, the bot has to connect cleanly:
+
+- correct server host and port,
+- correct TLS posture,
+- nick availability,
+- optional server password,
+- and optional NickServ identification.
+
+If this layer fails, you do not have an access-control problem. You have a connection or login problem.
+
+### Gate 2: channel access
+
+Upstream frames the first policy gate as whether the bot accepts messages from a channel at all.
+
+That is controlled by:
+
+- `groupPolicy`
+- `groups`
+
+With `groupPolicy: 'allowlist'`, you must explicitly define the channels you want to support.
+
+### Gate 3: sender access and reply triggering
+
+Even after a channel is allowed, two more checks still matter:
+
+- whether the sender is allowed in that channel,
+- whether mention-gating permits a reply.
+
+The docs separate these controls clearly:
+
+- DM sender allowlist: `allowFrom`
+- channel sender allowlist: `groupAllowFrom` or `groups['#channel'].allowFrom`
+- mention behavior in channels: `requireMention`
+
+This is the part new operators get wrong most often.
+
+> `allowFrom` is for DMs. It does not grant channel speakers permission inside IRC channels.
+
+## Fastest safe baseline
+
+A safe first rollout for IRC looks like this:
+
+- enable TLS,
+- keep DMs on pairing,
+- allowlist only one or two channels,
+- require mentions in channels at first,
+- and use stable sender identities instead of mutable nicknames where possible.
+
+### Minimal config
+
+```json5
+{
+  channels: {
+    irc: {
+      enabled: true,
+      host: 'irc.example.net',
+      port: 6697,
+      tls: true,
+      nick: 'openclaw',
+      dmPolicy: 'pairing',
+      groupPolicy: 'allowlist',
+      groups: {
+        '#ops-bot': {
+          allowFrom: ['nick!user@host'],
+          requireMention: true,
+        },
+      },
+    },
+  },
+}
+```
+
+Why this shape works:
+
+- transport is explicit,
+- channel scope is narrow,
+- sender scope is visible in config,
+- and the bot does not start free-replying in every room it can see.
+
+## Step 1: Treat connection and policy as separate work
+
+The first validation target is not “did the bot join.” It is “did the bot connect in a durable, identifiable way.”
+
+Start with:
+
+- server host and port,
+- TLS enabled unless you intentionally accept plaintext,
+- nick, username, and realname set appropriately,
+- and NickServ configured if the network expects identification after connect.
+
+The official docs include a `nickserv` block for this exact purpose.
+
+If the network requires NickServ and you skip it, later policy debugging becomes noise because the real failure happened much earlier.
+
+## Step 2: Decide which channels exist at all
+
+The upstream docs make the first group gate explicit:
+
+- `groupPolicy='allowlist'` means only configured channels are active
+- `groupPolicy='open'` allows unconfigured channels, but they are still mention-gated by default
+
+For most operators, `allowlist` is the correct starting point.
+
+That keeps your rollout legible. You know exactly which rooms are supposed to work, and you can reason about silence as policy instead of guessing whether the bot noticed the room.
+
+## Step 3: Decide who may trigger the bot inside a channel
+
+This is the most important IRC-specific distinction in the official docs.
+
+If the bot joins `#ops-bot`, that still does **not** answer who may talk to it there.
+
+Use either:
+
+- `groupAllowFrom` for a global channel-sender allowlist,
+- or `groups['#channel'].allowFrom` for per-channel control.
+
+Use stable identities where possible:
+
+- preferred: `nick!user@host`
+- weaker and mutable: bare nick matching
+
+The docs are explicit that bare nick matching should only be enabled with `dangerouslyAllowNameMatching: true`.
+
+That wording is a clue, not decoration. If you need the dangerous mode, treat it as a compatibility exception and document why.
+
+## Step 4: Decide whether channels require a mention
+
+Even in an allowed channel with an allowed sender, OpenClaw defaults to mention-gating in group contexts.
+
+That means this setup is normal:
+
+- the bot is connected,
+- the channel is allowed,
+- the sender is allowed,
+- but the message is dropped because it did not mention the bot.
+
+If you want the bot to reply without pings in a specific channel, set:
+
+```json5
+{
+  channels: {
+    irc: {
+      groups: {
+        '#ops-bot': {
+          requireMention: false,
+          allowFrom: ['*'],
+        },
+      },
+    },
+  },
+}
+```
+
+Do that on purpose, not by accident.
+
+## Verification drill
+
+An IRC rollout is only trustworthy when you verify all three layers.
+
+### 1. Verify connection health
+
+Confirm the bot can connect, authenticate as needed, and stay present on the intended network.
+
+If login fails, upstream points first to nick availability and server password checks. If TLS fails, inspect host, port, and certificate setup.
+
+### 2. Verify one DM path
+
+Send a direct message from a sender who is not yet approved.
+
+With the default policy, that should prove the pairing path rather than auto-trusting the sender.
+
+### 3. Verify one allowlisted channel
+
+Use a single known channel in `groups` and test an explicit mention from an allowed sender.
+
+This should prove:
+
+- the channel itself is allowed,
+- the sender is allowed in that channel,
+- mention-gating works as expected.
+
+### 4. Verify one intentional failure
+
+This is the most useful IRC-specific check:
+
+- test a message in a non-allowlisted channel, or
+- test a channel message from a sender not present in the sender allowlist.
+
+Silence here is healthy. It proves the gates are doing what you asked.
+
+## Public-channel caution
+
+The official docs include a direct warning: if you set `allowFrom: ['*']` in a public channel, anyone in that channel can prompt the bot.
+
+That does not automatically make the setup wrong, but it changes the threat model immediately.
+
+Upstream recommends pairing that kind of openness with stricter tool policy, including per-channel or per-sender tool restrictions.
+
+The operator lesson is simple:
+
+- broad prompt access should come with narrower execution rights.
+
+## NickServ and environment notes
+
+Two documented conveniences are worth remembering:
+
+- NickServ can be configured directly in the channel config for post-connect identification.
+- The default account also supports environment variables such as `IRC_HOST`, `IRC_PORT`, `IRC_TLS`, `IRC_NICK`, and `IRC_NICKSERV_PASSWORD`.
+
+That is useful for smaller deployments, but long-term operations are still easier when your channel policy remains visible in config rather than scattered across shell state.
+
+## What usually breaks first
+
+The official troubleshooting notes describe a predictable set of failures.
+
+### The bot connects but never replies in channels
+
+This is often not a network issue. The likely causes are:
+
+- `groups` does not include the channel,
+- the sender is not allowed for channel traffic,
+- or mention-gating is dropping the message.
+
+The docs specifically call out `missing-mention` as a clue here.
+
+### DMs work, channels do not
+
+That usually means the operator used `allowFrom` and assumed it also covered channel senders.
+
+It does not. Channel sender policy lives in `groupAllowFrom` or per-channel `allowFrom` entries under `groups`.
+
+### The bot is too open in public rooms
+
+If you switch to `groupPolicy: 'open'` and combine it with permissive sender rules, IRC can become the noisiest lane in your deployment.
+
+That is why upstream defaults to allowlist-first operation.
+
+## Continue from here
+
+The next two topics usually help once IRC is live:
+
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+- [/channels/groups](/channels/groups)
+
+The first helps with DM trust decisions. The second matters the moment you want channel behavior to feel deliberate instead of accidental.

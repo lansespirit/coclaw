@@ -1,0 +1,379 @@
+---
+title: 'Twitch'
+description: 'Twitch chat setup for OpenClaw: plugin install, bot-account credentials, channel join behavior, allowlist versus role gating, mention requirements, token refresh, and live-chat verification.'
+category: 'Channel Integration'
+subcategory: 'Community Plugin'
+platform: 'Twitch'
+difficulty: 'intermediate'
+estimatedTime: '20–35 min setup'
+author: 'CoClaw Team'
+publishDate: 2026-03-08
+lastUpdated: 2026-03-09
+featured: false
+keywords:
+  - 'openclaw twitch'
+  - 'twitch openclaw'
+  - 'twitch irc bot'
+  - 'twitch allowfrom'
+  - 'twitch require mention'
+  - 'twitch token refresh'
+---
+
+> Twitch is a **live-chat lane**, not a quiet bot inbox. The operator job is to keep three things aligned: **the bot account that authenticates**, **the channel chat it joins**, and **the OpenClaw access rules that stop public chat from turning into open bot control**.
+
+## Why choose Twitch
+
+Twitch is useful when OpenClaw needs to participate in a stream's chat surface rather than a private messaging app.
+
+That gives it a very specific operational profile:
+
+- authentication is through a Twitch user account and OAuth token,
+- message traffic happens in a joined channel chat,
+- and moderation discipline matters as much as raw connectivity.
+
+This is why the official docs place a warning near the top: add `allowFrom` or `allowedRoles`, and remember that `requireMention` defaults to `true`.
+
+## What this page is for
+
+Use this dossier when you need to decide:
+
+- whether Twitch should be a public community surface or a tightly bounded operator tool,
+- how to separate bot credentials from channel targeting,
+- when to use a hard allowlist versus role-based access,
+- how to verify the lane without testing for the first time on a busy live stream,
+- and what token lifecycle decisions matter before rollout.
+
+## The mental model: account, channel, and access are different knobs
+
+Most Twitch mistakes come from treating a working login as proof that the bot should answer everyone.
+
+### Layer 1: the bot account authenticates
+
+The channel uses a Twitch user account.
+
+Core fields are:
+
+- `username`
+- `accessToken`
+- `clientId`
+
+The official quick setup recommends generating a Bot Token and ensuring the token has:
+
+- `chat:read`
+- `chat:write`
+
+### Layer 2: the bot joins one target chat channel
+
+`channel` is not the same thing as `username`.
+
+The docs call this out explicitly:
+
+- `username` is the bot account that authenticates,
+- `channel` is the Twitch chat room the bot joins.
+
+That distinction matters whenever the bot account and the streamer account are different, which is a common setup.
+
+### Layer 3: OpenClaw still decides who may trigger the bot
+
+The official docs are unusually direct here because Twitch is a public chat surface.
+
+You should add either:
+
+- `allowFrom` for a hard allowlist of Twitch user IDs, or
+- `allowedRoles` for role-based access.
+
+And by default:
+
+- `requireMention` is `true`.
+
+That default is healthy. It keeps the bot from responding to every ambient chat line during early rollout.
+
+## Fastest safe baseline
+
+For a first production-minded setup, the safest shape is:
+
+- one dedicated bot account,
+- one known target channel,
+- `allowFrom` with your own Twitch user ID,
+- default mention requirement left on.
+
+### Minimal config
+
+```json5
+{
+  channels: {
+    twitch: {
+      enabled: true,
+      username: 'openclaw',
+      accessToken: 'oauth:abc123...',
+      clientId: 'xyz789...',
+      channel: 'vevisk',
+      allowFrom: ['123456789'],
+    },
+  },
+}
+```
+
+Why this is the right first shape:
+
+- the bot only joins one intended chat,
+- one stable user ID is explicitly trusted,
+- and mention-gated replies reduce accidental activation.
+
+## Step 1: install the plugin and get the right credentials
+
+Twitch support ships as a plugin.
+
+Install it with:
+
+```bash
+openclaw plugins install @openclaw/twitch
+```
+
+If you are working from a local checkout, the docs also allow:
+
+```bash
+openclaw plugins install ./extensions/twitch
+```
+
+For beginner setup, the official docs recommend using Twitch Token Generator:
+
+1. select **Bot Token**,
+2. verify `chat:read` and `chat:write`,
+3. copy the **Client ID** and **Access Token**.
+
+The docs also note that tokens from the token generator expire after several hours.
+
+## Step 2: configure the token source consciously
+
+For the default account, the docs allow an env var:
+
+```bash
+OPENCLAW_TWITCH_ACCESS_TOKEN=oauth:abc123...
+```
+
+Or you can set it directly in config:
+
+```json5
+{
+  channels: {
+    twitch: {
+      accessToken: 'oauth:abc123...',
+    },
+  },
+}
+```
+
+If both env and config are set, config takes precedence.
+
+For long-term operations, config is usually easier to reason about because Twitch setups often evolve from “one test bot in one chat” into multiple channels and separate accounts.
+
+## Step 3: choose access control before public testing
+
+### `allowFrom`: most secure
+
+The docs explicitly recommend `allowFrom` as the hard allowlist path.
+
+```json5
+{
+  channels: {
+    twitch: {
+      allowFrom: ['123456789'],
+    },
+  },
+}
+```
+
+The values are **Twitch user IDs**, not usernames. The official rationale is sound: usernames can change, but user IDs are permanent.
+
+### `allowedRoles`: good when chat roles define trust
+
+If you want role-based access instead of an explicit user-ID allowlist, leave `allowFrom` unset and use roles such as:
+
+- `moderator`
+- `owner`
+- `vip`
+- `subscriber`
+- `all`
+
+Example:
+
+```json5
+{
+  channels: {
+    twitch: {
+      allowedRoles: ['moderator'],
+    },
+  },
+}
+```
+
+### `requireMention`: keep it on unless you have a strong reason not to
+
+By default, `requireMention` is `true`.
+
+You can disable it:
+
+```json5
+{
+  channels: {
+    twitch: {
+      requireMention: false,
+    },
+  },
+}
+```
+
+But on a live public surface, that is a meaningful escalation. Keep the default until you have a moderation reason to broaden behavior.
+
+## Step 4: plan for token expiry early
+
+The official docs split Twitch token handling into two paths.
+
+### Simple path: regenerate expiring tokens
+
+Tokens from Twitch Token Generator cannot be refreshed automatically. When they expire, regenerate them.
+
+This is fine for evaluation or low-stakes usage.
+
+### Durable path: add refresh credentials
+
+For automatic refresh, create your own Twitch application and add:
+
+- `clientSecret`
+- `refreshToken`
+
+Example:
+
+```json5
+{
+  channels: {
+    twitch: {
+      clientSecret: 'your_client_secret',
+      refreshToken: 'your_refresh_token',
+    },
+  },
+}
+```
+
+The docs state that the bot refreshes tokens before expiration and logs refresh events.
+
+## Verification drill: test like a moderator, not like a launch day audience
+
+The safest Twitch proof is narrow and deliberate.
+
+1. Install the plugin and restart the Gateway.
+2. Run the official diagnostic commands:
+
+```bash
+openclaw doctor
+openclaw channels status --probe
+```
+
+3. Confirm the bot account can join the configured `channel`.
+4. Send a message from an allowed Twitch user.
+5. Mention the bot explicitly, since `requireMention` is on by default.
+6. Confirm the bot answers in chat.
+7. Confirm a non-allowed user or non-matching role does **not** trigger it.
+
+That final negative test matters on Twitch more than on many other channels.
+
+## What usually breaks first
+
+The official docs give a compact but useful first-pass troubleshooting map.
+
+### 1. Access control blocks the test user
+
+If the bot does not respond, check whether your user ID is in `allowFrom`.
+
+For testing only, the docs suggest temporarily removing `allowFrom` and using:
+
+```json5
+{
+  channels: {
+    twitch: {
+      allowedRoles: ['all'],
+    },
+  },
+}
+```
+
+That is a good diagnostic move, but not a recommended steady state.
+
+### 2. Bot is not in the intended chat
+
+The bot must join the channel named in `channel`.
+
+A valid token alone does not mean the bot is present in the chat room you are testing.
+
+### 3. Token or auth details are wrong
+
+For connection or authentication errors, the docs say to verify:
+
+- `accessToken` is the OAuth access token value and typically starts with `oauth:`,
+- the token includes `chat:read` and `chat:write`,
+- and, if using refresh, both `clientSecret` and `refreshToken` are set.
+
+### 4. Refresh is not actually enabled
+
+If logs say token refresh is disabled, the docs point to the same missing pieces:
+
+- `clientSecret`
+- `refreshToken`
+
+The presence of `expiresIn` alone is not the same as having a renewable token setup.
+
+## Multi-account support
+
+Twitch supports `channels.twitch.accounts` for per-account configuration.
+
+That is useful when you want:
+
+- one bot account in multiple channels,
+- different credentials per channel,
+- or cleaner separation between test and production chats.
+
+Example from the official docs:
+
+```json5
+{
+  channels: {
+    twitch: {
+      accounts: {
+        channel1: {
+          username: 'openclaw',
+          accessToken: 'oauth:abc123...',
+          clientId: 'xyz789...',
+          channel: 'vevisk',
+        },
+        channel2: {
+          username: 'openclaw',
+          accessToken: 'oauth:def456...',
+          clientId: 'uvw012...',
+          channel: 'secondchannel',
+        },
+      },
+    },
+  },
+}
+```
+
+The docs add one crucial constraint: each account needs its own token.
+
+## Recommended production posture
+
+For most Twitch deployments, the safest steady state is:
+
+- a dedicated bot account,
+- a known renewal plan for tokens,
+- `allowFrom` or a narrow `allowedRoles` rule,
+- mention gating left on unless you have proven moderation coverage.
+
+Twitch is not the place to discover your access-control policy by accident.
+
+## Where Twitch fits in a channel strategy
+
+Twitch is strongest as a **community-facing live surface**.
+
+Use it when you want OpenClaw to show up in stream chat with clear boundaries.
+It is not a replacement for a private operator lane. In practice it works best when paired with a quieter admin or fallback channel elsewhere.
