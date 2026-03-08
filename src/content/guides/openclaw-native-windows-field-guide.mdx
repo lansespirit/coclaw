@@ -1,0 +1,475 @@
+---
+title: "OpenClaw on Native Windows: PATH, Scheduled Tasks, Node Host, and the Real Failure Modes"
+description: "A field guide to running OpenClaw on native Windows without guesswork. Learn why shell PATH and Scheduled Task PATH diverge, when `tools.exec.pathPrepend` helps or hurts, why `openclaw node run` can stall after printing PATH, and when WSL2 is the lower-risk choice."
+category: "deployment"
+difficulty: "Intermediate"
+platforms:
+  - "Windows 10"
+  - "Windows 11"
+  - "Windows (native)"
+  - "WSL2"
+time: "22 min"
+steps:
+  - title: "Separate shell, service, and node-host environments"
+    content: "Most native Windows bugs are really environment mismatches: the shell where install succeeds is not the same environment the gateway service or node host later uses."
+  - title: "Treat `gateway.cmd` as generated output, not configuration"
+    content: "It is useful for diagnosis, but reinstalls and updates can regenerate it. Durable fixes should live in supported config or in a different runtime choice."
+  - title: "Use the right fix for the right runtime"
+    content: "`tools.exec.pathPrepend` can help gateway-host exec, but it is not a node-host fix, and some Windows versions/releases have reported sharp edges around PATH handling."
+  - title: "Adopt a stable native Windows baseline"
+    content: "Install normally, verify from one shell, and only daemonize after foreground runs are clean."
+  - title: "Know what native Windows is not"
+    content: "A Scheduled Task that starts after login is not the same thing as a true always-on Windows service running in Session 0."
+  - title: "Escalate to WSL2 deliberately"
+    content: "If the remaining friction is mostly PATH, locale, Session 0, or Windows-specific process behavior, WSL2 is usually the fastest way back to a boring, repeatable setup."
+keywords:
+  - "OpenClaw Windows native"
+  - "Scheduled Task PATH"
+  - "gateway.cmd"
+  - "tools.exec.pathPrepend"
+  - "openclaw node run"
+  - "Windows 11 24H2"
+  - "PATH mismatch"
+  - "Windows Service vs Scheduled Task"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+featured: true
+---
+
+If you are running OpenClaw on **native Windows** rather than inside WSL2, the core mistake is treating “Windows” as one environment.
+
+It is not.
+
+For OpenClaw, there are usually at least **three** different runtime contexts:
+
+1. the shell where you install or test commands,
+2. the **gateway service** started via Scheduled Task,
+3. the **node host** process started by `openclaw node run`.
+
+That difference explains most reports like:
+
+- “`openclaw` is installed, but the command is not recognized”
+- “`where docker` works in PowerShell, but `tools.exec` cannot find `docker` or `rg`”
+- “`openclaw node run` prints PATH and then hangs”
+- “`exec` only works with `pty: true` on Windows”
+- “the installer failed and PowerShell closed before I could even read the reason”
+
+This guide turns those into a predictable playbook.
+
+High-value related pages:
+
+- [Install OpenClaw on Windows - Windows 10/11 & WSL2 Setup Guide](/getting-started/windows)
+- [OpenClaw on Windows: Native vs WSL2, Install Paths, and When to Switch](/guides/openclaw-windows-native-vs-wsl2)
+- [OpenClaw Installation Troubleshooting: Node/NPM, PATH, Windows (WSL2), and Docker](/guides/openclaw-installation-troubleshooting)
+- [Windows: 'openclaw' is not recognized after install](/troubleshooting/solutions/windows-openclaw-not-recognized-after-install)
+- [Windows: installer fails and PowerShell closes before you can read the error](/troubleshooting/solutions/windows-installer-powershell-closes-before-error)
+- [Windows: tools.exec cannot find docker, rg, or gh even though they work in PowerShell](/troubleshooting/solutions/windows-scheduled-task-path-tools-exec-cli-not-found)
+- [Windows native: node run hangs after printing PATH, or the runtime stays unstable](/troubleshooting/solutions/windows-native-node-run-hangs-or-runtime-unstable)
+- [Windows: Exec tool returns empty output unless `pty: true`](/troubleshooting/solutions/windows-exec-non-pty-empty-output)
+- [OpenClaw Configuration Guide: openclaw.json, Models, Gateway, Channels, and Plugins](/guides/openclaw-configuration)
+- [Enable Tools and Plugins (Advanced)](/guides/custom-tools)
+- [OpenClaw Deployment Troubleshooting: Persistent State, Gateway Token, STARTING/Probe Failures, and Fast Recovery](/guides/openclaw-deployment-troubleshooting)
+
+---
+
+## 1) The bottom line: what is actually recommended?
+
+If you are starting fresh, **WSL2 remains the lower-risk Windows path**.
+
+Native Windows is still usable, but you should think of it as:
+
+- **fine for targeted local use**, especially when you keep the gateway in a foreground shell while debugging,
+- **more fragile for background service setups**, PATH-sensitive tools, and node-host edge cases,
+- **more sensitive to locale / username / service-environment differences** than WSL2.
+
+So the right operator stance is not “native Windows is impossible.”
+
+It is:
+
+- use native Windows when you know why you want it,
+- reduce variables aggressively,
+- move to WSL2 when the remaining friction is mostly Windows-specific plumbing.
+
+---
+
+## 2) The three environments you must not mix up
+
+### A) Interactive shell
+
+This is the PowerShell or `cmd` session where you run:
+
+```powershell
+where openclaw
+where docker
+where rg
+openclaw doctor
+```
+
+This shell is the truth for **what you can run manually right now**.
+
+### B) Gateway service (Scheduled Task)
+
+On native Windows, the gateway service is launched through a generated wrapper under your state directory, commonly:
+
+```text
+%USERPROFILE%\.openclaw\gateway.cmd
+```
+
+That means the gateway service can end up using a **different PATH** from the shell you are currently looking at.
+
+This is the root of a very common failure:
+
+- `where docker` succeeds in PowerShell,
+- but `tools.exec` inside OpenClaw says `docker` or `rg` is not found.
+
+### C) Node host (`openclaw node run`)
+
+This is a separate runtime again.
+
+Its PATH and startup chain are **not identical** to the gateway service. So a fix that helps gateway-host `exec` is not automatically a fix for node-host startup.
+
+This matters because:
+
+- `tools.exec.pathPrepend` is useful for **gateway-host exec**,
+- but it is **not** the right explanation for every `openclaw node run` hang.
+
+If you remember only one thing from this guide, remember this:
+
+> “Works in my shell” does not prove “works in the Windows service” or “works in the node host.”
+
+---
+
+## 3) The stable baseline for native Windows
+
+Before debugging deeper, reduce the setup to this baseline.
+
+### 3.1 Install normally
+
+Use the boring install path:
+
+```powershell
+npm install -g openclaw@latest
+```
+
+Do **not** normalize:
+
+```powershell
+npm install -g openclaw --ignore-scripts
+```
+
+`--ignore-scripts` is useful for special packaging or security workflows, but it is a bad default for day-to-day runtime debugging because it increases the chance of a **half-installed** environment.
+
+### 3.2 If the installer closes PowerShell, switch to the manual route
+
+Some Windows users hit the opposite failure: they are not even debugging OpenClaw yet — they are debugging the **installer entrypoint**.
+
+Typical pattern:
+
+- `iwr ...install.ps1 | iex` fails,
+- PowerShell closes too quickly,
+- the real error is something like “could not find winget / choco / scoop” or “Node is missing”.
+
+In that situation, stop fighting the bootstrapper and go one layer lower:
+
+1. install Node.js 22+ manually,
+2. open a fresh PowerShell,
+3. run the normal npm install path.
+
+```powershell
+npm install -g openclaw@latest
+openclaw --version
+openclaw doctor
+```
+
+This gives you readable failure output and removes one moving part.
+
+### 3.3 Verify from one shell first
+
+In the same shell where you plan to install or run services, verify:
+
+```powershell
+where openclaw
+node -v
+openclaw --version
+openclaw doctor
+```
+
+If you care about CLI tools later used by `tools.exec`, verify them here too:
+
+```powershell
+where docker
+where rg
+```
+
+### 3.4 Prefer foreground gateway while debugging
+
+Before you daemonize, prove the runtime works in the foreground:
+
+```powershell
+openclaw gateway run --port 18789
+```
+
+Why this is so valuable:
+
+- foreground `gateway run` eliminates Scheduled Task as a variable,
+- it tells you whether the bug is really the service environment,
+- it gives cleaner logs than “service seems installed but tool resolution is wrong.”
+
+Only after that is clean should you rely on:
+
+```powershell
+openclaw gateway install --force --runtime node --port 18789
+```
+
+---
+
+## 4) The real native Windows failure modes
+
+### 4.1 `openclaw` is not recognized after install
+
+Symptoms:
+
+- PowerShell says `'openclaw' is not recognized as an internal or external command`
+- install appeared to succeed, but the CLI is missing
+
+This is usually not an OpenClaw runtime bug. It is a **global npm PATH** problem.
+
+Start here:
+
+- [Windows: 'openclaw' is not recognized after install](/troubleshooting/solutions/windows-openclaw-not-recognized-after-install)
+
+### 4.2 `tools.exec` cannot find `docker`, `rg`, or other installed CLI tools
+
+Symptoms:
+
+- `where docker` works in PowerShell,
+- `where rg` works in PowerShell,
+- but `tools.exec` reports command-not-found behavior.
+
+Treat this first as a **gateway service PATH** problem, not an `exec` bug.
+
+Do this in order:
+
+1. reinstall the gateway from the **same shell** where `where docker` / `where rg` already succeed,
+2. inspect `%USERPROFILE%\.openclaw\gateway.cmd`,
+3. only then change config.
+
+Fast path:
+
+```powershell
+openclaw gateway stop
+openclaw gateway uninstall
+openclaw gateway install --force --runtime node --port 18789
+```
+
+If the gateway service still cannot resolve tools, `tools.exec.pathPrepend` can be the right fix for **gateway-host exec**:
+
+```json5
+{
+  tools: {
+    exec: {
+      pathPrepend: [
+        "C:\\Program Files\\Docker\\Docker\\resources\\bin",
+        "C:\\Users\\<you>\\AppData\\Local\\Microsoft\\WinGet\\Links"
+      ]
+    }
+  }
+}
+```
+
+Then restart the gateway:
+
+```powershell
+openclaw gateway restart
+```
+
+But keep two caveats in your head:
+
+- `tools.exec.pathPrepend` helps when exec runs on the **gateway** or in the **sandbox**; it is **not** a node-host fix.
+- some Windows issue reports have shown versions where `pathPrepend` behaved badly enough to effectively break PATH resolution. If enabling it makes even `powershell` or `where.exe` disappear inside exec, remove it from config directly and fall back to full executable paths, foreground gateway testing, or WSL2.
+
+If you need an immediate unblock, call the binary by full path instead of relying on PATH lookup.
+
+### 4.3 `gateway.cmd` is diagnostic output, not a durable customization surface
+
+`%USERPROFILE%\.openclaw\gateway.cmd` is useful because it tells you what the Scheduled Task is really going to run.
+
+That makes it great for diagnosis:
+
+- inspect the `PATH` line,
+- confirm the command path,
+- compare what the service sees vs what your shell sees.
+
+But it is **not** a good long-term config surface:
+
+- `openclaw gateway install --force` can regenerate it,
+- updates can overwrite manual edits,
+- user-specific hacks in that file are easy to forget during upgrades.
+
+So the safe rule is:
+
+- inspect `gateway.cmd` to understand the failure,
+- avoid depending on hand-edited lines there for long-term correctness.
+
+If the only reliable fix requires hand-maintaining `gateway.cmd`, that is a sign you should either:
+
+- move the fix into supported config,
+- run foreground/manual gateway on native Windows,
+- or move the setup to WSL2.
+
+### 4.4 `openclaw node run` prints PATH and then hangs
+
+Symptoms:
+
+- you see a line like `node host PATH: ...`,
+- then there is no successful connection message,
+- the process appears stuck before becoming a usable node host.
+
+Do **not** jump straight to “gateway networking is broken.”
+
+First reduce the highest-risk variables:
+
+1. remove `--ignore-scripts` from the install path,
+2. test from a fresh shell,
+3. confirm gateway and node host are started from the same environment,
+4. if you can, reproduce in WSL2 before going deeper into native Windows.
+
+Why this is the right order:
+
+- by the time PATH is printed, you are already past basic CLI parsing,
+- the remaining problem is usually runtime startup, host environment, or a native Windows edge case,
+- WSL2 is the fastest control experiment for “is this OpenClaw generally broken, or is native Windows the variable?”
+
+### 4.5 `exec` produces empty output unless `pty: true`
+
+This is a separate Windows-specific failure mode.
+
+If commands appear to do nothing with non-PTY exec, do not keep guessing. Use the dedicated workaround:
+
+- [Windows: Exec tool returns empty output unless `pty: true`](/troubleshooting/solutions/windows-exec-non-pty-empty-output)
+
+### 4.6 Scheduled Task is not the same thing as a real Windows Service
+
+This distinction matters more than many users expect.
+
+The built-in native Windows daemon path is centered on **Scheduled Task** behavior. That is not the same as a classic always-on Windows service running in **Session 0**.
+
+This matters if you expect:
+
+- true boot-time startup without an interactive login,
+- service-account behavior,
+- config rooted somewhere other than the signed-in user’s normal home context,
+- “server-style” Windows operation rather than “desktop user with a supervised background task”.
+
+If your requirement is really “I need a true service model, not a desktop-session task,” native Windows becomes much less friendly, and WSL2 or another Linux host is usually the more predictable option.
+
+### 4.7 Locale, path spaces, and non-ASCII paths are a real risk bucket
+
+Several Windows issues are not “PATH problems” at all. They come from native Windows differences such as:
+
+- non-ASCII usernames or hostnames,
+- localized Windows service output,
+- path quoting when executable locations include spaces,
+- status parsing assumptions that hold on English systems but not elsewhere.
+
+That does **not** mean every Chinese / German / Russian Windows system will fail.
+
+It means that if you are debugging a native Windows issue on:
+
+- Windows 11 24H2,
+- a localized OS,
+- a profile path with non-ASCII characters,
+- or a Node/npm install under `C:\Program Files\...`,
+
+you should reduce variables earlier than you would on Linux.
+
+The fastest control tests are:
+
+- a clean reinstall without `--ignore-scripts`,
+- a fresh shell,
+- a foreground `gateway run`,
+- a WSL2 reproduction.
+
+---
+
+## 5) When native Windows is still a good choice
+
+Native Windows is reasonable when most of these are true:
+
+- you want local-only usage on one machine,
+- you are comfortable using PowerShell and inspecting PATH directly,
+- you do not need a large fleet of external CLI tools discovered through service-launched PATH lookup,
+- you are okay debugging in foreground before moving to a background service.
+
+In practice, the lowest-friction native Windows pattern is often:
+
+1. install normally,
+2. validate in one shell,
+3. keep the gateway foreground while stabilizing config,
+4. only then switch to Scheduled Task if you still want background launch.
+
+---
+
+## 6) When to stop fighting native Windows and move to WSL2
+
+Move to WSL2 if one or more of these is true:
+
+- you depend heavily on Unix-style CLI tooling,
+- you need the most reproducible PATH and service behavior,
+- you are already losing time on Scheduled Task / PATH / locale quirks,
+- your issue disappears the moment you run the same flow in WSL2,
+- what you really want is a true always-on service model rather than a desktop-session task.
+
+This is not “giving up.”
+
+It is choosing the environment that matches OpenClaw’s most repeatable Windows deployment path.
+
+If you want that route, start here:
+
+- [OpenClaw on Windows: Native vs WSL2, Install Paths, and When to Switch](/guides/openclaw-windows-native-vs-wsl2)
+- [Install OpenClaw on Windows - Windows 10/11 & WSL2 Setup Guide](/getting-started/windows)
+- [Windows (WSL2): gateway service install fails (systemd not enabled)](/troubleshooting/solutions/windows-wsl2-systemd-not-enabled)
+
+---
+
+## 7) The minimum evidence bundle for a real Windows issue report
+
+When you open an issue or debug a stubborn native Windows problem, avoid vague reports like “it hangs” or “tool not found.”
+
+Collect this instead:
+
+```powershell
+openclaw --version
+node -v
+openclaw doctor
+openclaw gateway status
+where openclaw
+where docker
+where rg
+```
+
+And then add the environment-specific proof:
+
+- for gateway service issues: the relevant lines from `%USERPROFILE%\.openclaw\gateway.cmd`,
+- for node host issues: the full last lines after `node host PATH: ...`,
+- for tool lookup issues: whether full executable paths work even when PATH lookup fails,
+- for installer/bootstrap issues: the exact manual Node/npm path you used after the one-liner failed,
+- for locale-sensitive issues: your Windows version, locale, and whether the username/path contains non-ASCII characters.
+
+That turns “Windows is broken” into something maintainable.
+
+---
+
+## Related
+
+- [OpenClaw on Windows: Native vs WSL2, Install Paths, and When to Switch](/guides/openclaw-windows-native-vs-wsl2)
+- [OpenClaw Installation Troubleshooting: Node/NPM, PATH, Windows (WSL2), and Docker](/guides/openclaw-installation-troubleshooting)
+- [Windows: 'openclaw' is not recognized after install](/troubleshooting/solutions/windows-openclaw-not-recognized-after-install)
+- [Windows: installer fails and PowerShell closes before you can read the error](/troubleshooting/solutions/windows-installer-powershell-closes-before-error)
+- [Windows: tools.exec cannot find docker, rg, or gh even though they work in PowerShell](/troubleshooting/solutions/windows-scheduled-task-path-tools-exec-cli-not-found)
+- [Windows native: node run hangs after printing PATH, or the runtime stays unstable](/troubleshooting/solutions/windows-native-node-run-hangs-or-runtime-unstable)
+- [Windows: Exec tool returns empty output unless `pty: true`](/troubleshooting/solutions/windows-exec-non-pty-empty-output)
+- [OpenClaw Configuration Guide: openclaw.json, Models, Gateway, Channels, and Plugins](/guides/openclaw-configuration)
+- [Enable Tools and Plugins (Advanced)](/guides/custom-tools)
+- [OpenClaw Deployment Troubleshooting: Persistent State, Gateway Token, STARTING/Probe Failures, and Fast Recovery](/guides/openclaw-deployment-troubleshooting)
+- [Windows (WSL2): gateway service install fails (systemd not enabled)](/troubleshooting/solutions/windows-wsl2-systemd-not-enabled)

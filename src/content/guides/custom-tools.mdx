@@ -36,6 +36,12 @@ Official reference (recommended reading):
 - Tool policy vs sandbox vs elevated: https://docs.openclaw.ai/gateway/sandbox-vs-tool-policy-vs-elevated
 - Plugin tools (optional allowlists): https://docs.openclaw.ai/plugins/agent-tools
 
+If you are debugging this on native Windows rather than Linux/WSL2, also read:
+
+- [OpenClaw on Native Windows: PATH, Scheduled Tasks, Node Host, and the Real Failure Modes](/guides/openclaw-native-windows-field-guide)
+- [Windows: tools.exec cannot find docker, rg, or gh even though they work in PowerShell](/troubleshooting/solutions/windows-scheduled-task-path-tools-exec-cli-not-found)
+- [Windows: Exec tool returns empty output unless `pty: true`](/troubleshooting/solutions/windows-exec-non-pty-empty-output)
+
 ## 1) Enable an optional plugin (example: `llm-task`)
 
 Edit your config (default: `~/.openclaw/openclaw.json`) and enable the plugin:
@@ -132,3 +138,10 @@ Common failure patterns:
 - Plugin enabled but tool not allowlisted (optional tools)
 - Tool allowlist exists but does not include the tool (everything else becomes blocked)
 - Tool is allowed globally, but denied in sandbox policy (when sandboxed)
+- On native Windows, the service runtime may see a different PATH than your interactive shell
+- On Windows, `exec` can also fail for PTY/runtime reasons even when the tool policy itself is correct
+
+Related Windows pages:
+
+- [Windows: tools.exec cannot find docker, rg, or gh even though they work in PowerShell](/troubleshooting/solutions/windows-scheduled-task-path-tools-exec-cli-not-found)
+- [Windows: Exec tool returns empty output unless `pty: true`](/troubleshooting/solutions/windows-exec-non-pty-empty-output)

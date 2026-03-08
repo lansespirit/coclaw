@@ -51,6 +51,11 @@ If you’re still stuck on install/service setup first, start here:
 
 - [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
 
+If you are on Windows and your real confusion is “native Windows runtime vs WSL2 vs service behavior”, these are the best companion pages:
+
+- [/guides/openclaw-windows-native-vs-wsl2](/guides/openclaw-windows-native-vs-wsl2)
+- [/guides/openclaw-native-windows-field-guide](/guides/openclaw-native-windows-field-guide)
+
 ---
 
 ## 0) The 60-second mental model
@@ -104,6 +109,10 @@ Open the URL it prints. If you bookmarked an old URL (or opened `http://127.0.0.
 missing the one-time token bootstrap.
 
 ### 1.2 Confirm you are reaching the right gateway
+
+If you are on native Windows, remember that a foreground shell, a Scheduled Task gateway, and a node host can all behave like different environments. If that is the problem, use:
+
+- [/guides/openclaw-native-windows-field-guide](/guides/openclaw-native-windows-field-guide)
 
 This is the most common remote-host trap: you think you’re hitting the remote gateway, but you’re actually hitting a local
 port, a stale reverse proxy, or a different container.

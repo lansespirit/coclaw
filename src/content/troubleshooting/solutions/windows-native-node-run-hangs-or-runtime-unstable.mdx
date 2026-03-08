@@ -1,0 +1,125 @@
+---
+title: "Windows native: node run hangs after printing PATH, or the runtime stays unstable"
+description: "Stabilize native Windows setups where `openclaw node run` hangs after PATH output, the runtime behaves differently from your shell, or your real requirement is better served by WSL2."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "windows"
+channel: []
+errorSignatures:
+  - "node host PATH:"
+  - "openclaw node run"
+  - "stopped"
+  - "Scheduled Task"
+keywords:
+  - "windows"
+  - "node run"
+  - "PATH"
+  - "24H2"
+  - "WSL2"
+  - "Session 0"
+  - "non-ASCII path"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+author: "CoClaw Team"
+related:
+  guides:
+    - "/guides/openclaw-native-windows-field-guide"
+    - "/guides/openclaw-windows-native-vs-wsl2"
+    - "/guides/openclaw-deployment-troubleshooting"
+  docs:
+    - "https://docs.openclaw.ai/nodes"
+    - "https://docs.openclaw.ai/platforms/windows"
+  githubIssues:
+    - 39038
+    - 39057
+    - 37563
+    - 17032
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- `openclaw node run` prints a line like `node host PATH: ...` and then appears to hang.
+- Native Windows behavior differs from what works in your normal shell.
+- You expected a true background-service model, but the built-in Windows daemon path behaves more like a desktop-session task.
+- You are on a localized Windows install, a non-ASCII profile path, or a Node/npm path under `C:\Program Files\...` and native behavior feels fragile.
+
+## Cause
+
+This class of problem is usually **not just one missing PATH entry**.
+
+It tends to be a native Windows runtime mismatch involving one or more of these:
+
+- `--ignore-scripts` or another half-install path,
+- node-host startup on native Windows,
+- assumptions that a Scheduled Task behaves like a true Windows Service / Session 0 process,
+- localized Windows output,
+- path quoting or non-ASCII path edge cases.
+
+## Fix
+
+### 1) Reduce variables before debugging deeper
+
+Use the boring baseline:
+
+```powershell
+npm uninstall -g openclaw
+npm install -g openclaw@latest
+openclaw --version
+openclaw doctor
+```
+
+Do **not** keep testing on a `--ignore-scripts` install.
+
+### 2) Confirm the gateway and node host are launched from comparable environments
+
+If you are testing node-host behavior, do not mix shells casually.
+
+At minimum, confirm:
+
+```powershell
+openclaw gateway status
+node -v
+where openclaw
+```
+
+If possible, start both from the same fresh shell while reducing other changes.
+
+### 3) Decide whether you really need native Windows for this setup
+
+If your real requirement is:
+
+- a more Linux-like service model,
+- fewer PATH and locale surprises,
+- or predictable external CLI behavior,
+
+then WSL2 is usually the right fix, not more native-Windows tweaking.
+
+Start here:
+
+- [/guides/openclaw-windows-native-vs-wsl2](/guides/openclaw-windows-native-vs-wsl2)
+
+### 4) Move stubborn native setups to WSL2 earlier, not later
+
+If you are on Windows 11 24H2, a localized OS, a non-ASCII home path, or a path-with-spaces-heavy setup, use WSL2 as the control path before spending more time on native Windows.
+
+### 5) If you stay native, keep the gateway foreground during stabilization
+
+```powershell
+openclaw gateway run --port 18789
+```
+
+That gives you a simpler control path before layering on Scheduled Task behavior again.
+
+## Verify
+
+- `openclaw node run` no longer stalls after the PATH line, or
+- the same workflow is stable in WSL2, proving the remaining issue was native Windows-specific.
+
+## Related
+
+- [OpenClaw on Native Windows: PATH, Scheduled Tasks, Node Host, and the Real Failure Modes](/guides/openclaw-native-windows-field-guide)
+- [OpenClaw on Windows: Native vs WSL2, Install Paths, and When to Switch](/guides/openclaw-windows-native-vs-wsl2)
+- [OpenClaw Deployment Troubleshooting: Persistent State, Gateway Token, STARTING/Probe Failures, and Fast Recovery](/guides/openclaw-deployment-troubleshooting)

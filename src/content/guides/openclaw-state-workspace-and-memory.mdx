@@ -49,6 +49,8 @@ Related (high value):
 
 - Deployment persistence + tokens: [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
 - Config precedence: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- Native Windows runtime / service edge cases: [/guides/openclaw-native-windows-field-guide](/guides/openclaw-native-windows-field-guide)
+- Windows path choice (native vs WSL2): [/guides/openclaw-windows-native-vs-wsl2](/guides/openclaw-windows-native-vs-wsl2)
 
 ---
 
@@ -137,6 +139,10 @@ Use the persistence playbook:
 - [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
 
 ### 3.2 You have multiple installs and the service uses a different runtime
+
+This is especially common when the shell you used for install is not the same environment the running service actually uses. On native Windows, that mismatch can look like PATH drift, Scheduled Task drift, or “ghost writes” to the wrong home/state path. For that path specifically, also see:
+
+- [/guides/openclaw-native-windows-field-guide](/guides/openclaw-native-windows-field-guide)
 
 If updates/installs were done in one shell, but the daemon runs another Node/PATH, you can get inconsistent behavior and
 “ghost writes” (writes go to a different home/state than you think).

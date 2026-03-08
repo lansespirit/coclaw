@@ -98,6 +98,31 @@ Windows native installs can also fail to refresh PATH reliably:
 
 - [/troubleshooting/solutions/windows-openclaw-not-recognized-after-install](/troubleshooting/solutions/windows-openclaw-not-recognized-after-install)
 
+If you are deciding between native Windows and WSL2 first:
+
+- [/guides/openclaw-windows-native-vs-wsl2](/guides/openclaw-windows-native-vs-wsl2)
+
+If you want the deeper operator guide for native Windows service / PATH / node-host behavior:
+
+- [/guides/openclaw-native-windows-field-guide](/guides/openclaw-native-windows-field-guide)
+- [/troubleshooting/solutions/windows-scheduled-task-path-tools-exec-cli-not-found](/troubleshooting/solutions/windows-scheduled-task-path-tools-exec-cli-not-found)
+- [/troubleshooting/solutions/windows-native-node-run-hangs-or-runtime-unstable](/troubleshooting/solutions/windows-native-node-run-hangs-or-runtime-unstable)
+
+### 1.1.1 Windows installer closes before you can read the error
+
+If the Windows installer/bootstrapper closes PowerShell immediately, stop using the one-liner for now and switch to a manual install path so the error stays visible:
+
+```powershell
+npm install -g openclaw@latest
+openclaw --version
+openclaw doctor
+```
+
+For choosing between native Windows and WSL2 before you go further:
+
+- [/guides/openclaw-windows-native-vs-wsl2](/guides/openclaw-windows-native-vs-wsl2)
+- [/troubleshooting/solutions/windows-installer-powershell-closes-before-error](/troubleshooting/solutions/windows-installer-powershell-closes-before-error)
+
 ### 1.2 Node version mismatch (classic)
 
 If `openclaw` starts but prints Node runtime errors, or installs a package but fails at runtime, confirm your Node is supported:
@@ -208,4 +233,3 @@ openclaw dashboard
 If you’re deploying on a platform that resets containers/VM images, also read:
 
 - [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
-

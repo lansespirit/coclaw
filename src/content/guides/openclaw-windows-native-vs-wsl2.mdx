@@ -1,0 +1,265 @@
+---
+title: "OpenClaw on Windows: Native vs WSL2, Install Paths, and When to Switch"
+description: "A practical decision guide for Windows users: when native Windows is good enough, when WSL2 is the safer default, which install path to choose, and how to migrate without turning your setup into a mystery."
+category: "deployment"
+difficulty: "Beginner"
+platforms:
+  - "Windows 10"
+  - "Windows 11"
+  - "Windows (native)"
+  - "WSL2"
+time: "14 min"
+steps:
+  - title: "Choose the right Windows path before debugging"
+    content: "Most Windows pain starts with the wrong install target. Decide first whether you want a desktop-local setup, a service-like runtime, or Linux-style tool compatibility."
+  - title: "Understand installer vs npm vs WSL2"
+    content: "The one-liner installer is convenient, manual npm is easier to debug, and WSL2 is usually the most repeatable long-term Windows option."
+  - title: "Prefer boring service models"
+    content: "Native Windows uses Scheduled Task semantics; WSL2 gives you a Linux-style systemd/user-service path that is often easier to reason about."
+  - title: "Switch early when the problem is really the platform"
+    content: "If your issue is mostly PATH, Session 0 expectations, localized Windows quirks, or external CLI compatibility, WSL2 is often faster than deeper native debugging."
+  - title: "Migrate without wiping state blindly"
+    content: "Back up the state directory first, then rebuild on the target runtime with a clean, explicit path."
+keywords:
+  - "OpenClaw Windows vs WSL2"
+  - "OpenClaw native Windows"
+  - "OpenClaw WSL2"
+  - "Windows install path"
+  - "Windows Scheduled Task"
+  - "Windows service model"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+featured: true
+---
+
+If you are on Windows and asking “Should I use native Windows or WSL2?”, you are asking the right question.
+
+A lot of Windows troubleshooting waste comes from starting on the wrong path:
+
+- using the one-liner installer when what you really need is readable manual install output,
+- using native Windows when your workflow depends on Linux-style tooling,
+- expecting a Scheduled Task to behave like a true background service,
+- or staying on native Windows long after the remaining problems are clearly platform-specific.
+
+This guide helps you choose the path **before** you burn time debugging the wrong layer.
+
+Related:
+
+- [Install OpenClaw on Windows - Windows 10/11 & WSL2 Setup Guide](/getting-started/windows)
+- [OpenClaw on Native Windows: PATH, Scheduled Tasks, Node Host, and the Real Failure Modes](/guides/openclaw-native-windows-field-guide)
+- [OpenClaw Installation Troubleshooting: Node/NPM, PATH, Windows (WSL2), and Docker](/guides/openclaw-installation-troubleshooting)
+- [Windows: installer fails and PowerShell closes before you can read the error](/troubleshooting/solutions/windows-installer-powershell-closes-before-error)
+- [Windows (WSL2): gateway service install fails (systemd not enabled)](/troubleshooting/solutions/windows-wsl2-systemd-not-enabled)
+
+---
+
+## 1) Quick recommendation
+
+Choose **WSL2 first** if:
+
+- you are new to OpenClaw,
+- you want the most reproducible path on Windows,
+- you rely on Unix-like CLI tools,
+- you want fewer surprises around PATH and service behavior.
+
+Choose **native Windows** if:
+
+- you intentionally want a Windows-local setup,
+- your workflow is relatively simple,
+- you are comfortable inspecting PowerShell, PATH, and generated task wrappers,
+- you are okay using a foreground gateway during debugging.
+
+If you are unsure, choose WSL2.
+
+---
+
+## 2) The three Windows install paths — and what each is for
+
+### A) One-liner installer
+
+Example:
+
+```powershell
+iwr -useb https://openclaw.ai/install.ps1 | iex
+```
+
+Use this when:
+
+- you want convenience,
+- your machine already has a normal Windows package-manager situation,
+- you are not currently debugging a fresh-install problem.
+
+Do **not** keep forcing this path if:
+
+- the terminal closes too quickly,
+- you cannot read the failure reason,
+- it complains about missing `winget`, `choco`, or `scoop`.
+
+At that point, manual npm install is the better debugging path.
+
+### B) Manual npm install on native Windows
+
+Example:
+
+```powershell
+npm install -g openclaw@latest
+```
+
+Use this when:
+
+- you want readable output,
+- you are debugging install/runtime issues,
+- you want to verify `node`, `npm`, and `openclaw` from the same shell.
+
+This is the best native-Windows path when you need to reduce variables. If the bootstrapper was your first failure, jump straight to:
+
+- [Windows: installer fails and PowerShell closes before you can read the error](/troubleshooting/solutions/windows-installer-powershell-closes-before-error)
+
+### C) WSL2 install
+
+Use this when:
+
+- you want the most boring long-term Windows setup,
+- you expect Linux-style tools and service behavior,
+- native Windows issues are consuming time without giving you Windows-specific value.
+
+This is why CoClaw keeps framing Windows as **WSL2-first**.
+
+---
+
+## 3) Native Windows vs WSL2: what really changes?
+
+### PATH behavior
+
+On native Windows, PATH can differ across:
+
+- your interactive shell,
+- the Scheduled Task gateway,
+- `openclaw node run`.
+
+On WSL2, the runtime is usually easier to reason about because it follows Linux conventions more closely.
+
+### Background service model
+
+On native Windows, the common OpenClaw daemon story is a **Scheduled Task**.
+
+That is often good enough for “my desktop machine should keep this running after I log in,” but it is not the same as “I want a proper server-style service model.”
+
+On WSL2, the mental model is clearer:
+
+- enable systemd,
+- install the daemon,
+- operate like a Linux user service.
+
+### External CLI compatibility
+
+If your workflows depend on tools like `docker`, `rg`, `gh`, or other PATH-resolved binaries, native Windows is more likely to expose service-environment and quoting edge cases.
+
+WSL2 is usually the calmer place to run that style of setup.
+
+### Locale and path edge cases
+
+Native Windows is more exposed to:
+
+- localized OS output,
+- non-ASCII usernames and paths,
+- executable locations under `C:\Program Files\...`,
+- Session 0 / desktop-user differences.
+
+WSL2 does not magically solve every problem, but it removes many Windows-specific ones from the equation.
+
+---
+
+## 4) When native Windows is the right choice
+
+Native Windows is a reasonable choice when you care about one or more of these:
+
+- Windows-local convenience matters more than Linux compatibility,
+- you mainly use OpenClaw on one personal machine,
+- you are not relying on a complicated external toolchain,
+- you are okay with “foreground first, daemon second” as the operating style.
+
+A good native Windows pattern is:
+
+1. install with npm,
+2. verify from one shell,
+3. run `openclaw gateway run` first,
+4. only daemonize after the foreground path is stable.
+
+---
+
+## 5) When WSL2 is the better call immediately
+
+Switch to WSL2 early if:
+
+- you want the least surprising Windows deployment path,
+- the setup is for regular, long-lived use rather than quick local testing,
+- you need strong compatibility with CLI tools,
+- you are already seeing PATH, Scheduled Task, locale, or node-host weirdness,
+- what you really want is “Linux behavior, but on a Windows laptop”.
+
+You are not losing anything important by doing this. You are usually gaining predictability.
+
+---
+
+## 6) The red flags that mean “stop debugging native Windows now”
+
+Move to WSL2 instead of going deeper if you see a combination like this:
+
+- one-liner installer fails and closes too quickly to diagnose,
+- `where docker` works in PowerShell but `tools.exec` cannot find it,
+- `openclaw node run` prints PATH and hangs,
+- the only “fix” requires hand-editing generated `gateway.cmd`,
+- you actually need true service-like behavior rather than a desktop-session task,
+- the issue disappears the moment you test in WSL2.
+
+That is your signal that the platform is now the biggest variable.
+
+---
+
+## 7) Migration checklist: native Windows → WSL2
+
+Do not migrate by randomly reinstalling and hoping for the best.
+
+Use this order:
+
+1. Back up the current state directory.
+2. Decide whether you are migrating only config or the whole state.
+3. Install Node and OpenClaw inside WSL2.
+4. Enable systemd in WSL2.
+5. Recreate the daemon there.
+6. Re-test from the WSL2 shell before exposing any UI or channels.
+
+Useful starting points:
+
+- [Install OpenClaw on Windows - Windows 10/11 & WSL2 Setup Guide](/getting-started/windows)
+- [Windows (WSL2): gateway service install fails (systemd not enabled)](/troubleshooting/solutions/windows-wsl2-systemd-not-enabled)
+- [OpenClaw State, Workspace, and Memory: Persistence & Permissions Troubleshooting](/guides/openclaw-state-workspace-and-memory)
+- [OpenClaw Deployment Troubleshooting: Persistent State, Gateway Token, STARTING/Probe Failures, and Fast Recovery](/guides/openclaw-deployment-troubleshooting)
+
+---
+
+## 8) What this guide intentionally does not cover
+
+This is a **choice guide**, not the deep runtime-debugging guide.
+
+If you are already committed to native Windows and need to debug:
+
+- PATH mismatch,
+- Scheduled Task behavior,
+- `tools.exec.pathPrepend`,
+- `openclaw node run` startup,
+- locale / path / service-model edge cases,
+
+use the field guide:
+
+- [OpenClaw on Native Windows: PATH, Scheduled Tasks, Node Host, and the Real Failure Modes](/guides/openclaw-native-windows-field-guide)
+
+---
+
+## Related
+
+- [Install OpenClaw on Windows - Windows 10/11 & WSL2 Setup Guide](/getting-started/windows)
+- [OpenClaw on Native Windows: PATH, Scheduled Tasks, Node Host, and the Real Failure Modes](/guides/openclaw-native-windows-field-guide)
+- [OpenClaw Installation Troubleshooting: Node/NPM, PATH, Windows (WSL2), and Docker](/guides/openclaw-installation-troubleshooting)
+- [Windows (WSL2): gateway service install fails (systemd not enabled)](/troubleshooting/solutions/windows-wsl2-systemd-not-enabled)

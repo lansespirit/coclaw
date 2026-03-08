@@ -1,0 +1,149 @@
+---
+title: "Windows: tools.exec cannot find docker, rg, or gh even though they work in PowerShell"
+description: "Fix native Windows cases where the Scheduled Task gateway uses a different PATH than your interactive shell, so tools.exec cannot resolve installed CLI tools."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "windows"
+channel: []
+errorSignatures:
+  - "command not found"
+  - "tools.exec"
+  - "docker version"
+  - "rg --version"
+  - "npm is required to install plugin-local"
+keywords:
+  - "windows"
+  - "Scheduled Task"
+  - "PATH"
+  - "tools.exec"
+  - "docker"
+  - "rg"
+  - "gh"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+author: "CoClaw Team"
+related:
+  guides:
+    - "/guides/openclaw-native-windows-field-guide"
+    - "/guides/openclaw-installation-troubleshooting"
+    - "/guides/openclaw-configuration"
+    - "/guides/custom-tools"
+  docs:
+    - "https://docs.openclaw.ai/tools/exec"
+    - "https://docs.openclaw.ai/gateway"
+  githubIssues:
+    - 39081
+    - 19910
+    - 25399
+    - 29305
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- In PowerShell, `where docker`, `where rg`, or `where gh` succeeds.
+- But inside OpenClaw `tools.exec`, those commands behave like they are missing.
+- Plugin runtime setup may fail with follow-on errors like:
+  - `npm is required to install plugin-local ... but was not found on PATH`
+- The problem appears only when the gateway runs as a Windows **Scheduled Task**.
+
+## Cause
+
+On native Windows, the gateway service does **not** necessarily see the same PATH as your interactive shell.
+
+The built-in daemon path launches through a generated wrapper such as:
+
+```text
+%USERPROFILE%\.openclaw\gateway.cmd
+```
+
+So you can end up debugging a **service-environment PATH mismatch**, not a missing installation of `docker`, `rg`, `gh`, or `npm`.
+
+## Fix
+
+### 1) Reinstall the gateway from the same shell where the commands already work
+
+In the exact shell where these succeed:
+
+```powershell
+where docker
+where rg
+where gh
+```
+
+reinstall the gateway:
+
+```powershell
+openclaw gateway stop
+openclaw gateway uninstall
+openclaw gateway install --force --runtime node --port 18789
+```
+
+### 2) Inspect `gateway.cmd`, but do not treat it as durable configuration
+
+Open:
+
+```text
+%USERPROFILE%\.openclaw\gateway.cmd
+```
+
+Use it to confirm what PATH and command the Scheduled Task will actually run.
+
+Important: this file is useful for **diagnosis**, but updates and reinstalls can regenerate it. Do not rely on hand-edited lines there as your long-term fix.
+
+### 3) If exec really runs on the gateway, use `tools.exec.pathPrepend` carefully
+
+For gateway-host exec, this can be the right fix:
+
+```json5
+{
+  tools: {
+    exec: {
+      pathPrepend: [
+        "C:\\Program Files\\Docker\\Docker\\resources\\bin",
+        "C:\\Users\\<you>\\AppData\\Local\\Microsoft\\WinGet\\Links"
+      ]
+    }
+  }
+}
+```
+
+Then restart the gateway:
+
+```powershell
+openclaw gateway restart
+```
+
+### 4) If enabling `pathPrepend` makes PATH worse, remove it immediately
+
+Some Windows issue reports have shown `tools.exec.pathPrepend` behaving badly enough to effectively break PATH resolution.
+
+If even `powershell` or `where.exe` disappears inside exec after enabling it:
+
+- remove `tools.exec.pathPrepend` from config,
+- restart the gateway,
+- fall back to full executable paths,
+- or run the gateway in the foreground while debugging.
+
+### 5) Use foreground gateway as the clean control test
+
+```powershell
+openclaw gateway run --port 18789
+```
+
+If the commands work in foreground mode but fail under Scheduled Task, you have confirmed this is a Windows service-environment problem.
+
+## Verify
+
+- In the same PowerShell used for install, `where docker`, `where rg`, or `where gh` succeeds.
+- `tools.exec` can run the same command in a fresh session.
+- If you used foreground `gateway run`, the command also works there.
+
+## Related
+
+- [OpenClaw on Native Windows: PATH, Scheduled Tasks, Node Host, and the Real Failure Modes](/guides/openclaw-native-windows-field-guide)
+- [OpenClaw Installation Troubleshooting: Node/NPM, PATH, Windows (WSL2), and Docker](/guides/openclaw-installation-troubleshooting)
+- [OpenClaw Configuration Guide: openclaw.json, Models, Gateway, Channels, and Plugins](/guides/openclaw-configuration)
+- [Enable Tools and Plugins (Advanced)](/guides/custom-tools)

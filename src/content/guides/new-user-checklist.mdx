@@ -63,6 +63,10 @@ openclaw onboard --install-daemon
 This installs a per-user supervised service (launchd on macOS, systemd user service on Linux/WSL2)
 so the gateway keeps running in the background.
 
+If you are on Windows and have not decided between native Windows and WSL2 yet, read this first:
+
+- [/guides/openclaw-windows-native-vs-wsl2](/guides/openclaw-windows-native-vs-wsl2)
+
 ## 2) Dashboard access: avoid the "unauthorized" trap
 
 The Control UI is served by the gateway (default http://127.0.0.1:18789/), but auth is enforced.

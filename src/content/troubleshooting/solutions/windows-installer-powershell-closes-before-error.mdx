@@ -1,0 +1,108 @@
+---
+title: "Windows: installer fails and PowerShell closes before you can read the error"
+description: "Recover from Windows install/bootstrap failures where the one-liner closes PowerShell too quickly by switching to a readable manual install path and validating Node/npm first."
+kind: "solution"
+component: "install"
+severity: "high"
+os:
+  - "windows"
+channel: []
+errorSignatures:
+  - "Could not find a package manager (winget, choco, or scoop)"
+  - "Please install Node.js 22+ manually"
+  - "PowerShell closes"
+keywords:
+  - "windows"
+  - "installer"
+  - "PowerShell"
+  - "winget"
+  - "Node.js"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+author: "CoClaw Team"
+related:
+  guides:
+    - "/guides/openclaw-windows-native-vs-wsl2"
+    - "/guides/openclaw-installation-troubleshooting"
+  docs:
+    - "https://docs.openclaw.ai/install/installer"
+  githubIssues:
+    - 38054
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- You try the Windows one-liner installer and the terminal closes before you can read the real error.
+- Screen capture reveals an error like:
+  - `Could not find a package manager (winget, choco, or scoop)`
+  - `Please install Node.js 22+ manually`
+- You are not sure whether OpenClaw failed, Node is missing, or the bootstrapper itself failed.
+
+## Cause
+
+This is usually **not** a gateway/runtime bug yet. It is an **installer/bootstrapper** failure on Windows.
+
+The one-liner is convenient, but it hides too many variables when:
+
+- Windows package managers are unavailable,
+- Node.js is not installed yet,
+- or PowerShell exits before you can inspect the failure.
+
+## Fix
+
+### 1) Stop using the one-liner for this machine until the basics are verified
+
+If the bootstrapper closes too quickly, switch to a manual path so the error stays visible.
+
+### 2) Install Node.js 22+ manually first
+
+Use the official installer from `nodejs.org`, then open a **fresh** PowerShell and verify:
+
+```powershell
+node -v
+npm -v
+```
+
+If either command is missing, fix Node before continuing.
+
+### 3) Install OpenClaw with npm directly
+
+```powershell
+npm install -g openclaw@latest
+openclaw --version
+openclaw doctor
+```
+
+This gives you readable output and makes it much easier to tell whether the real problem is:
+
+- Node/npm,
+- Windows PATH,
+- or OpenClaw itself.
+
+### 4) If Windows is already feeling shaky, decide now whether to use WSL2 instead
+
+If you are on a fresh machine and already hitting Windows-native installer friction, read:
+
+- [/guides/openclaw-windows-native-vs-wsl2](/guides/openclaw-windows-native-vs-wsl2)
+
+WSL2 is often the lower-risk path if you want the most repeatable Windows setup.
+
+## Verify
+
+Run these in a fresh PowerShell:
+
+```powershell
+node -v
+npm -v
+where openclaw
+openclaw --version
+openclaw doctor
+```
+
+You should be able to read the full output without the terminal disappearing.
+
+## Related
+
+- [OpenClaw on Windows: Native vs WSL2, Install Paths, and When to Switch](/guides/openclaw-windows-native-vs-wsl2)
+- [OpenClaw Installation Troubleshooting: Node/NPM, PATH, Windows (WSL2), and Docker](/guides/openclaw-installation-troubleshooting)

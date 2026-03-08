@@ -59,6 +59,12 @@ If you want the shortest version first, use the dedicated fix page:
 
 - [/troubleshooting/solutions/openclaw-only-chats-no-tools-after-update](/troubleshooting/solutions/openclaw-only-chats-no-tools-after-update)
 
+If you are on native Windows and the symptom feels more like “the service/runtime cannot see tools” than “the policy removed tools”, also check:
+
+- [/guides/openclaw-native-windows-field-guide](/guides/openclaw-native-windows-field-guide)
+- [/troubleshooting/solutions/windows-scheduled-task-path-tools-exec-cli-not-found](/troubleshooting/solutions/windows-scheduled-task-path-tools-exec-cli-not-found)
+- [/troubleshooting/solutions/windows-exec-non-pty-empty-output](/troubleshooting/solutions/windows-exec-non-pty-empty-output)
+
 ## Quick answer
 
 If you trust this machine and want the classic “coding agent” behavior back, set:
@@ -103,11 +109,16 @@ This guide does **not** solve issues like:
 - the model is failing to respond
 - channel messages are not arriving
 - auth or provider setup is broken
+- native Windows service / PATH mismatches where the tool exists but the runtime cannot resolve it
 
 If OpenClaw is not responding at all, start with:
 
 - [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
 - [/guides/updating-and-migration](/guides/updating-and-migration)
+
+If the issue is Windows-specific and the agent only loses tools when running under the service/runtime path, use:
+
+- [/troubleshooting/solutions/windows-scheduled-task-path-tools-exec-cli-not-found](/troubleshooting/solutions/windows-scheduled-task-path-tools-exec-cli-not-found)
 
 ## 2) Inspect your current config
 

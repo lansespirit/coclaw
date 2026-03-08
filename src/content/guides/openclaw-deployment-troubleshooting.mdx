@@ -55,6 +55,8 @@ Further reading in this site:
 
 - Configuration fundamentals: [/guides/openclaw-configuration](/guides/openclaw-configuration)
 - Docker quick start: [/guides/docker-deployment](/guides/docker-deployment)
+- Windows runtime choice: [/guides/openclaw-windows-native-vs-wsl2](/guides/openclaw-windows-native-vs-wsl2)
+- Native Windows service/runtime behavior: [/guides/openclaw-native-windows-field-guide](/guides/openclaw-native-windows-field-guide)
 - Related troubleshooting:
   - [/troubleshooting/solutions/gateway-refusing-to-bind-without-auth](/troubleshooting/solutions/gateway-refusing-to-bind-without-auth)
   - [/troubleshooting/solutions/gateway-service-running-but-probe-fails](/troubleshooting/solutions/gateway-service-running-but-probe-fails)
@@ -198,6 +200,11 @@ docker compose exec openclaw-gateway sh -lc 'ss -ltnp || netstat -ltnp'
 If nothing is listening, probes will fail. Fix the startup error from logs.
 
 ### 4.3 Bind matters: remote deployments usually require `lan`
+
+If you are debugging this on native Windows and what you actually wanted was a more server-like service model, do not forget that Scheduled Task is not the same as a true always-on Windows Service. In that case, also read:
+
+- [/guides/openclaw-windows-native-vs-wsl2](/guides/openclaw-windows-native-vs-wsl2)
+- [/troubleshooting/solutions/windows-native-node-run-hangs-or-runtime-unstable](/troubleshooting/solutions/windows-native-node-run-hangs-or-runtime-unstable)
 
 A very common failure mode:
 

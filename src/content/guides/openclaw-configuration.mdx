@@ -49,6 +49,11 @@ If you are currently blocked by an error, jump to:
 
 - [Troubleshooting quick links](#troubleshooting-quick-links)
 
+If your problem is specifically a **Windows runtime / service / PATH mismatch**, start with:
+
+- [OpenClaw on Native Windows: PATH, Scheduled Tasks, Node Host, and the Real Failure Modes](/guides/openclaw-native-windows-field-guide)
+- [Windows: tools.exec cannot find docker, rg, or gh even though they work in PowerShell](/troubleshooting/solutions/windows-scheduled-task-path-tools-exec-cli-not-found)
+
 ## 0) Where configuration lives
 
 OpenClaw is stateful. Most users should treat the **state directory** as "the install":
@@ -71,6 +76,10 @@ Common overrides:
 Practical rule: if you are running OpenClaw via a service manager (launchd/systemd) or Docker, the runtime environment
 may not match your interactive shell. Confirm the service is using the same `OPENCLAW_CONFIG_PATH` / `OPENCLAW_STATE_DIR`
 you think it is.
+
+On native Windows, this same mismatch often shows up as “PowerShell can find the tool, but the gateway service cannot.” For that path specifically, see:
+
+- [Windows: tools.exec cannot find docker, rg, or gh even though they work in PowerShell](/troubleshooting/solutions/windows-scheduled-task-path-tools-exec-cli-not-found)
 
 Tip: you can run multiple isolated gateways on one machine by giving each instance its own state + config:
 
