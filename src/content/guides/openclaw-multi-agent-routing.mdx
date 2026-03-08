@@ -1,0 +1,451 @@
+---
+title: "One Gateway, Many Agents: Practical Routing, Bindings, and Multi-Account Patterns"
+description: "A practical guide to running multiple OpenClaw agents behind one gateway without turning your setup into guesswork. Learn how bindings, channel accounts, routing boundaries, workspace design, and Telegram-specific pitfalls fit together."
+category: "advanced"
+difficulty: "Advanced"
+platforms:
+  - "Telegram"
+  - "Self-hosted"
+  - "Docker"
+  - "Messaging"
+time: "18 min"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+steps:
+  - title: "Separate identity, route, and memory"
+    content: "A second bot account is only an ingress identity; you still need explicit bindings, context boundaries, and handoff rules."
+  - title: "Start with one gateway unless isolation is hard"
+    content: "One gateway keeps auth, models, and observability simpler; split into multiple gateways only for real blast-radius or compliance reasons."
+  - title: "Bind every non-default account on purpose"
+    content: "Treat bindings as the routing contract between channels/accounts and agents, especially when Telegram has more than one bot token."
+  - title: "Design shared workspaces, not shared confusion"
+    content: "Use the workspace for durable artifacts and handoffs; keep agent memory narrow enough that roles do not bleed into each other."
+  - title: "Give each agent a job, not a vibe"
+    content: "Primary assistant, research assistant, and ops assistant should each have clear channel scope, tool scope, and escalation rules."
+keywords:
+  - "multi-agent"
+  - "routing"
+  - "bindings"
+  - "telegram"
+  - "multi-account"
+  - "gateway"
+  - "workspace"
+  - "memory boundaries"
+  - "agent architecture"
+---
+
+If you are moving from **one helpful bot** to **a small team of specialized agents**, the key lesson is this:
+
+**multi-agent is not mainly a prompting problem. It is a routing and boundary problem.**
+
+Most messy setups do not fail because the prompts are weak. They fail because the operator assumes that a second Telegram bot,
+a second persona, or a second model automatically creates a clean second worker. It does not. You still need to decide:
+
+- which incoming channel/account should reach which agent
+- what context that agent is allowed to see
+- what memory should stay local vs shared
+- how handoffs become durable artifacts instead of hidden chat history
+
+For most teams, the right answer is **one gateway, multiple agents, explicit bindings, and a shared workspace with narrow role boundaries**.
+Only split into multiple gateways when you need hard isolation.
+
+If you still need the basics of config layout, read [/guides/openclaw-configuration](/guides/openclaw-configuration) first. If your main entry point is Telegram, keep [/guides/telegram-setup](/guides/telegram-setup) nearby while planning routes.
+
+## The practical mental model
+
+Think in four layers:
+
+1. **Gateway**: the runtime boundary that owns config, auth, channels, logs, and state.
+2. **Channel account**: the external identity people talk to, such as a Telegram bot token.
+3. **Binding / route**: the rule that says “traffic from this account or channel goes to this agent.”
+4. **Agent boundary**: the model, tools, workspace conventions, and memory scope for a role.
+
+That is why “just add another bot” is incomplete. A second bot gives you a second **door**. It does not tell OpenClaw which **worker** should answer, what that worker can touch, or where the resulting artifacts should live.
+
+Here is the architecture most people actually want:
+
+```text
+Users / groups / automations
+        |
+        v
+     One Gateway
+        |
+        +--> Telegram account: main ------> Agent: primary assistant
+        |
+        +--> Telegram account: research --> Agent: research assistant
+        |
+        +--> Telegram account: ops -------> Agent: ops assistant
+        |
+        +--> Shared workspace artifacts, logs, and handoff files
+```
+
+The important detail is the middle layer: **routing must be explicit enough that each ingress path has an intended destination**.
+
+## Why one gateway is usually the right starting point
+
+One gateway is usually enough when:
+
+- the same operator or team manages all agents
+- agents share the same broad model/provider estate
+- you want one place for logs, status checks, and channel connectivity
+- the agents work on the same projects and benefit from a shared workspace
+
+This is simpler than running several isolated gateways because you avoid duplicating:
+
+- auth and networking setup
+- service management and restart behavior
+- model/provider configuration
+- monitoring and troubleshooting effort
+
+In other words, **specialization does not require infrastructure fragmentation**.
+
+Use multiple gateways only when you need one of these hard boundaries:
+
+- different owners or trust domains
+- different compliance or data residency requirements
+- a high-risk experimental agent that should not share state with production
+- conflicting plugin/tool exposure that is easier to isolate at the gateway level
+- an operational reason to restart or upgrade one environment independently
+
+If your reason is only “I want three personalities,” stay on one gateway.
+
+## Bindings are the real contract
+
+In practice, bindings are what turn “many accounts and many agents” into a system you can reason about.
+
+The community pain point is predictable: operators add multiple Telegram accounts under one gateway, then assume non-default traffic will automatically land on the intended agent. In real deployments, that assumption is fragile. The safer pattern is:
+
+- define each account intentionally
+- bind each non-default account intentionally
+- keep one obvious fallback route only if you truly want one
+
+Conceptually, the shape looks like this:
+
+```json5
+{
+  channels: {
+    telegram: {
+      accounts: {
+        default: { botToken: "${TG_MAIN_BOT_TOKEN}" },
+        research: { botToken: "${TG_RESEARCH_BOT_TOKEN}" },
+        ops: { botToken: "${TG_OPS_BOT_TOKEN}" },
+      },
+    },
+  },
+
+  bindings: [
+    { agentId: "primary", match: { channel: "telegram", accountId: "default" } },
+    { agentId: "research", match: { channel: "telegram", accountId: "research" } },
+    { agentId: "ops", match: { channel: "telegram", accountId: "ops" } },
+  ],
+}
+```
+
+Treat that as an **architecture pattern**, not a copy-paste promise for every version. The point is the contract:
+
+- **channel account identity** is the ingress key
+- **binding** is the dispatch rule
+- **agentId** is the worker you intend to answer
+
+If you do not make this relationship obvious, you end up debugging “wrong agent answered” or “this second bot is silent” as if they were model problems.
+
+They usually are not.
+
+## Telegram multi-account: why it bites people first
+
+Telegram is often where multi-agent ideas become real, because it is easy to create more than one bot token. It is also where routing mistakes become visible fastest.
+
+The common traps are boring, but expensive:
+
+### 1) A second Telegram account is not a second routing policy
+
+A second token gives you a second bot identity. That does **not** automatically mean:
+
+- different memory boundaries
+- different tool permissions
+- different workspace conventions
+- a guaranteed binding to a non-default agent
+
+If the account-to-agent relationship is ambiguous, you have created two brand names and one operational mess.
+
+### 2) Telegram visibility rules stack with OpenClaw routing rules
+
+Even before OpenClaw can route traffic, Telegram itself may filter what the bot sees:
+
+- privacy mode in groups
+- missing admin rights
+- DM pairing / allowlist behavior
+- group-specific mention or reply expectations
+
+So a failed interaction can happen at two separate layers:
+
+1. Telegram never delivered the event the way you expected.
+2. OpenClaw received it, but the gateway had no correct binding or policy for that path.
+
+That is why Telegram multi-account setups feel confusing: two systems are making routing decisions at once.
+
+### 3) Default routes hide mistakes
+
+Default behavior is convenient during setup, but dangerous in multi-account production.
+
+If your main assistant is the only route you fully understand, everything else quietly becomes an exception case. That is how you get:
+
+- one bot answering with the wrong persona
+- one bot never answering at all
+- one bot writing into a workspace area meant for another role
+
+For anything beyond a toy setup, **bind non-default accounts explicitly and test each one with a deliberate route check**.
+
+For Telegram-specific controls and first-run gotchas, see [/guides/telegram-setup](/guides/telegram-setup).
+
+## Multi-agent design starts with boundaries, not prompts
+
+The fastest way to make a multi-agent system unusable is to let every agent see and do everything.
+
+Give each role three boundaries:
+
+### 1) Channel boundary
+
+Where should this agent be reachable?
+
+Examples:
+
+- primary assistant: direct human-facing DM and the main team group
+- research assistant: a dedicated research bot/account or a dedicated intake room
+- ops assistant: only an admin-only bot, cron, or alert channel
+
+If two agents share the same front door, be prepared to explain the arbitration rule clearly. If you cannot explain it in one sentence, simplify the routes.
+
+### 2) Tool boundary
+
+What is this agent actually allowed to do?
+
+Examples:
+
+- primary assistant: safe read/write to the main project workspace
+- research assistant: search, summarize, draft notes, low-risk artifact creation
+- ops assistant: diagnostics, deployment-adjacent workflows, status collection, carefully scoped administrative actions
+
+Do not give the ops agent a public DM channel and broad write powers unless you enjoy preventable incidents.
+
+### 3) Memory boundary
+
+What should persist as local role memory, and what should be written as shared project state?
+
+This is where many teams confuse memory with collaboration.
+
+Use this rule:
+
+- **private role memory** for local habits, recent working context, and short-lived thread continuity
+- **shared workspace artifacts** for anything another agent or human must reliably inspect later
+
+That means decisions, plans, handoff notes, status summaries, and evidence should land in the workspace, not remain trapped inside one agent’s conversational state.
+
+If you are still sorting out what state persists and what lives in the workspace, read [/guides/openclaw-state-workspace-and-memory](/guides/openclaw-state-workspace-and-memory).
+
+## Shared workspace, narrow memory: the pattern that ages well
+
+For most practical teams, the clean pattern is:
+
+- one shared project workspace
+- one folder convention for handoffs and outputs
+- narrow per-agent memory
+- explicit written artifacts at every cross-agent boundary
+
+Why this works:
+
+- humans can inspect progress without reading hidden chat history
+- agents can collaborate through durable files instead of implied memory
+- failures become debuggable because evidence exists outside the runtime
+- you can swap or retrain an agent role without losing the entire project state
+
+What not to do:
+
+- do not assume “shared gateway” means “shared understanding”
+- do not use one giant undifferentiated workspace folder with no ownership conventions
+- do not rely on one agent remembering what another agent said yesterday
+
+Good handoff artifacts are boring by design:
+
+- `brief.md`
+- `research-notes.md`
+- `ops-status.md`
+- `next-actions.md`
+
+When collaboration matters, boring beats clever.
+
+## A role split that works for many teams
+
+If you want a practical default, start with three roles.
+
+### Primary assistant
+
+Use for:
+
+- the main human-facing bot
+- short-answer coordination
+- intake, triage, and deciding whether work should be delegated
+
+Should have:
+
+- the clearest public identity
+- the safest default route
+- enough tools to be useful, but not every administrative power
+
+Should not be:
+
+- your deployment bot
+- your everything bot
+- the only place important work products live
+
+### Research assistant
+
+Use for:
+
+- long-form exploration
+- source gathering and synthesis
+- draft generation and option comparison
+
+Should have:
+
+- a dedicated intake path or explicit summon path
+- strong artifact habits: notes, links, summaries, decision memos
+- a workspace area where outputs are easy to reuse
+
+Should not be:
+
+- the bot that answers every casual operational ping
+- a hidden side-agent whose work disappears into chat history
+
+### Ops assistant
+
+Use for:
+
+- status checks
+- environment diagnostics
+- deployment-adjacent workflows
+- structured incident summaries
+
+Should have:
+
+- the narrowest audience
+- the narrowest tool scope compatible with its job
+- explicit escalation rules when a human must approve the next step
+
+Should not be:
+
+- exposed to general public channels
+- sharing the same open-ended conversational surface as your primary assistant
+
+This split is not magical. It is just operationally legible.
+
+## When to route by account, and when to route inside one account
+
+Do not create a new account for every subtle behavioral variation.
+
+Use a **separate account** when you need:
+
+- a clearly different public identity
+- a different audience or access policy
+- separate admin controls at the channel platform level
+- easy mental separation for humans using the system
+
+Stay on **one account with internal delegation** when the user experience should still feel like talking to one assistant that sometimes calls specialists behind the scenes.
+
+That distinction matters. Sometimes the right architecture is not “three visible bots,” but “one visible bot with two specialist back-end workers.”
+
+If the human should not have to choose which bot to message, keep the surface area small and let the primary assistant orchestrate.
+
+## The mistakes that make multi-agent feel flaky
+
+These are the patterns to avoid.
+
+### Mistake 1: treating persona as architecture
+
+“This bot has a different system prompt” is not enough. If routes, tools, and memory are shared, you have branding, not separation.
+
+### Mistake 2: sharing all memory and calling it collaboration
+
+Shared memory often becomes cross-role contamination. Use shared files for collaboration and keep role memory tighter.
+
+### Mistake 3: giving every agent the same ingress path
+
+If every bot can answer everywhere, nobody knows who should answer, and nobody can debug why the wrong one did.
+
+### Mistake 4: creating multiple gateways too early
+
+Separate gateways feel clean in theory, but they multiply config, state, auth, upgrades, and failure modes. Earn that complexity.
+
+### Mistake 5: no routing test plan
+
+For each account and each important chat surface, you should be able to answer:
+
+- what event should reach this agent?
+- what event should not reach this agent?
+- what artifact should appear after a successful run?
+
+If you cannot test those three things, you do not yet have a reliable route.
+
+## A good rollout plan for your first serious setup
+
+If you are designing this this week, do it in this order:
+
+1. **Name the roles**: primary, research, ops.
+2. **Assign ingress paths**: which channel/account/group reaches which role.
+3. **Define tool boundaries**: what each role may actually do.
+4. **Define handoff artifacts**: where plans, findings, and evidence are written.
+5. **Bind non-default accounts explicitly**.
+6. **Test each route independently** before letting real users depend on it.
+
+Notice what is not on that list: “spend a day writing clever prompts.”
+
+Prompt quality matters, but routing clarity matters first.
+
+## When separate gateways really are the right answer
+
+There are valid reasons to split later.
+
+Move to multiple gateways when one or more of these is true:
+
+- you need hard separation of state directories and secrets
+- the ops agent should survive independent restarts and upgrades
+- you want a lab or staging environment that can break without affecting production
+- different teams manage different agents and should not share one control plane
+
+At that point, the guide in [/guides/openclaw-configuration](/guides/openclaw-configuration) becomes important again, because state paths and config paths now matter even more.
+
+But make that move because you need isolation, not because multi-agent sounds more “serious” with more processes.
+
+## Bottom line
+
+The practical architecture for most teams is not “many bots everywhere.” It is:
+
+- **one gateway**
+- **multiple agents with clear jobs**
+- **explicit bindings for every non-default ingress path**
+- **shared workspace artifacts for handoffs**
+- **narrow memory and tool boundaries**
+
+That gives you specialization without chaos.
+
+If you remember only one sentence, make it this:
+
+**a second account creates a second door; only routing and boundaries create a second reliable worker.**
+
+## Related reading
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- [/guides/telegram-setup](/guides/telegram-setup)
+- [/guides/openclaw-state-workspace-and-memory](/guides/openclaw-state-workspace-and-memory)
+- [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability)
+
+## Primary external signals
+
+- OpenClaw issue #39539: multi-agent Telegram routing discussion and the need for explicit bindings for non-default accounts — [GitHub issue #39539](https://github.com/openclaw/openclaw/issues/39539)
+- OpenClaw issue #75: an older signal that users wanted more than a single app surface, useful as historical context but less specific on routing mechanics — [GitHub issue #75](https://github.com/openclaw/openclaw/issues/75)
+
+## Suggested next reading on CoClaw
+
+- [Configuration guide](/guides/openclaw-configuration)
+- [State, workspace, and memory](/guides/openclaw-state-workspace-and-memory)
+- [Telegram setup](/guides/telegram-setup)

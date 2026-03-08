@@ -1,0 +1,460 @@
+---
+title: "ClawHub Usage Guide: Discover, Evaluate, Install, Upgrade, and Roll Back Skills Safely"
+description: "A practical guide to using ClawHub as a skill discovery and distribution channel: how to evaluate maintainers, install in a low-risk way, upgrade without surprises, and keep a real rollback path when a skill fails or disappears."
+category: "advanced"
+difficulty: "Intermediate"
+platforms:
+  - "ClawHub"
+  - "CLI"
+  - "macOS"
+  - "Linux"
+  - "Windows"
+time: "25 min"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+steps:
+  - title: "Use discovery as filtering, not trust"
+    content: "Popularity and marketplace ranking help you find candidates, but you still need to verify maintainers, code, permissions, and update history yourself."
+  - title: "Install first in a low-blast-radius lab"
+    content: "Give new skills a separate workspace, limited secrets, and a narrow task so you can observe behavior before promoting them to daily use."
+  - title: "Upgrade with a recorded known-good state"
+    content: "Before every update, note the exact skill version or source you trust and keep a backup of the surrounding OpenClaw state that depends on it."
+  - title: "Treat rollback as an operating procedure"
+    content: "If a release regresses, remove the current install, reinstall the last-known-good source, and verify the workflow instead of debugging on production."
+  - title: "Keep safety boundaries outside the marketplace"
+    content: "Registry scanning and moderation help, but your real protection comes from least privilege, separate environments, and auditable approval gates."
+keywords:
+  - "clawhub"
+  - "skills"
+  - "skill marketplace"
+  - "supply chain security"
+  - "openclaw"
+  - "rollback"
+  - "upgrade"
+  - "prompt injection"
+---
+
+ClawHub is useful, but it is not magic. It solves **discovery and distribution**, not trust.
+
+That distinction matters because the hardest part of using community skills is not finding a button to click. It is deciding **what deserves to run inside your agent environment**, what should stay in a lab, and how you recover when a skill update breaks behavior or a registry listing disappears.
+
+This guide focuses on the operator questions that actually matter:
+
+- How do you discover worthwhile skills without equating popularity with safety?
+- How do you evaluate a community skill before giving it access to files, browsers, tokens, or messages?
+- How do you install and upgrade without creating silent dependency drift?
+- How do you roll back when a release goes bad or the marketplace becomes unavailable?
+- Where are the real security boundaries, and where are people fooling themselves?
+
+If you want the short version, here it is:
+
+> Use ClawHub as a marketplace and update channel, but keep your **trust model, blast-radius limits, and rollback plan** outside the marketplace.
+
+## What ClawHub is good for
+
+At its best, ClawHub gives the OpenClaw ecosystem three things:
+
+1. **Discovery**: a place to find skills by category, search term, or maintainer.
+2. **Distribution**: a simpler install/update path than manually cloning random repositories.
+3. **Shared visibility**: ratings, reports, popularity, and community attention around the same package.
+
+That is real value. Without a registry, every install becomes a custom research project.
+
+But a registry also creates a false sense of assurance. A listed skill can still be a poor fit, badly maintained, overly privileged, or actively unsafe. A hidden or removed skill can still have legitimate users who depend on it. The recent Capability Evolver / EvoMap story is a reminder that marketplace status, security allegations, moderation actions, and operator reality do not always line up cleanly.
+
+So the right mental model is:
+
+- **ClawHub helps you find skills faster.**
+- **It does not remove the need for technical judgment.**
+
+## When ClawHub is the wrong starting point
+
+Do **not** begin with a community skill if your use case looks like one of these:
+
+- You are handling customer data, internal source code, regulated information, or production credentials.
+- You do not yet know the minimum permissions the workflow needs.
+- You cannot test in a separate environment first.
+- You do not have a clear uninstall or rollback path.
+- You are choosing a skill because it is trending, not because you understand its operating model.
+
+In those cases, start by defining the workflow and trust boundary first. The marketplace comes second.
+
+## 1) Discovery: use the marketplace to narrow options, not to outsource judgment
+
+Discovery should answer a very specific question:
+
+> "Which two or three candidate skills deserve my review time?"
+
+It should **not** answer:
+
+> "Which skill is safe enough to run because other people installed it?"
+
+A practical discovery flow looks like this:
+
+### Start with the task, not the skill name
+
+Write down the smallest useful job you want the skill to do.
+
+Examples:
+
+- "Summarize Gmail threads and draft replies, but never send without approval."
+- "Post a status update to Slack from a known template."
+- "Read local Markdown notes and create an index."
+
+That framing helps you reject skills that solve ten things when you only need one. Over-broad capability is often a security problem disguised as convenience.
+
+### Use multiple signals during discovery
+
+ClawHub search is useful, including the CLI flow:
+
+```bash
+npx clawhub@latest search "gmail"
+```
+
+But do not stop at search results. For each candidate, check:
+
+- the maintainer identity and whether it maps to a real person, org, or GitHub history
+- whether the source repository is public and actively maintained
+- whether issues are answered with substance, not just marketing
+- whether the README explains permissions, network usage, and failure modes
+- whether the skill solves one workflow cleanly or claims to do everything
+
+### Prefer boring maintainers over flashy demos
+
+A reliable maintainer with a small, well-scoped skill is usually a better bet than a viral skill with an unclear operating model.
+
+Strong discovery signals:
+
+- public source repo
+- recent commits that look like maintenance, not only launch hype
+- release notes that mention fixes and compatibility, not just features
+- documentation that explains limits and setup assumptions
+- evidence the author understands safe defaults
+
+Weak discovery signals:
+
+- only screenshots, no code
+- AI-generated README with no operational detail
+- vague language about "self-evolving" or "fully autonomous" behavior without explaining guardrails
+- no visible path for bug reports, takedowns, or version history
+
+## 2) Evaluation: the five questions to answer before install
+
+Before you install any skill, be able to answer these five questions in plain English.
+
+### A. What can it read?
+
+Look for access to:
+
+- local files
+- memory/state directories
+- browser sessions and cookies
+- email or chat history
+- environment variables and API keys
+
+If the answer is "probably a lot," the skill is too ambiguous to install casually.
+
+### B. What can it send out?
+
+Outbound capability is where many skill risks become real incidents.
+
+Check whether the skill can:
+
+- call arbitrary HTTP endpoints
+- send messages or email
+- upload files
+- post to third-party dashboards or webhooks
+
+A skill that can both **read sensitive data** and **send network requests** deserves much stricter scrutiny than a purely local utility.
+
+### C. What does failure look like?
+
+A good skill description should let you imagine a bad day.
+
+Examples:
+
+- If auth fails, does the skill stop safely or retry forever?
+- If the external API changes, does it produce a clear error or corrupt output?
+- If the tool gets the wrong prompt, can it only draft, or can it also send, delete, or overwrite?
+
+If you cannot describe the failure mode, you do not understand the skill yet.
+
+### D. Can you verify the source and update path?
+
+Marketplace presence is not enough. Verify:
+
+- where the source lives
+- whether released artifacts map to source you can inspect
+- whether you can identify a known-good version, tag, or commit
+- whether the maintainer publishes meaningful release notes
+
+If you cannot identify what you would reinstall after a bad upgrade, you do not have a rollback plan.
+
+### E. Is the claimed value worth the risk surface?
+
+This is the most important question and the one people skip.
+
+A calculator skill with browser control, shell access, and outbound HTTP is absurd. A deployment skill with restricted shell access in a lab environment may be reasonable. Value and privilege should move together.
+
+## 3) Install: do the first install in a lab, not in your everyday workspace
+
+The safest install is the one that cannot hurt much.
+
+Official CLI installation is straightforward:
+
+```bash
+npx clawhub@latest install <owner>/<skill>
+```
+
+That convenience is exactly why discipline matters. Before the first install, set these boundaries:
+
+### Separate lab from daily use
+
+Your first install should happen in an environment with:
+
+- a separate workspace directory
+- limited or fake credentials where possible
+- no production secrets
+- a narrow, reversible test task
+
+This is the practical version of the advice in our security playbook: treat skills like software supply chain components, not like harmless prompts.
+
+### Give the skill a single evaluation task
+
+Do not test a new skill with your entire real workflow. Give it one bounded job such as:
+
+- draft, but do not send
+- summarize, but do not mutate files
+- read one known folder, not your full home directory
+
+The point of the first install is not "see everything it can do." It is "observe whether it behaves predictably under constraint."
+
+### Record the known-good state immediately
+
+As soon as a skill passes initial evaluation, record:
+
+- the skill identifier
+- the source repository URL
+- the version, tag, or release you installed if the project exposes one
+- any required secrets or environment assumptions
+- the exact workflow you verified
+
+If you skip this, your future self will not know what "working" meant before the next upgrade.
+
+### If CLI auth fails, fix the registry path first
+
+Some users have hit a case where token login returns `Unauthorized` even with a fresh token. If that happens, use the documented `www` registry URL workaround instead of assuming the token itself is bad:
+
+```bash
+npx clawhub@latest auth login \
+  --token "clh_..." \
+  --no-browser \
+  --registry "https://www.clawhub.ai/"
+```
+
+If auth is flaky, do not keep retrying destructive actions. Get the registry path stable first.
+
+## 4) Upgrade: treat every update as a change request
+
+The official update path is simple:
+
+```bash
+npx clawhub@latest update <owner>/<skill>
+```
+
+Simple command, non-simple consequence.
+
+A skill update can change:
+
+- prompts and agent behavior
+- external API usage
+- required secrets
+- file formats and state expectations
+- permission surface
+
+So the right upgrade rule is:
+
+> Never upgrade a skill you depend on unless you can name the version you trust today.
+
+### A safe upgrade routine
+
+Before upgrading:
+
+1. Read the release notes or recent commits.
+2. Confirm whether permissions, providers, or external services changed.
+3. Snapshot the surrounding OpenClaw state if the workflow is important.
+4. Re-run the same narrow verification task you used when approving the skill.
+
+After upgrading, verify three things:
+
+- the skill still performs the expected task
+- it does not request broader access than before
+- failure behavior is still understandable and reversible
+
+### Upgrade in waves, not all at once
+
+If a skill matters, use a promotion model:
+
+- **Lab** updates first
+- **Everyday environment** second
+- **Shared or production-like environment** last
+
+This matters because many regressions are not "the skill is broken" problems. They are compatibility problems between the skill, your current state, and your surrounding tools.
+
+## 5) Rollback: assume you will need it before you need it
+
+Rollback is where disciplined operators separate themselves from hopeful ones.
+
+The registry is an install channel, not a substitute for your own change history. A skill can regress, vanish from discovery, get reported, be delisted, or simply stop fitting your setup. If that happens, the goal is not to argue with the marketplace while your workflow is down. The goal is to restore the last known-good behavior.
+
+### The minimum rollback procedure
+
+1. Stop relying on the failing skill for production work.
+2. Remove the current install:
+
+```bash
+npx clawhub@latest remove <owner>/<skill>
+```
+
+3. Reinstall the last-known-good source you recorded before the upgrade.
+4. Re-run the exact verification task you documented.
+5. Only then restore the workflow to daily use.
+
+Notice what this procedure assumes: **you kept your own record of the working source and state assumptions.**
+
+That is why rollback starts before upgrade, not after failure.
+
+### If the skill is no longer visible in ClawHub
+
+This is the harder case, and the marketplace history around high-profile skills is exactly why you should plan for it.
+
+If a listing disappears or becomes inaccessible:
+
+- do not assume the removal proves the skill was malicious
+- do not assume the removal was mistaken either
+- stop using the skill until you can verify the source independently
+- prefer reinstalling only from a source repository or artifact you previously reviewed
+- if you cannot verify that source, treat the skill as untrusted and replace the workflow
+
+A marketplace can accelerate installs. It can also become a bottleneck. Your continuity plan should not depend on marketplace availability alone.
+
+## 6) Security boundaries: what ClawHub can help with, and what it cannot solve for you
+
+ClawHub can contribute useful ecosystem controls such as visibility, moderation, scanning, and reporting. Those are helpful signals. They are **not** your final line of defense.
+
+Your real safety boundaries live outside the registry:
+
+### Least privilege
+
+Do not give a new skill:
+
+- unrestricted filesystem access
+- high-value API keys
+- browser sessions with important cookies
+- outbound messaging plus access to sensitive local data
+
+all at the same time unless you are willing to accept the full blast radius.
+
+### Environment separation
+
+Keep at least two environments:
+
+- **lab** for trying new or updated skills
+- **trusted** for the subset you already evaluated
+
+If you run a serious setup, add a third boundary for shared or production-like use.
+
+### Human approval for side effects
+
+A skill that drafts is safer than a skill that sends. A skill that classifies is safer than a skill that mutates. A skill that proposes file changes is safer than one that silently writes everywhere.
+
+Where possible, require explicit approval before:
+
+- sending messages
+- posting externally
+- deleting or overwriting files
+- changing accounts, tokens, or configuration
+
+### Auditable change history
+
+Keep a simple operator log for every approved skill:
+
+- when you installed it
+- what source you trusted
+- what permissions it needs
+- what test you used to approve it
+- what changed at each upgrade
+- what the rollback source is
+
+Without that paper trail, a marketplace update becomes guesswork.
+
+## Common mistakes
+
+The most common ClawHub mistakes are not technical. They are judgment errors.
+
+### Mistake 1: treating ranking as trust
+
+Popularity means attention, not safety.
+
+### Mistake 2: installing into the same environment you depend on
+
+If discovery, evaluation, and daily work all happen in one place, you have no safe learning space.
+
+### Mistake 3: upgrading because "latest" exists
+
+A new release is an event, not an obligation.
+
+### Mistake 4: assuming marketplace moderation replaces local review
+
+Registry controls are ecosystem hygiene, not individualized risk acceptance.
+
+### Mistake 5: skipping rollback notes because the skill is small
+
+Small skills can still break critical automations.
+
+## A practical checklist before you say yes
+
+Install the skill only if all of these are true:
+
+- You can explain what the skill reads, writes, and sends.
+- You can identify the maintainer and a reviewable source.
+- You can test it in a low-blast-radius environment first.
+- You know what "working" means for one concrete task.
+- You have recorded a known-good source for rollback.
+- The value of the workflow is proportionate to the permissions you are granting.
+
+If one of those is missing, you are not ready to install. You are still in discovery.
+
+## Final recommendation
+
+Use ClawHub confidently, but use it like an operator.
+
+That means:
+
+- discover through the marketplace
+- evaluate through source, scope, and maintainer quality
+- install first in a lab
+- upgrade with a named known-good baseline
+- roll back from your own records, not from memory
+
+ClawHub is worth using when it speeds up access to skills you can explain and contain.
+
+It becomes dangerous when it turns into a substitute for your own security model.
+
+## Related reading
+
+- [OpenClaw Security Playbook: Skill Supply Chain Safety & Prompt Injection Defense](/guides/openclaw-skill-safety-and-prompt-injection)
+- [ClawHub CLI: 'Unauthorized' even with a valid token](/troubleshooting/clawhub-cli-unauthorized-with-valid-token)
+- [Haoyang Zhang (autogame-17): Capability Evolver, ClawHub, and EvoMap](/stories/haoyang-zhang-evomap)
+
+## External sources checked
+
+- [ClawHub official site](https://www.clawhub.ai/)
+- [ClawHub official GitHub repository](https://github.com/openclaw/clawhub)
+- [OpenClaw docs: ClawHub](https://docs.openclaw.ai/tools/clawhub)
+
+## Suggested next reading on CoClaw
+
+- [Extension ecosystem map](/blog/openclaw-extension-ecosystem-map)
+- [Skill safety and prompt injection defense](/guides/openclaw-skill-safety-and-prompt-injection)
+- [Ecosystem variants map](/blog/openclaw-ecosystem-variants-map)
