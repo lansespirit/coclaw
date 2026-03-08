@@ -5,8 +5,7 @@
 ## 0) 名词解释（哪些发布、哪些只做输入）
 
 - **Solution（发布）：** 我们整理后的“可落地解决方案”页面（Symptoms → Cause → Fix → Verify → Related）。存放在 `src/content/troubleshooting/solutions/*.mdx`。
-- **Case（内部草稿/研究）：** 从 issue 抽取的草稿记录，用于聚类与选题，不对外发布（`kind: case`, `draft: true`）。
-- **GitHub issues/discussions（仅输入）：** 只作为研究素材，不对外镜像，不在站点主流程里推广（避免重复内容与 SEO 内耗）。
+- **GitHub issues/discussions（仅输入）：** 只作为研究素材，不对外镜像成 MDX 页面，不在站点主流程里推广（避免重复内容与 SEO 内耗）。
 
 ## 1) 数据刷新（GitHub -> 本地数据集）
 
@@ -64,29 +63,16 @@ pnpm analyze:issues
 - 统计口径覆盖 **title + body + comments**（如 comments 可用）。
 - 示例优先选择评论更多的 issues（通常更代表真实问题与可复现路径）。
 
-## 3) 草稿生成（可选，内部用）
+## 3) 写作规范（Solution 页面）
 
-用于快速产出“case 草稿”以便人工整理：
-
-```bash
-pnpm generate:troubleshooting-stubs
-```
-
-约束：
-
-- 生成内容必须为 `kind: case` 且 `draft: true`
-- Case 不发布（构建路由只包含 `kind: solution`）
-
-## 4) 写作规范（Solution 页面）
-
-### 4.1 路径与路由
+### 3.1 路径与路由
 
 - 每条 solution 一个文件：
   - `src/content/troubleshooting/solutions/<slug>.mdx`
 - 对外路由：
   - `/troubleshooting/solutions/<slug>/`
 
-### 4.2 Frontmatter 规范（必填/推荐）
+### 3.2 Frontmatter 规范（必填/推荐）
 
 必填：
 
@@ -108,7 +94,7 @@ pnpm generate:troubleshooting-stubs
 - `related.githubIssues: []`（仅写 issue number；作为来源，不做镜像）
 - `related.docs: []`（OpenClaw 官方文档链接）
 
-### 4.3 正文结构（强制标题顺序）
+### 3.3 正文结构（强制标题顺序）
 
 每篇 solution 必须包含以下标题，且顺序固定：
 
@@ -118,7 +104,7 @@ pnpm generate:troubleshooting-stubs
 4. `## Verify`
 5. `## Related`（可选但建议）
 
-### 4.4 errorSignatures 规则（避免重复与误命中）
+### 3.4 errorSignatures 规则（避免重复与误命中）
 
 `errorSignatures` 只放“决定性文本”（用户贴日志时能强命中）。
 
@@ -130,7 +116,7 @@ pnpm generate:troubleshooting-stubs
   - 例如单独 `1008` 会同时命中 pairing/unauthorized/device identity；应写完整原因字符串（如 `pairing required`）。
 - 控制长度：3–8 个为宜；只在能提升搜索召回时才添加。
 
-### 4.5 内容质量规则（长期可维护）
+### 3.5 内容质量规则（长期可维护）
 
 - 不能把 GitHub issue 讨论直接搬进来当 solution（最多引用事实/症状，不能镜像线程）。
 - 页面必须可独立解决问题：不跳转也能修复（Related 只是补充）。
@@ -139,14 +125,14 @@ pnpm generate:troubleshooting-stubs
 - 配置示例要“最小可用”，并明确“要改哪一行/哪一个字段”。
 - 必须给出可验证步骤（Verify：什么表现代表修好了）。
 
-## 5) 可见性与 SEO 策略
+## 4) 可见性与 SEO 策略
 
 - Solutions 对外可索引。
 - Issues Explorer / 原始 issues 页面仅内部使用，不在站内主流程推广：
   - Solutions 或 Troubleshooting 主流程中不要链接 `/troubleshooting/issues`
   - 保持 `noindex` + sitemap 排除（当前已做）
 
-## 6) 发布流程（合并前 checklist）
+## 5) 发布流程（合并前 checklist）
 
 新增/更新 solution 合并前必须检查：
 
@@ -160,7 +146,7 @@ pnpm generate:troubleshooting-stubs
    - 页面能正常渲染（`/troubleshooting/solutions/<slug>/`）
    - Pagefind 能搜到（用某个 `errorSignatures` 的 token 搜索验证）
 
-## 7) 推荐维护节奏
+## 6) 推荐维护节奏
 
 - 每周（或每次 OpenClaw 大版本更新后）：
   - `pnpm sync:issues`
