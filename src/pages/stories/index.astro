@@ -17,6 +17,14 @@ const dateFormatter = new Intl.DateTimeFormat('en', {
   year: 'numeric',
 });
 
+const storyTypeLabels = {
+  person: 'Person story',
+  company: 'Company story',
+  project: 'Project case',
+  incident: 'Incident report',
+  ecosystem: 'Ecosystem story',
+} as const;
+
 const stories = storyEntries
   .sort((leftEntry, rightEntry) => {
     if (leftEntry.data.featured !== rightEntry.data.featured) {
@@ -25,31 +33,38 @@ const stories = storyEntries
 
     return rightEntry.data.publishDate.getTime() - leftEntry.data.publishDate.getTime();
   })
-  .map((entry) => ({
-    name: entry.data.name,
-    role: entry.data.role,
-    company: entry.data.company,
-    quote: entry.data.quote,
-    summary: entry.data.summary,
-    href: `/stories/${entry.slug}`,
-    featured: entry.data.featured,
-    avatar: entry.data.avatar,
-    coverImage: entry.data.coverImage,
-    publishDate: entry.data.publishDate,
-    publishLabel: dateFormatter.format(entry.data.publishDate),
-    sourceCount: entry.data.sources?.length ?? 0,
-    keywords:
-      entry.data.keywords
-        ?.split(',')
-        .map((keyword) => keyword.trim())
-        .filter(Boolean)
-        .slice(0, 3) ?? [],
-  }));
+  .map((entry) => {
+    const updatedDate = entry.data.updatedDate ?? entry.data.publishDate;
+
+    return {
+      title: entry.data.title,
+      storyType: entry.data.storyType,
+      name: entry.data.name,
+      role: entry.data.role,
+      company: entry.data.company,
+      quote: entry.data.quote,
+      summary: entry.data.summary,
+      dek: entry.data.dek,
+      href: `/stories/${entry.slug}`,
+      featured: entry.data.featured,
+      avatar: entry.data.avatar,
+      coverImage: entry.data.coverImage,
+      publishDate: entry.data.publishDate,
+      publishLabel: dateFormatter.format(entry.data.publishDate),
+      updatedDate,
+      updatedLabel: dateFormatter.format(updatedDate),
+      sourceCount: entry.data.sources?.length ?? 0,
+      topics: entry.data.topics.slice(0, 3),
+    };
+  });
 
 const spotlightStory = stories.find((story) => story.featured) ?? stories[0];
 const archiveStories = stories.filter((story) => story.href !== spotlightStory?.href);
 const latestStory = [...stories].sort(
   (leftStory, rightStory) => rightStory.publishDate.getTime() - leftStory.publishDate.getTime()
+)[0];
+const latestUpdatedStory = [...stories].sort(
+  (leftStory, rightStory) => rightStory.updatedDate.getTime() - leftStory.updatedDate.getTime()
 )[0];
 const totalSources = stories.reduce((count, story) => count + story.sourceCount, 0);
 
@@ -59,13 +74,21 @@ const editorialPillars = [
   'Security-aware takeaways',
 ];
 
-const seoTopics = ['Security', 'Governance', 'Deployments', 'ClawHub'];
+const seoTopics = Array.from(new Set(stories.flatMap((story) => story.topics))).slice(0, 6);
+const collectionKeywords = [
+  'OpenClaw stories',
+  'OpenClaw case studies',
+  'OpenClaw security',
+  'ClawHub',
+  'CoClaw',
+  ...seoTopics,
+].join(', ');
 
 const heroMeta = [
-  'Issue 01 · March 2026',
-  `${stories.length} stories`,
+  `${stories.length} source-backed stories`,
   `${totalSources} public sources`,
-  latestStory ? `Updated ${latestStory.publishLabel}` : 'Updated TBD',
+  latestStory ? `Latest ${latestStory.publishLabel}` : 'Latest TBD',
+  latestUpdatedStory ? `Updated ${latestUpdatedStory.updatedLabel}` : 'Updated TBD',
 ];
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -78,7 +101,7 @@ const structuredData = {
   url: canonicalURL.toString(),
   hasPart: stories.map((story) => ({
     '@type': 'WebPage',
-    name: story.name,
+    name: story.title,
     url: new URL(story.href, Astro.site).toString(),
     description: story.summary,
   })),
@@ -88,7 +111,7 @@ const structuredData = {
 <BaseLayout
   title="OpenClaw Stories, Case Studies & Security Lessons | CoClaw"
   description="CoClaw curates source-backed OpenClaw stories, case studies, ClawHub governance moments, and security lessons for operators who care about trust, deployment, and day-two reality."
-  keywords="OpenClaw stories, OpenClaw case studies, OpenClaw security, ClawHub, CoClaw, AI assistant deployment, OpenClaw community"
+  keywords={collectionKeywords}
 >
   <Fragment slot="head">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -240,7 +263,7 @@ const structuredData = {
                 {spotlightStory.coverImage ? (
                   <img
                     src={spotlightStory.coverImage}
-                    alt={`${spotlightStory.name} cover`}
+                    alt={`${spotlightStory.title} cover`}
                     class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
                     loading="eager"
                   />
@@ -250,7 +273,7 @@ const structuredData = {
                 <div class="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent dark:from-background/60" />
                 <div class="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full border border-divider bg-content1/80 px-4 py-2 text-[0.72rem] uppercase tracking-[0.24em] text-default-700 backdrop-blur dark:bg-content1/60 dark:text-default-500">
                   <IconCollection className="h-4 w-4 text-secondary" aria-hidden="true" />
-                  Featured OpenClaw case study
+                  {storyTypeLabels[spotlightStory.storyType]}
                 </div>
               </div>
 
@@ -261,16 +284,18 @@ const structuredData = {
                     <span class="h-1 w-1 rounded-full bg-default-400" />
                     <span>{spotlightStory.sourceCount} sources</span>
                     <span class="h-1 w-1 rounded-full bg-default-400" />
-                    <span>{spotlightStory.company}</span>
+                    <span>{storyTypeLabels[spotlightStory.storyType]}</span>
                   </div>
                   <h2 class="stories-display mt-5 text-4xl leading-tight text-foreground md:text-5xl">
-                    {spotlightStory.name}
+                    {spotlightStory.title}
                   </h2>
-                  <p class="mt-3 text-base font-medium text-secondary md:text-lg">
-                    {spotlightStory.role}
-                  </p>
+                  <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-default-600 dark:text-default-500 md:text-base">
+                    <span class="font-semibold text-secondary">{spotlightStory.name}</span>
+                    <span class="hidden h-1 w-1 rounded-full bg-default-400 md:block" />
+                    <span>{spotlightStory.role}</span>
+                  </div>
                   <p class="mt-6 max-w-3xl text-base leading-8 text-default-800 dark:text-default-600 md:text-lg">
-                    {spotlightStory.summary}
+                    {spotlightStory.dek}
                   </p>
                   <blockquote class="mt-8 border-l border-secondary/30 pl-5 text-2xl leading-relaxed text-foreground md:text-[2rem]">
                     <span class="inline-flex align-top text-secondary">
@@ -323,14 +348,17 @@ const structuredData = {
                         {story.publishLabel}
                       </p>
                       <h3 class="mt-3 text-2xl font-semibold leading-tight text-foreground">
-                        {story.name}
+                        {story.title}
                       </h3>
                     </div>
                     <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-xs uppercase tracking-[0.18em] text-default-600 dark:bg-content2/35 dark:text-default-500">
                       {story.sourceCount} sources
                     </span>
                   </div>
-                  <p class="mt-3 text-sm font-medium text-secondary">{story.role}</p>
+                  <p class="mt-3 text-sm font-medium text-secondary">
+                    {storyTypeLabels[story.storyType]}
+                  </p>
+                  <p class="mt-2 text-sm text-default-600 dark:text-default-500">{story.name}</p>
                   <p class="mt-4 text-sm leading-7 text-default-700 dark:text-default-500">
                     {story.summary}
                   </p>
@@ -378,7 +406,7 @@ const structuredData = {
                 {story.coverImage ? (
                   <img
                     src={story.coverImage}
-                    alt={`${story.name} cover`}
+                    alt={`${story.title} cover`}
                     class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
                     loading="lazy"
                   />
@@ -392,12 +420,13 @@ const structuredData = {
                 <div class="flex flex-wrap items-center gap-3 text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
                   <span>{story.publishLabel}</span>
                   <span class="h-1 w-1 rounded-full bg-default-400" />
-                  <span>{story.company}</span>
+                  <span>{storyTypeLabels[story.storyType]}</span>
                 </div>
                 <h3 class="mt-4 text-2xl font-semibold leading-tight text-foreground">
-                  {story.name}
+                  {story.title}
                 </h3>
-                <p class="mt-2 text-sm font-medium text-secondary">{story.role}</p>
+                <p class="mt-2 text-sm font-medium text-secondary">{story.name}</p>
+                <p class="mt-1 text-sm text-default-600 dark:text-default-500">{story.role}</p>
                 <p class="mt-4 text-sm leading-7 text-default-700 dark:text-default-500">
                   {story.summary}
                 </p>
@@ -405,9 +434,9 @@ const structuredData = {
                   “{story.quote}”
                 </blockquote>
                 <div class="mt-5 flex flex-wrap gap-2">
-                  {story.keywords.map((keyword) => (
+                  {story.topics.map((topic) => (
                     <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-[0.72rem] uppercase tracking-[0.16em] text-default-600 dark:bg-content2/35 dark:text-default-500">
-                      {keyword}
+                      {topic}
                     </span>
                   ))}
                 </div>

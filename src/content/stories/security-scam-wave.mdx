@@ -1,139 +1,122 @@
 ---
+title: The Security Scam Wave Around OpenClaw
+storyType: incident
 name: Security Scam Wave
 role: Community / Maintainers
 company: OpenClaw community
 avatar: /images/stories/security.svg
 coverImage: /images/stories/covers/security-scam-wave.svg
 ogImage: /images/stories/official/clawhub-official.png
-summary: 'When OpenClaw went viral, scammers followed. This is the practical security playbook we wish every day-0 user had.'
-quote: 'If your assistant can act, your threat model isn’t theoretical.'
+summary: 'A source-backed feature on the first OpenClaw scam wave: renames, typosquats, malicious skills, exposed admin surfaces, and the operational discipline new builders need from day 0.'
+dek: 'When OpenClaw went viral, the risk was not only bad press. It was that beginners were being asked to install software, trust third-party skills, and expose powerful admin surfaces in the middle of a confusion-heavy growth spike.'
+quote: 'The moment an assistant can act, every scam around installation and trust becomes more expensive.'
 publishDate: 2026-02-01
-keywords: 'OpenClaw security, supply chain, typosquatting, tokens, allowlists'
+updatedDate: 2026-03-09
+topics:
+  - OpenClaw security
+  - supply chain
+  - typosquatting
+  - malicious skills
+  - dashboard exposure
+  - tokens
 sources:
   - label: 'Mashable — Clawdbot is now Moltbot… (updated: now OpenClaw)'
     url: https://mashable.com/article/clawdbot-changes-name-to-moltbot-openclaw
-  - label: 'Malwarebytes — Clawdbot (now OpenClaw) hit by scammers / supply-chain risk recap'
-    url: https://www.malwarebytes.com/blog/news/2026/01/from-clawdbot-to-openclaw-new-name-same-scammers
-  - label: 'GitHub — OpenClaw release: openclaw 2026.1.30 (security-related notes)'
+  - label: 'Malwarebytes — Clawdbot’s rename to Moltbot sparks impersonation campaign'
+    url: https://www.malwarebytes.com/blog/threat-intel/2026/01/clawdbots-rename-to-moltbot-sparks-impersonation-campaign
+  - label: 'GitHub — OpenClaw release: v2026.1.30'
     url: https://github.com/openclaw/openclaw/releases/tag/v2026.1.30
   - label: 'OpenClaw Docs — Dashboard security notes'
     url: https://docs.openclaw.ai/web/dashboard
-  - label: 'OpenClaw Docs — Lore (community account of early scams)'
+  - label: 'OpenClaw Docs — Lore'
     url: https://docs.openclaw.ai/start/lore
+  - label: 'Tom’s Hardware — Malicious OpenClaw skill targets crypto users on ClawHub'
+    url: https://www.tomshardware.com/tech-industry/cyber-security/malicious-moltbot-skill-targets-crypto-users-on-clawhub
+  - label: 'TechRadar — Moltbot is now OpenClaw, but malicious skills are still trying to trick victims'
+    url: https://www.techradar.com/pro/moltbot-is-now-openclaw-but-watch-out-malicious-skills-are-still-trying-to-trick-victims-into-spreading-malware
 ---
 
-> Viral projects don't just attract contributors.  
-> They attract people who can type faster than you can think.
+> First came the rename confusion.  
+> Then came the fake links. Then the fake skills. Then the sick feeling that people were granting real power while still guessing what was real.
 
-## What We Can Verify (and What We Can’t)
+The first OpenClaw security story did not arrive as a single clean incident.
 
-There are two kinds of “security stories” in a community’s first month:
+It arrived as atmosphere.
 
-- the verifiable, linkable incidents (press reports, official notes), and
-- the fog-of-war anecdotes (Discord screenshots, reuploads, “my friend got hacked”).
+A project was blowing up in public. Names were changing fast enough to confuse even attentive readers. Search results were lagging behind reality. Newcomers were trying to install the latest thing they had just heard about. Somewhere inside that rush, scammers and copycats did what they always do: they moved into the gap between attention and verification.
 
-CoClaw’s promise is simple: we’ll keep the drama to the prose, and the facts to the sources.
+That is why the early **security scam wave** around OpenClaw felt bigger than a routine round of phishing. This was not only a story about fake downloads. It was a story about confusion landing in an ecosystem where users were not just downloading software, but wiring up tokens, enabling skills, exposing dashboards, and trusting a tool that could actually act.
 
-From public reporting and project materials, we can say with confidence:
+The product was exciting for exactly the same reason it was risky: once configured, OpenClaw was not passive software. It could send messages, run tools, and touch real systems. That made every fake repo, every look-alike domain, and every bad setup guide more expensive than it would have been in an ordinary hype cycle.
 
-- The project’s rapid popularity created a fertile environment for scams and copycats (including
-  crypto-focused impersonation, per reporting).
-- The OpenClaw team has been actively hardening defaults (for example, Gateway auth moving toward
-  fail-closed behavior and other security notes in release changelogs).
-- The official docs emphasize that the dashboard is an **admin surface** and should not be exposed
-  publicly.
+## The week the internet started copying the surface
 
-That is enough to build a real safety playbook.
+The public record from that period has a recognizable rhythm.
 
-## The Moment It Turns Serious: When “AI” Becomes “Admin”
+**Mashable** covered the renaming churn that pushed the project through multiple identities in rapid succession. **Malwarebytes** documented impersonation infrastructure emerging around the same window, including cloned repositories and typo-style trust traps. Other reporting around malicious skills extended the fear from the core project into the surrounding ecosystem, where a user could move from "install the app" to "install extra capabilities" without much emotional separation between the two.
 
-If your assistant only chats, the worst-case outcome is usually embarrassment.
+That is the part people remember viscerally: not one breach, but the sense that everything around the project suddenly needed to be checked twice.
 
-If your assistant can:
+A newcomer could plausibly encounter all of this in the span of one evening:
 
-- send messages,
-- read files,
-- run tools,
-- or open remote access surfaces,
+- an old name in an article,
+- a new name in a post,
+- a copied command in a screenshot,
+- a repo that looked right at first glance,
+- and a skill that sounded useful enough to install before asking many questions.
 
-then the worst-case outcome becomes **account compromise** and **secret theft**.
+None of those steps is dramatic by itself. Put together, they form the real shape of the scam wave: a user moving quickly through a maze that did not yet look like a maze.
 
-This is why “agent security” feels different from “app security.” A normal app has a UI. An agent
-has a language interface—meaning an attacker can try to _talk_ their way into your system.
+## Why OpenClaw made the panic feel heavier
 
-## The Five Scam Patterns to Assume on Day 0
+A lot of developer-tool scams are ultimately about one bad moment at install time.
 
-### 1) Typosquatted repos and look-alike orgs
+OpenClaw made the trust problem feel heavier because the install was only the beginning.
 
-The easiest scam is the oldest: a near-identical repository name and a README that tells you to
-run a suspicious installer.
+The official documentation already hints at this. The **Dashboard / Control UI** is described as an admin surface, not a casual public page. The release notes around the period show the project tightening security behavior in public. The message underneath those details is plain enough: once OpenClaw is running, it sits closer to the control plane than many users initially realize.
 
-### 2) “Helpful” installers that ask for too much
+That changes the emotional math.
 
-Any script that:
+If a person installs the wrong utility, they may lose time, money, or credentials. If a person sets up the wrong **agent runtime**, the risk extends outward: channels, tokens, plugins, history, automation, and whatever else the agent is allowed to touch. The scam economy around OpenClaw did not have to invent that leverage. The product had already created it for legitimate use.
 
-- requests your API keys in plaintext,
-- uploads your config somewhere,
-- or changes your shell profile without explanation,
+That is why the early warnings around dashboards, tokens, and admin exposure mattered so much. They were not overreactions to hype. They were recognition that a system capable of delegated action turns ordinary trust mistakes into operational mistakes.
 
-is not “help.” It’s a credential extraction pipeline.
+## Then the skills story arrived
 
-### 3) Fake “official” support accounts
+If the rename confusion opened the door, the **skills** story made the room feel larger.
 
-Attackers impersonate maintainers, “support engineers,” and “heads of engineering” because it
-short-circuits a beginner’s skepticism.
+Coverage from outlets such as **Tom’s Hardware** and **TechRadar** pushed malicious or deceptive ClawHub skills into the same narrative as cloned repos and fake links. That widened the threat model immediately. Users were no longer just asking, “Where do I install OpenClaw?” They were also asking, “What else inside this ecosystem am I supposed to trust?”
 
-### 4) Malicious “configuration generators” and “one-click setup” tools
+That second question is where the panic stopped being simple.
 
-Config is power. A config generator that quietly enables permissive auth modes or open DM policies
-can turn your assistant into a public service you didn’t intend to run.
+A marketplace is fun when everything feels like possibility. It feels very different when possibility starts looking like distribution risk. A skill registry can be both at once. That is what made the early OpenClaw mood so noisy. Excitement and suspicion were happening in the same tab.
 
-### 5) Token and dashboard leakage
+A malicious skill story is scary for a particular reason: it is not merely about someone imitating the project from the outside. It is about risk entering through the same interface where the ecosystem is telling users to discover what makes the platform powerful.
 
-If your gateway token leaks—and your dashboard is reachable—you’ve effectively handed someone the
-keys to your admin surface.
+That is a much more intimate form of distrust.
 
-## The CoClaw Defensive Checklist
+## The real scene behind the fear
 
-### Protect installs
+The most useful way to remember the scam wave is not as a list of incidents, but as a scene.
 
-- Bookmark the official repo and docs.
-- Prefer documented commands over random scripts.
-- If you use Docker, keep volumes and `.env` files private.
+Someone has just heard that OpenClaw is the thing to try. They are not performing a forensic audit. They are excited. They are skimming headlines, opening tabs, clicking links friends sent them, and trying to get to the working setup before the internet moves on to the next thing. They are exactly the kind of user hype cycles create.
 
-### Protect the gateway
+Now add a renamed project, a few copied surfaces, a few opportunistic scammers, a registry full of tempting extensions, and a dashboard that is more powerful than it looks.
 
-- Keep the dashboard on localhost, or behind Tailscale/SSH.
-- Rotate tokens if you pasted them into any untrusted UI.
+That is the whole story.
 
-### Protect messaging channels
+The fear lingered because people could imagine themselves in that scene very easily. They did not have to picture an advanced attacker. They only had to picture a hurried version of themselves.
 
-- Use pairing or allowlists.
-- Keep group behavior “mention-only” by default.
+## Why it still matters
 
-### Protect tool permissions
+The first OpenClaw scam wave is worth remembering because it clarified what kind of product OpenClaw really was.
 
-- Start with conservative allowlists.
-- Treat tool enablement as a security change, not a convenience toggle.
+Not just an AI app. Not just a chat shell. A system with enough reach that installation trust, ecosystem trust, and admin-surface hygiene all belong to the same narrative.
 
-## If You Think You Got Burned
+That realization is what turned a burst of confusion into a durable ecosystem memory. The project had reached the point where growth and trust engineering could no longer happen on separate schedules.
 
-Do the boring steps, in order:
+That is the real lesson of the wave.
 
-1. Disconnect the gateway from the internet (stop the service / pull network).
-2. Rotate provider keys (OpenAI/Anthropic/etc.) and channel tokens.
-3. Rotate the gateway token/password and restart.
-4. Audit `~/.openclaw/` (or your state dir) for unexpected changes.
-5. Reinstall from official sources if you can’t account for what ran on your machine.
+Not “users should be careful.” Everyone already knows that sentence.
 
-## Closing: The Price of “Viral”
-
-The internet rewards useful tools—and punishes them for being useful.
-
-OpenClaw’s community responded the only way that scales: by hardening defaults, writing warnings,
-and teaching users how to think like operators.
-
-This story is that lesson, condensed.
-
-CoClaw will maintain a safety-first installation path: curated links, explicit warnings, and
-up-to-date references to official documentation.
+The better lesson is sharper: once a product can act on a user’s behalf, every scam around naming, installation, and extensions becomes more consequential, because the thing being compromised is not just software. It is delegated authority.

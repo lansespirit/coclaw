@@ -107,17 +107,20 @@ const troubleshootingCollection = defineCollection({
 const storiesCollection = defineCollection({
   type: 'content',
   schema: z.object({
+    title: z.string(),
+    storyType: z.enum(['person', 'company', 'project', 'incident', 'ecosystem']),
     name: z.string(),
     role: z.string(),
     company: z.string(),
     avatar: z.string(),
     ogImage: z.string().optional(),
-    // Optional large hero/background image for the story detail page.
     coverImage: z.string().optional(),
     summary: z.string(),
+    dek: z.string(),
     quote: z.string(),
     publishDate: z.date(),
-    keywords: z.string().optional(),
+    updatedDate: z.date().optional(),
+    topics: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
     sources: z
       .array(

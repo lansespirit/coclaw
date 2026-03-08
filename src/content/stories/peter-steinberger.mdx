@@ -1,108 +1,111 @@
 ---
+title: Peter Steinberger and the Rebrand That Turned Into a Trust Test
+storyType: person
 name: Peter Steinberger
 role: Creator of OpenClaw
 company: Independent / Community
 avatar: /images/stories/rebrand.svg
 coverImage: /images/stories/covers/peter-steinberger.svg
 ogImage: /images/stories/official/peter-steinberger-official.jpg
-summary: 'A viral open-source project, a forced rebrand, and the trust lessons you only learn at scale.'
-quote: 'Names change. Your install chain shouldn’t.'
+summary: 'A source-backed feature on Peter Steinberger, OpenClaw’s rapid renames, and how a branding problem quickly became a distribution, scam, and installer-trust problem.'
+dek: 'The OpenClaw rebrand cycle mattered for a simple reason: when a fast-growing agent project changes names under pressure, the trust chain can fracture faster than users can keep up.'
+quote: 'A rename is never just branding once distribution has already escaped into the wild.'
 publishDate: 2026-02-01
-keywords: 'rebrand, Moltbot, trust, scams, supply chain security, OpenClaw story'
+updatedDate: 2026-03-09
+topics:
+  - rebrand
+  - OpenClaw trust
+  - distribution risk
+  - supply chain security
+  - scams
+  - installer trust
 sources:
-  - label: 'GitHub — OpenClaw release: openclaw 2026.1.30'
+  - label: 'GitHub — OpenClaw release: v2026.1.30'
     url: https://github.com/openclaw/openclaw/releases/tag/v2026.1.30
-  - label: 'Mashable — Clawdbot is now Moltbot… (updated: now OpenClaw)'
-    url: https://mashable.com/article/clawdbot-changes-name-to-moltbot-openclaw
-  - label: 'Malwarebytes — Clawdbot (now OpenClaw) hit by scammers / supply-chain risk recap'
-    url: https://www.malwarebytes.com/blog/news/2026/01/from-clawdbot-to-openclaw-new-name-same-scammers
-  - label: 'OpenClaw Docs — Lore (community backstory)'
+  - label: 'OpenClaw Docs — Lore'
     url: https://docs.openclaw.ai/start/lore
+  - label: 'Mashable — Clawdbot is now Moltbot … and then OpenClaw'
+    url: https://mashable.com/article/clawdbot-changes-name-to-moltbot-openclaw
+  - label: 'Malwarebytes — Clawdbot’s rename to Moltbot sparks impersonation campaign'
+    url: https://www.malwarebytes.com/blog/threat-intel/2026/01/clawdbots-rename-to-moltbot-sparks-impersonation-campaign
+  - label: 'Forbes — Moltbot gets another new name, OpenClaw, and triggers security fears and scams'
+    url: https://www.forbes.com/sites/ronschmelzer/2026/01/30/moltbot-molts-again-and-becomes-openclaw-pushback-and-concerns-grow//
 ---
 
-> In open source, most projects grow like trees.  
-> OpenClaw grew like a fire.
+> One project, three names, and an internet moving too fast to wait for the docs to update.
 
-## The Rebrand Sprint (and Why It Was Inevitable)
+There is a version of **Peter Steinberger’s** story that fits neatly into a headline: founder builds a fast-rising project, legal pressure lands, the name changes, chaos follows.
 
-Public reporting and project materials describe a fast sequence of renames—**Clawdbot → Moltbot →
-OpenClaw**—triggered by trademark pressure and the realities of branding a viral project.
+It is not wrong. It is just smaller than the real thing.
 
-It’s tempting to treat this as a meme. But the deeper point is operational:
+What actually made the OpenClaw rename sequence memorable was not the branding itself. It was the feeling of the ground moving under users in real time. A project people were trying to install, recommend, and explain kept changing names while attention was still accelerating. **Clawdbot** became **Moltbot**, then **OpenClaw**, while screenshots, search results, reposted commands, explainer threads, and cloned look-alike surfaces all continued living their own separate lives.
 
-> A rename is not a cosmetic event.
-> It is a supply-chain event.
+That is when a rename stops being cosmetic.
 
-When a tool becomes popular, the internet doesn’t just bring users. It brings:
+It becomes a trust story.
 
-- typosquatters,
-- fake “install helpers,”
-- copycat repos,
-- and bad actors who know exactly where beginners click.
+## Three names in public, all at once
 
-Mashable reported that the project’s GitHub page was briefly targeted by crypto scammers (per the
-creator’s own posts), which is a blunt reminder that _attention is an attack surface_.
+The basic sequence is well enough documented to hold up. OpenClaw’s lore page describes the trademark pressure that forced the project off its earlier identity and records the jump through multiple names before settling on **OpenClaw** by the end of January 2026. The GitHub release page for **v2026.1.30** shows the project already operationalizing that change through updated branding and install references. Mashable and other coverage then amplified the rename outside the project’s own channels.
 
-Security researchers also warned about copycats and malicious “helpers” emerging around the
-rebrand—exactly the kind of supply-chain pressure that shows up when a project becomes a default
-recommendation in group chats.
+That should have been the end of it: messy, fast, memorable.
 
-## What “Trust the Source” Actually Means
+Instead, it produced the kind of confusion that only happens when software escapes its original habitat. Blog posts kept the old names in circulation. People repeated shell commands from screenshots. Searchers wanted the “new official thing” before the ecosystem had fully synchronized around where official even lived. The project was no longer just renaming itself. It was racing the internet’s copy of itself.
 
-New users often hear: “install from official sources.”
+And the internet is very good at making copies.
 
-But what is “official,” in practice?
+## The moment the trust chain snapped
 
-Here’s a pragmatic rule set you can apply in under a minute:
+Malwarebytes’ reporting is useful here because it catches the story at the exact point where rebrand turns into attack surface. The rename window attracted look-alike domains, cloned repositories, and impersonation attempts aimed at users trying to figure out which identity was current.
 
-### 1) Prefer identity over keywords
+That detail changes the genre of the story.
 
-“OpenClaw” is a string. Attackers can copy it.
+A traditional open-source rename is annoying. A rename in an agent ecosystem is riskier because people are not only downloading code. They are wiring up tokens, channels, dashboards, plugins, and automations. The thing they are installing is not passive software. It is a system that can act.
 
-What’s harder to fake quickly:
+So when the naming layer fractures, the consequences are heavier than embarrassment. A confused user does not just land on the wrong homepage. They may land on the wrong installer, the wrong repo, or the wrong trust anchor at the exact moment they are trying to grant a tool real authority.
 
-- the GitHub organization (`openclaw/openclaw`),
-- the release artifacts and tags,
-- and the project’s own docs domain.
+That is why the rename stuck in people’s minds. It felt like a branding event, but it behaved like a distribution incident.
 
-### 2) Use release pages as your truth anchor
+## Why Peter is only half the story
 
-If you want to know what’s current, check the release page and treat it as canonical. For example,
-the `openclaw 2026.1.30` release lives under the official repository and includes security-related
-notes and operational changes.
+Steinberger matters because he is the visible human at the center of the sequence. Founders are the people readers look for when a project seems to be molting in public. They give the chaos a face.
 
-### 3) Expect security posture to evolve fast
+But the reason this story belongs in a CoClaw archive is that it is also bigger than its protagonist.
 
-One of the subtle shifts visible in recent release notes: the Gateway’s defaults harden over time.
-This is what “viral project adulthood” looks like—more fail-closed defaults, fewer footguns.
+The OpenClaw rename exposed a structural truth about modern software trust: users rarely verify software the way maintainers wish they would. They pattern-match. They type the latest name they saw into search. They click a result that looks plausible. They trust familiarity, logos, social proof, and repetition. That behavior is already fragile during ordinary growth. It becomes fragile to the point of danger when a project is popular enough to be imitated and unstable enough to be renamed in public.
 
-## A Founder’s Problem: Shipping Features While Fighting the Internet
+You can feel that tension all through the lore page. It is not a neutral incident report, and it should not be read like one. But it does preserve the mood of a project trying to explain itself while abuse, confusion, memes, and migration were all happening at once. That mood is part of the evidence. It tells you the team was not simply polishing a new brand. It was trying to hold onto a trust surface that had already escaped into screenshots and search results.
 
-The OpenClaw docs even keep a “Lore” page—part backstory, part community catharsis. Read it as a
-tone document, not a court filing, but the emotional truth is familiar to anyone who has shipped a
-popular developer tool:
+## The real scene to remember
 
-- you are building product,
-- while simultaneously triaging the consequences of attention.
+The easiest way to remember this episode is not as a timeline of names, but as a scene.
 
-That tension is the story: not just the rename, but what the rename reveals about modern software
-distribution.
+A user hears about the project from a friend or a post. They see one name in an article, another in a screenshot, and a third in the official repo. They are told the project is exploding, that scammers are circling, and that the newest links are the only safe links. They want to move quickly because everyone else is already using it.
 
-## Practical Trust Checklist (Do This, Not That)
+That is the scene.
 
-- **Do** bookmark the official repo and docs.
-- **Do** install from release links and documented commands.
-- **Do** keep the dashboard private (localhost/VPN/SSH tunnel), and treat tokens like passwords.
-- **Don’t** run random “one-liner installers” from strangers unless you can audit them.
-- **Don’t** grant broad tool permissions until you understand what the agent can actually do.
+Not Peter at a keyboard. Not a trademark email. A user trying to decide, at speed, what is official.
 
-## Closing: The Name Is the Least Interesting Part
+Once you understand the story that way, the practical meaning becomes obvious. Release pages, docs domains, org names, and install instructions are not just support material. They are the trust chain itself. And when that chain is under strain, attackers do not need brilliance. They need timing.
 
-The rename is headline material. The real lesson is quieter:
+## Why the story still lingers
 
-When you adopt an agent runtime, you aren’t just installing software—you’re enrolling in an ongoing
-relationship with its update cadence, its threat model, and its community norms.
+OpenClaw’s rename would have been memorable even without the scams, simply because three-name transitions make good internet theater. What made it durable was the way the rename revealed the hidden workload of trust.
 
-That’s not a reason to avoid OpenClaw.
+A project can survive changing its name.
 
-It’s a reason to run it like you mean it.
+What is harder is changing its name while keeping its distribution history coherent enough that hurried users still know where truth lives. That is the engineering problem hiding inside the branding problem. The GitHub releases, the docs, the domain migration, the canonical install references — those are the quiet pieces that determine whether a rename is temporary confusion or lasting reputational drag.
+
+That is why the Peter Steinberger story is worth keeping. Not because it flatters or indicts him, but because it captures a moment when software identity stopped being symbolic and turned operational.
+
+## Closing
+
+People remember the rename because it was dramatic.
+
+They should remember it because it was clarifying.
+
+OpenClaw did not just demonstrate how fast a project can change names. It demonstrated how fast trust can splinter once distribution has already escaped into the wider internet.
+
+In that sense, Peter Steinberger’s story is not really about naming at all.
+
+It is about the moment a popular agent project discovers that identity, installation, and security have already fused into the same problem.
