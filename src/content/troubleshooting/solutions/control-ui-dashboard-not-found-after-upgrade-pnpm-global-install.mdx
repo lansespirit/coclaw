@@ -1,0 +1,93 @@
+---
+title: "Control UI: dashboard root returns plain-text 'Not Found' after upgrade (pnpm global install)"
+description: "Fix cases where the gateway starts normally after an upgrade, but `/` returns plain-text `Not Found` until Control UI assets are copied out of the pnpm global package tree and `gateway.controlUi.root` points at that local copy."
+kind: "solution"
+component: "web-ui"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+channel: []
+errorSignatures:
+  - "HTTP/1.1 404 Not Found"
+  - "/__openclaw/control-ui-config.json"
+  - "gateway.controlUi.root"
+  - "dist/control-ui"
+keywords:
+  - "control ui"
+  - "pnpm"
+  - "dashboard"
+  - "not found"
+  - "upgrade"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 39621
+  docs:
+    - "https://docs.openclaw.ai/web/dashboard"
+    - "https://docs.openclaw.ai/gateway/configuration-reference"
+  guides:
+    - "/guides/updating-and-migration"
+    - "/guides/openclaw-configuration"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- The gateway starts normally after an upgrade, but opening the dashboard root (`/`) returns plain-text:
+  - `HTTP/1.1 404 Not Found`
+- `gateway.controlUi.enabled` is already `true`.
+- Control UI assets exist on disk under the installed package, often something like:
+  - `$(pnpm root -g)/openclaw/dist/control-ui`
+- Pointing `gateway.controlUi.root` directly at that pnpm-installed path still does not make the dashboard load.
+
+## Cause
+
+This deployment shape can break when the gateway tries to serve Control UI assets directly from the **pnpm global package tree** after an upgrade.
+
+The assets themselves may be present, but the runtime still fails to serve them correctly from that package-managed path.
+That is why the gateway looks healthy while `/` still responds with plain-text `Not Found`.
+
+## Fix
+
+### 1) Copy the Control UI assets into a normal local directory
+
+On the gateway host:
+
+```bash
+UI_ROOT="$(pnpm root -g)/openclaw/dist/control-ui"
+mkdir -p "$HOME/.openclaw/control-ui"
+cp -a "$UI_ROOT/." "$HOME/.openclaw/control-ui/"
+```
+
+If `pnpm root -g` prints a different global path on your machine, use that value.
+
+### 2) Point `gateway.controlUi.root` at the copied directory
+
+```bash
+openclaw config set gateway.controlUi.root "$HOME/.openclaw/control-ui"
+```
+
+### 3) Restart the gateway with your normal process manager
+
+Examples:
+
+```bash
+openclaw gateway restart
+```
+
+or, if you run under PM2 / systemd, use your normal restart command for that service.
+
+## Verify
+
+- `GET /` now returns `200 OK` and serves dashboard HTML.
+- `GET /__openclaw/control-ui-config.json` also returns `200 OK`.
+- The dashboard loads without rolling back OpenClaw.
+
+## Related
+
+- Update safety and rollback workflow: [/guides/updating-and-migration](/guides/updating-and-migration)
+- Config reference and path sanity checks: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+

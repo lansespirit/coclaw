@@ -1,0 +1,107 @@
+---
+title: "Gateway crashes with EBUSY / EACCES / EPERM when `~/.openclaw` is cloud-synced"
+description: "Fix gateway crashes caused by putting the live OpenClaw state directory inside iCloud Drive, OneDrive, Dropbox, Google Drive, or similar sync tools that briefly lock session/config files while uploading."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "EBUSY: resource busy or locked"
+  - "EACCES"
+  - "EPERM"
+  - "sessions/"
+  - ".jsonl"
+keywords:
+  - "cloud sync"
+  - "OneDrive"
+  - "Dropbox"
+  - "Google Drive"
+  - "iCloud"
+publishDate: 2026-03-08
+lastUpdated: 2026-03-08
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 39446
+  docs:
+    - "https://docs.openclaw.ai/gateway/doctor"
+    - "https://docs.openclaw.ai/help/environment"
+    - "https://docs.openclaw.ai/install/migrating"
+  guides:
+    - "/guides/new-user-checklist"
+    - "/guides/openclaw-configuration"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- The gateway crashes while writing sessions, config, or cron state.
+- Logs show transient file-lock or permission-style errors such as:
+  - `EBUSY: resource busy or locked`
+  - `EACCES`
+  - `EPERM`
+- The failing path is often somewhere under `~/.openclaw/`, for example:
+  - `~/.openclaw/agents/main/sessions/<...>.jsonl`
+- The machine is syncing `~/.openclaw/` through iCloud Drive, OneDrive, Dropbox, Google Drive, or another file-sync tool.
+
+## Cause
+
+OpenClaw writes many small, frequently changing files inside the **state directory**.
+
+Cloud sync clients often place short-lived locks on those files while uploading, indexing, or reconciling changes across devices.
+When the gateway hits one of those locked files during a write, it can fail with `EBUSY`, `EACCES`, or `EPERM` and may exit instead of continuing cleanly.
+
+The root problem is not that OpenClaw needs sync less often — it is that the **live mutable state directory should not be treated like a cross-device working folder**.
+
+## Fix
+
+### 1) Move the live state directory to a local, non-synced path
+
+Stop the gateway first, then copy the full state directory to a local path outside your sync provider.
+
+Example on macOS/Linux:
+
+```bash
+mkdir -p "$HOME/.local/share/openclaw-state"
+rsync -a "$HOME/.openclaw/" "$HOME/.local/share/openclaw-state/"
+```
+
+Pick any persistent local directory you control, as long as it is **not** managed by a cloud-sync client.
+
+### 2) Run the gateway with that state directory
+
+For one-off testing:
+
+```bash
+OPENCLAW_STATE_DIR="$HOME/.local/share/openclaw-state" openclaw gateway restart
+```
+
+For a background service, set the same `OPENCLAW_STATE_DIR` in the service environment and then rewrite/restart the service so it uses the new location.
+If you use the built-in gateway service installer, a full rewrite is the safest path:
+
+```bash
+OPENCLAW_STATE_DIR="$HOME/.local/share/openclaw-state" openclaw gateway install --force
+OPENCLAW_STATE_DIR="$HOME/.local/share/openclaw-state" openclaw gateway restart
+```
+
+If you use PM2, launchd, Docker, or another supervisor, update that supervisor to export the same variable before starting OpenClaw.
+
+### 3) Keep backups, not live sync
+
+If you want redundancy, back up the state directory periodically instead of live-syncing it while the gateway is running.
+
+## Verify
+
+- New session/config writes happen under the new `OPENCLAW_STATE_DIR`.
+- The gateway stays up during normal message traffic.
+- The previous `EBUSY` / `EACCES` / `EPERM` crashes no longer appear in logs.
+
+## Related
+
+- State directory and recovery basics: [/guides/new-user-checklist](/guides/new-user-checklist)
+- Config and environment path sanity checks: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+
