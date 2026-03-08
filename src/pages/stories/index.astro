@@ -54,31 +54,18 @@ const latestStory = [...stories].sort(
 const totalSources = stories.reduce((count, story) => count + story.sourceCount, 0);
 
 const editorialPillars = [
-  {
-    title: 'OpenClaw-first context',
-    description: 'Why this matters to setup, trust, and day-two operations.',
-  },
-  {
-    title: 'Source-backed reporting',
-    description: 'Public posts, docs, and issue threads readers can verify themselves.',
-  },
-  {
-    title: 'Security takeaways',
-    description: 'Practical lessons for ClawHub, tools, tokens, and deployment risk.',
-  },
+  'Source-backed reporting',
+  'Operator-focused context',
+  'Security-aware takeaways',
 ];
 
-const seoTopics = [
-  'OpenClaw case studies',
-  'OpenClaw security lessons',
-  'ClawHub governance',
-  'AI assistant deployment stories',
-];
+const seoTopics = ['Security', 'Governance', 'Deployments', 'ClawHub'];
 
 const heroMeta = [
-  `${stories.length} source-backed stories`,
-  `${totalSources} public references`,
-  latestStory ? `Latest update ${latestStory.publishLabel}` : 'Latest update TBD',
+  'Issue 01 · March 2026',
+  `${stories.length} stories`,
+  `${totalSources} public sources`,
+  latestStory ? `Updated ${latestStory.publishLabel}` : 'Updated TBD',
 ];
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
@@ -135,82 +122,81 @@ const structuredData = {
       </div>
       <div class="stories-grid absolute inset-0 opacity-40 dark:opacity-25"></div>
     </div>
-    <Section py="pt-28 pb-8 md:pt-40 md:pb-10" containerClass="relative z-10">
-      <div class="grid gap-12 xl:grid-cols-[minmax(0,1.35fr)_18rem] xl:items-center">
-        <div class="max-w-4xl animate-rise">
+    <Section py="pt-30 pb-6 md:pt-40 md:pb-8" containerClass="relative z-10">
+      <div class="grid gap-12 xl:grid-cols-[minmax(0,1.45fr)_18rem] xl:items-start">
+        <div class="max-w-[56rem] animate-rise">
           <div
             class="stories-kicker border border-divider bg-content1/70 text-default-700 dark:bg-content1/60 dark:text-default-500"
           >
             CoClaw editorial archive
           </div>
-          <h1
-            class="stories-display mt-7 max-w-4xl text-5xl leading-[0.97] tracking-[-0.04em] text-foreground md:text-7xl xl:text-[5.2rem]"
-          >
-            Understand OpenClaw
-            <span class="text-secondary">in the real world.</span>
-          </h1>
-          <p
-            class="mt-6 max-w-3xl text-lg leading-8 text-default-800 dark:text-default-600 md:text-[1.3rem]"
-          >
-            CoClaw curates source-backed OpenClaw stories, ClawHub governance moments, and security
-            lessons that help operators understand how real deployments succeed, drift, or fail.
-          </p>
-          <p
-            class="mt-4 max-w-3xl text-sm leading-7 text-default-600 dark:text-default-500 md:text-base"
-          >
-            A focused entry point for readers comparing <strong>OpenClaw case studies</strong>,
-            <strong>OpenClaw security lessons</strong>, and the community signals behind day-two
-            operations.
-          </p>
-          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a
-              href="#featured-story"
-              class="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-primary-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-primary-600"
+          <div class="mt-8 max-w-5xl">
+            <h1
+              class="stories-display text-6xl leading-[0.9] tracking-[-0.05em] text-foreground md:text-[5.7rem] xl:text-[7.3rem]"
             >
-              Read featured case study
-              <IconArrowRight className="h-4 w-4" aria-hidden="true" />
-            </a>
-            <a
-              href="#story-archive"
-              class="inline-flex items-center justify-center gap-2 rounded-full border border-divider bg-content1/75 px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-content2 dark:bg-content1/60"
-            >
-              Browse all stories
-            </a>
+              OpenClaw stories,<br />
+              <span class="text-secondary">case studies,</span><br />
+              security lessons.
+            </h1>
           </div>
+          <p
+            class="mt-8 max-w-3xl text-xl leading-9 text-default-800 dark:text-default-600 md:text-[1.46rem]"
+          >
+            CoClaw curates the stories people cite when they want to understand what OpenClaw looks
+            like after install day: governance pressure, security lessons, ecosystem signals, and
+            real operator outcomes.
+          </p>
           <div
-            class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-divider pt-5 text-sm text-default-600 dark:text-default-500"
+            class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-default-600 dark:text-default-500"
           >
             {
-              heroMeta.map((item) => (
+              heroMeta.map((item, itemIndex) => (
                 <span class="inline-flex items-center gap-2">
-                  <span class="h-1.5 w-1.5 rounded-full bg-secondary/70" />
+                  {itemIndex > 0 && (
+                    <span class="hidden h-1 w-1 rounded-full bg-default-400 sm:inline-block" />
+                  )}
                   <span>{item}</span>
                 </span>
               ))
             }
           </div>
+          <div class="mt-8 flex flex-wrap items-center gap-5 text-sm uppercase tracking-[0.18em]">
+            <a
+              href="#featured-story"
+              class="inline-flex items-center gap-2 font-semibold text-foreground transition hover:text-secondary"
+            >
+              Start with the cover story
+              <IconArrowRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+            <a
+              href="#story-archive"
+              class="inline-flex items-center gap-2 text-default-600 transition hover:text-foreground dark:text-default-500"
+            >
+              Browse the archive
+            </a>
+          </div>
         </div>
 
         <aside
-          class="animate-rise-delay rounded-[1.75rem] border border-divider bg-content1/75 p-5 shadow-[0_18px_60px_-34px_rgb(0_0_0/0.22)] dark:bg-content1/60 dark:shadow-[0_22px_70px_-36px_rgb(0_0_0/0.65)] backdrop-blur-2xl"
+          class="animate-rise-delay rounded-[1.75rem] border border-divider bg-content1/75 p-5 shadow-[0_18px_60px_-34px_rgb(0_0_0/0.22)] dark:bg-content1/60 dark:shadow-[0_22px_70px_-36px_rgb(0_0_0/0.65)] backdrop-blur-2xl xl:mt-10"
         >
           <p class="stories-mono text-xs uppercase tracking-[0.28em] text-default-500">
-            Why CoClaw curates this
+            Editor's note
           </p>
           <div
-            class="mt-4 rounded-[1.25rem] border border-divider bg-content2/55 p-4 dark:bg-content2/35"
+            class="mt-4 rounded-[1.25rem] border border-divider bg-content2/55 p-5 dark:bg-content2/35"
           >
-            <ul class="space-y-4">
+            <p class="stories-display text-2xl leading-tight text-foreground">Issue 01</p>
+            <p class="mt-3 text-sm leading-7 text-default-700 dark:text-default-500">
+              A cover package on OpenClaw stories that matter after the first install: what the
+              community built, what ClawHub amplified, and what operators learned the hard way.
+            </p>
+            <ul class="mt-5 space-y-3 border-t border-divider pt-4">
               {
                 editorialPillars.map((pillar) => (
-                  <li class="border-b border-divider/70 pb-4 last:border-b-0 last:pb-0">
-                    <div class="flex items-center gap-3 text-sm font-semibold text-foreground">
-                      <IconShieldCheckSolid className="h-4 w-4 text-primary" aria-hidden="true" />
-                      <span>{pillar.title}</span>
-                    </div>
-                    <p class="mt-2 text-sm leading-6 text-default-600 dark:text-default-500">
-                      {pillar.description}
-                    </p>
+                  <li class="flex items-center gap-3 text-sm font-medium text-foreground">
+                    <IconShieldCheckSolid className="h-4 w-4 text-primary" aria-hidden="true" />
+                    <span>{pillar}</span>
                   </li>
                 ))
               }
@@ -221,9 +207,9 @@ const structuredData = {
     </Section>
 
     <Section py="pt-0 pb-10 md:pb-12" containerClass="relative z-10">
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="flex flex-wrap items-center gap-3 border-t border-divider/80 pt-6">
         <span class="stories-mono text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
-          Explore by signal
+          Sections
         </span>
         {
           seoTopics.map((topic) => (
@@ -235,9 +221,19 @@ const structuredData = {
       </div>
     </Section>
 
+    <Section py="pt-0 pb-4 md:pb-6" containerClass="relative z-10">
+      <div
+        class="stories-mono flex items-center gap-3 text-[0.72rem] uppercase tracking-[0.26em] text-default-500"
+      >
+        <span class="h-px flex-1 bg-divider"></span>
+        <span>Cover story</span>
+        <span class="h-px flex-1 bg-divider"></span>
+      </div>
+    </Section>
+
     {
       spotlightStory && (
-        <Section id="featured-story" py="py-10 md:py-14" containerClass="relative z-10">
+        <Section id="featured-story" py="py-6 md:py-10" containerClass="relative z-10">
           <div class="grid gap-8 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] xl:items-stretch">
             <article class="group animate-rise overflow-hidden rounded-[2.4rem] border border-divider bg-content1/80 shadow-[0_28px_90px_-45px_rgb(0_0_0/0.35)] backdrop-blur-2xl dark:bg-content1/65 dark:shadow-[0_28px_110px_-48px_rgb(0_0_0/0.8)]">
               <div class="relative min-h-[18rem] overflow-hidden border-b border-divider bg-content2 dark:bg-content2/60">
