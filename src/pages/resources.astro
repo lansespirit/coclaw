@@ -211,10 +211,10 @@ const resourceSearchItems = [
   })),
   ...storyEntries.map((entry) => ({
     url: `/stories/${entry.slug}`,
-    title: entry.data.name,
-    description: entry.data.quote,
+    title: entry.data.title,
+    description: entry.data.summary,
     type: 'story',
-    keywords: entry.data.keywords ? [entry.data.keywords] : [],
+    keywords: entry.data.topics ?? [],
   })),
   ...videos.map((v) => ({
     url: `https://www.youtube.com/watch?v=${v.videoId}`,

@@ -75,7 +75,7 @@ function mapStoryEntry(entry: CollectionEntry<'stories'>): LatestContentItem {
     id: `story:${entry.slug}`,
     kind: 'story',
     href: `/stories/${entry.slug}`,
-    title: entry.data.name,
+    title: entry.data.title,
     description: entry.data.summary,
     publishDate: entry.data.publishDate,
     badge: 'Story',

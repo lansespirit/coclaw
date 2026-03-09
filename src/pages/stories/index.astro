@@ -17,12 +17,32 @@ const dateFormatter = new Intl.DateTimeFormat('en', {
   year: 'numeric',
 });
 
+function formatCountLabel(count: number, singular: string, plural = `${singular}s`) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 const storyTypeLabels = {
   person: 'Person story',
   company: 'Company story',
   project: 'Project case',
   incident: 'Incident report',
   ecosystem: 'Ecosystem story',
+} as const;
+
+const storyTypeShortLabels = {
+  person: 'People',
+  company: 'Companies',
+  project: 'Projects',
+  incident: 'Incidents',
+  ecosystem: 'Ecosystem',
+} as const;
+
+const storyCtaLabels = {
+  person: 'Read story',
+  company: 'Read company case',
+  project: 'Read project case',
+  incident: 'Read incident file',
+  ecosystem: 'Read ecosystem story',
 } as const;
 
 const stories = storyEntries
@@ -45,6 +65,7 @@ const stories = storyEntries
       quote: entry.data.quote,
       summary: entry.data.summary,
       dek: entry.data.dek,
+      slug: entry.slug,
       href: `/stories/${entry.slug}`,
       featured: entry.data.featured,
       avatar: entry.data.avatar,
@@ -54,42 +75,193 @@ const stories = storyEntries
       updatedDate,
       updatedLabel: dateFormatter.format(updatedDate),
       sourceCount: entry.data.sources?.length ?? 0,
-      topics: entry.data.topics.slice(0, 3),
+      topics: entry.data.topics,
     };
   });
 
-const spotlightStory = stories.find((story) => story.featured) ?? stories[0];
-const archiveStories = stories.filter((story) => story.href !== spotlightStory?.href);
-const latestStory = [...stories].sort(
-  (leftStory, rightStory) => rightStory.publishDate.getTime() - leftStory.publishDate.getTime()
-)[0];
-const latestUpdatedStory = [...stories].sort(
-  (leftStory, rightStory) => rightStory.updatedDate.getTime() - leftStory.updatedDate.getTime()
-)[0];
-const totalSources = stories.reduce((count, story) => count + story.sourceCount, 0);
-
-const editorialPillars = [
-  'Source-backed reporting',
-  'Operator-focused context',
-  'Security-aware takeaways',
+const spotlightPriority = [
+  'openclaw-business-owner-cluster',
+  'openclaw-use-case-census',
+  'openclaw-production-workflow-threshold',
+  'openclaw-night-shift-github-issues',
+  'openclaw-family-ai-gateway',
+  'openclaw-hype-reality-gap',
 ];
 
-const seoTopics = Array.from(new Set(stories.flatMap((story) => story.topics))).slice(0, 6);
+const spotlightStory =
+  stories.find((story) => story.featured) ??
+  spotlightPriority.map((slug) => stories.find((story) => story.slug === slug)).find(Boolean) ??
+  stories[0];
+const storiesByNewest = [...stories].sort(
+  (leftStory, rightStory) => rightStory.publishDate.getTime() - leftStory.publishDate.getTime()
+);
+const storiesByUpdated = [...stories].sort(
+  (leftStory, rightStory) => rightStory.updatedDate.getTime() - leftStory.updatedDate.getTime()
+);
+const latestStory = storiesByNewest[0];
+const latestUpdatedStory = storiesByUpdated[0];
+const totalSources = stories.reduce((count, story) => count + story.sourceCount, 0);
+
+const storyTypeCounts = {
+  person: stories.filter((story) => story.storyType === 'person').length,
+  company: stories.filter((story) => story.storyType === 'company').length,
+  project: stories.filter((story) => story.storyType === 'project').length,
+  incident: stories.filter((story) => story.storyType === 'incident').length,
+  ecosystem: stories.filter((story) => story.storyType === 'ecosystem').length,
+};
+
+const topicCounts = new Map<string, number>();
+for (const story of stories) {
+  for (const topic of story.topics) {
+    topicCounts.set(topic, (topicCounts.get(topic) ?? 0) + 1);
+  }
+}
+
+const topicFrequency = [...topicCounts.entries()].sort(
+  (leftTopic, rightTopic) =>
+    rightTopic[1] - leftTopic[1] || leftTopic[0].localeCompare(rightTopic[0])
+);
+const seoTopics = topicFrequency.map(([topic]) => topic).slice(0, 6);
+const primaryTopic = topicFrequency[0]?.[0] ?? 'OpenClaw operations';
+const coverageMix = [
+  storyTypeCounts.person ? formatCountLabel(storyTypeCounts.person, 'person', 'people') : null,
+  storyTypeCounts.project ? formatCountLabel(storyTypeCounts.project, 'project') : null,
+  storyTypeCounts.company
+    ? formatCountLabel(storyTypeCounts.company, 'company', 'companies')
+    : null,
+  storyTypeCounts.incident ? formatCountLabel(storyTypeCounts.incident, 'incident') : null,
+  storyTypeCounts.ecosystem ? formatCountLabel(storyTypeCounts.ecosystem, 'ecosystem') : null,
+]
+  .filter(Boolean)
+  .slice(0, 3)
+  .join(' · ');
+
+const editorialPillars = ['Traced sources', 'Operator stakes', 'Trust in context'];
+
 const collectionKeywords = [
   'OpenClaw stories',
   'OpenClaw case studies',
   'OpenClaw security',
+  'OpenClaw incidents',
   'ClawHub',
   'CoClaw',
   ...seoTopics,
 ].join(', ');
 
-const heroMeta = [
-  `${stories.length} source-backed stories`,
-  `${totalSources} public sources`,
-  latestStory ? `Latest ${latestStory.publishLabel}` : 'Latest TBD',
-  latestUpdatedStory ? `Updated ${latestUpdatedStory.updatedLabel}` : 'Updated TBD',
+const riskKeywords = [
+  'security',
+  'trust',
+  'moderation',
+  'governance',
+  'scam',
+  'typosquatting',
+  'supply chain',
+  'distribution',
+  'incident',
 ];
+
+function isRiskStory(story: (typeof stories)[number]) {
+  const searchFields = [story.title, story.summary, story.company, ...story.topics]
+    .join(' ')
+    .toLowerCase();
+
+  return (
+    story.storyType === 'incident' || riskKeywords.some((keyword) => searchFields.includes(keyword))
+  );
+}
+
+const usedStoryHrefs = new Set<string>();
+if (spotlightStory) usedStoryHrefs.add(spotlightStory.href);
+
+const latestStories = storiesByNewest
+  .filter((story) => !usedStoryHrefs.has(story.href))
+  .slice(0, 3);
+for (const story of latestStories) usedStoryHrefs.add(story.href);
+
+const watchlistStories = stories
+  .filter((story) => !usedStoryHrefs.has(story.href) && isRiskStory(story))
+  .slice(0, 3);
+for (const story of watchlistStories) usedStoryHrefs.add(story.href);
+
+const operatorPatternPriority = [
+  'openclaw-business-owner-cluster',
+  'openclaw-use-case-census',
+  'openclaw-production-workflow-threshold',
+  'openclaw-night-shift-github-issues',
+  'openclaw-for-ten-dollars-a-month',
+  'openclaw-guardrails-from-your-phone',
+];
+
+const lifeSystemPriority = [
+  'openclaw-family-ai-gateway',
+  'openclaw-changed-my-life',
+  'openclaw-plaud-second-brain',
+  'openclaw-telegram-mission-control',
+];
+
+function takeStoriesByPriority(prioritySlugs: string[], limit: number) {
+  const selected = [];
+  for (const slug of prioritySlugs) {
+    const story = stories.find((candidate) => candidate.slug === slug);
+    if (!story || usedStoryHrefs.has(story.href)) continue;
+    selected.push(story);
+    usedStoryHrefs.add(story.href);
+    if (selected.length >= limit) break;
+  }
+  return selected;
+}
+
+const operatorPatternStories = takeStoriesByPriority(operatorPatternPriority, 4);
+const lifeSystemStories = takeStoriesByPriority(lifeSystemPriority, 4);
+const builderStories = stories.filter((story) => !usedStoryHrefs.has(story.href)).slice(0, 6);
+
+function getStoryCardSubline(story: (typeof stories)[number]) {
+  if (story.storyType === 'person') return story.role;
+  if (story.storyType === 'incident') return story.company || story.role;
+  return story.company || story.role;
+}
+
+const storySignals = [
+  {
+    label: 'Latest published',
+    title: latestStory?.title ?? 'Latest story filed',
+    detail: latestStory ? latestStory.publishLabel : `${stories.length} stories live`,
+  },
+  {
+    label: 'Recurring thread',
+    title: primaryTopic,
+    detail: `${topicCounts.get(primaryTopic) ?? 0} stories in this thread`,
+  },
+  {
+    label: 'Coverage mix',
+    title: coverageMix || 'People, projects, incidents',
+    detail: `${totalSources} public sources across the archive`,
+  },
+];
+
+const archiveLenses = [
+  {
+    label: 'Under pressure',
+    href: '#watchlist',
+    description: 'Security, governance, and scam pressure',
+  },
+  {
+    label: 'Work patterns',
+    href: '#operator-patterns',
+    description: 'Revenue ops, production thresholds, cost control',
+  },
+  {
+    label: 'Daily systems',
+    href: '#life-systems',
+    description: 'Family gateways, memory stacks, mobile control',
+  },
+];
+
+const sectionChips = {
+  watchlist: ['Scam pressure', 'Governance drift', 'Distribution risk', 'Trust breaks'],
+  operatorPatterns: ['Revenue ops', 'Bounded coding', 'Cost ceilings', 'Mobile oversight'],
+  lifeSystems: ['Family gateway', 'Memory layer', 'Chat control', 'Delegated attention'],
+};
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const structuredData = {
@@ -97,7 +269,7 @@ const structuredData = {
   '@type': 'CollectionPage',
   name: 'OpenClaw Stories, Case Studies & Security Lessons',
   description:
-    'CoClaw curates source-backed OpenClaw stories, case studies, ClawHub governance moments, and security lessons for real operators.',
+    'Source-backed OpenClaw stories, case studies, ClawHub incidents, and security lessons for operators evaluating trust, deployment choices, and ecosystem risk.',
   url: canonicalURL.toString(),
   hasPart: stories.map((story) => ({
     '@type': 'WebPage',
@@ -110,7 +282,7 @@ const structuredData = {
 
 <BaseLayout
   title="OpenClaw Stories, Case Studies & Security Lessons | CoClaw"
-  description="CoClaw curates source-backed OpenClaw stories, case studies, ClawHub governance moments, and security lessons for operators who care about trust, deployment, and day-two reality."
+  description="Source-backed OpenClaw stories, case studies, ClawHub incidents, and security lessons for operators evaluating trust, deployment choices, and ecosystem risk."
   keywords={collectionKeywords}
 >
   <Fragment slot="head">
@@ -128,7 +300,7 @@ const structuredData = {
   >
     <div class="pointer-events-none absolute inset-0 overflow-hidden">
       <div
-        class="absolute inset-x-0 top-0 h-[40rem] bg-gradient-to-b from-secondary/8 via-transparent to-transparent dark:from-secondary/14"
+        class="absolute inset-x-0 top-0 h-[44rem] bg-gradient-to-b from-secondary/8 via-transparent to-transparent dark:from-secondary/14"
       >
       </div>
       <div
@@ -140,90 +312,91 @@ const structuredData = {
       >
       </div>
       <div
-        class="absolute left-1/3 top-[26rem] h-60 w-60 rounded-full bg-accent/8 blur-3xl dark:bg-accent/14"
+        class="absolute left-1/3 top-[28rem] h-60 w-60 rounded-full bg-accent/8 blur-3xl dark:bg-accent/14"
       >
       </div>
       <div class="stories-grid absolute inset-0 opacity-40 dark:opacity-25"></div>
+      <div class="stories-noise absolute inset-0 opacity-[0.06] dark:opacity-[0.08]"></div>
     </div>
-    <Section py="pt-30 pb-6 md:pt-40 md:pb-8" containerClass="relative z-10">
-      <div class="grid gap-12 xl:grid-cols-[minmax(0,1.45fr)_18rem] xl:items-start">
+
+    <Section py="pt-28 pb-10 md:pt-36 md:pb-12" containerClass="relative z-10">
+      <div class="grid gap-10 xl:grid-cols-[minmax(0,1.18fr)_22rem] xl:items-start">
         <div class="max-w-[56rem] animate-rise">
           <div
             class="stories-kicker border border-divider bg-content1/70 text-default-700 dark:bg-content1/60 dark:text-default-500"
           >
-            CoClaw editorial archive
+            CoClaw Stories
           </div>
-          <div class="mt-8 max-w-5xl">
-            <h1
-              class="stories-display text-6xl leading-[0.9] tracking-[-0.05em] text-foreground md:text-[5.7rem] xl:text-[7.3rem]"
-            >
-              OpenClaw stories,<br />
-              <span class="text-secondary">case studies,</span><br />
-              security lessons.
-            </h1>
-          </div>
+          <h1
+            class="stories-display mt-7 max-w-5xl text-5xl leading-[0.94] tracking-[-0.045em] text-foreground md:text-[5.25rem] xl:text-[6.4rem]"
+          >
+            OpenClaw stories, case studies,
+            <span class="text-secondary"> and security lessons.</span>
+          </h1>
           <p
-            class="mt-8 max-w-3xl text-xl leading-9 text-default-800 dark:text-default-600 md:text-[1.46rem]"
+            class="mt-7 max-w-3xl text-lg leading-8 text-default-800 dark:text-default-600 md:text-[1.34rem] md:leading-9"
           >
-            CoClaw curates the stories people cite when they want to understand what OpenClaw looks
-            like after install day: governance pressure, security lessons, ecosystem signals, and
-            real operator outcomes.
+            For readers trying to understand what actually happened: what shipped, what broke trust,
+            what ClawHub amplified, and what operators learned after the first wave of hype.
           </p>
-          <div
-            class="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-default-600 dark:text-default-500"
-          >
-            {
-              heroMeta.map((item, itemIndex) => (
-                <span class="inline-flex items-center gap-2">
-                  {itemIndex > 0 && (
-                    <span class="hidden h-1 w-1 rounded-full bg-default-400 sm:inline-block" />
-                  )}
-                  <span>{item}</span>
-                </span>
-              ))
-            }
-          </div>
-          <div class="mt-8 flex flex-wrap items-center gap-5 text-sm uppercase tracking-[0.18em]">
-            <a
-              href="#featured-story"
-              class="inline-flex items-center gap-2 font-semibold text-foreground transition hover:text-secondary"
-            >
-              Start with the cover story
-              <IconArrowRight className="h-4 w-4" aria-hidden="true" />
-            </a>
-            <a
-              href="#story-archive"
-              class="inline-flex items-center gap-2 text-default-600 transition hover:text-foreground dark:text-default-500"
-            >
-              Browse the archive
-            </a>
-          </div>
-        </div>
-
-        <aside
-          class="animate-rise-delay rounded-[1.75rem] border border-divider bg-content1/75 p-5 shadow-[0_18px_60px_-34px_rgb(0_0_0/0.22)] dark:bg-content1/60 dark:shadow-[0_22px_70px_-36px_rgb(0_0_0/0.65)] backdrop-blur-2xl xl:mt-10"
-        >
-          <p class="stories-mono text-xs uppercase tracking-[0.28em] text-default-500">
-            Editor's note
-          </p>
-          <div
-            class="mt-4 rounded-[1.25rem] border border-divider bg-content2/55 p-5 dark:bg-content2/35"
-          >
-            <p class="stories-display text-2xl leading-tight text-foreground">Issue 01</p>
-            <p class="mt-3 text-sm leading-7 text-default-700 dark:text-default-500">
-              A cover package on OpenClaw stories that matter after the first install: what the
-              community built, what ClawHub amplified, and what operators learned the hard way.
-            </p>
-            <ul class="mt-5 space-y-3 border-t border-divider pt-4">
+          <div class="mt-8">
+            <ul class="flex flex-wrap gap-x-8 gap-y-3">
               {
                 editorialPillars.map((pillar) => (
-                  <li class="flex items-center gap-3 text-sm font-medium text-foreground">
+                  <li class="inline-flex items-center gap-2.5 text-sm text-default-700 dark:text-default-500">
                     <IconShieldCheckSolid className="h-4 w-4 text-primary" aria-hidden="true" />
                     <span>{pillar}</span>
                   </li>
                 ))
               }
             </ul>
+          </div>
+          <div class="mt-8 flex flex-wrap items-center gap-5 text-sm uppercase tracking-[0.18em]">
+            <a
+              href="#featured-story"
+              class="inline-flex items-center gap-2 rounded-full border border-secondary/25 bg-secondary/10 px-5 py-3 font-semibold text-secondary transition duration-300 hover:-translate-y-0.5 hover:bg-secondary/15"
+            >
+              Read the lead story
+              <IconArrowRight className="h-4 w-4" aria-hidden="true" />
+            </a>
+            <a
+              href="#story-archive"
+              class="inline-flex items-center gap-2 text-default-600 transition hover:text-foreground dark:text-default-500"
+            >
+              Browse the sections
+            </a>
+          </div>
+        </div>
+
+        <aside class="animate-rise-delay xl:pt-4">
+          <div class="stories-panel rounded-[2rem] p-5 md:p-6">
+            <div class="flex items-center justify-between gap-4">
+              <p class="stories-mono text-[0.72rem] uppercase tracking-[0.28em] text-default-500">
+                How to read this archive
+              </p>
+              <span
+                class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-[0.68rem] uppercase tracking-[0.18em] text-default-600 dark:bg-content2/35 dark:text-default-500"
+              >
+                Current view
+              </span>
+            </div>
+            <div class="mt-4 grid gap-3">
+              {
+                storySignals.map((signal) => (
+                  <div class="rounded-[1.2rem] border border-divider bg-content2/55 p-3.5 dark:bg-content2/35">
+                    <p class="stories-mono text-[0.64rem] uppercase tracking-[0.22em] text-default-500">
+                      {signal.label}
+                    </p>
+                    <p class="mt-2 text-base font-semibold leading-6 text-foreground">
+                      {signal.title}
+                    </p>
+                    <p class="mt-1.5 text-sm leading-6 text-default-700 dark:text-default-500">
+                      {signal.detail}
+                    </p>
+                  </div>
+                ))
+              }
+            </div>
           </div>
         </aside>
       </div>
@@ -232,7 +405,7 @@ const structuredData = {
     <Section py="pt-0 pb-10 md:pb-12" containerClass="relative z-10">
       <div class="flex flex-wrap items-center gap-3 border-t border-divider/80 pt-6">
         <span class="stories-mono text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
-          Sections
+          Recurring themes
         </span>
         {
           seoTopics.map((topic) => (
@@ -244,179 +417,157 @@ const structuredData = {
       </div>
     </Section>
 
-    <Section py="pt-0 pb-4 md:pb-6" containerClass="relative z-10">
-      <div
-        class="stories-mono flex items-center gap-3 text-[0.72rem] uppercase tracking-[0.26em] text-default-500"
-      >
-        <span class="h-px flex-1 bg-divider"></span>
-        <span>Cover story</span>
-        <span class="h-px flex-1 bg-divider"></span>
-      </div>
-    </Section>
-
     {
       spotlightStory && (
-        <Section id="featured-story" py="py-6 md:py-10" containerClass="relative z-10">
-          <div class="grid gap-8 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] xl:items-stretch">
-            <article class="group animate-rise overflow-hidden rounded-[2.4rem] border border-divider bg-content1/80 shadow-[0_28px_90px_-45px_rgb(0_0_0/0.35)] backdrop-blur-2xl dark:bg-content1/65 dark:shadow-[0_28px_110px_-48px_rgb(0_0_0/0.8)]">
-              <div class="relative min-h-[18rem] overflow-hidden border-b border-divider bg-content2 dark:bg-content2/60">
-                {spotlightStory.coverImage ? (
-                  <img
-                    src={spotlightStory.coverImage}
-                    alt={`${spotlightStory.title} cover`}
-                    class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
-                    loading="eager"
-                  />
-                ) : (
-                  <div class="absolute inset-0 bg-gradient-to-br from-primary/15 via-content2 to-secondary/10 dark:from-primary/18 dark:via-content2/70 dark:to-secondary/16" />
-                )}
-                <div class="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent dark:from-background/60" />
-                <div class="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full border border-divider bg-content1/80 px-4 py-2 text-[0.72rem] uppercase tracking-[0.24em] text-default-700 backdrop-blur dark:bg-content1/60 dark:text-default-500">
-                  <IconCollection className="h-4 w-4 text-secondary" aria-hidden="true" />
-                  {storyTypeLabels[spotlightStory.storyType]}
-                </div>
-              </div>
-
-              <div class="grid gap-8 p-8 md:p-10 xl:grid-cols-[minmax(0,1fr)_18rem]">
-                <div>
-                  <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.24em] text-default-500">
-                    <span>{spotlightStory.publishLabel}</span>
-                    <span class="h-1 w-1 rounded-full bg-default-400" />
-                    <span>{spotlightStory.sourceCount} sources</span>
-                    <span class="h-1 w-1 rounded-full bg-default-400" />
-                    <span>{storyTypeLabels[spotlightStory.storyType]}</span>
-                  </div>
-                  <h2 class="stories-display mt-5 text-4xl leading-tight text-foreground md:text-5xl">
-                    {spotlightStory.title}
-                  </h2>
-                  <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-default-600 dark:text-default-500 md:text-base">
-                    <span class="font-semibold text-secondary">{spotlightStory.name}</span>
-                    <span class="hidden h-1 w-1 rounded-full bg-default-400 md:block" />
-                    <span>{spotlightStory.role}</span>
-                  </div>
-                  <p class="mt-6 max-w-3xl text-base leading-8 text-default-800 dark:text-default-600 md:text-lg">
-                    {spotlightStory.dek}
-                  </p>
-                  <blockquote class="mt-8 border-l border-secondary/30 pl-5 text-2xl leading-relaxed text-foreground md:text-[2rem]">
-                    <span class="inline-flex align-top text-secondary">
-                      <IconQuote className="mr-3 h-7 w-7" aria-hidden="true" />
-                    </span>
-                    {spotlightStory.quote}
-                  </blockquote>
-                </div>
-
-                <div class="flex flex-col justify-between gap-6 rounded-[1.8rem] border border-divider bg-content2/55 p-6 dark:bg-content2/35">
-                  <div>
-                    <p class="stories-mono text-xs uppercase tracking-[0.28em] text-default-500">
-                      Why CoClaw picked it
-                    </p>
-                    <ul class="mt-4 space-y-3 text-sm leading-7 text-default-700 dark:text-default-500">
-                      <li>
-                        Shows how OpenClaw adoption collides with real governance and trust
-                        questions.
-                      </li>
-                      <li>
-                        Gives readers concrete security or deployment lessons, not just a dramatic
-                        timeline.
-                      </li>
-                      <li>
-                        Works as an entry point into broader CoClaw guides on operations, safety,
-                        and setup.
-                      </li>
-                    </ul>
-                  </div>
-                  <a
-                    href={spotlightStory.href}
-                    class="inline-flex items-center justify-between rounded-full border border-secondary/25 bg-secondary/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-secondary transition duration-300 hover:-translate-y-0.5 hover:bg-secondary/15"
-                  >
-                    Read full case study
-                    <IconArrowRight className="h-4 w-4" aria-hidden="true" />
-                  </a>
-                </div>
-              </div>
-            </article>
-
-            <aside class="grid gap-4">
-              {archiveStories.slice(0, 2).map((story, storyIndex) => (
-                <article
-                  class="animate-rise rounded-[1.9rem] border border-divider bg-content1/75 p-6 shadow-[0_18px_70px_-35px_rgb(0_0_0/0.3)] backdrop-blur-xl dark:bg-content1/60 dark:shadow-[0_20px_80px_-36px_rgb(0_0_0/0.75)]"
-                  style={`animation-delay:${storyIndex * 120 + 80}ms`}
-                >
-                  <div class="flex items-start justify-between gap-4">
-                    <div>
-                      <p class="stories-mono text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
-                        {story.publishLabel}
-                      </p>
-                      <h3 class="mt-3 text-2xl font-semibold leading-tight text-foreground">
-                        {story.title}
-                      </h3>
-                    </div>
-                    <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-xs uppercase tracking-[0.18em] text-default-600 dark:bg-content2/35 dark:text-default-500">
-                      {story.sourceCount} sources
-                    </span>
-                  </div>
-                  <p class="mt-3 text-sm font-medium text-secondary">
-                    {storyTypeLabels[story.storyType]}
-                  </p>
-                  <p class="mt-2 text-sm text-default-600 dark:text-default-500">{story.name}</p>
-                  <p class="mt-4 text-sm leading-7 text-default-700 dark:text-default-500">
-                    {story.summary}
-                  </p>
-                  <a
-                    href={story.href}
-                    class="mt-6 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-foreground transition hover:text-secondary"
-                  >
-                    Open story
-                    <IconArrowRight className="h-4 w-4" aria-hidden="true" />
-                  </a>
-                </article>
-              ))}
-            </aside>
+        <Section id="featured-story" py="pt-0 pb-14 md:pb-16" containerClass="relative z-10">
+          <div class="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div class="max-w-3xl">
+              <p class="stories-mono text-[0.72rem] uppercase tracking-[0.28em] text-default-500">
+                Lead story
+              </p>
+              <h2 class="stories-display mt-3 text-4xl leading-tight text-foreground md:text-5xl">
+                The clearest place to enter the archive right now.
+              </h2>
+            </div>
+            <p class="max-w-xl text-base leading-8 text-default-700 dark:text-default-500">
+              One story that captures the current mix of OpenClaw ambition, product behavior, and
+              ecosystem risk.
+            </p>
           </div>
+
+          <article class="stories-panel overflow-hidden rounded-[2.5rem]">
+            <div class="grid gap-0 xl:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
+              <div class="p-8 md:p-10 xl:p-12">
+                <div class="flex flex-wrap items-center gap-3 text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
+                  <span class="inline-flex items-center gap-2 rounded-full border border-divider bg-content2/55 px-4 py-2 dark:bg-content2/35">
+                    <IconCollection className="h-4 w-4 text-secondary" aria-hidden="true" />
+                    {storyTypeLabels[spotlightStory.storyType]}
+                  </span>
+                  <span>{spotlightStory.publishLabel}</span>
+                  <span class="h-1 w-1 rounded-full bg-default-400" />
+                  <span>{spotlightStory.updatedLabel}</span>
+                </div>
+                <h3 class="stories-display mt-5 max-w-4xl text-4xl leading-[0.98] text-foreground md:text-[3.25rem]">
+                  {spotlightStory.title}
+                </h3>
+                <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-default-600 dark:text-default-500 md:text-base">
+                  <span class="font-semibold text-secondary">{spotlightStory.name}</span>
+                  <span class="hidden h-1 w-1 rounded-full bg-default-400 md:block" />
+                  <span>{spotlightStory.role}</span>
+                  <span class="hidden h-1 w-1 rounded-full bg-default-400 md:block" />
+                  <span>{spotlightStory.company}</span>
+                </div>
+                <p class="mt-6 max-w-3xl text-lg leading-8 text-default-800 dark:text-default-600">
+                  {spotlightStory.dek}
+                </p>
+                <blockquote class="mt-7 max-w-3xl border-l border-secondary/30 pl-5 text-2xl leading-relaxed text-foreground md:text-[1.9rem]">
+                  <span class="inline-flex align-top text-secondary">
+                    <IconQuote className="mr-3 h-7 w-7" aria-hidden="true" />
+                  </span>
+                  {spotlightStory.quote}
+                </blockquote>
+                <div class="mt-7 flex flex-wrap gap-2">
+                  {spotlightStory.topics.slice(0, 4).map((topic) => (
+                    <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-[0.72rem] uppercase tracking-[0.16em] text-default-600 dark:bg-content2/35 dark:text-default-500">
+                      {topic}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div class="border-t border-divider bg-content2/35 p-5 dark:bg-content2/25 xl:border-t-0 xl:border-l xl:p-6">
+                <div class="overflow-hidden rounded-[1.45rem] border border-divider bg-content1/60">
+                  {spotlightStory.coverImage ? (
+                    <img
+                      src={spotlightStory.coverImage}
+                      alt={`${spotlightStory.title} cover`}
+                      class="aspect-[16/10] w-full object-cover"
+                      loading="eager"
+                    />
+                  ) : (
+                    <div class="aspect-[16/10] bg-gradient-to-br from-primary/15 via-content2 to-secondary/10 dark:from-primary/18 dark:via-content2/70 dark:to-secondary/16" />
+                  )}
+                </div>
+
+                <div class="mt-4 rounded-[1.45rem] border border-divider bg-content1/70 p-4 dark:bg-content1/55">
+                  <div class="flex items-center justify-between gap-3">
+                    <p class="stories-mono text-[0.66rem] uppercase tracking-[0.24em] text-default-500">
+                      Quick read
+                    </p>
+                    <span class="stories-mono text-[0.62rem] uppercase tracking-[0.18em] text-default-500">
+                      {spotlightStory.sourceCount} sources
+                    </span>
+                  </div>
+
+                  <div class="mt-3 grid gap-3">
+                    <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                      <div class="rounded-[1rem] border border-divider bg-content2/45 px-3 py-3 dark:bg-content2/30">
+                        <p class="stories-mono text-[0.62rem] uppercase tracking-[0.18em] text-default-500">
+                          Who
+                        </p>
+                        <p class="mt-1.5 text-sm font-medium leading-6 text-foreground">
+                          {spotlightStory.name}
+                        </p>
+                      </div>
+                      <div class="rounded-[1rem] border border-divider bg-content2/45 px-3 py-3 dark:bg-content2/30">
+                        <p class="stories-mono text-[0.62rem] uppercase tracking-[0.18em] text-default-500">
+                          Company / project
+                        </p>
+                        <p class="mt-1.5 text-sm leading-6 text-default-700 dark:text-default-500">
+                          {spotlightStory.company}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div class="rounded-[1rem] border border-divider bg-content2/45 px-3 py-3 dark:bg-content2/30">
+                      <p class="stories-mono text-[0.62rem] uppercase tracking-[0.18em] text-default-500">
+                        What happened
+                      </p>
+                      <p class="mt-1.5 text-sm leading-6 text-default-700 dark:text-default-500">
+                        {spotlightStory.summary}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <a
+                  href={spotlightStory.href}
+                  class="mt-4 inline-flex w-full items-center justify-between rounded-full border border-secondary/25 bg-secondary/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-secondary transition duration-300 hover:-translate-y-0.5 hover:bg-secondary/15"
+                >
+                  {storyCtaLabels[spotlightStory.storyType]}
+                  <IconArrowRight className="h-4 w-4" aria-hidden="true" />
+                </a>
+              </div>
+            </div>
+          </article>
         </Section>
       )
     }
 
-    <Section id="story-archive" py="py-12 md:py-16" containerClass="relative z-10">
-      <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        <div class="max-w-3xl">
-          <p class="stories-mono text-xs uppercase tracking-[0.28em] text-default-500">
-            OpenClaw archive
-          </p>
-          <h2 class="stories-display mt-3 text-4xl leading-tight text-foreground md:text-5xl">
-            CoClaw turns story pages into
-            <span class="text-primary"> searchable operator context.</span>
-          </h2>
-        </div>
-        <p class="max-w-xl text-base leading-8 text-default-700 dark:text-default-500">
-          This archive is optimized for readers comparing OpenClaw community stories, security
-          incidents, deployment patterns, and ClawHub lessons—without digging through scattered
-          posts and screenshots.
-        </p>
-      </div>
+    {
+      latestStories.length > 0 && (
+        <Section py="py-10 md:py-12" containerClass="relative z-10">
+          <div class="mb-7 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div class="max-w-3xl">
+              <p class="stories-mono text-[0.72rem] uppercase tracking-[0.28em] text-default-500">
+                Recently added
+              </p>
+              <h2 class="stories-display mt-3 text-4xl leading-tight text-foreground md:text-5xl">
+                New stories worth opening first.
+              </h2>
+            </div>
+            <p class="max-w-xl text-base leading-8 text-default-700 dark:text-default-500">
+              New stories usually show where OpenClaw is settling: operator playbooks, everyday
+              delegation, memory systems, and the routines that survive after the buzz wears off.
+            </p>
+          </div>
 
-      <div class="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
-        {
-          archiveStories.map((story, storyIndex) => (
-            <article
-              class="group animate-rise flex h-full flex-col overflow-hidden rounded-[2rem] border border-divider bg-content1/80 shadow-[0_18px_70px_-36px_rgb(0_0_0/0.25)] backdrop-blur-xl dark:bg-content1/60 dark:shadow-[0_20px_90px_-40px_rgb(0_0_0/0.75)]"
-              style={`animation-delay:${storyIndex * 90}ms`}
-            >
-              <div class="relative aspect-[16/10] overflow-hidden border-b border-divider bg-content2 dark:bg-content2/50">
-                {story.coverImage ? (
-                  <img
-                    src={story.coverImage}
-                    alt={`${story.title} cover`}
-                    class="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div class="absolute inset-0 bg-gradient-to-br from-primary/12 via-content2 to-secondary/10 dark:from-primary/18 dark:via-content2/70 dark:to-secondary/16" />
-                )}
-                <div class="absolute inset-0 bg-gradient-to-t from-background/40 to-transparent dark:from-background/55" />
-              </div>
-
-              <div class="flex flex-1 flex-col p-6">
+          <div class="grid gap-5 lg:grid-cols-3">
+            {latestStories.map((story, storyIndex) => (
+              <article
+                class="stories-panel animate-rise rounded-[2rem] p-6"
+                style={`animation-delay:${storyIndex * 90}ms`}
+              >
                 <div class="flex flex-wrap items-center gap-3 text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
                   <span>{story.publishLabel}</span>
                   <span class="h-1 w-1 rounded-full bg-default-400" />
@@ -425,60 +576,411 @@ const structuredData = {
                 <h3 class="mt-4 text-2xl font-semibold leading-tight text-foreground">
                   {story.title}
                 </h3>
-                <p class="mt-2 text-sm font-medium text-secondary">{story.name}</p>
-                <p class="mt-1 text-sm text-default-600 dark:text-default-500">{story.role}</p>
-                <p class="mt-4 text-sm leading-7 text-default-700 dark:text-default-500">
+                <div class="mt-4 flex items-center gap-3">
+                  {story.avatar ? (
+                    <img
+                      src={story.avatar}
+                      alt={`${story.name} avatar`}
+                      class="h-11 w-11 rounded-full border border-divider object-cover bg-content2"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div class="h-11 w-11 rounded-full border border-divider bg-content2" />
+                  )}
+                  <div>
+                    <p class="text-sm font-semibold text-secondary">{story.name}</p>
+                    <p class="text-sm text-default-600 dark:text-default-500">{story.company}</p>
+                  </div>
+                </div>
+                <p class="mt-5 text-sm leading-7 text-default-700 dark:text-default-500">
                   {story.summary}
                 </p>
-                <blockquote class="mt-5 text-base leading-7 text-foreground">
-                  “{story.quote}”
-                </blockquote>
-                <div class="mt-5 flex flex-wrap gap-2">
-                  {story.topics.map((topic) => (
-                    <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-[0.72rem] uppercase tracking-[0.16em] text-default-600 dark:bg-content2/35 dark:text-default-500">
-                      {topic}
-                    </span>
-                  ))}
-                </div>
                 <div class="mt-6 flex items-center justify-between gap-4 border-t border-divider pt-5">
                   <span class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-default-500">
                     <IconDocumentText className="h-4 w-4 text-primary" aria-hidden="true" />
-                    {story.sourceCount} linked sources
+                    {story.sourceCount} sources
                   </span>
                   <a
                     href={story.href}
                     class="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-foreground transition hover:text-primary"
                   >
-                    Read story
+                    {storyCtaLabels[story.storyType]}
                     <IconArrowRight className="h-4 w-4" aria-hidden="true" />
                   </a>
                 </div>
-              </div>
-            </article>
-          ))
-        }
+              </article>
+            ))}
+          </div>
+        </Section>
+      )
+    }
+
+    <Section id="story-archive" py="pt-2 pb-2 md:pt-4 md:pb-4" containerClass="relative z-10">
+      <div class="stories-panel rounded-[1.8rem] p-4 md:p-5">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p class="stories-mono text-[0.68rem] uppercase tracking-[0.24em] text-default-500">
+              Browse by lens
+            </p>
+            <p class="mt-2 text-sm leading-7 text-default-700 dark:text-default-500">
+              Jump to the slice you need first: operational proof, everyday adoption, or stories
+              that change the trust equation.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 lg:justify-end">
+            {
+              archiveLenses.map((lens) => (
+                <a href={lens.href} class="stories-filter-chip">
+                  <span>{lens.label}</span>
+                  <span class="stories-filter-chip__detail">{lens.description}</span>
+                </a>
+              ))
+            }
+          </div>
+        </div>
       </div>
     </Section>
 
+    {
+      watchlistStories.length > 0 && (
+        <Section id="watchlist" py="py-4 md:py-6" containerClass="relative z-10">
+          <div class="stories-watchlist overflow-hidden rounded-[2.4rem] border border-divider p-6 shadow-[0_24px_100px_-45px_rgb(0_0_0/0.25)] backdrop-blur-2xl md:p-8">
+            <div class="grid gap-7 xl:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] xl:items-start">
+              <div>
+                <p class="stories-mono text-[0.72rem] uppercase tracking-[0.28em] text-default-500">
+                  Trust, security, and moderation
+                </p>
+                <h2 class="stories-display mt-3 text-4xl leading-tight text-foreground md:text-[3.2rem]">
+                  Where trust starts to fray.
+                </h2>
+                <p class="mt-4 text-base leading-8 text-default-700 dark:text-default-500">
+                  These are the stories where moderation, distribution, or outright scam pressure
+                  changed how OpenClaw had to be judged.
+                </p>
+                <p class="mt-3 text-sm leading-7 text-default-600 dark:text-default-500">
+                  Read this section when you need to separate drama from actual deployment risk.
+                </p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  {sectionChips.watchlist.map((chip) => (
+                    <span class="stories-filter-chip stories-filter-chip--static">{chip}</span>
+                  ))}
+                </div>
+              </div>
+              <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {watchlistStories.map((story, storyIndex) => (
+                  <article
+                    class="animate-rise rounded-[1.8rem] border border-divider bg-content1/75 p-5 shadow-[0_16px_60px_-36px_rgb(0_0_0/0.28)] dark:bg-content1/55 dark:shadow-[0_18px_70px_-36px_rgb(0_0_0/0.72)]"
+                    style={`animation-delay:${storyIndex * 100}ms`}
+                  >
+                    <div class="flex items-center justify-between gap-4 text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
+                      <span>{storyTypeLabels[story.storyType]}</span>
+                      <span>{story.publishLabel}</span>
+                    </div>
+                    <h3 class="mt-4 text-2xl font-semibold leading-tight text-foreground">
+                      {story.title}
+                    </h3>
+                    <p class="mt-3 text-sm font-medium text-secondary">{story.company}</p>
+                    <p class="mt-4 text-sm leading-7 text-default-700 dark:text-default-500">
+                      {story.summary}
+                    </p>
+                    <div class="mt-5 flex flex-wrap gap-2">
+                      {story.topics.slice(0, 3).map((topic) => (
+                        <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-[0.68rem] uppercase tracking-[0.16em] text-default-600 dark:bg-content2/35 dark:text-default-500">
+                          {topic}
+                        </span>
+                      ))}
+                    </div>
+                    <div class="mt-6 flex items-center justify-between gap-4 border-t border-divider pt-4">
+                      <span class="text-xs uppercase tracking-[0.18em] text-default-500">
+                        {story.sourceCount} linked sources
+                      </span>
+                      <a
+                        href={story.href}
+                        class="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-foreground transition hover:text-secondary"
+                      >
+                        {storyCtaLabels[story.storyType]}
+                        <IconArrowRight className="h-4 w-4" aria-hidden="true" />
+                      </a>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Section>
+      )
+    }
+
+    {
+      operatorPatternStories.length > 0 && (
+        <Section id="operator-patterns" py="py-12 md:py-16" containerClass="relative z-10">
+          <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div class="max-w-3xl">
+              <p class="stories-mono text-[0.72rem] uppercase tracking-[0.28em] text-default-500">
+                Work patterns
+              </p>
+              <h2 class="stories-display mt-3 text-4xl leading-tight text-foreground md:text-5xl">
+                Where OpenClaw stops looking like a demo and starts looking like work.
+              </h2>
+            </div>
+            <div class="max-w-xl">
+              <p class="text-base leading-8 text-default-700 dark:text-default-500">
+                These stories are about revenue work, bounded coding, production thresholds, cost
+                discipline, and the habits that keep an agent useful.
+              </p>
+              <p class="mt-3 text-sm leading-7 text-default-600 dark:text-default-500">
+                This is the section for readers who want to know whether OpenClaw survives
+                deadlines, budgets, and repeatable routines.
+              </p>
+              <div class="mt-4 flex flex-wrap gap-2">
+                {sectionChips.operatorPatterns.map((chip) => (
+                  <span class="stories-filter-chip stories-filter-chip--static">{chip}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div class="grid gap-6 lg:grid-cols-2 xl:grid-cols-2">
+            {operatorPatternStories.map((story, storyIndex) => (
+              <article
+                class="stories-panel animate-rise flex h-full flex-col rounded-[2rem] p-6"
+                style={`animation-delay:${storyIndex * 90}ms`}
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex min-w-0 items-center gap-3">
+                    {story.avatar ? (
+                      <img
+                        src={story.avatar}
+                        alt={`${story.name} avatar`}
+                        class="h-12 w-12 rounded-full border border-divider object-cover bg-content2"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div class="h-12 w-12 rounded-full border border-divider bg-content2" />
+                    )}
+                    <p class="truncate text-sm font-semibold text-secondary">{story.name}</p>
+                  </div>
+                  <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-[0.68rem] uppercase tracking-[0.16em] text-default-600 dark:bg-content2/35 dark:text-default-500">
+                    {storyTypeShortLabels[story.storyType]}
+                  </span>
+                </div>
+                <h3 class="mt-5 text-2xl font-semibold leading-tight text-foreground">
+                  {story.title}
+                </h3>
+                <p class="mt-3 text-sm text-default-600 dark:text-default-500">
+                  {getStoryCardSubline(story)}
+                </p>
+                <p class="mt-4 flex-1 text-sm leading-7 text-default-700 dark:text-default-500">
+                  {story.summary}
+                </p>
+                <div class="mt-5 flex flex-wrap gap-2">
+                  {story.topics.slice(0, 2).map((topic) => (
+                    <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-[0.68rem] uppercase tracking-[0.16em] text-default-600 dark:bg-content2/35 dark:text-default-500">
+                      {topic}
+                    </span>
+                  ))}
+                </div>
+                <div class="mt-6 flex items-center justify-between gap-4 border-t border-divider pt-5">
+                  <div class="text-xs uppercase tracking-[0.18em] text-default-500">
+                    Updated {story.updatedLabel}
+                  </div>
+                  <a
+                    href={story.href}
+                    class="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-foreground transition hover:text-primary"
+                  >
+                    {storyCtaLabels[story.storyType]}
+                    <IconArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </Section>
+      )
+    }
+
+    {
+      lifeSystemStories.length > 0 && (
+        <Section id="life-systems" py="py-4 md:py-8" containerClass="relative z-10">
+          <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div class="max-w-3xl">
+              <p class="stories-mono text-[0.72rem] uppercase tracking-[0.28em] text-default-500">
+                Daily systems
+              </p>
+              <h2 class="stories-display mt-3 text-4xl leading-tight text-foreground md:text-5xl">
+                The stories where OpenClaw leaves the workstation and enters daily life.
+              </h2>
+            </div>
+            <div class="max-w-xl">
+              <p class="text-base leading-8 text-default-700 dark:text-default-500">
+                Family gateways, memory layers, mobile control, and the quieter forms of delegated
+                attention that matter more than a benchmark chart.
+              </p>
+              <p class="mt-3 text-sm leading-7 text-default-600 dark:text-default-500">
+                Start here if you care less about heroic demos and more about how OpenClaw fits into
+                households, habits, and ambient coordination.
+              </p>
+              <div class="mt-4 flex flex-wrap gap-2">
+                {sectionChips.lifeSystems.map((chip) => (
+                  <span class="stories-filter-chip stories-filter-chip--static">{chip}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div class="grid gap-6 lg:grid-cols-2 xl:grid-cols-2">
+            {lifeSystemStories.map((story, storyIndex) => (
+              <article
+                class="stories-panel animate-rise flex h-full flex-col rounded-[2rem] p-6"
+                style={`animation-delay:${storyIndex * 90}ms`}
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex min-w-0 items-center gap-3">
+                    {story.avatar ? (
+                      <img
+                        src={story.avatar}
+                        alt={`${story.name} avatar`}
+                        class="h-12 w-12 rounded-full border border-divider object-cover bg-content2"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div class="h-12 w-12 rounded-full border border-divider bg-content2" />
+                    )}
+                    <p class="truncate text-sm font-semibold text-secondary">{story.name}</p>
+                  </div>
+                  <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-[0.68rem] uppercase tracking-[0.16em] text-default-600 dark:bg-content2/35 dark:text-default-500">
+                    {storyTypeShortLabels[story.storyType]}
+                  </span>
+                </div>
+                <h3 class="mt-5 text-2xl font-semibold leading-tight text-foreground">
+                  {story.title}
+                </h3>
+                <p class="mt-3 text-sm text-default-600 dark:text-default-500">
+                  {getStoryCardSubline(story)}
+                </p>
+                <p class="mt-4 flex-1 text-sm leading-7 text-default-700 dark:text-default-500">
+                  {story.summary}
+                </p>
+                <div class="mt-5 flex flex-wrap gap-2">
+                  {story.topics.slice(0, 2).map((topic) => (
+                    <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-[0.68rem] uppercase tracking-[0.16em] text-default-600 dark:bg-content2/35 dark:text-default-500">
+                      {topic}
+                    </span>
+                  ))}
+                </div>
+                <div class="mt-6 flex items-center justify-between gap-4 border-t border-divider pt-5">
+                  <div class="text-xs uppercase tracking-[0.18em] text-default-500">
+                    Updated {story.updatedLabel}
+                  </div>
+                  <a
+                    href={story.href}
+                    class="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-foreground transition hover:text-primary"
+                  >
+                    {storyCtaLabels[story.storyType]}
+                    <IconArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </Section>
+      )
+    }
+
+    {
+      builderStories.length > 0 && (
+        <Section py="py-8 md:py-12" containerClass="relative z-10">
+          <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div class="max-w-3xl">
+              <p class="stories-mono text-[0.72rem] uppercase tracking-[0.28em] text-default-500">
+                More from the archive
+              </p>
+              <h2 class="stories-display mt-3 text-4xl leading-tight text-foreground md:text-5xl">
+                Founder profiles, turning points, and the stories that shaped the ecosystem early
+                on.
+              </h2>
+            </div>
+            <p class="max-w-xl text-base leading-8 text-default-700 dark:text-default-500">
+              These pieces connect the people, companies, and incidents that gave the ecosystem its
+              earlier shape.
+            </p>
+          </div>
+
+          <div class="grid gap-6 lg:grid-cols-2 xl:grid-cols-2">
+            {builderStories.map((story, storyIndex) => (
+              <article
+                class="stories-panel animate-rise flex h-full flex-col rounded-[2rem] p-6"
+                style={`animation-delay:${storyIndex * 90}ms`}
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex min-w-0 items-center gap-3">
+                    {story.avatar ? (
+                      <img
+                        src={story.avatar}
+                        alt={`${story.name} avatar`}
+                        class="h-12 w-12 rounded-full border border-divider object-cover bg-content2"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div class="h-12 w-12 rounded-full border border-divider bg-content2" />
+                    )}
+                    <p class="truncate text-sm font-semibold text-secondary">{story.name}</p>
+                  </div>
+                  <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-[0.68rem] uppercase tracking-[0.16em] text-default-600 dark:bg-content2/35 dark:text-default-500">
+                    {storyTypeShortLabels[story.storyType]}
+                  </span>
+                </div>
+                <h3 class="mt-5 text-2xl font-semibold leading-tight text-foreground">
+                  {story.title}
+                </h3>
+                <p class="mt-3 text-sm text-default-600 dark:text-default-500">
+                  {getStoryCardSubline(story)}
+                </p>
+                <p class="mt-4 flex-1 text-sm leading-7 text-default-700 dark:text-default-500">
+                  {story.summary}
+                </p>
+                <div class="mt-5 flex flex-wrap gap-2">
+                  {story.topics.slice(0, 2).map((topic) => (
+                    <span class="rounded-full border border-divider bg-content2/60 px-3 py-1 text-[0.68rem] uppercase tracking-[0.16em] text-default-600 dark:bg-content2/35 dark:text-default-500">
+                      {topic}
+                    </span>
+                  ))}
+                </div>
+                <div class="mt-6 flex items-center justify-between gap-4 border-t border-divider pt-5">
+                  <div class="text-xs uppercase tracking-[0.18em] text-default-500">
+                    Updated {story.updatedLabel}
+                  </div>
+                  <a
+                    href={story.href}
+                    class="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-foreground transition hover:text-primary"
+                  >
+                    {storyCtaLabels[story.storyType]}
+                    <IconArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        </Section>
+      )
+    }
+
     <Section py="pt-6 pb-24 md:pt-10 md:pb-28" containerClass="relative z-10">
-      <div
-        class="overflow-hidden rounded-[2.4rem] border border-divider bg-content1/80 p-8 shadow-[0_24px_100px_-45px_rgb(0_0_0/0.25)] backdrop-blur-2xl dark:bg-content1/60 dark:shadow-[0_28px_110px_-48px_rgb(0_0_0/0.8)] md:p-12"
-      >
+      <div class="stories-panel overflow-hidden rounded-[2.4rem] p-8 md:p-12">
         <div class="grid gap-8 xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-end">
           <div>
-            <p class="stories-mono text-xs uppercase tracking-[0.28em] text-default-500">
+            <p class="stories-mono text-[0.72rem] uppercase tracking-[0.28em] text-default-500">
               Contribute
             </p>
             <h2
               class="stories-display mt-4 max-w-3xl text-4xl leading-tight text-foreground md:text-5xl"
             >
-              Have an OpenClaw story or security lesson
-              <span class="text-secondary"> worth documenting?</span>
+              Have an OpenClaw lead worth sending over?
             </h2>
             <p class="mt-5 max-w-3xl text-lg leading-8 text-default-800 dark:text-default-600">
-              CoClaw is interested in source-backed OpenClaw case studies: community deployments,
-              ClawHub moderation events, governance disputes, marketplace lessons, and operator
-              writeups that can help the next person make a better decision.
+              Send us rollout stories, ClawHub moderation events, governance disputes, operator
+              playbooks, or security failures that would help the next OpenClaw user make a better
+              call.
             </p>
           </div>
           <div class="space-y-4">
@@ -486,13 +988,13 @@ const structuredData = {
               href="mailto:contact@coclaw.com"
               class="inline-flex w-full items-center justify-center rounded-full border border-secondary/25 bg-secondary/10 px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-secondary transition duration-300 hover:-translate-y-0.5 hover:bg-secondary/15"
             >
-              Submit an OpenClaw lead
+              Send a story lead
             </a>
             <a
               href="/resources"
               class="inline-flex w-full items-center justify-center rounded-full border border-divider bg-content2/60 px-6 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-foreground transition duration-300 hover:-translate-y-0.5 hover:bg-content2"
             >
-              Browse related CoClaw guides
+              Browse related guides
             </a>
           </div>
         </div>
@@ -518,6 +1020,34 @@ const structuredData = {
     font-family: var(--stories-mono);
   }
 
+  .stories-panel {
+    border: 1px solid color-mix(in srgb, currentColor 6%, transparent);
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.72), rgb(255 255 255 / 0.56)),
+      linear-gradient(135deg, rgb(255 255 255 / 0.12), transparent 45%);
+    box-shadow: 0 28px 90px -46px rgb(0 0 0 / 0.32);
+    backdrop-filter: blur(26px);
+  }
+
+  :global(html.dark) .stories-panel {
+    background:
+      linear-gradient(180deg, rgb(18 18 22 / 0.78), rgb(18 18 22 / 0.62)),
+      linear-gradient(135deg, rgb(255 255 255 / 0.05), transparent 45%);
+    box-shadow: 0 30px 110px -50px rgb(0 0 0 / 0.78);
+  }
+
+  .stories-watchlist {
+    background:
+      radial-gradient(circle at top left, rgb(245 158 11 / 0.12), transparent 32%),
+      linear-gradient(180deg, rgb(255 255 255 / 0.68), rgb(255 255 255 / 0.54));
+  }
+
+  :global(html.dark) .stories-watchlist {
+    background:
+      radial-gradient(circle at top left, rgb(245 158 11 / 0.14), transparent 32%),
+      linear-gradient(180deg, rgb(20 20 24 / 0.8), rgb(20 20 24 / 0.64));
+  }
+
   .stories-kicker {
     display: inline-flex;
     align-items: center;
@@ -539,6 +1069,45 @@ const structuredData = {
     box-shadow: 0 0 20px color-mix(in srgb, currentColor 35%, transparent);
   }
 
+  .stories-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.78rem 1rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+    background: color-mix(in srgb, var(--heroui-content1, white) 76%, transparent);
+    color: inherit;
+    text-decoration: none;
+    transition:
+      transform 220ms ease,
+      border-color 220ms ease,
+      background-color 220ms ease,
+      color 220ms ease;
+    backdrop-filter: blur(18px);
+  }
+
+  .stories-filter-chip:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--heroui-primary, currentColor) 22%, transparent);
+    color: var(--heroui-primary, currentColor);
+  }
+
+  .stories-filter-chip__detail {
+    color: color-mix(in srgb, currentColor 62%, transparent);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .stories-filter-chip--static {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
   .stories-grid {
     background-image:
       linear-gradient(to right, rgb(0 0 0 / 0.04) 1px, transparent 1px),
@@ -547,10 +1116,30 @@ const structuredData = {
     mask-image: linear-gradient(180deg, rgb(0 0 0 / 0.28), transparent 82%);
   }
 
+  .stories-noise {
+    background-image:
+      radial-gradient(circle at 20% 20%, rgb(0 0 0 / 0.15) 0.4px, transparent 0.7px),
+      radial-gradient(circle at 80% 40%, rgb(0 0 0 / 0.14) 0.4px, transparent 0.7px),
+      radial-gradient(circle at 30% 80%, rgb(0 0 0 / 0.12) 0.4px, transparent 0.7px);
+    background-size:
+      16px 16px,
+      22px 22px,
+      18px 18px;
+    mix-blend-mode: multiply;
+  }
+
   :global(html.dark) .stories-grid {
     background-image:
       linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
       linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  }
+
+  :global(html.dark) .stories-noise {
+    background-image:
+      radial-gradient(circle at 20% 20%, rgb(255 255 255 / 0.14) 0.4px, transparent 0.7px),
+      radial-gradient(circle at 80% 40%, rgb(255 255 255 / 0.12) 0.4px, transparent 0.7px),
+      radial-gradient(circle at 30% 80%, rgb(255 255 255 / 0.1) 0.4px, transparent 0.7px);
+    mix-blend-mode: screen;
   }
 
   .animate-rise,

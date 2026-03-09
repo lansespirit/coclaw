@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" fill="none">
+  <rect width="160" height="160" rx="32" fill="#0B1220"/>
+  <path d="M40 56c0-11.046 8.954-20 20-20h24c11.046 0 20 8.954 20 20v44c0 11.046-8.954 20-20 20H60c-11.046 0-20-8.954-20-20V56z" fill="#111B30" stroke="#334155"/>
+  <rect x="52" y="52" width="40" height="8" rx="4" fill="#38BDF8"/>
+  <rect x="52" y="68" width="40" height="8" rx="4" fill="#38BDF8" fill-opacity="0.75"/>
+  <rect x="52" y="84" width="40" height="8" rx="4" fill="#38BDF8" fill-opacity="0.55"/>
+  <path d="M108 88c0-14.359 11.641-26 26-26 6.903 0 13.523 2.742 18.405 7.625C157.258 74.477 160 81.097 160 88c0 14.359-11.641 26-26 26h-26V88z" transform="translate(-30 0)" fill="#16314B"/>
+  <path d="M100 86c0-9.389 7.611-17 17-17 5.035 0 9.843 2.215 13.072 6.026A16.95 16.95 0 01141 86c0 9.389-7.611 17-17 17h-24V86z" fill="#1E293B" stroke="#334155"/>
+  <circle cx="121" cy="58" r="17" fill="#F59E0B"/>
+  <path d="M121 48v20" stroke="#1F1303" stroke-width="6" stroke-linecap="round"/>
+  <path d="M114 53c1.8-2.667 4.2-4 7.2-4 4.4 0 7.8 2.4 7.8 6.4 0 8-11 5.4-11 11.6" stroke="#1F1303" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
