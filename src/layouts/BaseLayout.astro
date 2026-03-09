@@ -101,7 +101,7 @@ const cfBranch = process.env.CF_PAGES_BRANCH;
   <body class="bg-background text-foreground min-h-screen flex flex-col">
     <slot name="topbar" />
     <header class="sticky top-0 z-50">
-      <Navbar client:load />
+      <Navbar client:load currentPath={Astro.url.pathname} />
     </header>
 
     <main class="flex-grow">
