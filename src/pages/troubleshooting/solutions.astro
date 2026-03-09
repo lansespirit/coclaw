@@ -91,8 +91,8 @@ const filteredCards = cards.filter((c) => {
 
 <BaseLayout
   title="All Troubleshooting Solutions - CoClaw"
-  description="Browse all curated troubleshooting solutions for OpenClaw: installation, configuration, channels, models, gateway, and more."
-  keywords="OpenClaw troubleshooting solutions, OpenClaw fixes, OpenClaw help"
+  description="Browse all curated troubleshooting solutions for OpenClaw: installation, configuration, channels, models, gateway, AI API compatibility, and more."
+  keywords="OpenClaw troubleshooting solutions, OpenClaw fixes, OpenClaw help, OpenAI-compatible, Ollama, vLLM, LiteLLM"
 >
   <div class="bg-background min-h-screen overflow-x-hidden relative">
     <Section py="pt-24 pb-12" containerClass="text-center">
@@ -122,6 +122,49 @@ const filteredCards = cards.filter((c) => {
           initialSeverity={initialSeverity}
           client:load
         />
+      </div>
+    </Section>
+
+    <Section py="pb-8">
+      <div class="max-w-5xl mx-auto rounded-3xl border border-divider bg-content1 p-8">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+          <div class="max-w-3xl">
+            <h2 class="text-2xl font-bold mb-3">AI API compatibility topic cluster</h2>
+            <p class="text-default-700 dark:text-default-500">
+              For custom providers, local-model servers, and OpenAI-compatible relays, start with
+              the compatibility matrix and symptom pages before assuming the issue is just auth or a
+              bad base URL.
+            </p>
+          </div>
+          <a
+            href="/guides/self-hosted-ai-api-compatibility-matrix"
+            class="text-primary hover:underline font-semibold"
+          >
+            Open the matrix
+          </a>
+        </div>
+        <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mt-6">
+          <a
+            href="/guides/choose-local-ai-api-path-for-openclaw"
+            class="rounded-2xl border border-divider bg-content2 p-5 hover:border-primary/40 transition-colors"
+            >Pick the right local or proxy API path</a
+          >
+          <a
+            href="/troubleshooting/solutions/api-works-in-curl-but-openclaw-fails"
+            class="rounded-2xl border border-divider bg-content2 p-5 hover:border-primary/40 transition-colors"
+            >`curl` works, but OpenClaw fails</a
+          >
+          <a
+            href="/troubleshooting/solutions/custom-provider-reasoning-breaks-openai-compatible"
+            class="rounded-2xl border border-divider bg-content2 p-5 hover:border-primary/40 transition-colors"
+            >Reasoning breaks a custom provider</a
+          >
+          <a
+            href="/troubleshooting/solutions/openai-compatible-endpoint-rejects-stream-or-store"
+            class="rounded-2xl border border-divider bg-content2 p-5 hover:border-primary/40 transition-colors"
+            >Endpoint rejects `stream` or `store`</a
+          >
+        </div>
       </div>
     </Section>
 

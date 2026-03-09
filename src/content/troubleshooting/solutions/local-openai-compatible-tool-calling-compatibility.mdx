@@ -1,0 +1,113 @@
+---
+title: "Local llama.cpp, Ollama, and vLLM tool-calling compatibility"
+description: "Understand why local-model servers can chat normally but still fail on agent tool calling, tool-result continuation, or OpenAI-compatible multi-turn behavior in OpenClaw."
+kind: "solution"
+component: "model"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "Unexpected message role"
+  - "tool calling"
+  - "tool result"
+  - "local model"
+keywords:
+  - "llama.cpp"
+  - "ollama"
+  - "vllm"
+  - "tool calling"
+  - "Unexpected message role"
+publishDate: 2026-03-09
+lastUpdated: 2026-03-09
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/providers/ollama"
+    - "https://docs.openclaw.ai/providers/vllm"
+  guides:
+    - "openclaw-relay-and-api-proxy-troubleshooting"
+    - "openclaw-configuration"
+  githubIssues:
+    - 27406
+    - 25100
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Local chat works, but agent tool calling is flaky or broken.
+- The first message may work, but later turns fail after a tool runs.
+- You may see template errors such as `Unexpected message role`.
+- The model may emit raw tool JSON into `content` instead of participating in a clean tool-calling loop.
+
+## Cause
+
+With local-model servers, there are usually **three separate compatibility layers**:
+
+1. the model itself,
+2. the server API layer,
+3. the OpenAI-compatible wrapper or chat template.
+
+Those layers are often treated as one thing by users, but they fail differently.
+
+Examples:
+
+- `llama.cpp` may reject tool-related message roles because the chat template does not understand them.
+- Ollama native API and Ollama `/v1` compatibility mode do not have the same expectations or stability for tools.
+- vLLM may support basic OpenAI-compatible chat but still differ on tool-calling details and later-turn behavior.
+
+## Fix
+
+### 1) Separate selection problems from runtime problems
+
+First prove OpenClaw is actually using the local model you expect:
+
+```bash
+openclaw models status --probe
+```
+
+If this resolves to the wrong provider, fix selection/config first.
+
+If it resolves to the correct local provider but real runs still fail, you are now debugging tool-calling compatibility.
+
+### 2) Ask whether the failure is at the model, server, or wrapper layer
+
+Use this mental split:
+
+- **model problem**: the model never produces reliable tool calls,
+- **server problem**: the backend cannot represent tool turns or later tool results correctly,
+- **wrapper/template problem**: the server tries to map messages into a chat template that rejects tool roles.
+
+That distinction prevents a lot of blind retrying.
+
+### 3) Prefer the most native path when you need tool reliability
+
+If a local stack offers both:
+
+- a native server API, and
+- an OpenAI-compatible `/v1` path,
+
+assume the native path is the stronger default for advanced agent behavior unless you have already proven the `/v1` path works for multi-turn tool use.
+
+### 4) If the server rejects tool-related roles, do not treat it as a generic auth issue
+
+Template or tool-role failures are usually not caused by API keys, provider selection, or `baseUrl` typos.
+
+They are evidence that the compatibility layer cannot represent OpenClaw's full conversation state correctly.
+
+## Verify
+
+You have reached the right diagnosis if:
+
+- plain chat works,
+- failures appear specifically when tool turns enter the session,
+- and the problem correlates with server/template behavior rather than with auth or networking.
+
+## Related
+
+- Ollama model-selection and `/v1` boundary guide: [/troubleshooting/solutions/ollama-configured-but-falls-back-to-anthropic](/troubleshooting/solutions/ollama-configured-but-falls-back-to-anthropic)
+- Relay/runtime payload mismatch guide: [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+- If your provider works only in minimal tests: [/troubleshooting/solutions/api-works-in-curl-but-openclaw-fails](/troubleshooting/solutions/api-works-in-curl-but-openclaw-fails)

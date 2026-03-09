@@ -1,0 +1,160 @@
+---
+title: "API works in curl, but OpenClaw still fails"
+description: "Fix custom or local AI API integrations where direct curl requests succeed, but OpenClaw still errors, returns blank output, or fails during real agent runs."
+kind: "solution"
+component: "model"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "curl works"
+  - "HTTP 422"
+  - "probe works but agent fails"
+  - "blank output"
+keywords:
+  - "curl works but OpenClaw fails"
+  - "probe works but agent fails"
+  - "custom provider"
+  - "openai-compatible"
+  - "HTTP 422"
+publishDate: 2026-03-09
+lastUpdated: 2026-03-09
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/cli/models"
+    - "https://docs.openclaw.ai/gateway/configuration"
+  guides:
+    - "openclaw-relay-and-api-proxy-troubleshooting"
+    - "openclaw-configuration"
+  githubIssues:
+    - 38902
+    - 16151
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- A direct `curl` request to your provider succeeds.
+- `openclaw models status --probe` may also succeed.
+- But a real `openclaw agent` run, TUI message, or channel reply still fails.
+- You may see `HTTP 422`, blank output, a fast failure, or “no output” even though the endpoint is reachable.
+
+## Cause
+
+This usually means you have already solved the **endpoint** problem and are now hitting a **runtime payload compatibility** problem.
+
+A minimal `curl` request usually proves only that the backend accepts:
+
+- the URL,
+- the auth header,
+- a small `messages` payload,
+- and basic chat generation.
+
+A real OpenClaw run may send more than that, including:
+
+- session history,
+- `tools`,
+- `tool_choice`,
+- `parallel_tool_calls`,
+- `reasoning_effort`,
+- `store`,
+- or `stream`.
+
+If the backend only partially implements an OpenAI-compatible contract, the minimal `curl` test can pass while the real run fails.
+
+## Fix
+
+### 1) Confirm whether probe also passes
+
+Run:
+
+```bash
+openclaw models status --probe
+```
+
+Interpret the result like this:
+
+- If probe fails, you are still in auth/config/network territory.
+- If probe succeeds but real runs fail, move to payload-compatibility debugging.
+
+### 2) Compare the minimal request with the real failing path
+
+Ask these questions:
+
+- Does your successful `curl` use only one user message?
+- Does it avoid `tools` and multi-turn history?
+- Does it force `stream: false`?
+- Does it avoid reasoning-related fields?
+
+If yes, then `curl` is proving only basic chat support.
+
+### 3) Temporarily treat the provider as plain chat only
+
+If this is a custom OpenAI-compatible provider, start with a conservative model config:
+
+```json5
+{
+  models: {
+    providers: {
+      myprovider: {
+        api: "openai-completions",
+        baseUrl: "http://host:port/v1",
+        apiKey: "${MY_API_KEY}",
+        models: [
+          {
+            id: "my-model",
+            reasoning: false,
+            input: ["text"],
+            compat: {
+              supportsTools: false,
+            },
+          },
+        ],
+      },
+    },
+  },
+}
+```
+
+That isolates whether the endpoint can survive a real OpenClaw run as a plain chat backend.
+
+### 4) Retry with a fresh session
+
+Do not reuse a session that may already contain failed tool turns or provider-specific history.
+
+```bash
+openclaw agent --session-id "compat-test-1" -m "hi"
+```
+
+In the TUI, use `/reset` before re-testing.
+
+### 5) Capture the most useful next evidence
+
+If it still fails, the most valuable next artifact is the server-side log or the final request body fields. You do **not** need to expose secrets.
+
+Ask whether the failing request includes any of these:
+
+- `tools`
+- `tool_choice`
+- `parallel_tool_calls`
+- `reasoning_effort`
+- `store`
+- `stream`
+
+## Verify
+
+The fix path is working if:
+
+- a fresh `openclaw agent` run succeeds, not just `curl`,
+- TUI replies are normal,
+- and logs show the expected provider/model being called without a fast 400/422 failure.
+
+## Related
+
+- Relay / proxy compatibility guide: [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+- Configuration basics: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- If the TUI is blank specifically: [/troubleshooting/solutions/tui-no-output-after-send](/troubleshooting/solutions/tui-no-output-after-send)

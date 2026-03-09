@@ -1,0 +1,120 @@
+---
+title: "Custom provider fails only when reasoning is enabled"
+description: "Fix custom OpenAI-compatible providers that work in basic chat mode but fail once reasoning or thinking controls are enabled."
+kind: "solution"
+component: "model"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "reasoning_effort"
+  - "thinking"
+  - "reasoning"
+keywords:
+  - "reasoning_effort"
+  - "thinking"
+  - "custom provider"
+  - "openai-compatible reasoning"
+  - "probe works"
+publishDate: 2026-03-09
+lastUpdated: 2026-03-09
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/concepts/models"
+    - "https://docs.openclaw.ai/gateway/configuration-reference"
+  guides:
+    - "openclaw-relay-and-api-proxy-troubleshooting"
+    - "openclaw-configuration"
+  githubIssues:
+    - 33272
+    - 38902
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Basic chat works.
+- The same provider fails after enabling reasoning or thinking features.
+- Errors may appear only for certain models or only after changing defaults.
+- Tool calling may also become unstable once reasoning is enabled.
+
+## Cause
+
+“Reasoning-capable model” and “this endpoint accepts reasoning-control fields” are **not** the same thing.
+
+A custom OpenAI-compatible endpoint may accept normal chat requests but reject or mis-handle fields such as:
+
+- `reasoning_effort`,
+- provider-specific thinking controls,
+- or translated reasoning payloads passed through a proxy layer.
+
+This is why a model can be genuinely reasoning-capable while the compatibility layer in front of it is not.
+
+## Fix
+
+### 1) Turn reasoning off for the compatibility test
+
+When debugging, first prove the endpoint can survive a plain run:
+
+```json5
+{
+  models: {
+    providers: {
+      myprovider: {
+        models: [
+          {
+            id: "my-model",
+            reasoning: false,
+          },
+        ],
+      },
+    },
+  },
+}
+```
+
+Then retry with a fresh session.
+
+### 2) Check whether the failure appears only after changing thinking defaults
+
+Look for:
+
+- global thinking defaults,
+- per-model reasoning flags,
+- or a recent configuration change that enabled reasoning-like behavior.
+
+If the problem started only after that change, your endpoint likely rejects the reasoning-control layer, not the model itself.
+
+### 3) Treat the endpoint as plain chat until proven otherwise
+
+For custom compatibility layers, the safe default is:
+
+- `reasoning: false` during initial integration,
+- then re-enable only after proving the specific endpoint contract supports it.
+
+### 4) Distinguish model capability from transport compatibility
+
+The right mental model is:
+
+- the model may support reasoning,
+- but the proxy, relay, or OpenAI-compatible wrapper may not support the control fields OpenClaw uses.
+
+That is a transport limitation, not proof that the underlying model is weak or broken.
+
+## Verify
+
+You have confirmed the diagnosis if:
+
+- the provider works with reasoning off,
+- fails only when reasoning is enabled,
+- and becomes stable again after reverting to plain chat mode.
+
+## Related
+
+- Runtime compatibility overview: [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+- Config debugging guide: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- If the endpoint also breaks on other runtime fields: [/troubleshooting/solutions/openai-compatible-endpoint-rejects-stream-or-store](/troubleshooting/solutions/openai-compatible-endpoint-rejects-stream-or-store)

@@ -1,0 +1,135 @@
+---
+title: "Custom OpenAI-compatible endpoint rejects tools or tool_choice"
+description: "Fix custom or proxy AI endpoints that can chat normally but fail once OpenClaw sends tools, tool_choice, parallel_tool_calls, or later tool-result turns."
+kind: "solution"
+component: "model"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "tool_choice"
+  - "parallel_tool_calls"
+  - "tools"
+  - "tool result"
+keywords:
+  - "openai-compatible tools"
+  - "tool_choice"
+  - "parallel_tool_calls"
+  - "tool calling"
+  - "custom provider"
+publishDate: 2026-03-09
+lastUpdated: 2026-03-09
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/concepts/models"
+    - "https://docs.openclaw.ai/gateway/configuration-reference"
+  guides:
+    - "openclaw-relay-and-api-proxy-troubleshooting"
+    - "openclaw-configuration"
+  githubIssues:
+    - 25100
+    - 33438
+    - 38902
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Basic chat works against your custom endpoint.
+- The first turn may succeed, but failures appear once tools are involved.
+- Requests may fail when OpenClaw sends `tools`, `tool_choice`, or later tool-result continuation.
+- You may see 400/422 errors, empty replies, or the model printing tool JSON as plain text.
+
+## Cause
+
+Many custom OpenAI-compatible endpoints implement only a subset of the modern tool-calling contract.
+
+Common breakpoints include:
+
+- rejecting `tools` entirely,
+- accepting `tools` but rejecting `tool_choice`,
+- rejecting `parallel_tool_calls`,
+- mishandling tool-result continuation on later turns,
+- or accepting tool calls only in single-turn playground-style usage.
+
+This is especially common when the endpoint sits behind a local-model server, a relay, or a proxy that normalizes requests imperfectly.
+
+## Fix
+
+### 1) Prove whether plain chat is the only supported mode
+
+Temporarily configure the model as a plain chat backend:
+
+```json5
+{
+  models: {
+    providers: {
+      myprovider: {
+        api: "openai-completions",
+        baseUrl: "http://host:port/v1",
+        apiKey: "${MY_API_KEY}",
+        models: [
+          {
+            id: "my-model",
+            reasoning: false,
+            input: ["text"],
+            compat: {
+              supportsTools: false,
+            },
+          },
+        ],
+      },
+    },
+  },
+}
+```
+
+If that stabilizes the provider, you have confirmed a tools-compatibility boundary rather than a networking problem.
+
+### 2) Retry with a fresh session
+
+Tool-related failures often poison the session history for later retries.
+
+Use a new session id:
+
+```bash
+openclaw agent --session-id "tool-compat-test" -m "hi"
+```
+
+### 3) Check whether the provider only fails on later turns
+
+Ask:
+
+- does the first chat turn succeed?
+- does the failure appear only after a tool runs?
+- do errors mention bad response shape, invalid arguments, or empty tool names?
+
+If yes, your endpoint may support only partial tool-calling behavior.
+
+### 4) Prefer a provider path with a clearer tools contract
+
+If you need reliable agent tooling, prefer:
+
+- a native API path designed for that backend,
+- a provider mode with stronger tool semantics,
+- or a different relay/backend known to handle tool-result continuation correctly.
+
+Do not assume every `/v1/chat/completions` endpoint is equally capable once tools enter the session.
+
+## Verify
+
+The issue is resolved if:
+
+- OpenClaw no longer fails when tools are enabled,
+- later turns after tool execution also succeed,
+- and the model stops dumping raw tool JSON into plain text output.
+
+## Related
+
+- Relay compatibility guide: [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+- If only plain chat works: [/troubleshooting/solutions/api-works-in-curl-but-openclaw-fails](/troubleshooting/solutions/api-works-in-curl-but-openclaw-fails)
+- Local-model tool-calling edge cases: [/troubleshooting/solutions/local-openai-compatible-tool-calling-compatibility](/troubleshooting/solutions/local-openai-compatible-tool-calling-compatibility)

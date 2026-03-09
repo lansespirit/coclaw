@@ -75,8 +75,8 @@ const localIndex = solutions.map((entry) => ({
 
 <BaseLayout
   title="Troubleshooting - OpenClaw Solutions"
-  description="Find step-by-step solutions to common OpenClaw problems. Search our troubleshooting database for installation errors, channel integration issues, and configuration fixes."
-  keywords="OpenClaw troubleshooting, OpenClaw errors, OpenClaw issues, OpenClaw problems, OpenClaw help, OpenClaw support"
+  description="Find step-by-step solutions to common OpenClaw problems, including installation, channels, configuration, model auth, and OpenAI-compatible AI API compatibility issues."
+  keywords="OpenClaw troubleshooting, OpenClaw errors, OpenClaw issues, OpenClaw problems, OpenClaw help, OpenClaw support, OpenAI-compatible, local model, Ollama, vLLM, LiteLLM"
 >
   <div class="bg-background min-h-screen overflow-x-hidden relative">
     <!-- Hero + Search -->
@@ -112,7 +112,7 @@ const localIndex = solutions.map((entry) => ({
     <!-- Solution Categories -->
     <Section py="pt-10 pb-16">
       <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center">Browse Solutions by Category</h2>
-      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
         <!-- Install & Setup -->
         <a
           href="/troubleshooting/solutions?component=install"
@@ -220,6 +220,96 @@ const localIndex = solutions.map((entry) => ({
             />
           </div>
         </a>
+
+        <!-- AI API Compatibility -->
+        <a
+          href="/guides/self-hosted-ai-api-compatibility-matrix"
+          class="group relative overflow-hidden rounded-2xl border border-divider bg-content1 p-6 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1"
+        >
+          <div class="mb-4">
+            <div
+              class="w-12 h-12 rounded-xl bg-gradient-to-br from-success-500 to-primary-600 flex items-center justify-center"
+            >
+              <IconDesktop className="w-6 h-6 text-white" aria-hidden="true" />
+            </div>
+          </div>
+          <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+            AI API Compatibility
+          </h3>
+          <p class="text-default-700 dark:text-default-500 text-sm mb-4">
+            OpenAI-compatible endpoints, local models, tools, reasoning, and streaming mismatches
+          </p>
+          <div class="flex items-center text-primary text-sm font-medium">
+            <span>View guide</span>
+            <IconChevronRight
+              className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+              aria-hidden="true"
+            />
+          </div>
+        </a>
+      </div>
+    </Section>
+
+    <Section py="pt-0 pb-10">
+      <div class="rounded-3xl border border-divider bg-content1 p-8 md:p-10">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
+          <div class="max-w-3xl">
+            <h2 class="text-2xl md:text-3xl font-bold mb-3">AI API Compatibility Fast Path</h2>
+            <p class="text-default-700 dark:text-default-500 leading-relaxed">
+              If your issue sounds like "curl works but OpenClaw fails", "probe works but the agent
+              still errors", or "my local OpenAI-compatible backend only breaks on tools", start
+              with this topic cluster instead of generic auth troubleshooting.
+            </p>
+          </div>
+          <a
+            class="text-primary hover:underline font-semibold"
+            href="/guides/self-hosted-ai-api-compatibility-matrix"
+          >
+            Open the compatibility matrix
+          </a>
+        </div>
+        <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-4 mt-8">
+          <a
+            href="/guides/choose-local-ai-api-path-for-openclaw"
+            class="rounded-2xl border border-divider bg-content2 p-5 hover:border-primary/40 transition-colors"
+          >
+            <div class="text-sm font-semibold text-primary mb-2">Choose a path</div>
+            <div class="font-semibold mb-2">Native Ollama vs `/v1` vs vLLM vs LiteLLM</div>
+            <p class="text-sm text-default-700 dark:text-default-500">
+              Pick the right integration path before you debug the wrong layer.
+            </p>
+          </a>
+          <a
+            href="/troubleshooting/solutions/api-works-in-curl-but-openclaw-fails"
+            class="rounded-2xl border border-divider bg-content2 p-5 hover:border-primary/40 transition-colors"
+          >
+            <div class="text-sm font-semibold text-primary mb-2">Symptom</div>
+            <div class="font-semibold mb-2">API works in curl, but OpenClaw fails</div>
+            <p class="text-sm text-default-700 dark:text-default-500">
+              Separate endpoint reachability from runtime payload compatibility.
+            </p>
+          </a>
+          <a
+            href="/troubleshooting/solutions/custom-openai-compatible-endpoint-rejects-tools"
+            class="rounded-2xl border border-divider bg-content2 p-5 hover:border-primary/40 transition-colors"
+          >
+            <div class="text-sm font-semibold text-primary mb-2">Symptom</div>
+            <div class="font-semibold mb-2">Endpoint rejects tools or `tool_choice`</div>
+            <p class="text-sm text-default-700 dark:text-default-500">
+              Most common failure pattern after plain chat already works.
+            </p>
+          </a>
+          <a
+            href="/troubleshooting/solutions/local-openai-compatible-tool-calling-compatibility"
+            class="rounded-2xl border border-divider bg-content2 p-5 hover:border-primary/40 transition-colors"
+          >
+            <div class="text-sm font-semibold text-primary mb-2">Local stack</div>
+            <div class="font-semibold mb-2">llama.cpp, Ollama, and vLLM tool-calling</div>
+            <p class="text-sm text-default-700 dark:text-default-500">
+              Use this when local chat works but agent loops break on later turns.
+            </p>
+          </a>
+        </div>
       </div>
     </Section>
 

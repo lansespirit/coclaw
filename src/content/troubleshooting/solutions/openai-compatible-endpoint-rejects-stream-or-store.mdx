@@ -1,0 +1,105 @@
+---
+title: "OpenAI-compatible endpoint rejects stream or store"
+description: "Fix OpenAI-compatible AI endpoints that fail because they do not support stream, store, or related request fields that OpenClaw may send during real runs."
+kind: "solution"
+component: "model"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "store"
+  - "stream"
+  - "no body"
+  - "unknown field"
+keywords:
+  - "store unsupported"
+  - "stream true"
+  - "openai-compatible"
+  - "custom provider"
+  - "no body"
+publishDate: 2026-03-09
+lastUpdated: 2026-03-09
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/cli/models"
+    - "https://docs.openclaw.ai/gateway/configuration"
+  guides:
+    - "openclaw-relay-and-api-proxy-troubleshooting"
+    - "openclaw-configuration"
+  githubIssues:
+    - 22704
+    - 24815
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Your endpoint works in some clients but OpenClaw fails with a 400-style error.
+- Errors may mention unknown fields, invalid JSON payload names, or behave like “no body” / empty response failures.
+- The issue often appears only with specific OpenAI-compatible providers or relays.
+
+## Cause
+
+Some OpenAI-compatible endpoints support only a subset of the request fields used by modern clients.
+
+Two common cases are:
+
+- the endpoint rejects `store`,
+- or the endpoint cannot handle `stream: true` in the way OpenClaw expects.
+
+Sometimes the backend returns a poorly exposed error body, so the surface symptom looks generic even though the real problem is just one unsupported field.
+
+## Fix
+
+### 1) Confirm whether the failing backend is strict about unknown fields
+
+Compare your successful manual request with the real failing run.
+
+Ask whether the failing request includes:
+
+- `store`,
+- `stream`,
+- or other extra compatibility fields your minimal manual request did not send.
+
+### 2) Treat “no body” as a transport clue, not a final diagnosis
+
+If OpenClaw reports a generic 400 / no-body style failure, it may still be an unsupported-field problem.
+
+That is especially likely when:
+
+- the backend is behind a proxy,
+- the error body is compressed or reformatted,
+- or the compatibility layer surfaces a vague error instead of the original provider message.
+
+### 3) Retry with the simplest possible provider shape
+
+Use the smallest viable custom provider config first:
+
+- correct `api` mode,
+- conservative model config,
+- no extra capability assumptions,
+- and plain chat if needed while you narrow the problem.
+
+### 4) If streaming is the likely breakpoint, treat it as an endpoint limitation
+
+If the provider only succeeds when requests are non-streaming in your manual tests, but OpenClaw still fails, that is a strong sign that the compatibility path cannot yet support the streaming behavior your run expects.
+
+At that point the problem is not “wrong API key”; it is a contract limitation.
+
+## Verify
+
+The issue is correctly diagnosed if:
+
+- you can identify `store` or `stream` as the differentiator,
+- simpler provider behavior works,
+- and failures correlate with those fields rather than with auth or model selection.
+
+## Related
+
+- API-mode and relay debugging guide: [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+- General config guidance: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- If the endpoint works only in minimal manual tests: [/troubleshooting/solutions/api-works-in-curl-but-openclaw-fails](/troubleshooting/solutions/api-works-in-curl-but-openclaw-fails)
