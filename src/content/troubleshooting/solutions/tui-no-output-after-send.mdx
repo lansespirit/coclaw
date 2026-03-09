@@ -1,6 +1,6 @@
 ---
 title: "TUI: '(no output)' or no response after sending a message"
-description: "If the OpenClaw TUI shows '(no output)' or appears stuck, check connection status, gateway logs, model auth, delivery toggle, and restart the TUI/session."
+description: "If the OpenClaw TUI shows '(no output)' or appears stuck, check connection status, gateway logs, model auth, and whether your provider only supports minimal chat payloads but not real OpenClaw runtime requests."
 kind: "solution"
 component: "tui"
 severity: "medium"
@@ -15,8 +15,10 @@ keywords:
   - "tui"
   - "no output"
   - "streaming"
+  - "probe works but agent fails"
+  - "custom provider"
 publishDate: 2026-02-03
-lastUpdated: 2026-02-03
+lastUpdated: 2026-03-09
 author: "CoClaw Team"
 related:
   docs:
@@ -41,6 +43,7 @@ Most common causes:
 - The gateway is still busy, stalled, or disconnected.
 - Delivery is off (you expected a reply in a chat channel, but the TUI is only showing local chat).
 - A provider streaming edge case (some providers/models have had TUI rendering bugs).
+- A custom or local OpenAI-compatible backend accepts `curl` or `models status --probe`, but rejects the fuller payload used in a real agent run.
 
 ## Fix
 
@@ -70,13 +73,43 @@ openclaw models status
 openclaw models status --probe
 ```
 
-### 4) If you expected messages to be delivered to a channel
+If probe fails, you are still in auth/config/network territory.
+
+If probe succeeds but the TUI still shows `(no output)` or the run errors immediately, suspect a **runtime payload compatibility** problem rather than a basic connectivity problem.
+
+### 4) If probe passes, test whether the provider only supports minimal chat payloads
+
+This pattern is increasingly common with custom OpenAI-compatible endpoints, local proxies, and some local-model servers:
+
+- direct `curl` works,
+- `openclaw models status --probe` works,
+- but a real TUI or `openclaw agent` run still fails.
+
+That usually means the backend accepts a minimal chat request but rejects one of the fields that OpenClaw may send during a real run, such as:
+
+- `tools`
+- `tool_choice`
+- `parallel_tool_calls`
+- `reasoning_effort`
+- `store`
+- `stream`
+
+Practical next step:
+
+- try a **new clean session** with `/reset`, and
+- if you control the model config, temporarily treat that provider as a plain chat backend first.
+
+If you are using a custom OpenAI-compatible provider, the most useful follow-up guide is:
+
+- [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+
+### 5) If you expected messages to be delivered to a channel
 
 Turn on delivery:
 
 - `/deliver on` (or start with `openclaw tui --deliver`)
 
-### 5) Reset the session / restart the TUI
+### 6) Reset the session / restart the TUI
 
 In the TUI:
 
@@ -89,4 +122,3 @@ If the issue only happens with one provider/model, switch models temporarily and
 
 - A new message returns a normal assistant response in the TUI.
 - Gateway logs show a successful model call.
-

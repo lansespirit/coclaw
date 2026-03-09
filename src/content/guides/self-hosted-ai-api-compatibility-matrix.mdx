@@ -1,0 +1,328 @@
+---
+title: "Self-Hosted AI API Compatibility Matrix for OpenClaw"
+description: "A practical compatibility matrix for using OpenClaw with self-hosted and proxy AI APIs: native Ollama, Ollama /v1, llama.cpp, vLLM, LiteLLM, and OpenAI-compatible relays."
+category: "integration"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+time: "18 min"
+publishDate: 2026-03-09
+lastUpdated: 2026-03-09
+steps:
+  - title: "Separate endpoint reachability from runtime compatibility"
+    content: "A backend can answer curl and still fail on tools, reasoning, or multi-turn agent state."
+  - title: "Identify which API layer you are actually using"
+    content: "Native Ollama, Ollama /v1, llama.cpp, vLLM, LiteLLM, and generic relays have different boundaries even when they all look OpenAI-compatible."
+  - title: "Choose a safe default integration mode"
+    content: "Start with the narrowest compatibility assumptions, then add advanced features back after proving them."
+  - title: "Use the matrix to classify failures faster"
+    content: "Map symptoms like HTTP 422, blank output, unsupported fields, or tool-result failures to the likely compatibility layer."
+keywords:
+  - "self-hosted AI API"
+  - "compatibility matrix"
+  - "OpenAI-compatible"
+  - "Ollama"
+  - "llama.cpp"
+  - "vLLM"
+  - "LiteLLM"
+  - "tool calling"
+  - "reasoning"
+  - "streaming"
+---
+
+If you run OpenClaw against self-hosted or proxy AI backends, the most useful question is not:
+
+> Is this backend OpenAI-compatible?
+
+It is:
+
+> Which parts of the runtime does it actually support?
+
+That distinction matters because many integrations are compatible only at the **basic chat** layer. They answer a simple `curl` request, maybe even pass `openclaw models status --probe`, and then fail the moment OpenClaw sends a fuller runtime payload.
+
+This page is meant to be the high-level map you can use before choosing a backend and while debugging one.
+
+If you are already seeing concrete errors, start with these symptom pages too:
+
+- [/troubleshooting/solutions/api-works-in-curl-but-openclaw-fails](/troubleshooting/solutions/api-works-in-curl-but-openclaw-fails)
+- [/troubleshooting/solutions/custom-openai-compatible-endpoint-rejects-tools](/troubleshooting/solutions/custom-openai-compatible-endpoint-rejects-tools)
+- [/troubleshooting/solutions/custom-provider-reasoning-breaks-openai-compatible](/troubleshooting/solutions/custom-provider-reasoning-breaks-openai-compatible)
+- [/troubleshooting/solutions/openai-compatible-endpoint-rejects-stream-or-store](/troubleshooting/solutions/openai-compatible-endpoint-rejects-stream-or-store)
+- [/troubleshooting/solutions/local-openai-compatible-tool-calling-compatibility](/troubleshooting/solutions/local-openai-compatible-tool-calling-compatibility)
+
+---
+
+## The Core Judgment
+
+For OpenClaw, “OpenAI-compatible” should be treated as a **starting clue**, not a guarantee.
+
+In practice, compatibility is layered:
+
+1. **Reachability** — the URL, auth, and basic request all work.
+2. **Contract shape** — the backend actually implements the API mode you selected.
+3. **Runtime features** — tools, reasoning, streaming, and multi-turn continuation behave correctly.
+4. **Session durability** — later turns keep working after tool results, retries, and long-lived context.
+
+Most painful integrations fail at layers 3 and 4.
+
+---
+
+## A Simpler Way to Think About Backends
+
+Instead of asking whether a backend is “supported,” ask which bucket it belongs to.
+
+### Bucket A: Native backend APIs
+
+Examples:
+
+- native Ollama API
+
+Strengths:
+
+- usually the clearest expectation boundary,
+- fewer translation layers,
+- less ambiguity about which fields are truly supported.
+
+Weaknesses:
+
+- not always interchangeable with other OpenAI-style tooling,
+- may require provider-specific setup or behavior expectations.
+
+### Bucket B: Local or hosted OpenAI-compatible servers
+
+Examples:
+
+- Ollama `/v1`
+- llama.cpp server `/v1`
+- vLLM OpenAI-compatible server
+
+Strengths:
+
+- familiar endpoint shape,
+- easy to test with curl and generic clients,
+- works well for basic chat in many setups.
+
+Weaknesses:
+
+- tool calling quality and multi-turn tool-result behavior vary a lot,
+- some fields are only partially supported,
+- “works in playground” often does not mean “works for agent runtime.”
+
+### Bucket C: Proxy / relay / unification layers
+
+Examples:
+
+- LiteLLM
+- NewAPI / OneAPI / AnyRouter
+- custom OpenAI-compatible relays
+
+Strengths:
+
+- centralize auth, routing, billing, and vendor abstraction,
+- can simplify multi-provider operations.
+
+Weaknesses:
+
+- introduce another translation layer,
+- can hide real provider errors,
+- may support only a subset of modern runtime semantics.
+
+---
+
+## Compatibility Matrix
+
+The matrix below is deliberately practical rather than absolute. It describes the **default expectation boundary** most operators should assume before they have validated their own stack.
+
+| Backend path | Basic chat | Tools payload | Tool-result continuation | Reasoning controls | Streaming semantics | Best default expectation |
+| --- | --- | --- | --- | --- | --- | --- |
+| Native Ollama API | Usually strong | Better than `/v1` path | Better than `/v1` path | Backend-specific | Backend-specific | Use when you want the most native Ollama behavior |
+| Ollama `/v1` OpenAI-compatible | Often good | Mixed | Mixed to weak | Mixed | Mixed | Treat as basic chat first, prove tools later |
+| llama.cpp `/v1` | Often good for simple chat | Mixed | Often fragile if templates reject tool roles | Mixed | Mixed | Good for simple chat; verify tool-role behavior explicitly |
+| vLLM OpenAI-compatible | Often good | Mixed to improving | Mixed | Mixed | Mixed | Strong for basic OpenAI-style serving; verify agent behaviors explicitly |
+| LiteLLM as proxy | Depends on upstream | Depends on upstream + proxy translation | Depends on proxy + upstream | Mixed | Mixed | Good governance layer, but not a free compatibility guarantee |
+| Generic OpenAI-compatible relay | Unknown by default | Unknown by default | Unknown by default | Unknown by default | Unknown by default | Start conservative and assume only minimal chat is proven |
+
+A useful rule of thumb:
+
+- the more translation layers between OpenClaw and the underlying model,
+- the more conservative you should be about tools, reasoning, and later-turn agent flows.
+
+---
+
+## Feature Matrix: What Breaks Most Often
+
+### 1) Basic chat
+
+Usually the first thing to work.
+
+A backend that supports:
+
+- `messages`,
+- a model id,
+- auth,
+- and a normal assistant reply,
+
+can often pass both `curl` and `openclaw models status --probe`.
+
+This is the layer that creates false confidence.
+
+### 2) Tools
+
+This is where “OpenAI-compatible” starts to diverge.
+
+Common failure modes:
+
+- backend rejects `tools`,
+- backend accepts `tools` but rejects `tool_choice`,
+- backend emits tool call JSON into plain text instead of the expected structure,
+- backend supports one-shot tool calls but not later-turn continuation.
+
+### 3) Tool-result continuation
+
+This is the most underappreciated compatibility boundary.
+
+A backend can appear tool-capable and still fail when OpenClaw sends:
+
+- a tool result,
+- a later assistant turn,
+- or a longer multi-turn transcript containing tool-use history.
+
+This is a major reason why “first turn worked” is not enough evidence.
+
+### 4) Reasoning controls
+
+Reasoning capability and reasoning-control compatibility are different things.
+
+A model may be able to reason while the transport layer rejects fields such as:
+
+- `reasoning_effort`,
+- provider-specific thinking flags,
+- or translated reasoning payloads passed through a relay.
+
+### 5) Streaming
+
+Some backends can stream in a way that works for generic clients but not for the runtime behavior OpenClaw expects.
+
+Typical outcomes:
+
+- blank output,
+- vague 400-style errors,
+- or a provider that only appears reliable in non-streaming manual tests.
+
+### 6) Error transparency
+
+Proxy layers can make diagnosis harder by returning:
+
+- vague “no body” errors,
+- rewrapped provider failures,
+- or transport errors that hide the original unsupported field.
+
+That is not a minor inconvenience. It changes your debugging strategy.
+
+---
+
+## The Safest Integration Strategy
+
+If you are bringing a new self-hosted or proxy API into OpenClaw, use this sequence.
+
+### Step 1: Prove reachability
+
+Use:
+
+```bash
+openclaw models status --probe
+```
+
+and a minimal manual request.
+
+### Step 2: Prove plain chat agent runtime
+
+If the backend is custom or uncertain, start with conservative assumptions:
+
+- `reasoning: false`
+- `compat.supportsTools: false`
+
+That tests whether OpenClaw can complete a real run as plain chat.
+
+### Step 3: Add advanced features gradually
+
+Only after plain chat is stable should you test:
+
+- tools,
+- multi-turn tool-result loops,
+- reasoning controls,
+- streaming-specific expectations.
+
+### Step 4: Keep evidence at the field level
+
+When an integration fails, ask:
+
+- which request path worked,
+- which request path failed,
+- and which extra fields appeared in the failing request.
+
+That shortens debugging dramatically.
+
+---
+
+## Which Errors Usually Point to Which Layer?
+
+### `curl` works, but OpenClaw fails
+
+Most likely:
+
+- runtime payload mismatch,
+- not a base URL problem anymore.
+
+### Probe works, but TUI or `openclaw agent` fails
+
+Most likely:
+
+- tools,
+- reasoning,
+- streaming,
+- or multi-turn continuation mismatch.
+
+### First turn works, later turns fail after a tool call
+
+Most likely:
+
+- tool-result continuation problem,
+- or server/chat-template incompatibility.
+
+### Template errors like `Unexpected message role`
+
+Most likely:
+
+- local server wrapper or chat-template limitation,
+- not a key or auth problem.
+
+### “Unknown field” / `store` / `stream` style errors
+
+Most likely:
+
+- partial implementation of a nominally OpenAI-compatible contract.
+
+---
+
+## Recommended Default Choices
+
+If you need a practical default stance:
+
+- choose the **most native path** available when you care about advanced agent behavior,
+- choose OpenAI-compatible local or proxy paths when you primarily need broad client interoperability,
+- and assume tools/reasoning/streaming must be **proven**, not assumed.
+
+That approach is less glamorous than “everything is OpenAI-compatible now,” but it matches how users actually get burned in production.
+
+---
+
+## Related Guides
+
+- Relay and proxy troubleshooting: [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+- Configuration basics: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- Choosing a local or proxy API path: [/guides/choose-local-ai-api-path-for-openclaw](/guides/choose-local-ai-api-path-for-openclaw)

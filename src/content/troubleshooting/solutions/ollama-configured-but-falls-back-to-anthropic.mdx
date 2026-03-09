@@ -1,6 +1,6 @@
 ---
 title: "Ollama configured, but OpenClaw still uses Anthropic (or model discovery keeps failing)"
-description: "Fix local Ollama setups where gateway logs show Anthropic fallback or repeated Ollama model-discovery failures by pinning provider config and verifying connectivity from the gateway runtime."
+description: "Fix local Ollama setups where gateway logs show Anthropic fallback or repeated Ollama model-discovery failures by pinning provider config, verifying connectivity from the gateway runtime, and separating model selection problems from OpenAI-compatible payload problems."
 kind: "solution"
 component: "model"
 severity: "high"
@@ -18,8 +18,10 @@ keywords:
   - "anthropic fallback"
   - "baseUrl"
   - "local model"
+  - "openai-compatible"
+  - "tool calling"
 publishDate: 2026-02-11
-lastUpdated: 2026-02-13
+lastUpdated: 2026-03-09
 author: "CoClaw Team"
 related:
   docs:
@@ -49,6 +51,7 @@ Common causes:
 - `agents.defaults.model.primary` is not pinned to an `ollama/...` id, so selection falls back to another provider.
 - You defined `models.providers.ollama.models[]`, but set each `id` to a *fully-qualified* ref like `ollama/qwen2.5:7b`.
   In provider catalogs, `id` should be the **raw model id** (for example `qwen2.5:7b`), while `ollama/qwen2.5:7b` is the **reference** you use when selecting a model in `agents.defaults.model.primary`.
+- You are using Ollama through its `/v1` OpenAI-compatible path and assuming it is equivalent to the native Ollama API for tools, multi-turn agent flows, and streaming. It often is not.
 
 ## Fix
 
@@ -92,6 +95,28 @@ Use explicit provider config and model ids instead of relying only on auto-disco
 }
 ```
 
+### 2.5) Decide whether you should use native Ollama API or `/v1` OpenAI-compatible mode
+
+This distinction matters a lot.
+
+If your goal is just:
+
+- basic local chat,
+- a proxy layer that only speaks OpenAI-style `/v1`,
+- or a quick compatibility test,
+
+then `api: "openai-completions"` can be a reasonable starting point.
+
+But if your goal is:
+
+- reliable tool calling,
+- multi-turn tool-result continuation,
+- or the most natural Ollama behavior,
+
+then the native Ollama API is usually the safer expectation boundary.
+
+In other words: OpenClaw successfully selecting `ollama/...` does **not** guarantee that Ollama's `/v1` compatibility mode will behave like a full agent runtime.
+
 ### 3) Confirm active model selection and probe
 
 ```bash
@@ -100,6 +125,15 @@ openclaw models status --probe
 ```
 
 If probe still resolves to Anthropic, restart gateway and recheck runtime config path/environment.
+
+If probe succeeds and the active model is clearly `ollama/...`, but a real agent or TUI run still fails, you have likely moved past model selection and into **payload compatibility** territory.
+
+Typical symptoms of that next layer:
+
+- plain chat works but tools fail,
+- `curl` works but OpenClaw agent runs fail,
+- reasoning or streaming changes behavior unexpectedly,
+- or the server rejects tool-related roles/messages on later turns.
 
 ## Verify
 
@@ -110,5 +144,6 @@ If probe still resolves to Anthropic, restart gateway and recheck runtime config
 ## Related
 
 - Configuration overview (models/providers, refs vs ids, local endpoints): [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- Relay / OpenAI-compatible runtime mismatch guide: [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
 - For generic auth/rate-limit/provider failures, use:
   - [Model/auth failures: rate limit, billing, or all models failed](/troubleshooting/solutions/models-all-models-failed/)

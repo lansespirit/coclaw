@@ -1,0 +1,280 @@
+---
+title: "How to Choose Between Native Ollama, OpenAI-Compatible /v1, vLLM, and LiteLLM for OpenClaw"
+description: "A decision guide for choosing the right local or proxy AI API path for OpenClaw: native Ollama, Ollama /v1, llama.cpp, vLLM, LiteLLM, and generic OpenAI-compatible relays."
+category: "deployment"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+time: "16 min"
+publishDate: 2026-03-09
+lastUpdated: 2026-03-09
+steps:
+  - title: "Decide what you are optimizing for"
+    content: "The right path depends on whether you care most about native behavior, broad interoperability, governance, or experimentation speed."
+  - title: "Do not treat all /v1 endpoints as equivalent"
+    content: "OpenAI-compatible shape is not the same as full runtime compatibility for tools, reasoning, and later turns."
+  - title: "Prefer the most native path for advanced agent work"
+    content: "If you need reliable tool calling and long-lived agent loops, native APIs usually provide a clearer expectation boundary."
+  - title: "Use proxy layers for governance, not magical compatibility"
+    content: "LiteLLM and similar layers are useful, but they add translation and can hide the real source of failures."
+keywords:
+  - "Ollama"
+  - "vLLM"
+  - "LiteLLM"
+  - "OpenAI-compatible"
+  - "llama.cpp"
+  - "tool calling"
+  - "self-hosted"
+  - "local models"
+---
+
+One of the easiest ways to waste time in OpenClaw is to choose an API path for the wrong reason.
+
+Many operators ask:
+
+> Which local API path is best?
+
+A better question is:
+
+> Which path is best for the way I expect this OpenClaw instance to behave?
+
+Because these are not interchangeable choices:
+
+- native Ollama API,
+- Ollama `/v1`,
+- llama.cpp server,
+- vLLM,
+- LiteLLM in front of one or more backends,
+- or a generic OpenAI-compatible relay.
+
+They solve different problems.
+
+---
+
+## The Core Judgment
+
+If you need the **most predictable advanced agent behavior**, prefer the **most native path** your stack offers.
+
+If you need the **widest interoperability with generic clients and tooling**, OpenAI-compatible `/v1` paths are attractive — but you should assume they need extra validation for tools, reasoning, and multi-turn agent flows.
+
+If you need **governance, routing, and centralized policy**, a proxy like LiteLLM can be the right layer — but it is not a free compatibility upgrade.
+
+---
+
+## Start With Your Real Priority
+
+### Priority 1: “I want the least surprising agent behavior”
+
+This usually points toward:
+
+- native Ollama API,
+- or the least translated backend path available.
+
+Why:
+
+- fewer protocol adapters,
+- fewer hidden assumptions,
+- clearer blame when something fails.
+
+Tradeoff:
+
+- you give up some interchangeability with generic OpenAI-style tooling.
+
+### Priority 2: “I want easy interoperability with clients and tools”
+
+This usually points toward:
+
+- OpenAI-compatible `/v1` endpoints,
+- such as Ollama `/v1`, vLLM, or other local-model servers.
+
+Why:
+
+- easier to reuse with many tools,
+- easy to test with curl,
+- familiar request shape.
+
+Tradeoff:
+
+- more likely to hit runtime feature mismatches later.
+
+### Priority 3: “I want one policy layer for many providers”
+
+This points toward:
+
+- LiteLLM,
+- or another proxy / relay layer.
+
+Why:
+
+- unified auth,
+- routing,
+- failover,
+- logging,
+- and governance.
+
+Tradeoff:
+
+- another translation layer,
+- another place where modern runtime fields can be altered, dropped, or only partially supported.
+
+---
+
+## When Each Path Makes Sense
+
+### Native Ollama API
+
+Best when:
+
+- Ollama is your primary local runtime,
+- you care about predictable Ollama behavior,
+- you want the clearest expectation boundary for advanced local usage.
+
+Less ideal when:
+
+- you want one universal OpenAI-style endpoint for many different clients.
+
+Recommended mindset:
+
+- choose this when you want OpenClaw to behave like a serious local agent, not just a generic chat client.
+
+### Ollama `/v1` OpenAI-Compatible Mode
+
+Best when:
+
+- you need OpenAI-style compatibility for surrounding tools,
+- you are mainly testing or doing simpler chat-style workflows,
+- you understand that this may not be equivalent to native Ollama behavior.
+
+Less ideal when:
+
+- reliable multi-turn tool calling is mission-critical.
+
+Recommended mindset:
+
+- start here only if OpenAI-style compatibility is itself part of your goal.
+
+### llama.cpp Server
+
+Best when:
+
+- you want direct control over a local server path,
+- you are comfortable validating model/template behavior yourself,
+- you are willing to treat chat-template compatibility as part of the integration work.
+
+Less ideal when:
+
+- you want “it should just work” tool-call semantics across many models.
+
+Recommended mindset:
+
+- good for power users, but do not underestimate template and wrapper limitations.
+
+### vLLM
+
+Best when:
+
+- you want strong OpenAI-style serving for local or self-hosted models,
+- you care about inference-server ergonomics and serving performance,
+- you can validate advanced runtime behavior explicitly.
+
+Less ideal when:
+
+- you assume OpenAI-shaped serving automatically implies full agent parity.
+
+Recommended mindset:
+
+- strong serving choice, but still validate tools, later-turn continuation, and runtime fields with OpenClaw specifically.
+
+### LiteLLM
+
+Best when:
+
+- you need a governance and routing layer,
+- you want to unify multiple backends,
+- you care about spend policy, provider abstraction, or operational centralization.
+
+Less ideal when:
+
+- your main goal is maximum simplicity,
+- or you are already debugging a fragile compatibility chain.
+
+Recommended mindset:
+
+- use it as an operational layer, not as proof that every upstream behavior has been normalized perfectly.
+
+### Generic OpenAI-Compatible Relays
+
+Best when:
+
+- you need regional reach, vendor abstraction, or access convenience,
+- you are comfortable verifying contract details yourself.
+
+Less ideal when:
+
+- you want a low-ambiguity runtime surface.
+
+Recommended mindset:
+
+- assume only basic chat is proven until you validate more.
+
+---
+
+## The Real Tradeoff Table
+
+| If you care most about... | Usually prefer... | Main warning |
+| --- | --- | --- |
+| Most native advanced behavior | Native Ollama API or the least translated backend path | You lose some generic-tool interoperability |
+| Easy `/v1` interoperability | Ollama `/v1`, vLLM, or another OpenAI-compatible server | Tools and later-turn behavior must still be proven |
+| Centralized routing and governance | LiteLLM or another relay layer | Adds translation and can hide root causes |
+| Fast experimentation | Any local `/v1` path you can stand up quickly | Early success may only prove minimal chat |
+| Lowest debugging ambiguity | The path with the fewest protocol adapters | May be less portable across tooling |
+
+---
+
+## A Good Default Decision Process
+
+### Choose native first if all of these are true
+
+- OpenClaw is a serious local agent in your workflow,
+- tool calling matters,
+- you want fewer translation layers,
+- and you do not need generic OpenAI-style interoperability as the primary goal.
+
+### Choose `/v1` compatibility first if all of these are true
+
+- interoperability with many tools matters more than perfect runtime parity,
+- you are comfortable validating advanced features yourself,
+- and basic chat value is already enough to justify the setup.
+
+### Choose a proxy layer first if all of these are true
+
+- you are managing more than one provider,
+- spend/governance/logging are part of the problem,
+- and you accept that proxy convenience can come with debugging complexity.
+
+---
+
+## The Biggest Mistake to Avoid
+
+The biggest mistake is to interpret early success too broadly.
+
+These statements are **not** equivalent:
+
+- “The backend responds to curl.”
+- “`openclaw models status --probe` passes.”
+- “OpenClaw can hold a real tool-using session against this backend.”
+
+If you keep that distinction in mind, you will choose better and debug faster.
+
+---
+
+## Recommended Next Reads
+
+- Compatibility matrix: [/guides/self-hosted-ai-api-compatibility-matrix](/guides/self-hosted-ai-api-compatibility-matrix)
+- Relay / proxy troubleshooting: [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+- Config basics: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- Ollama selection and `/v1` boundary: [/troubleshooting/solutions/ollama-configured-but-falls-back-to-anthropic](/troubleshooting/solutions/ollama-configured-but-falls-back-to-anthropic)

@@ -11,7 +11,7 @@ platforms:
   - "Self-hosted"
 time: "20 min"
 publishDate: 2026-02-27
-lastUpdated: 2026-02-27
+lastUpdated: 2026-03-09
 steps:
   - title: "Confirm what your relay actually implements"
     content: "Identify whether your provider supports Anthropic Messages, OpenAI Chat Completions, or OpenAI Responses (or only a partial subset)."
@@ -40,6 +40,8 @@ keywords:
   - "openai-completions"
   - "openai-responses"
   - "anthropic-messages"
+  - "curl works but openclaw fails"
+  - "probe works"
 ---
 
 Relays and API proxies are incredibly useful (especially if you need multi-provider routing, unified billing, or a China-friendly
@@ -88,6 +90,22 @@ Practical takeaway: when a relay says “OpenAI compatible”, it often means *o
 - OpenAI **Chat Completions** (`/v1/chat/completions`) → OpenClaw `api: "openai-completions"`
 - OpenAI **Responses** (`/v1/responses`) → OpenClaw `api: "openai-responses"`
 - Anthropic **Messages** (`/v1/messages`) → OpenClaw `api: "anthropic-messages"`
+
+### Compatibility is layered, not binary
+
+The most important mindset shift for relay debugging is this:
+
+- **Endpoint compatibility**: can OpenClaw reach the URL with the right auth?
+- **Contract compatibility**: does the relay actually implement the API mode you picked?
+- **Runtime payload compatibility**: does it still work once OpenClaw sends tools, multi-turn state, reasoning controls, or streaming?
+
+That is why users so often report one of these confusing combinations:
+
+- `curl` works, but OpenClaw fails
+- `openclaw models status --probe` works, but `openclaw agent` or TUI fails
+- plain chat works, but tool calling or reasoning fails
+
+Those are usually **not** network problems anymore. They are payload-compatibility problems.
 
 ---
 
@@ -286,7 +304,85 @@ support that toggle consistently.
 
 If you’re troubleshooting, set `reasoning: false` first and re-test.
 
-### 5.3 If the gateway makes zero API calls, you’re not hitting that provider
+### 5.3 `curl` success does not prove agent compatibility
+
+A minimal `curl` test usually sends a tiny payload like:
+
+- one `messages` item,
+- no tools,
+- no tool results,
+- no reasoning controls,
+- no session history,
+- often `stream: false`.
+
+That proves the endpoint is alive and can handle **basic chat completions**.
+
+It does **not** prove the relay also supports everything OpenClaw may send during a real run.
+
+The usual breakpoints on OpenAI-compatible relays are:
+
+- `tools`
+- `tool_choice`
+- `parallel_tool_calls`
+- `reasoning_effort`
+- `store`
+- `stream: true`
+
+If your curl request succeeds but OpenClaw fails with 400/422/empty output, assume the relay is rejecting one of those runtime fields until proven otherwise.
+
+### 5.4 `models status --probe` can pass while real runs fail
+
+`openclaw models status --probe` is a very useful first test, but it is still a **smaller** request than a real agent run.
+
+It is best treated as:
+
+- “can OpenClaw authenticate and get one basic response from this provider?”
+
+It is **not** equivalent to:
+
+- “this provider fully supports my actual session shape, tools, streaming, and reasoning settings.”
+
+Practical takeaway:
+
+- if probe fails, fix auth/network/config first;
+- if probe succeeds but real chat still fails, move immediately to **runtime payload compatibility**.
+
+### 5.5 Quick downgrade path for flaky custom providers
+
+If a custom OpenAI-compatible relay is unstable, first treat it as a **plain chat endpoint** and only add advanced features back after it is stable.
+
+Conservative example:
+
+```json5
+{
+  models: {
+    providers: {
+      myrelay: {
+        api: "openai-completions",
+        baseUrl: "https://example.com/v1",
+        apiKey: "${MYRELAY_API_KEY}",
+        models: [
+          {
+            id: "my-model",
+            reasoning: false,
+            input: ["text"],
+            compat: {
+              supportsTools: false,
+            },
+          },
+        ],
+      },
+    },
+  },
+}
+```
+
+That will not fix every relay edge case, but it is the fastest way to separate:
+
+- “the endpoint only supports plain chat” from
+- “the endpoint is fundamentally misconfigured or unreachable.”
+
+### 5.6 If the gateway makes zero API calls, you’re not hitting that provider
 
 If you expect “relay X” to be called but logs show no outbound request at all, the problem is typically:
 
@@ -314,6 +410,8 @@ You’re looking for:
 - the **exact request URL** (does it contain `/v1` once?),
 - the **HTTP status code** (403/404/429),
 - and any structured error body.
+
+Important: a successful probe only proves the minimal path works. If the real agent still fails, keep debugging — you have likely moved from config/auth problems into payload-compatibility problems.
 
 ### 6.2 Reproduce with curl using the same URL and headers
 
@@ -355,7 +453,17 @@ If curl works but OpenClaw doesn’t, compare:
 - request URL paths,
 - auth header format (`Authorization` vs `x-api-key`),
 - required vendor headers,
-- and response JSON shape.
+- response JSON shape,
+- and whether the failing OpenClaw run includes runtime fields your curl test did not.
+
+Ask specifically whether the real failing request body contains any of these:
+
+- `tools`
+- `tool_choice`
+- `parallel_tool_calls`
+- `reasoning_effort`
+- `store`
+- `stream`
 
 ---
 
@@ -367,11 +475,16 @@ If curl works but OpenClaw doesn’t, compare:
 - [ ] No per-agent override is pinning a different provider/model
 - [ ] If 403: set `headers.User-Agent`, and verify IP/region allowlist
 - [ ] If blank output: verify response JSON matches the endpoint contract; disable `reasoning: true`
+- [ ] If probe passes but real runs fail: compare runtime fields (`tools`, `tool_choice`, `parallel_tool_calls`, `reasoning_effort`, `store`, `stream`)
 
 ---
 
 ## Further reading
 
+- Self-hosted AI API compatibility matrix:
+  - [/guides/self-hosted-ai-api-compatibility-matrix](/guides/self-hosted-ai-api-compatibility-matrix)
+- Choosing a local or proxy API path:
+  - [/guides/choose-local-ai-api-path-for-openclaw](/guides/choose-local-ai-api-path-for-openclaw)
 - OpenClaw model concepts and configuration:
   - https://docs.openclaw.ai/concepts/models
   - https://docs.openclaw.ai/gateway/configuration

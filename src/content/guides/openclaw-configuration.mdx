@@ -10,7 +10,7 @@ platforms:
   - "Docker"
 time: "35 min"
 publishDate: 2026-02-13
-lastUpdated: 2026-02-13
+lastUpdated: 2026-03-09
 steps:
   - title: "Know where config lives and how precedence works"
     content: "Start by locating your state directory and openclaw.json, and learn what overwrites what (CLI vs file vs env)."
@@ -31,6 +31,9 @@ keywords:
   - "ollama"
   - "token auth"
   - "allowlist"
+  - "openai-compatible"
+  - "custom provider"
+  - "supportsTools"
 ---
 
 This guide is a "map" of OpenClaw configuration. It is not a full schema reference, but it should get you from
@@ -374,6 +377,77 @@ If you point a provider at a local process (Ollama, LM Studio, vLLM, LiteLLM, et
 - Prefer `127.0.0.1` over `localhost` to avoid IPv6 `::1` edge cases.
 - Make sure the gateway runtime is the same network namespace as the local process (containers and WSL can break this).
 
+### A safe starting point for custom OpenAI-compatible providers
+
+If you are connecting OpenClaw to a custom endpoint that is described only as “OpenAI-compatible”, start conservative.
+
+Many endpoints support **basic chat completions** but do not fully support:
+
+- tools,
+- tool-result continuation,
+- reasoning controls,
+- or streaming behavior in the same way OpenClaw expects.
+
+Safe first-pass example:
+
+```json5
+{
+  models: {
+    mode: "merge",
+    providers: {
+      localqwen: {
+        baseUrl: "http://127.0.0.1:2005/v1",
+        apiKey: "${LOCALQWEN_API_KEY}",
+        api: "openai-completions",
+        models: [
+          {
+            id: "DeepSeek-R1-Distill-Qwen-32B",
+            name: "DeepSeek-R1-Distill-Qwen-32B",
+            reasoning: false,
+            input: ["text"],
+            compat: {
+              supportsTools: false,
+            },
+          },
+        ],
+      },
+    },
+  },
+  agents: {
+    defaults: {
+      model: { primary: "localqwen/DeepSeek-R1-Distill-Qwen-32B" },
+    },
+  },
+}
+```
+
+This is a good first test because it answers a narrow question:
+
+- can this endpoint survive a real OpenClaw run as a **plain chat backend**?
+
+If yes, you can add more advanced compatibility back gradually.
+
+### `curl` success vs agent success: how to tell config bugs from payload bugs
+
+Use this quick decision rule:
+
+- If `curl` fails and `openclaw models status --probe` fails, you are still in **config/auth/network** territory.
+- If `curl` works but `openclaw models status --probe` fails, re-check the actual OpenClaw config, runtime environment, and resolved provider.
+- If `curl` works and `openclaw models status --probe` works, but `openclaw agent` or TUI fails, you are probably in **runtime payload compatibility** territory.
+
+That last case is increasingly common with custom OpenAI-compatible endpoints. The backend may accept a minimal chat request but reject fields such as:
+
+- `tools`
+- `tool_choice`
+- `parallel_tool_calls`
+- `reasoning_effort`
+- `store`
+- `stream`
+
+If that matches your symptom pattern, use:
+
+- [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+
 ## 6) Common config pitfalls (and how to avoid them)
 
 ### "Config validation failed" after editing
@@ -401,6 +475,18 @@ Two common patterns:
 
 - Control UI is "unauthorized" because you opened a non-tokenized URL (use `openclaw dashboard`).
 - Gateway token isn't being read in the runtime environment (launchd/systemd/docker env mismatch).
+
+### Custom provider works in `curl`, but still fails in OpenClaw
+
+This usually means you have already solved the **endpoint** problem and are now hitting a **payload compatibility** problem.
+
+The most common mistake is assuming that “OpenAI-compatible” means “supports everything OpenClaw may send in a real run”. It often only means:
+
+- basic `/v1/chat/completions`
+- basic auth headers
+- basic `messages` payload
+
+It does **not** automatically mean support for tools, tool-result continuation, reasoning controls, or provider-specific streaming behavior.
 
 ### Docker permission errors writing config/state
 
@@ -462,6 +548,12 @@ When you share logs publicly, redact:
   - [/troubleshooting/solutions/linux-systemd-orphan-gateway-processes](/troubleshooting/solutions/linux-systemd-orphan-gateway-processes)
 - WhatsApp setup:
   - [/guides/whatsapp-setup](/guides/whatsapp-setup)
+
+## AI API compatibility guides
+
+- Compatibility matrix: [/guides/self-hosted-ai-api-compatibility-matrix](/guides/self-hosted-ai-api-compatibility-matrix)
+- Choosing a local or proxy API path: [/guides/choose-local-ai-api-path-for-openclaw](/guides/choose-local-ai-api-path-for-openclaw)
+- Relay and proxy troubleshooting: [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
 
 ## More configuration-heavy guides
 
