@@ -4,6 +4,8 @@ import Container from './Container.astro';
 interface Props {
   /** HTML tag name. Defaults to section. */
   as?: string;
+  /** Optional section id for anchor links. */
+  id?: string;
   /** Classes applied to the outer section wrapper. */
   class?: string;
   /** Classes applied to the inner Container wrapper. */
@@ -18,6 +20,7 @@ interface Props {
 
 const {
   as = 'section',
+  id,
   class: sectionClass = '',
   containerClass = '',
   containerSize = 'wide',
@@ -27,7 +30,7 @@ const {
 const Tag = as as keyof HTMLElementTagNameMap;
 ---
 
-<Tag class={`relative ${py} ${sectionClass}`.trim()}>
+<Tag id={id} class={`relative ${py} ${sectionClass}`.trim()}>
   <Container
     size={containerSize}
     gutter={containerGutter}
