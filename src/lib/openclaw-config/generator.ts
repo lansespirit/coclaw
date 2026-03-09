@@ -413,26 +413,29 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
     });
   }
 
-  if (state.safeMode) {
-    cfg.tools = {
-      sandbox: {
-        tools: {
-          allow: [
-            'bash',
-            'process',
-            'read',
-            'write',
-            'edit',
-            'sessions_list',
-            'sessions_history',
-            'sessions_send',
-            'sessions_spawn',
-          ],
-          deny: ['browser', 'canvas', 'nodes', 'cron', 'discord', 'gateway'],
-        },
-      },
-    };
-  }
+  cfg.tools = {
+    profile: 'coding',
+    ...(state.safeMode
+      ? {
+          sandbox: {
+            tools: {
+              allow: [
+                'bash',
+                'process',
+                'read',
+                'write',
+                'edit',
+                'sessions_list',
+                'sessions_history',
+                'sessions_send',
+                'sessions_spawn',
+              ],
+              deny: ['browser', 'canvas', 'nodes', 'cron', 'discord', 'gateway'],
+            },
+          },
+        }
+      : {}),
+  };
 
   if (state.ai.mode === 'custom') {
     const providerId = state.ai.custom.providerId.trim();

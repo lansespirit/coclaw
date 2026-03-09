@@ -152,6 +152,17 @@ function run() {
     assert.ok(hasIssue(res, 'error', 'gateway.customBindHost'));
   }
 
+  // 1b) Generator should always pin tools.profile to coding
+  {
+    const s = baseState();
+    s.safeMode = false;
+    const res = buildOpenClawConfig(s);
+    const cfg = res.config as unknown as {
+      tools?: { profile?: unknown };
+    };
+    assert.equal(cfg.tools?.profile, 'coding');
+  }
+
   // 2) Gateway: binding beyond loopback requires auth
   {
     const s = baseState();
