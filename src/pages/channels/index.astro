@@ -63,58 +63,95 @@ const extraCards = entries
     };
   });
 
-const showcaseChannels = [...blueprintCards, ...extraCards];
+const popularityOrder = [
+  'whatsapp',
+  'telegram',
+  'discord',
+  'slack',
+  'msteams',
+  'signal',
+  'line',
+  'googlechat',
+  'webchat',
+  'matrix',
+  'twitch',
+  'bluebubbles',
+  'mattermost',
+  'feishu',
+  'nextcloud-talk',
+  'synology-chat',
+  'irc',
+  'imessage',
+  'zalo',
+  'tlon',
+  'nostr',
+  'zalouser',
+] as const;
+const popularityIndex = new Map(popularityOrder.map((slug, index) => [slug, index]));
+const showcaseChannels = [...blueprintCards, ...extraCards].sort((a, b) => {
+  const aRank = popularityIndex.get(a.slug) ?? popularityOrder.length + 50;
+  const bRank = popularityIndex.get(b.slug) ?? popularityOrder.length + 50;
+
+  if (aRank !== bRank) return aRank - bRank;
+  if (a.href && !b.href) return -1;
+  if (!a.href && b.href) return 1;
+
+  return a.title.localeCompare(b.title);
+});
 const liveCount = entries.length;
-const stagedCount = showcaseChannels.length - liveCount;
-const topicCloud = Array.from(
-  new Set(showcaseChannels.flatMap((channel) => channel.keywords))
-).slice(0, 10);
+const builtInCount = showcaseChannels.filter((channel) =>
+  ['core', 'recommended', 'browser', 'legacy'].includes(channel.kind)
+).length;
+const pluginCount = showcaseChannels.filter((channel) => channel.kind === 'plugin').length;
+const topicCloud = [
+  'WhatsApp Web',
+  'Telegram Bot',
+  'Discord Bot',
+  'Slack Socket Mode',
+  'Microsoft Teams bot',
+  'Signal CLI',
+  'Google Chat webhook',
+  'LINE Messaging API',
+  'Matrix rooms',
+  'OpenClaw WebChat',
+];
+const popularHighlights = showcaseChannels.slice(0, 6);
 
 const heroMetrics = [
   {
     value: String(showcaseChannels.length).padStart(2, '0'),
-    label: 'routing lanes',
-    note: 'Each platform gets its own security posture, checklist, and troubleshooting spine.',
+    label: 'documented channels',
+    note: 'Guides for WhatsApp, Telegram, Discord, Slack, Signal, Teams, Matrix, LINE, WebChat, and more.',
   },
   {
-    value: String(liveCount).padStart(2, '0'),
-    label: 'published dossiers',
-    note: liveCount
-      ? 'These routes are backed by local MDX dossiers, not placeholder copy.'
-      : 'No channel dossiers are published yet, so the section is still running on prepared lane metadata.',
+    value: String(builtInCount).padStart(2, '0'),
+    label: 'built-in routes',
+    note: 'Core, recommended, browser, and legacy channels that usually make the shortlist first.',
   },
   {
-    value: String(stagedCount).padStart(2, '0'),
-    label: stagedCount ? 'staged lanes' : 'coverage gaps',
-    note: stagedCount
-      ? 'New channels can join the section without changing the layout or the review standard.'
-      : 'Every featured lane currently resolves to a live dossier.',
+    value: String(pluginCount).padStart(2, '0'),
+    label: 'community plugins',
+    note: 'Plugin-backed, regional, and self-hosted channels including Feishu, Mattermost, Nextcloud Talk, Twitch, Tlon, and Zalo.',
   },
-];
-
-const routingPrinciples = [
-  'Authentication first, screenshots later.',
-  'Least privilege is the baseline configuration.',
-  'Every guide includes verification and break-fix paths.',
-  'Channel-specific risks stay visible above the fold.',
 ];
 
 const operatorLanes = [
   {
-    title: 'Credential handoff',
-    description: 'How tokens, QR sessions, OAuth scopes, or app secrets are created and stored.',
+    title: 'Auth model',
+    description:
+      'Bot tokens, QR sessions, WebSocket credentials, webhook secrets, or local bridge identities.',
     icon: IconLockClosed,
   },
   {
-    title: 'Safety envelope',
+    title: 'Access control',
     description:
-      'Permissions, pairing boundaries, and account-protection notes for the chosen platform.',
+      'Pairing, allowlists, group policy, mention requirements, role checks, and sender boundaries.',
     icon: IconShieldCheckSolid,
   },
   {
-    title: 'Delivery rehearsal',
+    title: 'Verification path',
     description:
-      'A concrete test matrix covering first reply, room/thread behavior, and recovery checks.',
+      'First DM, group or room test, restart behavior, reconnect health, and known failure drills.',
     icon: IconCheck,
   },
 ];
@@ -122,27 +159,27 @@ const operatorLanes = [
 const choreography = [
   {
     step: '01',
-    title: 'Choose the lane',
+    title: 'Match the audience',
     description:
-      'Start with the platform whose permissions and audience match the real rollout target.',
+      'Decide whether the real target is consumer chat, team workspace chat, self-hosted rooms, or the built-in WebChat console.',
   },
   {
     step: '02',
-    title: 'Provision credentials',
+    title: 'Choose the transport',
     description:
-      'Create the narrowest viable token, bot app, or session path before touching production spaces.',
+      'Pick the right operational model: QR login, bot token, Socket Mode, HTTP webhook, WebSocket, or local bridge.',
   },
   {
     step: '03',
-    title: 'Harden the envelope',
+    title: 'Lock the boundary',
     description:
-      'Set pairing, scopes, intents, roles, or moderation boundaries so defaults are safe.',
+      'Set pairing, allowlists, requireMention, roles, and group policy before the first broad rollout.',
   },
   {
     step: '04',
-    title: 'Rehearse delivery',
+    title: 'Prove it under stress',
     description:
-      'Verify direct messages, shared spaces, and one known failure path before declaring success.',
+      'Validate direct replies, shared spaces, restart behavior, listener state, and one realistic failure before launch.',
   },
 ];
 
@@ -207,8 +244,8 @@ const toneStyles = {
 ---
 
 <BaseLayout
-  title="OpenClaw Channels | CoClaw"
-  description="Channel integration dossiers for Telegram, WhatsApp, Slack, Discord, and future OpenClaw messaging lanes. Each page centers authentication, safety, verification, and troubleshooting."
+  title="OpenClaw Channels Directory | WhatsApp, Telegram, Discord, Slack, Signal, Teams & More"
+  description="OpenClaw channel guides for WhatsApp, Telegram, Discord, Slack, Signal, Microsoft Teams, Google Chat, LINE, Matrix, WebChat, BlueBubbles, and more. Compare setup, pairing, allowlists, webhooks, Socket Mode, QR login, and troubleshooting."
 >
   <div class="channels-deck relative min-h-screen overflow-x-hidden bg-background">
     <div class="pointer-events-none absolute inset-0 overflow-hidden">
@@ -238,26 +275,24 @@ const toneStyles = {
           <div
             class="channels-kicker border border-divider bg-content1/75 text-default-700 dark:bg-content1/60 dark:text-default-500"
           >
-            Integration switchboard
+            OpenClaw channels
           </div>
 
           <div class="mt-8 max-w-5xl">
             <h1
               class="channels-display text-6xl leading-[0.92] tracking-[-0.05em] text-foreground md:text-[5.55rem] xl:text-[7rem]"
             >
-              Channels deserve
-              <span class="text-secondary"> more than setup notes.</span>
-              <br />
-              They need operator dossiers.
+              OpenClaw
+              <span class="text-secondary"> channels</span>
             </h1>
           </div>
 
           <p
             class="mt-8 max-w-3xl text-xl leading-9 text-default-700 dark:text-default-500 md:text-[1.38rem]"
           >
-            This section works like an operator console: each platform gets its own visual tone,
-            safety posture, credential map, and verification ritual. The index collects live
-            dossiers today and keeps the same structure ready for the next channel that lands.
+            Find the right OpenClaw channel for WhatsApp, Telegram, Discord, Slack, Signal, Teams,
+            Google Chat, LINE, Matrix, WebChat, BlueBubbles, and more. Each page covers setup,
+            access policy, transport, verification, and troubleshooting.
           </p>
 
           <div
@@ -265,15 +300,15 @@ const toneStyles = {
           >
             <span class="inline-flex items-center gap-2">
               <span class="h-2 w-2 rounded-full bg-primary"></span>
-              Security-first defaults
+              Most-used channels first
             </span>
             <span class="inline-flex items-center gap-2">
               <span class="h-2 w-2 rounded-full bg-secondary"></span>
-              Platform-specific onboarding
+              Setup, pairing, webhooks
             </span>
             <span class="inline-flex items-center gap-2">
               <span class="h-2 w-2 rounded-full bg-accent"></span>
-              Troubleshooting built into the route
+              Practical setup notes
             </span>
           </div>
 
@@ -282,14 +317,14 @@ const toneStyles = {
               href="#channel-lanes"
               class="inline-flex items-center gap-2 font-semibold text-foreground transition hover:text-primary"
             >
-              Browse platform lanes
+              Browse popular channels
               <IconArrowRight className="h-4 w-4" aria-hidden="true" />
             </a>
             <a
               href="/troubleshooting/solutions?component=channel"
               class="inline-flex items-center gap-2 text-default-600 transition hover:text-foreground dark:text-default-500"
             >
-              Open troubleshooting routes
+              Open channel troubleshooting
               <IconArrowTopRightOnSquare className="h-4 w-4" aria-hidden="true" />
             </a>
           </div>
@@ -299,27 +334,35 @@ const toneStyles = {
           class="channel-rise-delay rounded-[1.8rem] border border-divider bg-content1/75 p-5 shadow-[0_24px_90px_-50px_rgb(0_0_0/0.35)] backdrop-blur-2xl dark:bg-content1/60 dark:shadow-[0_28px_100px_-52px_rgb(0_0_0/0.8)] xl:mt-10"
         >
           <p class="channels-mono text-xs uppercase tracking-[0.28em] text-default-500">
-            Design direction
+            Top OpenClaw Channels
           </p>
-          <div
-            class="mt-4 rounded-[1.35rem] border border-divider bg-content2/55 p-5 dark:bg-content2/35"
-          >
-            <p class="channels-display text-2xl leading-tight text-foreground">Signal routing</p>
-            <p class="mt-3 text-sm leading-7 text-default-700 dark:text-default-500">
-              The memorable motif is a clean control room: editorial typography up front, telemetry
-              cards underneath, and a visible route from credentials to proof-of-delivery.
-            </p>
-            <ul class="mt-5 space-y-3 border-t border-divider pt-4">
-              {
-                routingPrinciples.map((principle) => (
-                  <li class="flex items-center gap-3 text-sm font-medium text-foreground">
-                    <IconBolt className="h-4 w-4 text-primary" aria-hidden="true" />
-                    <span>{principle}</span>
-                  </li>
-                ))
-              }
-            </ul>
-          </div>
+          <p class="channels-display mt-4 text-2xl leading-tight text-foreground">
+            Top OpenClaw Channels
+          </p>
+          <p class="mt-3 text-sm leading-6 text-default-700 dark:text-default-500">
+            Most-used channels first.
+          </p>
+          <ul class="mt-5 space-y-2.5 border-t border-divider pt-4">
+            {
+              popularHighlights.map((channel, index) => (
+                <li class="flex items-start justify-between gap-3 py-1 text-sm text-foreground">
+                  <div class="flex items-start gap-3 min-w-0">
+                    <span class="channels-mono mt-0.5 text-[0.68rem] uppercase tracking-[0.24em] text-default-500">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <div class="min-w-0">
+                      <p class="font-medium leading-6 text-foreground">{channel.title}</p>
+                      <p class="mt-0.5 text-[0.72rem] leading-5 text-default-600 dark:text-default-500">
+                        {channel.keywords[0]}
+                      </p>
+                    </div>
+                  </div>
+                  <IconBolt className="mt-1 h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+                </li>
+              ))
+            }
+          </ul>
+          <p class="mt-4 text-[0.72rem] leading-5 text-default-500">Ordered by current usage.</p>
         </aside>
       </div>
     </Section>
@@ -350,7 +393,7 @@ const toneStyles = {
     <Section py="pt-0 pb-4 md:pb-6" containerClass="relative z-10">
       <div class="flex flex-wrap items-center gap-3 border-t border-divider/80 pt-6">
         <span class="channels-mono text-[0.72rem] uppercase tracking-[0.24em] text-default-500">
-          Focus cloud
+          Common channel searches
         </span>
         {
           topicCloud.map((topic) => (
@@ -366,24 +409,23 @@ const toneStyles = {
       <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <p class="channels-mono text-xs uppercase tracking-[0.28em] text-default-500">
-            Platform lanes
+            OpenClaw channels
           </p>
           <h2 class="channels-display mt-3 text-4xl leading-tight text-foreground md:text-5xl">
-            Operator dossiers for each messaging surface.
+            Start with the channels most teams use.
           </h2>
         </div>
         <p class="max-w-2xl text-sm leading-7 text-default-700 dark:text-default-500">
-          Each card carries a distinct safety posture, auth model, and runtime stance while staying
-          inside one consistent editorial system.
+          The list starts with the most common deployments, then moves into self-hosted, regional,
+          and experimental channels.
         </p>
       </div>
 
       {
         liveCount === 0 && (
           <div class="mt-8 rounded-[1.4rem] border border-divider bg-content1/72 px-5 py-4 text-sm leading-7 text-default-700 shadow-[0_16px_54px_-38px_rgb(0_0_0/0.24)] dark:bg-content1/58 dark:text-default-500 dark:shadow-[0_22px_70px_-42px_rgb(0_0_0/0.75)]">
-            No channel dossiers are published yet, so this index is showing prepared lane metadata
-            first. As soon as guides land in `src/content/channels`, these cards resolve to live
-            dossiers without changing the layout.
+            No channel guides are published yet. New files in `src/content/channels` will appear
+            here automatically.
           </div>
         )
       }
@@ -512,12 +554,12 @@ const toneStyles = {
           class="overflow-hidden rounded-[2rem] border border-divider bg-content1/78 p-6 shadow-[0_24px_90px_-48px_rgb(0_0_0/0.3)] backdrop-blur-2xl dark:bg-content1/62 dark:shadow-[0_28px_100px_-50px_rgb(0_0_0/0.82)] md:p-8"
         >
           <p class="channels-mono text-xs uppercase tracking-[0.28em] text-default-500">
-            Connection choreography
+            How to choose
           </p>
           <h2
             class="channels-display mt-3 max-w-3xl text-4xl leading-tight text-foreground md:text-5xl"
           >
-            One route, four deliberate beats.
+            Choose the channel that fits your rollout.
           </h2>
           <div class="mt-8 grid gap-6 md:grid-cols-2">
             {
@@ -548,7 +590,7 @@ const toneStyles = {
                     </span>
                     <div>
                       <p class="channels-mono text-[0.68rem] uppercase tracking-[0.24em] text-default-500">
-                        Built into every page
+                        Every page covers
                       </p>
                       <h3 class="mt-2 text-xl font-semibold text-foreground">{lane.title}</h3>
                       <p class="mt-3 text-sm leading-7 text-default-700 dark:text-default-500">
