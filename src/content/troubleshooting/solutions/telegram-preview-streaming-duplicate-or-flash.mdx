@@ -1,6 +1,6 @@
 ---
 title: "Telegram: preview streaming causes duplicate-looking replies or NO_REPLY flashes"
-description: "Fix Telegram preview-stream side effects by switching `channels.telegram.streaming` away from `partial`, restarting the gateway, and retesting with a clean session."
+description: "Fix Telegram preview-stream side effects (duplicates, flicker, or stale previews) by switching `channels.telegram.streaming` away from `partial`, restarting the gateway, and retesting with a clean session."
 kind: "solution"
 component: "channel"
 severity: "medium"
@@ -14,14 +14,16 @@ errorSignatures:
   - "Telegram duplicate messages"
   - "two messages appear, then one is deleted"
   - "NO_REPLY"
+  - "stale preview"
 keywords:
   - "telegram"
   - "streaming"
   - "partial"
   - "preview"
   - "duplicate reply"
+  - "stale preview"
 publishDate: 2026-03-07
-lastUpdated: 2026-03-07
+lastUpdated: 2026-03-10
 author: "CoClaw Team"
 related:
   githubIssues:
@@ -40,6 +42,7 @@ layout: ../../../layouts/TroubleshootingLayout.astro
 
 - In Telegram, **two replies briefly appear and then one disappears**.
 - Or a reply that should end in `NO_REPLY` **flashes visible text first**, then gets suppressed.
+- Or you see a **stale preview message** that lingers after the final reply is delivered (especially in topics/threads).
 - The same agent turn may look normal in Web UI / Control UI, but look duplicated or flickery only in Telegram.
 - The problem is most likely when `channels.telegram.streaming` is `true`, `partial`, or another preview-streaming mode.
 
@@ -55,6 +58,11 @@ On current OpenClaw builds:
 - `channels.telegram.streaming: "block"` skips preview streaming to avoid double-streaming.
 
 When the preview path and the final delivery/cleanup path overlap, Telegram can show a **temporary second visible message** or a **brief flash of text** before the final state settles.
+
+Two common “families” of symptoms:
+
+- **Duplicate-looking replies**: Telegram shows the preview message and the final message as two separate visible messages for a moment, or the preview fails to get deleted/edited back cleanly.
+- **Stale preview**: a preview message remains after the final reply is posted (often when editing fails, timeouts occur, or the conversation is a topic/thread with additional Telegram constraints).
 
 ## Fix
 
@@ -101,6 +109,15 @@ If an agent uses the `message` tool and then suppresses the final chat response,
 
 That reduces the chance that Telegram preview streaming shows text that was never meant to become a visible final reply.
 
+### 4) Restart + test in a clean session (important for stale previews)
+
+Even after changing streaming mode, a stuck/stale preview can persist inside a “bad” session or thread state.
+
+- Restart the gateway (already included above).
+- Start fresh:
+  - Send `/new` once in the affected DM/topic, or
+  - Test in a brand-new DM/topic thread.
+
 ## Verify
 
 - Send one plain-text Telegram prompt in a **fresh** DM or a single group/topic thread.
@@ -117,4 +134,3 @@ If the problem still happens with `channels.telegram.streaming: "off"`, it is mo
 - [/guides/telegram-setup](/guides/telegram-setup)
 - [/guides/openclaw-configuration](/guides/openclaw-configuration)
 - OpenClaw docs: Telegram channel
-

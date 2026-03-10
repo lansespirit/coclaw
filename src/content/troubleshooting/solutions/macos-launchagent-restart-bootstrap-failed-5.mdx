@@ -1,0 +1,155 @@
+---
+title: "macOS LaunchAgent: gateway restart fails (Bootstrap failed: 5 / not loaded)"
+description: "Fix macOS LaunchAgent installs where `openclaw gateway restart` leaves the gateway not loaded or fails with `Bootstrap failed: 5` by using kickstart for in-place restarts, refreshing the service install, and correcting bare `node` paths."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "macos"
+errorSignatures:
+  - "Bootstrap failed: 5"
+  - "launchctl bootstrap failed"
+  - "not loaded"
+  - "EX_CONFIG"
+keywords:
+  - "macos"
+  - "launchd"
+  - "launchagent"
+  - "launchctl"
+  - "bootstrap failed 5"
+  - "kickstart"
+  - "not loaded"
+publishDate: 2026-03-10
+lastUpdated: 2026-03-10
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 40659
+    - 40737
+    - 40776
+    - 40195
+  docs:
+    - "https://docs.openclaw.ai/cli/doctor"
+    - "https://docs.openclaw.ai/install/updating"
+    - "https://docs.openclaw.ai/web/control-ui"
+  guides:
+    - "/guides/updating-and-migration"
+    - "/guides/openclaw-installation-troubleshooting"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- You run `openclaw gateway restart`, but the gateway does **not** come back.
+- `openclaw gateway status` shows the service as **not loaded** (or looks installed but down).
+- You see one of these errors:
+  - `launchctl bootstrap failed: Bootstrap failed: 5: Input/output error`
+  - LaunchAgent exits immediately with `EX_CONFIG` (often when launchd can’t find `node`).
+- The exact same plist sometimes works and sometimes fails after a SIGTERM or health-monitor restart.
+
+## Cause
+
+This is usually one (or more) of these stacked together:
+
+1. **Restart path is too disruptive for a loaded LaunchAgent**
+   - A full `bootout` + `bootstrap` cycle can fail even when an in-place restart would have worked.
+2. **Stale service definition after updates**
+   - The LaunchAgent plist can point at an old runtime layout or hit a launchd “dirty state” after certain exits.
+3. **Bare `node` in `ProgramArguments[0]`**
+   - launchd resolves `ProgramArguments[0]` **before** it applies the plist environment, so `node` can work in your shell but fail under LaunchAgent.
+4. **Wrong execution context**
+   - LaunchAgent install/restart requires a logged-in macOS GUI session for the target user. Running from SSH/headless context can break recovery.
+
+## Fix
+
+### 0) Confirm you’re operating as the correct logged-in user
+
+All commands below should run as the same macOS user who owns `~/.openclaw/`.
+
+```bash
+id -u
+echo "$HOME"
+```
+
+### 1) Fastest safe restart: `kickstart` the already-loaded service
+
+If the LaunchAgent is loaded (or was recently healthy), prefer an in-place restart:
+
+```bash
+launchctl kickstart -k "gui/$(id -u)/ai.openclaw.gateway"
+openclaw gateway status
+```
+
+Why this helps: `kickstart -k` avoids the more fragile `bootout` + `bootstrap` cycle.
+
+### 2) If the service is “not loaded” (or bootstrap fails): refresh the install
+
+Use OpenClaw’s repair path, then rewrite the LaunchAgent definition:
+
+```bash
+openclaw doctor
+openclaw gateway install --force
+openclaw gateway status
+```
+
+If the gateway still won’t come back, follow logs while you retry one restart:
+
+```bash
+openclaw logs --follow
+```
+
+### 3) If the LaunchAgent exits immediately (common: bare `node` path)
+
+If `openclaw gateway install --force` still generates a plist that starts with a bare `node`,
+patch it to an absolute path and reload it.
+
+```bash
+PLIST="$HOME/Library/LaunchAgents/ai.openclaw.gateway.plist"
+NODE_PATH="$(command -v node)"
+echo "$NODE_PATH"
+```
+
+If `NODE_PATH` is empty, fix your Node install first (Homebrew / nvm / asdf), then retry.
+
+Then replace the first argument:
+
+```bash
+sed -i '' "s|<string>node</string>|<string>${NODE_PATH}</string>|" "$PLIST"
+```
+
+Reload the LaunchAgent:
+
+```bash
+DOMAIN="gui/$(id -u)"
+LABEL="ai.openclaw.gateway"
+
+launchctl bootout "$DOMAIN" "$PLIST"
+launchctl enable "$DOMAIN/$LABEL"
+launchctl bootstrap "$DOMAIN" "$PLIST"
+launchctl kickstart -k "$DOMAIN/$LABEL"
+
+openclaw gateway status
+```
+
+Why this helps: launchd does not reliably find `node` via `PATH` during early service startup. An absolute path removes that failure mode.
+
+## Verify
+
+- `openclaw gateway status` shows the service as running.
+- The Control UI loads locally:
+  - `http://127.0.0.1:18789/`
+- After one restart cycle, the gateway comes back without manual intervention.
+
+If it still fails, collect:
+
+```bash
+launchctl print "gui/$(id -u)/ai.openclaw.gateway"
+openclaw gateway status
+openclaw doctor
+```
+
+## Related
+
+- [/troubleshooting/solutions/macos-gateway-stays-down-after-vpn-reconnect](/troubleshooting/solutions/macos-gateway-stays-down-after-vpn-reconnect)
+- [/troubleshooting/solutions/gateway-service-running-but-probe-fails](/troubleshooting/solutions/gateway-service-running-but-probe-fails)
+- [/guides/updating-and-migration](/guides/updating-and-migration)

@@ -1,6 +1,6 @@
 ---
 title: "Cron: announce delivery sends a summary instead of the full output (Telegram topics / chat channels)"
-description: "If an isolated cron job used to deliver the full multi-line output but now only a short summary is sent (or output appears in the wrong place), disable announce and send explicitly via the message tool, or pin/upgrade past the regression."
+description: "If an isolated cron job used to deliver the full output but now sends a summary (or leaks extra text like thinking/reasoning), disable announce delivery and send a clean final message explicitly."
 kind: "solution"
 component: "gateway"
 severity: "high"
@@ -13,13 +13,15 @@ channel:
 errorSignatures:
   - "cron announce"
   - "summary instead of full output"
+  - "thinking leaked"
 keywords:
   - "cron"
   - "announce"
   - "telegram"
   - "topic"
+  - "reasoning"
 publishDate: 2026-02-22
-lastUpdated: 2026-02-22
+lastUpdated: 2026-03-10
 author: "CoClaw Team"
 related:
   githubIssues:
@@ -34,6 +36,7 @@ layout: ../../../layouts/TroubleshootingLayout.astro
 
 - You have an isolated cron job that generates a multi-line report.
 - After an upgrade, `delivery.mode = "announce"` delivers only a short summary (or noisy relay) instead of the full report output.
+- Or the delivered message includes **extra content you didn’t intend to send** (for example, verbose intermediate text, planning notes, or model “thinking/reasoning” text).
 - This is especially common when delivering to Telegram forum topics (threads).
 
 ## Cause
@@ -42,6 +45,8 @@ Some OpenClaw versions/regressions have produced incorrect announce behavior for
 
 - the delivery path summarizes output rather than forwarding the full outbound payloads, and/or
 - the output is surfaced in an unexpected place (for example Control UI chat history) rather than the intended channel target.
+
+Operationally, `announce` delivery is a gateway-side delivery mechanism. If you need **strict control** over what gets sent (exact formatting, no summary, no extra text), you’ll get the most reliable results by disabling announce and sending via the `message` tool yourself.
 
 ## Fix
 
@@ -53,9 +58,15 @@ Turn off announce delivery:
 openclaw cron edit <job-id> --no-deliver
 ```
 
-Then change the job prompt so it explicitly calls the message tool to send the report.
+Then change the job prompt so it explicitly calls the `message` tool to send the report.
 
 For Telegram forum topics, prefer sending to the group id plus a `messageThreadId` (topic id).
+
+If you want to reduce the chance of verbose “thinking” style outputs in cron runs, also set a low thinking level:
+
+```bash
+openclaw cron edit <job-id> --thinking off
+```
 
 ### 2) If you need a fast operational workaround: pin a known-good version
 
@@ -69,10 +80,12 @@ As a temporary measure, deliver to a DM or a non-topic group target (no thread i
 
 - Trigger a run:
   - `openclaw cron run <job-id>`
-- Confirm the full report is delivered (not summarized), and only once.
+- Confirm the delivered message is exactly what you expect:
+  - full output (not summarized),
+  - no extra “thinking/reasoning” text,
+  - delivered only once.
 
 ## Related
 
 - If announce delivery fails completely with `cron announce delivery failed`, see:
   - `/troubleshooting/solutions/cron-announce-delivery-fails-telegram/`
-

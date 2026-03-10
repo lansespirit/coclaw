@@ -8,7 +8,7 @@ difficulty: 'intermediate'
 estimatedTime: '30–45 min setup'
 author: 'CoClaw Team'
 publishDate: 2026-03-08
-lastUpdated: 2026-03-09
+lastUpdated: 2026-03-10
 featured: false
 keywords:
   - 'openclaw feishu'
@@ -239,6 +239,19 @@ The docs mark `open` as the default, but many teams will want `allowlist` first.
 Per-group `requireMention` defaults to `true`.
 
 That default is useful. Keep it until the bot has earned ambient presence in shared rooms.
+
+#### Thread replies are not implicit mentions (current behavior)
+
+If your team primarily talks to the bot by **replying inside a thread under a bot message**, note this limitation:
+
+- A thread reply still requires an explicit `@bot` mention to trigger a response when `requireMention: true`.
+
+Today, the only operator workaround is to set `requireMention: false` for that group, which affects the whole group (not just thread replies).
+
+If you choose that workaround, compensate by tightening at least one other layer:
+
+- keep `groupPolicy: "allowlist"` (do not leave it open), and/or
+- use `groups.<chat_id>.allowFrom` to restrict who can drive the bot in that group.
 
 ### 3. Sender-level gating inside a group
 

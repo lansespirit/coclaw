@@ -1,0 +1,100 @@
+---
+title: "npm global install: OpenClaw breaks after upgrade/downgrade (missing dist chunk)"
+description: "Fix OpenClaw global installs that break after a version swap (upgrade/downgrade) with errors like 'Cannot find module ... dist/...chunk...' by doing a clean reinstall and refreshing the gateway service install."
+kind: "solution"
+component: "install"
+severity: "high"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+errorSignatures:
+  - "Cannot find module"
+  - "tool-loop-detection"
+  - "dist/"
+keywords:
+  - "npm install -g"
+  - "downgrade"
+  - "upgrade"
+  - "missing dist"
+  - "tool-loop-detection"
+  - "Cannot find module"
+publishDate: 2026-03-10
+lastUpdated: 2026-03-10
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 28146
+    - 28206
+  docs:
+    - "https://docs.openclaw.ai/install/updating"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- After an `npm install -g openclaw@...` **upgrade or downgrade**, OpenClaw becomes unusable.
+- Tool-heavy workflows break (TUI/agent/channel runs), often looking like “tools silently don’t work”.
+- You see a runtime import error such as:
+  - `Cannot find module '.../openclaw/dist/...chunk....js'`
+  - `Cannot find module '.../tool-loop-detection-....js'`
+
+## Cause
+
+This is usually not a config problem. It’s a **corrupted global package tree** after a version swap:
+
+- A previous build’s content-hashed dist chunk is still referenced somewhere, but the file is no longer present.
+- A simple in-place overwrite (`npm install -g openclaw@other-version`) can leave you in a half-upgraded state.
+
+## Fix
+
+### 1) Clean reinstall the CLI/runtime (recommended)
+
+Do a full uninstall, then install the exact version you want.
+
+**Install latest cleanly:**
+
+```bash
+npm uninstall -g openclaw
+npm install -g openclaw@latest --force
+```
+
+**Or pin a known-good version cleanly:**
+
+```bash
+npm uninstall -g openclaw
+npm install -g openclaw@2026.3.2
+```
+
+Why this helps: uninstall + reinstall forces npm to rebuild the global package tree from scratch instead of trying to reconcile two versions’ dist chunks.
+
+### 2) Refresh the gateway service install (if you run as a service)
+
+If you installed the gateway as a background service (launchd/systemd/Scheduled Task), refresh the service definition so it points at the current runtime:
+
+```bash
+openclaw gateway install --force
+openclaw gateway restart
+```
+
+Why this helps: even after a clean npm reinstall, your service can still be running an older path/runtime until it is reinstalled.
+
+### 3) Verify you didn’t accidentally keep multiple installs
+
+If things still look inconsistent, confirm you’re running the binary you think you are:
+
+```bash
+which openclaw
+openclaw --version
+```
+
+## Verify
+
+- `openclaw doctor` runs without crashing.
+- Tool calls work again (for example: a small `exec`, `read`, or config probe).
+- `openclaw gateway status` shows the expected service state.
+
+## Related
+
+- [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
+- [/guides/updating-and-migration](/guides/updating-and-migration)

@@ -10,7 +10,7 @@ platforms:
   - "Docker"
 time: "35 min"
 publishDate: 2026-02-13
-lastUpdated: 2026-03-09
+lastUpdated: 2026-03-10
 steps:
   - title: "Know where config lives and how precedence works"
     content: "Start by locating your state directory and openclaw.json, and learn what overwrites what (CLI vs file vs env)."
@@ -475,6 +475,66 @@ Two common patterns:
 
 - Control UI is "unauthorized" because you opened a non-tokenized URL (use `openclaw dashboard`).
 - Gateway token isn't being read in the runtime environment (launchd/systemd/docker env mismatch).
+
+### “Chat works, but tools fail with ‘No API key’” (auth profiles vs provider apiKey)
+
+This is a surprisingly common failure mode with custom providers and OpenAI-compatible endpoints:
+
+- basic chat requests succeed,
+- but a real agent run fails once tools are involved (or you see “missing key / unauthenticated” only in certain flows).
+
+The most common root causes:
+
+1. **You put secrets in the wrong place.**
+   - `auth.profiles` in `openclaw.json` is **metadata + routing**, not where keys are stored.
+   - Provider auth is resolved in this order: `auth-profiles.json` → env vars → `models.providers.*.apiKey`.
+2. **Your service environment doesn’t have the same env vars as your shell.**
+   - A key that works in `curl` from your terminal can still be missing for launchd/systemd/Docker.
+
+Fast recovery checklist:
+
+1. Confirm the gateway can authenticate to the provider:
+
+```bash
+openclaw models status --probe
+```
+
+2. Put the API key on the provider entry (env-substitution is the safest default):
+
+```json5
+{
+  models: {
+    providers: {
+      myprovider: {
+        apiKey: "${MYPROVIDER_API_KEY}",
+      },
+    },
+  },
+}
+```
+
+If you’re using SecretRefs, this shape is valid too:
+
+```json5
+{
+  models: {
+    providers: {
+      myprovider: {
+        apiKey: { source: "env", provider: "default", id: "MYPROVIDER_API_KEY" },
+      },
+    },
+  },
+}
+```
+
+3. Restart and retest:
+
+```bash
+openclaw gateway restart
+openclaw models status --probe
+```
+
+If your provider works for chat but fails when tools are enabled, also verify that the provider/model catalog entry is honest about tool support (`compat.supportsTools`), and start with tools disabled until you confirm compatibility.
 
 ### Custom provider works in `curl`, but still fails in OpenClaw
 

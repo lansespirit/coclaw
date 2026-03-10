@@ -11,7 +11,7 @@ platforms:
   - "Self-hosted"
 time: "25 min"
 publishDate: 2026-03-02
-lastUpdated: 2026-03-02
+lastUpdated: 2026-03-10
 featured: true
 steps:
   - title: "Confirm you're debugging the right layer"
@@ -141,6 +141,23 @@ CoClaw references:
 
 Practical tip: probes consume tokens and can trip limits, but they save hours by proving whether auth works.
 
+### 3.1 Billing fixed but OpenClaw still fails (restart + fresh session)
+
+One annoying pattern: you top up credits / fix a spending cap, but the current OpenClaw session still looks “stuck” (especially on channels).
+
+Fast recovery sequence:
+
+1. Start a fresh session so OpenClaw re-picks provider/auth state:
+   - Send `/new` once in the affected chat.
+2. Restart the gateway (clears stuck runs and forces a clean reconnect):
+
+```bash
+openclaw gateway restart
+openclaw models status --probe
+```
+
+If billing failures disabled your current provider profile, add a fallback model/provider so you have a “get back to green” path even during cooldown windows.
+
 ---
 
 ## 4) A minimal debug loop (copy/paste)
@@ -172,4 +189,3 @@ This keeps you from changing five variables at once.
 - Control UI unauthorized/pairing: [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
 - Spreadsheet/document upload explodes the turn before the model can act: [/troubleshooting/solutions/xlsx-upload-blows-out-context-window](/troubleshooting/solutions/xlsx-upload-blows-out-context-window)
 - Config validation failures after edits: [/troubleshooting/solutions/config-validation-failed](/troubleshooting/solutions/config-validation-failed)
-

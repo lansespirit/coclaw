@@ -11,7 +11,7 @@ platforms:
   - "Self-hosted"
 time: "20 min"
 publishDate: 2026-03-02
-lastUpdated: 2026-03-02
+lastUpdated: 2026-03-10
 steps:
   - title: "Start with the mental model: token auth vs device pairing"
     content: "Most dashboard problems are not 'the UI is broken' — they are either auth token mismatch or an unapproved device identity."
@@ -152,6 +152,26 @@ openclaw devices approve <requestId>
 
 Reload the page and reconnect.
 
+### 2.1.1 The “access path priority” that avoids pairing/auth loops
+
+Device identity and auth state are strongly tied to *how you access the dashboard* (scheme + host + port).
+
+If you keep bouncing between:
+
+- `http://127.0.0.1:18789/`
+- `http://localhost:18789/`
+- `https://mydomain.example/`
+- `https://tailnet-hostname/`
+
+…you can accidentally create “new devices” over and over, or lose the stored identity after refresh.
+
+Most reliable order:
+
+1. **First-time setup / debugging**: SSH tunnel to loopback + `openclaw dashboard`
+2. **Stable daily use**: one HTTPS origin (reverse proxy or built-in TLS) + `openclaw dashboard`
+
+Pick one primary origin and stick to it.
+
 ### 2.2 Use a secure access path for remote dashboards
 
 The most robust “first setup” options:
@@ -169,6 +189,26 @@ If you are using a reverse proxy and things “worked then broke”, also check:
 Some setups fail to persist browser identity (or you are switching browsers/profiles constantly). Use the targeted fix:
 
 - [/troubleshooting/solutions/control-ui-device-identity-required](/troubleshooting/solutions/control-ui-device-identity-required)
+
+If you’re debugging a “refresh loop” and want a tight checklist:
+
+1. Generate a fresh tokenized link:
+
+```bash
+openclaw dashboard
+```
+
+2. Verify you can list devices from the same gateway you think you’re hitting:
+
+```bash
+openclaw devices list
+```
+
+3. Approve the pending request and reload the same tokenized origin:
+
+```bash
+openclaw devices approve <requestId>
+```
 
 ---
 
@@ -204,4 +244,3 @@ openclaw dashboard
 ```
 
 If you can restore state + reconnect in under 15 minutes, “unauthorized/pairing day” stops being a crisis.
-

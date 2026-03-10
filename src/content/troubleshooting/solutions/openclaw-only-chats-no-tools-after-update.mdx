@@ -21,16 +21,16 @@ keywords:
   - "OpenClaw exec read write missing"
   - "OpenClaw update regression"
 publishDate: 2026-03-06
-lastUpdated: 2026-03-06
+lastUpdated: 2026-03-10
 author: "CoClaw Team"
 related:
   docs:
     - "https://docs.openclaw.ai/gateway/configuration-reference"
     - "https://docs.openclaw.ai/start/onboarding"
   guides:
-    - "openclaw-not-using-tools-after-update"
-    - "openclaw-configuration"
-    - "updating-and-migration"
+    - "/guides/openclaw-not-using-tools-after-update"
+    - "/guides/openclaw-configuration"
+    - "/guides/updating-and-migration"
   githubIssues:
     - 34810
     - 36968
@@ -51,7 +51,10 @@ layout: ../../../layouts/TroubleshootingLayout.astro
 
 ## Cause
 
-The most common root cause is a **tool policy change**, not a model failure.
+There are two common root causes that feel similar in practice:
+
+1. **Tool policy change**: your tool allowlist no longer includes filesystem/runtime tools.
+2. **Tool-calling regression / non-tool-capable model**: the model can’t (or won’t) call tools reliably, so the agent “only chats” even though tools are enabled.
 
 Recent OpenClaw onboarding/default flows moved some installs to:
 
@@ -73,6 +76,20 @@ This exact symptom cluster appears in recent GitHub reports such as:
 - `#36968` — user cannot read a file in the workspace because the `read` tool is unavailable
 
 ## Fix
+
+### 0) Quick check: is this actually a tool-calling regression?
+
+If you see the model printing tool calls as **literal text** (for example `exec({...})`) instead of actually running them, you are not debugging `tools.profile`.
+
+Do this first:
+
+- Switch to a known tool-capable model (and restart), or
+- Pin/rollback to the last version that worked in your environment.
+
+Related reading:
+
+- [/troubleshooting/solutions/model-outputs-historical-context-tool-call-text](/troubleshooting/solutions/model-outputs-historical-context-tool-call-text)
+- [/guides/updating-and-migration](/guides/updating-and-migration)
 
 ### 1) Check your current tools profile
 
@@ -157,6 +174,28 @@ Use:
 openclaw config get tools.deny
 openclaw gateway status
 openclaw status --deep
+```
+
+If tools look enabled but tool runs still don’t happen, check the model/runtime layer:
+
+- Confirm the resolved model/provider is reachable:
+
+```bash
+openclaw models status --probe
+```
+
+- Try switching to a model you already have working (a model ref that passes probe):
+
+```bash
+openclaw config set agents.defaults.model.primary <provider/model>
+openclaw gateway restart
+```
+
+- If this started immediately after an update, pin a known-good version (replace `<version>` with the last working one):
+
+```bash
+npm i -g openclaw@<version>
+openclaw gateway restart
 ```
 
 ## Recommended next steps

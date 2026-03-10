@@ -1,0 +1,169 @@
+---
+title: "Compaction deadlock: /new and /reset hang — emergency out-of-band session reset"
+description: "If compaction timeouts deadlock the session lane and even `/new` / `/reset` hang, recover by stopping the gateway and resetting the stuck session from disk (backup first)."
+kind: "solution"
+component: "gateway"
+severity: "critical"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "compaction timeout"
+  - "timedOutDuringCompaction"
+  - "waitForCompactionRetry"
+  - "/new hangs"
+  - "/reset hangs"
+  - "--reset-session hung"
+keywords:
+  - "compaction"
+  - "deadlock"
+  - "session lane"
+  - "reset"
+  - "jsonl"
+  - "sessions.json"
+publishDate: 2026-03-10
+lastUpdated: 2026-03-10
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 40295
+  docs:
+    - "https://docs.openclaw.ai/concepts/compaction"
+    - "https://docs.openclaw.ai/concepts/session"
+    - "https://docs.openclaw.ai/cli/sessions"
+  guides:
+    - "/guides/openclaw-no-response-and-rate-limit-troubleshooting"
+    - "/guides/new-user-checklist"
+    - "/guides/openclaw-configuration"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Your gateway is “up” (service running, channel polling reconnects), but **it stops processing** messages.
+- You see a **typing indicator** for a while, then nothing.
+- Recovery commands **hang indefinitely** because they queue behind compaction:
+  - `/new`
+  - `/reset`
+  - `openclaw acp ... --reset-session`
+- Gateway logs show **compaction starting repeatedly** and **timing out** (for example 300s/600s timeouts), often triggered on every inbound message for the same session.
+
+## Cause
+
+OpenClaw session processing is effectively **single-lane** for a given session key.
+
+If compaction enters a failure loop (timeouts, rate limits, repeated retries), it can block the lane long enough that:
+
+- normal inbound messages cannot complete, and
+- administrative “in-band” resets (`/new`, `/reset`, `--reset-session`) **can’t run either** because they share the same lane.
+
+At that point, the practical recovery is **out-of-band**: stop the gateway process and reset the stuck session from disk.
+
+## Fix (Emergency out-of-band reset)
+
+> Safety rule: **Back up first.** You’re going to touch files under your gateway state directory.
+
+### 0) Make sure you are on the gateway host
+
+If you run the gateway on a remote machine/container, SSH into that host first. The session files you need are on the **gateway host**, not on your laptop UI.
+
+Default state dir is `~/.openclaw` unless you set `OPENCLAW_STATE_DIR`.
+
+### 1) Stop the gateway hard (do not rely on in-band commands)
+
+Try a normal stop first:
+
+```bash
+openclaw gateway stop
+```
+
+If it doesn’t stop quickly, use your OS process manager and force-kill the gateway process. (The goal is: **no OpenClaw process should be writing session files while you reset them**.)
+
+### 2) Back up the sessions directory
+
+On macOS/Linux (default agent id `main`):
+
+```bash
+STATE_DIR="${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
+AGENT_ID="main"
+TS="$(date +%Y%m%d-%H%M%S)"
+
+mkdir -p "$STATE_DIR/_recovery"
+rsync -a "$STATE_DIR/agents/$AGENT_ID/sessions/" "$STATE_DIR/_recovery/sessions.backup.$TS/"
+```
+
+On Windows, copy the equivalent `...\\.openclaw\\agents\\main\\sessions\\` folder to a safe backup location (Explorer is fine).
+
+### 3) Choose a reset strategy
+
+#### Option A (fastest, most reliable): move the whole sessions folder aside
+
+This resets **all sessions for that agent** (your channel will come back on a clean slate), while preserving a backup.
+
+```bash
+STATE_DIR="${OPENCLAW_STATE_DIR:-$HOME/.openclaw}"
+AGENT_ID="main"
+TS="$(date +%Y%m%d-%H%M%S)"
+
+mv "$STATE_DIR/agents/$AGENT_ID/sessions" "$STATE_DIR/agents/$AGENT_ID/sessions.stuck.$TS"
+mkdir -p "$STATE_DIR/agents/$AGENT_ID/sessions"
+```
+
+#### Option B (more targeted): reset only the stuck session key
+
+Use this if you want to preserve other sessions, and you’re comfortable editing one JSON file.
+
+1) Open the store file:
+
+- `~/.openclaw/agents/<agentId>/sessions/sessions.json`
+
+2) Find the stuck session key (common examples):
+
+- DM continuity: `agent:main:main`
+- Telegram DM with isolated scope: `agent:main:telegram:dm:<peerId>`
+
+3) Note the `sessionId` for that key, then:
+
+- Rename the transcript: `~/.openclaw/agents/<agentId>/sessions/<sessionId>.jsonl` → something like `<sessionId>.jsonl.reset.manual.<timestamp>`
+- Delete the session key entry from `sessions.json` (deleting entries is safe; OpenClaw recreates them on demand).
+
+### 4) Restart the gateway and immediately reset the chat
+
+Restart your gateway service (LaunchAgent/systemd/Docker/etc), then send `/new` once in the affected chat/channel to ensure you’re on a fresh session.
+
+## Verify
+
+- The gateway responds quickly again:
+  - `openclaw health` (or `openclaw gateway status`)
+  - `/status` in chat returns promptly
+- The affected channel stops “typing forever”.
+- `/new` and `/reset` execute immediately again.
+
+## Prevention (so it doesn’t happen again)
+
+- **Keep huge tool outputs out of the main session history.** Write logs/results to files and send a short summary + links/paths.
+- **Enable session maintenance** so session stores don’t grow unbounded:
+  - Run `openclaw sessions cleanup --dry-run` to preview impact.
+  - Consider setting `session.maintenance.mode: "enforce"` with sane `pruneAfter` + `maxEntries`.
+- **Enable tool-result pruning** (Anthropic/OpenRouter Anthropic) to reduce toolResult bloat between compactions:
+
+```json5
+{
+  agents: {
+    defaults: {
+      contextPruning: { mode: "cache-ttl", ttl: "5m" },
+    },
+  },
+}
+```
+
+- If you hit repeated compaction failures, do a proactive `/new` (or `/compact`) before the session becomes a recovery incident.
+
+## Related
+
+- Unresponsive gateway triage: [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
+- Operator basics (state dir, backups): [/guides/new-user-checklist](/guides/new-user-checklist)
+- Config sanity checks: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+

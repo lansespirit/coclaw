@@ -11,7 +11,7 @@ platforms:
   - "Self-hosted"
 time: "15 min"
 publishDate: 2026-03-08
-lastUpdated: 2026-03-08
+lastUpdated: 2026-03-10
 steps:
   - title: "Understand the two auth files"
     content: "Recovery can read a different file than the live gateway writes."
@@ -159,6 +159,57 @@ This guide is **not** the main fix when:
 In those cases, start with the shorter auth troubleshooting pages first.
 
 ---
+
+## 5.5) If `auth-profiles.json` is corrupted (concurrent write / “Extra data”)
+
+In some high-concurrency setups (busy channels + cron jobs + periodic auth refresh), operators have reported `auth-profiles.json` becoming **unparseable** due to what looks like concurrent writes (two JSON objects concatenated, or a truncated second object).
+
+Symptom pattern:
+
+- OpenClaw suddenly reports “No API key found” for a provider you definitely configured.
+- Errors mention the auth store path, for example:
+  - `Auth store: ~/.openclaw/agents/main/agent/auth-profiles.json`
+- The file fails to parse with errors like:
+  - `JSONDecodeError: Extra data`
+
+Emergency recovery (safe operator path):
+
+1. Stop the gateway (so nothing writes while you repair):
+
+```bash
+openclaw gateway stop
+```
+
+2. Back up the corrupted file:
+
+```bash
+cp ~/.openclaw/agents/main/agent/auth-profiles.json \
+   ~/.openclaw/agents/main/agent/auth-profiles.json.corrupt.$(date +%Y%m%d-%H%M%S)
+```
+
+3. Restore from a known-good source:
+
+- If you have `auth-profiles.provisioned.json` in your environment, copy it back:
+
+```bash
+cp ~/.openclaw/agents/main/agent/auth-profiles.provisioned.json \
+   ~/.openclaw/agents/main/agent/auth-profiles.json
+```
+
+- Otherwise, restore from your state backups (recommended: `openclaw backup create --verify` before upgrades/changes).
+
+4. Restart and probe:
+
+```bash
+openclaw gateway restart
+openclaw models status --probe
+```
+
+Prevention tips (until upstream atomic writes land):
+
+- Avoid running **multiple gateways** against the same state directory.
+- Keep the state directory off cloud-sync folders (see: [/troubleshooting/solutions/state-dir-cloud-sync-ebusy-crash](/troubleshooting/solutions/state-dir-cloud-sync-ebusy-crash)).
+- Keep at least one periodic backup of the auth file (or the whole state dir) so restoration is boring.
 
 ## 6) Operational habit to adopt
 
