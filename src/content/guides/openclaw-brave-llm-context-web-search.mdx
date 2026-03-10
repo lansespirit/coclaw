@@ -1,0 +1,217 @@
+---
+title: "OpenClaw Brave `llm-context` Web Search: When It’s Better Than Normal Search"
+description: "A practical guide to Brave's `llm-context` mode in OpenClaw: what it returns, when to use it instead of normal web search, how to think about freshness and region, and how to avoid common key and environment mistakes."
+category: "integration"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+time: "12 min"
+publishDate: 2026-03-10
+lastUpdated: 2026-03-10
+steps:
+  - title: "Understand what `llm-context` changes"
+    content: "This mode is not just 'Brave search with a different name' — it is optimized to return extracted grounding snippets and source metadata."
+  - title: "Use it for synthesis-heavy search, not every search"
+    content: "If you want normal result browsing, standard search is often better; if you want concise grounded context, `llm-context` is often the win."
+  - title: "Keep query intent tight"
+    content: "Short, well-bounded questions work better than sprawling multi-goal prompts."
+  - title: "Tune country, language, and freshness deliberately"
+    content: "These filters matter more when you care about current events, regional differences, or non-English sources."
+  - title: "Treat API key and service environment as first-class"
+    content: "If the gateway cannot see `BRAVE_API_KEY`, nothing else about mode choice matters."
+keywords:
+  - "Brave llm-context"
+  - "web_search"
+  - "BRAVE_API_KEY"
+  - "grounding snippets"
+  - "search freshness"
+  - "OpenClaw web search"
+---
+
+`2026.3.8` added an opt-in Brave mode:
+
+```json5
+tools: {
+  web: {
+    search: {
+      provider: "brave",
+      brave: {
+        mode: "llm-context"
+      }
+    }
+  }
+}
+```
+
+That sounds small, but it changes how you should think about Brave inside OpenClaw.
+
+The short version:
+
+- use **normal search** when you want a broad result list,
+- use **`llm-context`** when you want the search provider to return more directly usable grounding snippets with source metadata.
+
+---
+
+## 1) What `llm-context` is actually for
+
+Standard web search is good when the agent needs a broad search surface:
+
+- multiple links,
+- result diversity,
+- exploratory browsing,
+- or a more manual follow-up flow.
+
+Brave `llm-context` is better when the task is closer to:
+
+- “summarize the current consensus,”
+- “find the most relevant current facts,”
+- “ground this answer with concise source-backed snippets.”
+
+In other words, it is more useful when your real need is **grounded synthesis**, not just SERP exploration.
+
+---
+
+## 2) When `llm-context` is a better default
+
+Use it when:
+
+- the question is fact-heavy and current,
+- you want cleaner grounding in the returned search payload,
+- you care more about answerable context than a large pile of links,
+- or you are feeding search results into a downstream model step.
+
+Good examples:
+
+- latest product or release changes,
+- current provider status or pricing checks,
+- policy/rules/restrictions with strong recency requirements,
+- high-signal research summaries.
+
+---
+
+## 3) When normal Brave search is still better
+
+Do **not** force `llm-context` everywhere.
+
+Normal search is often better when:
+
+- you want wider coverage,
+- you expect to click through several sources,
+- the task is exploratory,
+- or the user really wants “search results” more than a grounded summary.
+
+Rule of thumb:
+
+- **browse many possibilities** → normal search
+- **extract grounded context quickly** → `llm-context`
+
+---
+
+## 4) Query shape matters more than people think
+
+`llm-context` works best when the query is tight.
+
+Better:
+
+- one topic,
+- one time horizon,
+- one comparison axis.
+
+Worse:
+
+- broad, multi-part, everything-bagel prompts,
+- several unrelated goals in one query,
+- vague “tell me everything” phrasing.
+
+If the question is too broad, break it into two searches instead of hoping one giant query gets magically better because the mode changed.
+
+---
+
+## 5) Country, language, and freshness are worth using
+
+Brave search in OpenClaw supports filters like:
+
+- `country`
+- `search_lang`
+- `ui_lang`
+- `freshness`
+
+These are especially helpful when:
+
+- results differ by region,
+- you need non-English sources,
+- or the topic is time-sensitive.
+
+Examples of where this matters:
+
+- release availability by country,
+- region-locked models/services,
+- recent announcements,
+- current policy or pricing pages.
+
+If a query feels “kind of right but oddly off,” poor region/language assumptions are often the reason.
+
+---
+
+## 6) The most common operational mistake: the key is not visible to the gateway
+
+If `web_search` fails before you ever get to compare modes, the usual problem is not Brave itself — it is that the running gateway cannot see `BRAVE_API_KEY`.
+
+The most reliable fix path is still:
+
+```bash
+printf 'BRAVE_API_KEY=%s\n' 'YOUR_BRAVE_KEY' >> ~/.openclaw/.env
+openclaw gateway restart
+```
+
+This matters because the **gateway service environment** is the real truth source, not the shell where you last ran `openclaw configure`.
+
+If that error string sounds familiar, also read:
+
+- [/troubleshooting/solutions/web-search-missing-brave-api-key](/troubleshooting/solutions/web-search-missing-brave-api-key)
+
+---
+
+## 7) A sane rollout pattern
+
+If you are unsure whether your workflow benefits from `llm-context`, do this:
+
+1. enable Brave search cleanly,
+2. test a few recurring research tasks,
+3. compare result usefulness rather than raw number of links,
+4. keep normal search as the fallback mental model.
+
+This is not a religion question. It is a workflow-fit question.
+
+---
+
+## 8) Good candidate workflows
+
+`llm-context` is especially promising for:
+
+- release note triage,
+- issue investigation with current web context,
+- pricing/policy verification,
+- and “brief me fast, but keep sources attached” tasks.
+
+That makes it a strong fit for operators, maintainers, and agents that summarize current information for humans.
+
+---
+
+## Quick checklist
+
+- [ ] I know whether I want broad browsing or grounded synthesis
+- [ ] My query is narrow enough to answer well
+- [ ] I set region/language/freshness intentionally when the topic needs it
+- [ ] The gateway can actually see `BRAVE_API_KEY`
+- [ ] I am evaluating usefulness, not just result count
+
+## Related
+
+- [Web search: missing_brave_api_key even though it's configured](/troubleshooting/solutions/web-search-missing-brave-api-key)
+- [OpenClaw Configuration Guide: openclaw.json, Models, Gateway, Channels, and Plugins](/guides/openclaw-configuration)
+- [OpenClaw Relay & API Proxy Troubleshooting (NewAPI/OneAPI/AnyRouter): Fix 403s, 404s, and Empty Replies](/guides/openclaw-relay-and-api-proxy-troubleshooting)

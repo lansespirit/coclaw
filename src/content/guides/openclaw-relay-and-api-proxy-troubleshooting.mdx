@@ -11,7 +11,7 @@ platforms:
   - "Self-hosted"
 time: "20 min"
 publishDate: 2026-02-27
-lastUpdated: 2026-03-09
+lastUpdated: 2026-03-10
 steps:
   - title: "Confirm what your relay actually implements"
     content: "Identify whether your provider supports Anthropic Messages, OpenAI Chat Completions, or OpenAI Responses (or only a partial subset)."
@@ -49,6 +49,11 @@ endpoint), but they also introduce a new class of “it works in curl but not in
 
 This guide is a battle-tested checklist for the most common issues reported by the community: **403 blocks**, **404 not found**
 (often caused by wrong `baseUrl`), and **blank/empty replies** caused by response-format mismatch.
+
+If the problem appeared immediately after an OpenClaw upgrade, keep a rollback path ready instead of debugging forever on a broken production setup:
+
+- [/guides/updating-and-migration](/guides/updating-and-migration)
+- [/guides/openclaw-backup-and-rollback](/guides/openclaw-backup-and-rollback)
 
 If you’re new to OpenClaw configuration, start here first:
 
@@ -273,6 +278,41 @@ If your relay is strict, you may need to coordinate with the relay operator:
 - ask them to allowlist your gateway IP,
 - or to disable WAF rules that block SDK traffic.
 
+### 4.2 Prove the **gateway process** is using the same proxy path as your curl test
+
+This is one of the most common false assumptions:
+
+- `curl` works in **your current shell**,
+- but the OpenClaw gateway runs as a **service**,
+- so the gateway may not inherit the same `HTTP_PROXY`, `HTTPS_PROXY`, or `ALL_PROXY` values.
+
+Practical rule:
+
+- trust the gateway process environment more than your interactive shell,
+- and trust a same-host curl repro only after you confirm both are using the same proxy path.
+
+Good places to define proxy env vars:
+
+- the gateway parent process environment,
+- `~/.openclaw/.env`,
+- or a deliberate service environment setup.
+
+If you changed proxy environment and nothing improved, restart the gateway before concluding the proxy change failed.
+
+This matters especially for reports that look like:
+
+- curl succeeds,
+- but OpenClaw still gets region-style `403`s,
+- or the issue appeared only after an upgrade even though your endpoint and key did not change.
+
+In that case, ask a narrower question:
+
+> Is the gateway really using the same proxy path as curl?
+
+If the answer becomes “I should probably stop and preserve the current good state before trying more changes,” take that hint and create a backup first:
+
+- [/guides/openclaw-backup-and-rollback](/guides/openclaw-backup-and-rollback)
+
 ---
 
 ## 5) “Empty reply”, blank output, or silent failures
@@ -474,6 +514,7 @@ Ask specifically whether the real failing request body contains any of these:
 - [ ] You edited the config the gateway uses, then restarted it
 - [ ] No per-agent override is pinning a different provider/model
 - [ ] If 403: set `headers.User-Agent`, and verify IP/region allowlist
+- [ ] If curl works through a proxy: confirm the gateway service gets the same `HTTP_PROXY` / `HTTPS_PROXY` / `ALL_PROXY` environment
 - [ ] If blank output: verify response JSON matches the endpoint contract; disable `reasoning: true`
 - [ ] If probe passes but real runs fail: compare runtime fields (`tools`, `tool_choice`, `parallel_tool_calls`, `reasoning_effort`, `store`, `stream`)
 

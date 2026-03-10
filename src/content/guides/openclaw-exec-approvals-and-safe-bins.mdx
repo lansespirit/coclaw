@@ -1,0 +1,261 @@
+---
+title: "OpenClaw Exec Approvals and Safe Bins: Why `tools.exec.security=\"full\"` Can Still Be Blocked"
+description: "A practical guide to OpenClaw exec approvals: understand the difference between tool policy, elevated mode, allowlists, and safe bins; fix `allowlist miss`; and choose the right trust model for gateway and node hosts."
+category: "advanced"
+difficulty: "Advanced"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Self-hosted"
+time: "18 min"
+publishDate: 2026-03-10
+lastUpdated: 2026-03-10
+steps:
+  - title: "Separate exec layers before debugging"
+    content: "Tool allow/deny, sandbox location, elevated mode, and exec approvals are different controls; mixing them up is the fastest way to get lost."
+  - title: "Find the real execution host"
+    content: "Exec approvals are enforced on the gateway host or node host that actually runs the command, not on whatever shell you are staring at."
+  - title: "Use allowlists for interpreters and CLIs"
+    content: "Treat `node`, `python3`, `bash`, `sh`, `zsh`, and package-manager binaries as explicit allowlist candidates, not safe bins."
+  - title: "Reserve safe bins for stdin-only filters"
+    content: "Safe bins are a narrow fast-path for tools like `jq`, not a general bypass around approvals."
+  - title: "Pick a trust posture deliberately"
+    content: "`full`, `allowlist`, and prompt behavior should reflect how risky the host actually is, not just how impatient you are in the moment."
+keywords:
+  - "exec approvals"
+  - "allowlist miss"
+  - "safeBins"
+  - "tools.exec.security"
+  - "openclaw approvals"
+  - "node host"
+  - "gateway host"
+---
+
+One of the most confusing OpenClaw moments looks like this:
+
+- you set `tools.exec.security: "full"`,
+- you set `tools.exec.ask: "off"`,
+- and the command still fails with something like **`allowlist miss`**.
+
+That feels contradictory, but it usually is not.
+
+The reason is simple: **`exec` has more than one gate**.
+
+This guide is the practical map.
+
+If your broader problem is optional tools/plugins rather than host exec specifically, also read:
+
+- [/guides/custom-tools](/guides/custom-tools)
+
+If the behavior changed right after an upgrade, also keep these two nearby:
+
+- [/guides/updating-and-migration](/guides/updating-and-migration)
+- [/guides/openclaw-backup-and-rollback](/guides/openclaw-backup-and-rollback)
+
+---
+
+## 1) The four layers people collapse into one
+
+When people say “exec is blocked”, they often mean one of four different things:
+
+1. **tool policy** — is the tool allowed for this agent at all?
+2. **sandbox/runtime** — does it run in sandbox, gateway host, or node host?
+3. **elevated mode** — are you allowing host execution or approval skipping in this session?
+4. **exec approvals** — does the execution host itself allow this command path?
+
+Those are not synonyms.
+
+If you debug them as if they were one switch, you will keep making the wrong change.
+
+---
+
+## 2) Exec approvals live on the execution host
+
+This is the most important fact:
+
+- if the command runs on the **gateway host**, approvals are enforced there,
+- if the command runs on a **node host**, approvals are enforced on that node host.
+
+The local approvals file lives at:
+
+```text
+~/.openclaw/exec-approvals.json
+```
+
+So when a command is blocked, ask first:
+
+> Which machine actually tried to execute it?
+
+Do not assume the answer is “the machine where I edited `openclaw.json`."
+
+This is especially important if your setup already involves nodes for remote browser control or other split-host behavior:
+
+- [/guides/openclaw-remote-browser-node-host](/guides/openclaw-remote-browser-node-host)
+
+---
+
+## 3) Why `tools.exec.security="full"` can still feel blocked
+
+OpenClaw’s runtime `tools.exec.*` settings and the host’s exec approvals are separate inputs.
+
+In practice, the effective approvals posture is the **stricter** result.
+
+That means a host-local approvals file can still keep you in an allowlist-driven world even when your agent config feels permissive.
+
+Practical takeaway:
+
+- if you see `allowlist miss`, do not assume your JSON config was ignored,
+- assume the execution host still requires an allowlist match or prompt path,
+- and inspect approvals next.
+
+---
+
+## 4) The fastest fix for `allowlist miss`
+
+If the binary should really be allowed, add it explicitly with the approvals CLI.
+
+Examples:
+
+```bash
+openclaw approvals allowlist add --agent main "/opt/homebrew/bin/node"
+openclaw approvals allowlist add --agent main "/bin/bash"
+openclaw approvals allowlist add --agent main "/usr/bin/python3"
+```
+
+If the command runs on a node host instead of the gateway host:
+
+```bash
+openclaw approvals allowlist add --agent main --node <id|name|ip> "/usr/bin/python3"
+```
+
+This is usually the right move for:
+
+- interpreters,
+- package managers,
+- wrapper CLIs,
+- and trusted operator binaries you actually mean to run.
+
+---
+
+## 5) Do **not** use `safeBins` as a trust bypass for interpreters
+
+`safeBins` is easy to misunderstand.
+
+It is meant for a small class of **stdin-only filter binaries**, such as stream processors.
+
+It is **not** meant for:
+
+- `python3`
+- `node`
+- `bash`
+- `sh`
+- `zsh`
+- `ruby`
+- or other runtimes that can evaluate code, spawn subcommands, or read files by design.
+
+If a binary is powerful, give it an explicit allowlist entry instead of trying to sneak it through `safeBins`.
+
+That keeps the trust boundary honest.
+
+---
+
+## 6) What `safeBins` is actually good for
+
+Use `safeBins` for narrow, predictable filters where stdin-only behavior is the whole point.
+
+The mental model is:
+
+- a stream comes in,
+- a tightly constrained binary transforms it,
+- and the binary does **not** turn into a generic filesystem/code execution escape hatch.
+
+If your command needs arbitrary file paths, script evaluation, or runtime shells, you are already outside the “safe bin” model.
+
+---
+
+## 7) Trust model choices that make sense in real life
+
+### Option A: strict operator posture
+
+Best when:
+
+- the host is sensitive,
+- multiple workflows share it,
+- or you want every powerful command path to be explicit.
+
+Recommended posture:
+
+- approvals in `allowlist` mode,
+- prompts on miss,
+- interpreters explicitly allowlisted,
+- minimal use of `safeBins`.
+
+### Option B: trusted solo-operator host
+
+Best when:
+
+- this is your own tightly controlled machine,
+- you understand the blast radius,
+- and speed matters more than frequent prompting.
+
+You may still choose broader approvals defaults, but do so deliberately — not because you confused `tools.exec.security` with host approvals.
+
+Before broadening trust on a machine you care about, create a rollback point for your config/state first:
+
+- [/guides/openclaw-backup-and-rollback](/guides/openclaw-backup-and-rollback)
+
+---
+
+## 8) Common failure patterns
+
+### “It works in my shell, but OpenClaw says allowlist miss”
+
+That usually means:
+
+- the shell is not the enforcement point,
+- the gateway/node host is,
+- and that host’s approvals file still requires an allowlist match.
+
+### “I added `python3` to safeBins and it still feels wrong”
+
+That is the wrong trust model.
+
+Move it to an explicit allowlist entry.
+
+### “The gateway host works, but the node host still blocks”
+
+Those are two different approval stores.
+
+Fix the node host’s approvals, not just the gateway config.
+
+---
+
+## 9) A safe debugging order
+
+When exec behavior is confusing, use this order:
+
+1. confirm the tool is allowed for the agent,
+2. confirm where it is executing (sandbox / gateway / node),
+3. check whether elevated mode changes anything,
+4. inspect or update exec approvals on the actual execution host,
+5. only then tweak `safeBins` or broader trust settings.
+
+That order usually cuts the debugging time in half.
+
+---
+
+## Quick checklist
+
+- [ ] I know whether the command runs on sandbox, gateway host, or node host
+- [ ] I am editing approvals on the actual execution host
+- [ ] I use allowlists for interpreters and powerful CLIs
+- [ ] I reserve `safeBins` for stdin-only filters
+- [ ] I am not treating `tools.exec.security` as the only gate
+
+## Related
+
+- [Enable Tools and Plugins (Advanced)](/guides/custom-tools)
+- [OpenClaw Configuration Guide: openclaw.json, Models, Gateway, Channels, and Plugins](/guides/openclaw-configuration)
+- [Windows: tools.exec cannot find docker, rg, or gh even though they work in PowerShell](/troubleshooting/solutions/windows-scheduled-task-path-tools-exec-cli-not-found)
+- [Windows: Exec tool returns empty output unless `pty: true`](/troubleshooting/solutions/windows-exec-non-pty-empty-output)

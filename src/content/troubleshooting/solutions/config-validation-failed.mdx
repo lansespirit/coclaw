@@ -17,7 +17,7 @@ keywords:
   - "schema"
   - "doctor"
 publishDate: 2026-02-03
-lastUpdated: 2026-02-13
+lastUpdated: 2026-03-10
 author: "CoClaw Team"
 related:
   docs:
@@ -52,6 +52,20 @@ OpenClaw validates config strictly for safety:
 - wrong types (`allowFrom` must be an array, etc.)
 - invalid enum values
 
+### C) Upgrade migration warning that did **not** rewrite your file yet
+
+This is the subtle case that catches a lot of people after upgrades:
+
+- OpenClaw prints an **auto-migrated on load** message,
+- but your on-disk config still contains the old key,
+- and strict validation still refuses to boot until the file is rewritten.
+
+Typical example:
+
+- `session.threadBindings.ttlHours` was renamed to `session.threadBindings.idleHours`
+
+So the operator sees a migration warning and assumes “good, it handled it”, but the gateway still exits with `Invalid config`.
+
 ## Fix
 
 ### 1) Run doctor to see exact errors
@@ -60,11 +74,80 @@ OpenClaw validates config strictly for safety:
 openclaw doctor
 ```
 
+If the gateway is crash-looping and you want a fast “does the file validate” check without starting anything:
+
+```bash
+openclaw config validate
+```
+
 ### 2) If doctor suggests a safe fix/migration
 
 ```bash
 openclaw doctor --fix
 ```
+
+This is the right first move for upgrade-era key renames, especially when the logs mention:
+
+- `auto-migrated on load`
+- `was renamed to`
+- `run 'openclaw doctor --fix'`
+
+### 2.1 Example: `ttlHours` → `idleHours`
+
+If your logs mention a legacy key like:
+
+```text
+session.threadBindings.ttlHours was renamed to session.threadBindings.idleHours
+```
+
+then use one of these recovery paths:
+
+```bash
+openclaw doctor --fix
+```
+
+or, if you need to patch it manually, replace the old key in `~/.openclaw/openclaw.json` and restart the gateway.
+
+Practical rule:
+
+- migration **warning** means OpenClaw recognized the old shape,
+- migration **success** means your actual file is now aligned,
+- if the gateway still refuses to start, treat it as an unresolved config-validation problem until proven otherwise.
+
+### 2.2 If Control UI / `config.patch` bricked your gateway (crash loop + log spam)
+
+The Control UI can change config via a gateway RPC called `config.patch` (a partial update merge).
+
+If a patch writes an unknown key or wrong type, you can end up in a loop:
+
+- gateway restarts,
+- reads invalid config,
+- fails validation,
+- restarts again (and logs spam forever).
+
+Recovery runbook:
+
+1. **Stop the gateway service** so it stops re-reading the broken file.
+2. Restore a known-good config backup:
+
+```bash
+ls -1 ~/.openclaw/openclaw.json.bak.* 2>/dev/null | tail -n 10
+cp ~/.openclaw/openclaw.json.bak.<timestamp> ~/.openclaw/openclaw.json
+```
+
+3. Validate before restarting:
+
+```bash
+openclaw config validate
+```
+
+4. Restart the gateway:
+
+```bash
+openclaw gateway restart
+```
+
+Prevention tip: use `openclaw config set` for single-key edits and the config generator for multi-field edits. Treat ad-hoc JSON snippets from issue threads as untrusted until they validate on *your* version.
 
 ### 3) Revert to a known-good minimal config
 
@@ -87,6 +170,19 @@ This avoids manual syntax mistakes:
 openclaw config set agents.defaults.workspace "~/.openclaw/workspace"
 ```
 
+### 5) When docs and validation seem to disagree, trust the running schema first
+
+Sometimes a field can appear in examples, old docs, discussions, or issue comments, but your current build still rejects it.
+
+When that happens:
+
+1. trust `openclaw doctor` and `openclaw config validate` over stale snippets,
+2. confirm the exact version you are running,
+3. move the change to the closest schema-aligned location if a stable fallback exists,
+4. and use the config generator or current configuration guide as the tie-breaker.
+
+This is slower than copy-pasting a thread snippet, but much faster than a gateway crash loop.
+
 ## Verify
 
 ```bash
@@ -98,3 +194,5 @@ openclaw logs --follow
 
 - Configuration overview (concepts + safe patterns): [/guides/openclaw-configuration](/guides/openclaw-configuration)
 - Generate a schema-aligned config visually: [/openclaw-config-generator](/openclaw-config-generator)
+- Upgrade workflow + rollback: [/guides/updating-and-migration](/guides/updating-and-migration)
+- Backup before risky config surgery: [/guides/openclaw-backup-and-rollback](/guides/openclaw-backup-and-rollback)

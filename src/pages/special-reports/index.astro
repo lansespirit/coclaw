@@ -1,0 +1,127 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+import SpecialReportCard from '../../components/SpecialReportCard.astro';
+
+const entries = await getCollection('special-reports', ({ data }) => !data.draft);
+const reports = [...entries].sort((a, b) => {
+  if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+  return b.data.lastUpdated.getTime() - a.data.lastUpdated.getTime();
+});
+
+const featured = reports.find((entry) => entry.data.featured) ?? reports[0];
+const regular = reports.filter((entry) => entry.slug !== featured?.slug);
+---
+
+<BaseLayout
+  title="OpenClaw Special Reports: Updates, Migration Guides & Operator Briefings | CoClaw"
+  description="Read CoClaw Special Reports for OpenClaw updates, upgrade paths, migration planning, troubleshooting themes, and operator briefings. Each report pack connects the right guides for one major topic."
+>
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <div class="bg-background min-h-screen relative overflow-hidden">
+    <div class="absolute inset-0 editorial-grid opacity-40 pointer-events-none"></div>
+    <div
+      class="absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_top_left,rgba(0,111,238,0.18),transparent_50%)] pointer-events-none"
+    >
+    </div>
+    <div
+      class="absolute right-[-10rem] top-12 h-[28rem] w-[28rem] rounded-full bg-secondary/10 blur-[130px] pointer-events-none"
+    >
+    </div>
+
+    <Section py="pt-28 pb-12">
+      <div class="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-end">
+        <div class="lg:col-span-7">
+          <span
+            class="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-1 text-[11px] font-bold uppercase tracking-[0.24em] text-primary-700 dark:text-primary-300"
+          >
+            Special Reports
+          </span>
+          <div class="editorial-rule mt-6 mb-8 max-w-40"></div>
+          <h1
+            class="font-editorial max-w-5xl text-5xl leading-[0.9] tracking-[-0.04em] text-foreground md:text-7xl xl:text-[5.5rem]"
+          >
+            OpenClaw Special Reports for updates, migration, and operator troubleshooting.
+          </h1>
+          <p class="mt-8 max-w-3xl text-lg leading-relaxed text-default-600 md:text-xl">
+            Follow major OpenClaw releases, safe-upgrade paths, migration changes, and recurring
+            troubleshooting themes through curated report packs built from the right guides and
+            fixes.
+          </p>
+        </div>
+
+        {
+          featured ? (
+            <div class="lg:col-span-5">
+              <div class="editorial-panel relative overflow-hidden p-8 md:p-10">
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-primary/70 via-white/30 to-transparent" />
+                <div class="flex flex-wrap items-center gap-3 text-[11px] font-bold uppercase tracking-[0.18em] text-default-500">
+                  <span class="text-primary">Featured OpenClaw Report</span>
+                  <span>•</span>
+                  <span>
+                    {featured.data.status === 'evergreen' ? 'Evergreen Topic' : 'Operator Briefing'}
+                  </span>
+                </div>
+
+                <h2 class="font-editorial mt-6 text-3xl leading-[0.95] tracking-[-0.03em] md:text-5xl">
+                  <a
+                    href={`/special-reports/${featured.slug}`}
+                    class="transition-colors hover:text-primary"
+                  >
+                    {featured.data.title}
+                  </a>
+                </h2>
+                <p class="mt-5 text-base leading-relaxed text-default-600 md:text-lg">
+                  {featured.data.description}
+                </p>
+              </div>
+            </div>
+          ) : null
+        }
+      </div>
+    </Section>
+
+    <Section py="py-10 pb-20">
+      <div class="mb-8 flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+            OpenClaw Report Archive
+          </p>
+          <h2 class="font-editorial mt-4 text-4xl leading-tight tracking-[-0.03em] md:text-5xl">
+            Browse report packs by topic
+          </h2>
+        </div>
+        <p class="max-w-2xl text-sm leading-relaxed text-default-500 md:text-base">
+          Explore OpenClaw release analysis, upgrade and rollback paths, remote browser setups,
+          relay issues, and other operator-heavy topics in one place.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        {
+          reports.map((entry) => (
+            <SpecialReportCard
+              title={entry.data.title}
+              description={entry.data.description}
+              href={`/special-reports/${entry.slug}`}
+              status={entry.data.status}
+              audience={entry.data.audience}
+              publishDate={entry.data.publishDate}
+              featured={entry.slug === featured?.slug}
+              highlights={entry.data.highlights.slice(0, entry.slug === featured?.slug ? 2 : 1)}
+            />
+          ))
+        }
+      </div>
+    </Section>
+  </div>
+</BaseLayout>

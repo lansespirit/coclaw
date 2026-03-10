@@ -4,6 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/layout/Section.astro';
 import { BlogCard } from '../components/BlogCard';
 import { GuideCard } from '../components/GuideCard';
+import SpecialReportCard from '../components/SpecialReportCard.astro';
 import { FAQAccordion } from '../components/FAQAccordion';
 import { UserStoryCard } from '../components/UserStoryCard';
 import { VideoGallery } from '../components/VideoGallery';
@@ -61,6 +62,23 @@ const guides = guideEntries
     platforms: entry.data.platforms,
     time: entry.data.time,
     href: `/guides/${entry.slug}`,
+  }));
+
+const specialReportEntries = await getCollection('special-reports', ({ data }) => !data.draft);
+const specialReports = specialReportEntries
+  .sort((a, b) => {
+    if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+    return b.data.lastUpdated.getTime() - a.data.lastUpdated.getTime();
+  })
+  .slice(0, 3)
+  .map((entry) => ({
+    title: entry.data.title,
+    description: entry.data.description,
+    href: `/special-reports/${entry.slug}`,
+    status: entry.data.status,
+    audience: entry.data.audience,
+    publishDate: entry.data.publishDate,
+    featured: entry.data.featured,
   }));
 
 const troubleshootingEntries = await getCollection('troubleshooting', ({ data }) => !data.draft);
@@ -196,6 +214,13 @@ const resourceSearchItems = [
     type: 'guide',
     keywords: [],
   })),
+  ...specialReportEntries.map((entry) => ({
+    url: `/special-reports/${entry.slug}`,
+    title: entry.data.title,
+    description: entry.data.description,
+    type: 'special-report',
+    keywords: entry.data.keywords ?? [],
+  })),
   ...troubleshootingSolutions.map((s) => ({
     url: s.href,
     title: s.title,
@@ -281,6 +306,38 @@ const resourceSearchItems = [
           >
           </div>
         </div>
+      </div>
+    </Section>
+
+    <Section py="py-6">
+      <div class="flex items-end justify-between gap-6 mb-8">
+        <div>
+          <span
+            class="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-primary-700 dark:text-primary-300"
+          >
+            Special Reports
+          </span>
+          <h2 class="text-3xl md:text-4xl font-black tracking-tight mt-4">
+            Multi-page report packs for major OpenClaw topics.
+          </h2>
+          <p class="mt-3 text-default-600 max-w-2xl">
+            Curated packs for release waves, regression clusters, and high-signal operator topics
+            that deserve a guided reading path.
+          </p>
+        </div>
+        <Button
+          as="a"
+          href="/special-reports"
+          radius="full"
+          variant="bordered"
+          className="font-bold"
+        >
+          All Reports
+        </Button>
+      </div>
+
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+        {specialReports.map((report) => <SpecialReportCard {...report} />)}
       </div>
     </Section>
 

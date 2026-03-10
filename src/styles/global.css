@@ -38,6 +38,27 @@
 }
 
 @layer utilities {
+  .font-editorial {
+    font-family: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia,
+      serif;
+  }
+
+  .editorial-rule {
+    height: 1px;
+    background: linear-gradient(90deg, rgb(0 111 238 / 0.48), rgb(0 111 238 / 0.12), transparent);
+  }
+
+  .editorial-grid {
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
+  .editorial-panel {
+    @apply rounded-[32px] border border-divider/70 bg-content1/70 backdrop-blur-xl shadow-2xl;
+  }
+
   .text-balance {
     text-wrap: balance;
   }

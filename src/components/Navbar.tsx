@@ -28,6 +28,7 @@ const normalizePath = (path: string) => {
 const resourcesItems = [
   { name: 'Channels', href: '/channels' },
   { name: 'Guides', href: '/guides' },
+  { name: 'Special Reports', href: '/special-reports' },
   { name: 'Solutions', href: '/troubleshooting/solutions' },
   { name: 'Stories', href: '/stories' },
   { name: 'Blog', href: '/blog' },

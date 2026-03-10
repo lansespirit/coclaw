@@ -1,0 +1,105 @@
+---
+interface Highlight {
+  title: string;
+  summary: string;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  href: string;
+  status?: 'event' | 'evergreen';
+  audience?: string[];
+  publishDate?: Date;
+  featured?: boolean;
+  highlights?: Highlight[];
+}
+
+const {
+  title,
+  description,
+  href,
+  status = 'event',
+  audience = [],
+  publishDate,
+  featured = false,
+  highlights = [],
+} = Astro.props;
+
+const statusLabel = status === 'evergreen' ? 'Evergreen Topic' : 'Operator Briefing';
+const statusClass =
+  status === 'evergreen'
+    ? 'bg-secondary/10 text-secondary-700 dark:text-secondary-300 border-secondary/20'
+    : 'bg-primary/10 text-primary-700 dark:text-primary-300 border-primary/20';
+---
+
+<a
+  href={href}
+  class={`group editorial-panel block overflow-hidden p-7 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-[0_24px_70px_-36px_rgba(0,111,238,0.38)] ${
+    featured ? 'lg:p-9' : ''
+  }`}
+>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <span
+      class={`inline-flex items-center rounded-full border px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] ${statusClass}`}
+    >
+      {statusLabel}
+    </span>
+    {
+      publishDate ? (
+        <span class="text-[11px] font-medium uppercase tracking-[0.14em] text-default-500">
+          {publishDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          })}
+        </span>
+      ) : null
+    }
+  </div>
+
+  <div class="editorial-rule mt-5 mb-6 max-w-28 transition-all duration-300 group-hover:max-w-40">
+  </div>
+
+  <h3
+    class={`font-editorial leading-[0.95] tracking-[-0.03em] text-foreground transition-colors group-hover:text-primary ${featured ? 'text-3xl md:text-[2.65rem]' : 'text-2xl md:text-[2.1rem]'}`}
+  >
+    {title}
+  </h3>
+
+  <p class="mt-5 max-w-3xl text-sm leading-relaxed text-default-600 md:text-base">{description}</p>
+
+  {
+    highlights.length ? (
+      <div class="mt-6 space-y-3 border-t border-divider/70 pt-5">
+        {highlights.map((item) => (
+          <div>
+            <p class="text-sm font-semibold tracking-tight text-foreground">{item.title}</p>
+            <p class="mt-1 text-sm leading-relaxed text-default-500">{item.summary}</p>
+          </div>
+        ))}
+      </div>
+    ) : null
+  }
+
+  <div class="mt-6 flex flex-wrap items-end justify-between gap-4 border-t border-divider/70 pt-5">
+    {
+      audience.length ? (
+        <div class="flex flex-wrap gap-2">
+          {audience.slice(0, featured ? 4 : 3).map((item) => (
+            <span class="rounded-full border border-divider bg-content2/70 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-default-700 dark:text-default-500">
+              {item}
+            </span>
+          ))}
+        </div>
+      ) : null
+    }
+
+    <span
+      class="inline-flex items-center gap-2 text-sm font-semibold tracking-tight text-foreground transition-transform duration-300 group-hover:translate-x-1 group-hover:text-primary"
+    >
+      Read Report
+      <span aria-hidden="true">→</span>
+    </span>
+  </div>
+</a>

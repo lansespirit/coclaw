@@ -1,0 +1,275 @@
+---
+title: "OpenClaw Backup and Rollback: How to Use `openclaw backup create` and `verify` Safely"
+description: "A practical guide to OpenClaw's built-in backup commands: choose the right backup scope, verify archives before risky changes, and keep a real rollback path for upgrades, migrations, and config surgery."
+category: "deployment"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+time: "14 min"
+publishDate: 2026-03-10
+lastUpdated: 2026-03-10
+steps:
+  - title: "Choose the smallest backup that still protects you"
+    content: "Use full-state backups before upgrades or migrations, config-only backups before risky config edits, and exclude workspaces only when you already back them up separately."
+  - title: "Create the archive before the destructive step"
+    content: "Run `openclaw backup create` before updating, re-installing services, or editing config by hand."
+  - title: "Verify the archive immediately"
+    content: "Use `--verify` or `openclaw backup verify` so you discover a bad archive now, not during an outage."
+  - title: "Treat the archive like production secrets"
+    content: "Backups can contain API keys, OAuth tokens, channel credentials, sessions, and private workspace files."
+  - title: "Practice rollback while the system is still healthy"
+    content: "The best rollback is the one you have rehearsed before the upgrade goes sideways."
+keywords:
+  - "openclaw backup"
+  - "backup create"
+  - "backup verify"
+  - "rollback"
+  - "upgrade safety"
+  - "state backup"
+  - "openclaw migration"
+---
+
+OpenClaw `2026.3.8` adds a real CLI backup path, which is a much better operator story than “remember to `tar` your state dir before touching anything.”
+
+That does **not** mean every backup should be huge, and it does **not** mean you can stop thinking about restore drills.
+
+This guide helps you choose the right backup scope, verify the archive, and keep rollback boring.
+
+If you are updating or moving machines, also read:
+
+- [/guides/updating-and-migration](/guides/updating-and-migration)
+
+If the change you are about to make is specifically about provider/proxy behavior or trust/execution policy, these are the best companion guides:
+
+- [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+- [/guides/openclaw-exec-approvals-and-safe-bins](/guides/openclaw-exec-approvals-and-safe-bins)
+
+---
+
+## 1) What the built-in backup commands are good at
+
+The new backup CLI is best for these moments:
+
+- right before `npm i -g openclaw@latest` or `openclaw update`,
+- before `openclaw doctor --fix`,
+- before hand-editing `openclaw.json`,
+- before reinstalling the gateway service,
+- and before migrating to another machine.
+
+The important improvement is not just archive creation — it is **verification**.
+
+Use the CLI when you want a reproducible archive with a manifest you can check, instead of hoping your ad-hoc copy included the right files.
+
+---
+
+## 2) Pick the right backup scope
+
+### 2.1 Full backup: use before upgrades, migrations, or service surgery
+
+This is the safe default when you want a real rollback point:
+
+```bash
+openclaw backup create --verify
+```
+
+Use it before:
+
+- upgrading OpenClaw,
+- moving to a new host,
+- changing auth or channel setup,
+- or doing anything that could damage both config and state.
+
+### 2.2 Config-only backup: use before risky config edits
+
+If you are about to change only the active config file, a lightweight snapshot is often enough:
+
+```bash
+openclaw backup create --only-config --verify
+```
+
+This is useful when you are testing:
+
+- a provider swap,
+- a remote gateway token change,
+- a browser routing change,
+- or a schema migration fix.
+
+### 2.3 No workspace: use only when workspace data is already backed up elsewhere
+
+If your agent workspace is already under Git or another backup system, you may not want every archive to include it:
+
+```bash
+openclaw backup create --no-include-workspace --verify
+```
+
+That keeps the archive smaller while still protecting config, sessions, and credentials.
+
+Do **not** exclude workspaces casually if the workspace itself is important and not backed up separately.
+
+---
+
+## 3) Use dry-run when you are not sure what will be captured
+
+If you want to inspect the plan before writing anything:
+
+```bash
+openclaw backup create --dry-run --json
+```
+
+This is especially useful when:
+
+- you have a non-standard state directory,
+- you are debugging multiple install methods,
+- or you are deciding whether to include workspaces.
+
+Think of dry-run as the “show me exactly what you think production is” step.
+
+---
+
+## 4) Verification is part of backup, not an optional extra
+
+The easiest pattern is:
+
+```bash
+openclaw backup create --verify
+```
+
+If you already have an archive and want to check it later:
+
+```bash
+openclaw backup verify ./my-openclaw-backup.tar.gz
+```
+
+Why this matters:
+
+- a backup you never validated is just a guess,
+- validation catches broken archive structure early,
+- and “I can restore this” is more important than “I created a file with backup in the name.”
+
+---
+
+## 5) Where to store the archive
+
+Treat the archive like a secret bundle, because it often is one.
+
+It may contain:
+
+- API keys,
+- OAuth tokens,
+- channel credentials,
+- session history,
+- and private workspace content.
+
+Good patterns:
+
+- store it in a user-private backups directory,
+- move production backups to encrypted storage,
+- keep retention simple and intentional,
+- and separate “quick local rollback” from “longer-term disaster recovery.”
+
+Bad patterns:
+
+- leaving archives in a shared Downloads folder,
+- copying them to random cloud-synced directories without thinking,
+- or assuming your workspace Git repo replaces state backups.
+
+Workspace Git is great, but it does **not** replace gateway/session/credential backups.
+
+---
+
+## 6) A practical upgrade flow that uses the new backup commands
+
+Before upgrading:
+
+```bash
+openclaw backup create --verify
+openclaw doctor
+```
+
+Upgrade:
+
+```bash
+npm i -g openclaw@latest
+```
+
+Then validate and restart:
+
+```bash
+openclaw doctor
+openclaw gateway restart
+openclaw health
+```
+
+If the gateway service gets weird after the upgrade:
+
+```bash
+openclaw gateway install --force
+openclaw gateway restart
+```
+
+That gives you three separate safety layers:
+
+1. a restorable archive,
+2. a config/runtime health check,
+3. and a deterministic service recovery path.
+
+---
+
+## 7) Rollback mindset: know what you are restoring *for*
+
+Rollback is not one thing.
+
+Sometimes you are rolling back because:
+
+- the new binary is broken,
+- the new config is invalid,
+- the service install is pointing at the wrong runtime,
+- or the migration logic did something you do not trust yet.
+
+That is why a useful rollback plan should answer:
+
+- am I restoring only config,
+- or restoring full state,
+- or pinning the previous OpenClaw version as well?
+
+The cleanest real-world pattern is:
+
+1. restore the known-good archive,
+2. pin the last known-good OpenClaw version,
+3. restart the gateway,
+4. verify one real workflow before declaring success.
+
+Good “one real workflow” examples:
+
+- one provider call if you were debugging relays/proxies,
+- one browser task if you run a remote browser node,
+- one host exec command if you were changing approvals or execution policy.
+
+---
+
+## 8) What not to do
+
+- Do not wait until after a failed upgrade to think about backups.
+- Do not assume `tar ~/.openclaw` and “verified backup” are the same thing.
+- Do not use `--only-config` when your real risk includes credentials, sessions, or workspace state.
+- Do not store archives casually; they can be more sensitive than the live config file.
+
+---
+
+## Quick operator checklist
+
+- [ ] Before risky changes, run `openclaw backup create --verify`
+- [ ] Use `--only-config` only for config-only risk
+- [ ] Use `--no-include-workspace` only if workspace backup already exists elsewhere
+- [ ] Store archives like secrets
+- [ ] Pair every backup habit with a restore habit
+
+## Related
+
+- [Updating and Migrating OpenClaw Safely (No Surprises)](/guides/updating-and-migration)
+- [OpenClaw State, Workspace, and Memory: What Lives Where and What to Back Up](/guides/openclaw-state-workspace-and-memory)
+- [Gateway won't start: config validation failed / JSON5 parse error](/troubleshooting/solutions/config-validation-failed)

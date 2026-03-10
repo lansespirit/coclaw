@@ -158,11 +158,50 @@ const guidesCollection = defineCollection({
   }),
 });
 
+const specialReportsCollection = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    publishDate: z.date(),
+    lastUpdated: z.date(),
+    featured: z.boolean().default(false),
+    draft: z.boolean().default(false),
+    status: z.enum(['event', 'evergreen']).default('event'),
+    audience: z.array(z.string()).default([]),
+    highlights: z
+      .array(
+        z.object({
+          title: z.string(),
+          summary: z.string(),
+        })
+      )
+      .default([]),
+    readingPath: z
+      .array(
+        z.object({
+          title: z.string(),
+          href: z.string(),
+          reason: z.string().optional(),
+          badge: z.string().optional(),
+        })
+      )
+      .default([]),
+    readingPathTitle: z.string().optional(),
+    relatedGuides: z.array(z.string()).default([]),
+    relatedTroubleshooting: z.array(z.string()).default([]),
+    relatedBlog: z.array(z.string()).default([]),
+    keywords: z.array(z.string()).optional(),
+    ogImage: z.string().optional(),
+  }),
+});
+
 export const collections = {
   'getting-started': docsCollection,
   channels: docsCollection,
   troubleshooting: troubleshootingCollection,
   guides: guidesCollection,
+  'special-reports': specialReportsCollection,
   blog: docsCollection,
   templates: docsCollection,
   stories: storiesCollection,

@@ -1,0 +1,317 @@
+---
+import { getCollection } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Section from '../../components/layout/Section.astro';
+import RelatedLinks from '../../components/RelatedLinks.astro';
+import { Button } from '@heroui/react';
+
+export const getStaticPaths = (async () => {
+  const entries = await getCollection('special-reports', ({ data }) => !data.draft);
+  return entries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+const allGuides = await getCollection('guides', ({ data }) => !data.draft);
+const allTroubleshooting = await getCollection(
+  'troubleshooting',
+  ({ data }) => !data.draft && data.kind === 'solution'
+);
+const allBlog = await getCollection('blog', ({ data }) => !data.draft);
+const allReports = await getCollection('special-reports', ({ data }) => !data.draft);
+
+const guideMap = new Map(allGuides.map((item) => [item.slug, item]));
+const troubleshootingMap = new Map(allTroubleshooting.map((item) => [item.slug, item]));
+const blogMap = new Map(allBlog.map((item) => [item.slug, item]));
+
+const guideItems = entry.data.relatedGuides
+  .map((slug) => guideMap.get(slug))
+  .filter(Boolean)
+  .map((item) => ({
+    href: `/guides/${item!.slug}`,
+    title: item!.data.title,
+    description: item!.data.description,
+    badge: 'Guide',
+  }));
+
+const troubleshootingItems = entry.data.relatedTroubleshooting
+  .map((slug) => troubleshootingMap.get(slug))
+  .filter(Boolean)
+  .map((item) => ({
+    href: `/troubleshooting/${item!.slug}`,
+    title: item!.data.title,
+    description: item!.data.description,
+    badge: 'Fix',
+  }));
+
+const blogItems = entry.data.relatedBlog
+  .map((slug) => blogMap.get(slug))
+  .filter(Boolean)
+  .map((item) => ({
+    href: `/blog/${item!.slug}`,
+    title: item!.data.title,
+    description: item!.data.description,
+    badge: 'Blog',
+  }));
+
+const siblingReports = allReports
+  .filter((item) => item.slug !== entry.slug)
+  .sort((a, b) => b.data.lastUpdated.getTime() - a.data.lastUpdated.getTime())
+  .slice(0, 2)
+  .map((item) => ({
+    href: `/special-reports/${item.slug}`,
+    title: item.data.title,
+    description: item.data.description,
+    badge: 'Report',
+  }));
+
+const quickStart = entry.data.readingPath.slice(0, 3);
+const primaryHighlights = entry.data.highlights.slice(0, 4);
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: entry.data.title,
+  description: entry.data.description,
+  mainEntityOfPage: canonicalURL.toString(),
+};
+const statusLabel = entry.data.status === 'evergreen' ? 'Evergreen Topic' : 'Operator Briefing';
+const readingPathTitle = entry.data.readingPathTitle ?? `${entry.data.title} reading path`;
+---
+
+<BaseLayout
+  title={`${entry.data.title} | CoClaw Special Reports`}
+  description={entry.data.description}
+  type="article"
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <div class="bg-background min-h-screen relative overflow-hidden">
+    <div class="absolute inset-0 editorial-grid opacity-40 pointer-events-none"></div>
+    <div
+      class="absolute inset-x-0 top-0 h-[560px] bg-[radial-gradient(circle_at_top_left,rgba(0,111,238,0.18),transparent_52%)] pointer-events-none"
+    >
+    </div>
+    <div
+      class="absolute right-[-8rem] top-20 h-[26rem] w-[26rem] rounded-full bg-secondary/10 blur-[125px] pointer-events-none"
+    >
+    </div>
+
+    <Section py="pt-28 pb-12">
+      <div class="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:gap-10">
+        <div class="lg:col-span-7 xl:col-span-8">
+          <div
+            class="flex flex-wrap items-center gap-3 text-[11px] font-bold uppercase tracking-[0.18em] text-default-500"
+          >
+            <span
+              class="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-primary-700 dark:text-primary-300"
+            >
+              Special Report
+            </span>
+            <span>{statusLabel}</span>
+            <span>•</span>
+            <span>
+              Published {
+                entry.data.publishDate.toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })
+              }
+            </span>
+            <span>•</span>
+            <span>
+              Updated {
+                entry.data.lastUpdated.toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })
+              }
+            </span>
+          </div>
+
+          <div class="editorial-rule mt-6 mb-8 max-w-44"></div>
+
+          <h1
+            class="font-editorial max-w-5xl text-4xl leading-[0.9] tracking-[-0.045em] text-foreground md:text-6xl xl:text-[5.2rem]"
+          >
+            {entry.data.title}
+          </h1>
+          <p class="mt-7 max-w-3xl text-lg leading-relaxed text-default-600 md:text-[1.35rem]">
+            {entry.data.description}
+          </p>
+
+          {
+            entry.data.audience.length ? (
+              <div class="mt-8 flex flex-wrap gap-2.5">
+                {entry.data.audience.map((item) => (
+                  <span class="rounded-full border border-divider bg-content1/70 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-default-700 dark:text-default-500">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            ) : null
+          }
+
+          {
+            primaryHighlights.length ? (
+              <div class="mt-8 rounded-[24px] border border-divider/70 bg-content1/65 px-5 py-6 backdrop-blur-sm sm:px-6 sm:py-7 md:mt-10 md:rounded-[32px] md:px-8 md:py-8">
+                <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">
+                  Key Angles
+                </p>
+                <div class="mt-4 divide-y divide-divider/70 border-t border-divider/70">
+                  {primaryHighlights.map((item) => (
+                    <div class="py-4 first:pt-4 last:pb-0 md:py-5">
+                      <h2 class="text-lg font-semibold leading-snug tracking-tight text-foreground md:text-2xl">
+                        {item.title}
+                      </h2>
+                      <p class="mt-2 text-sm leading-6 text-default-600 md:text-base md:leading-relaxed">
+                        {item.summary}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null
+          }
+        </div>
+
+        <div class="hidden lg:block lg:col-span-5 xl:col-span-4">
+          <div class="editorial-panel sticky top-28 overflow-hidden p-7">
+            <div
+              class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-primary/70 via-white/30 to-transparent"
+            >
+            </div>
+            <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-primary">Start Here</p>
+            <h2 class="font-editorial mt-4 text-3xl leading-tight tracking-[-0.03em]">
+              Quick Start
+            </h2>
+            <p class="mt-4 text-sm leading-relaxed text-default-600 md:text-base">
+              Use these links if you need the fastest path into the right guide.
+            </p>
+
+            {
+              quickStart.length ? (
+                <div class="mt-7 space-y-3 border-y border-divider/70 py-6">
+                  {quickStart.map((item, index) => (
+                    <a
+                      href={item.href}
+                      class="group flex items-start gap-3 rounded-2xl border border-divider/70 bg-background/80 px-4 py-3 transition-colors hover:bg-content2/70"
+                    >
+                      <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/12 text-xs font-bold text-primary">
+                        {index + 1}
+                      </span>
+                      <div>
+                        <p class="text-sm font-semibold leading-snug text-foreground group-hover:text-primary">
+                          {item.title}
+                        </p>
+                        {item.reason ? (
+                          <p class="mt-1 text-xs leading-relaxed text-default-500">{item.reason}</p>
+                        ) : null}
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              ) : null
+            }
+
+            <div class="mt-6 flex flex-wrap gap-3">
+              <Button
+                as="a"
+                href="#reading-path"
+                radius="full"
+                color="primary"
+                className="font-bold px-6"
+              >
+                Reading Path
+              </Button>
+              <Button
+                as="a"
+                href="/special-reports"
+                radius="full"
+                variant="bordered"
+                className="font-bold px-6"
+              >
+                All Reports
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    {
+      entry.data.readingPath.length ? (
+        <Section id="reading-path" py="py-6" containerClass="max-w-6xl">
+          <div class="editorial-panel overflow-hidden px-5 py-6 sm:px-6 sm:py-7 md:px-10 md:py-10">
+            <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between md:gap-5">
+              <div>
+                <h2 class="font-editorial max-w-4xl text-[1.95rem] leading-[0.98] tracking-[-0.025em] sm:text-[2.35rem] md:text-5xl md:tracking-[-0.03em]">
+                  {readingPathTitle}
+                </h2>
+              </div>
+              <p class="max-w-xl text-sm leading-6 text-default-600 md:text-base md:leading-relaxed">
+                Read in order, then branch into the guide that matches your setup.
+              </p>
+            </div>
+
+            <div class="mt-6 grid gap-3 md:mt-8 md:gap-5">
+              {entry.data.readingPath.map((item, index) => (
+                <a
+                  href={item.href}
+                  class="group grid grid-cols-[auto_1fr] gap-3 rounded-[20px] border border-divider/70 bg-background/65 px-4 py-4 transition-colors hover:bg-content2/70 md:grid-cols-[auto_1fr] md:gap-4 md:rounded-[28px] md:px-6 md:py-5"
+                >
+                  <div class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-black text-white md:h-10 md:w-10 md:text-sm">
+                    {index + 1}
+                  </div>
+                  <div class="min-w-0">
+                    <div class="flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+                      <h3 class="text-lg font-semibold leading-snug tracking-tight text-foreground group-hover:text-primary md:text-xl">
+                        {item.title}
+                      </h3>
+                      {item.badge ? (
+                        <span class="rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary-700 dark:text-primary-300">
+                          {item.badge}
+                        </span>
+                      ) : null}
+                    </div>
+                    {item.reason ? (
+                      <p class="mt-2 text-[13px] leading-6 text-default-600 md:mt-3 md:text-base md:leading-relaxed">
+                        {item.reason}
+                      </p>
+                    ) : null}
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </Section>
+      ) : null
+    }
+
+    <Section py="py-12" containerSize="reading" containerGutter="docs">
+      <article class="c-content prose prose-lg prose-primary max-w-none">
+        <Content />
+      </article>
+
+      <RelatedLinks title="Guides In This Report" items={guideItems} />
+      <RelatedLinks title="Troubleshooting Notes In This Report" items={troubleshootingItems} />
+      <RelatedLinks title="Related Background Reading" items={blogItems} />
+      <RelatedLinks title="Other Special Reports" items={siblingReports} />
+    </Section>
+  </div>
+</BaseLayout>

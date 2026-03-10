@@ -1,0 +1,258 @@
+---
+title: "OpenClaw Remote Browser Setup: Gateway on One Machine, Browser on Another"
+description: "A practical guide to stable remote browser control in OpenClaw: run the gateway remotely, keep Chrome local, route through a node host, pin browser-capable nodes, and avoid the most common relay/probe confusions."
+category: "advanced"
+difficulty: "Advanced"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Self-hosted"
+time: "18 min"
+publishDate: 2026-03-10
+lastUpdated: 2026-03-10
+steps:
+  - title: "Separate gateway location from browser location"
+    content: "The gateway can live on a VPS, but the browser should usually live on the machine that actually owns Chrome and your local session state."
+  - title: "Use one intentional browser-capable node"
+    content: "If multiple nodes can proxy the browser, pin one instead of relying on auto-routing."
+  - title: "Verify the real target before debugging the relay"
+    content: "Confirm whether you are probing the right gateway and the right browser node before chasing timeouts."
+  - title: "Pin routing when the setup stops being trivial"
+    content: "Use `gateway.nodes.browser.node` and, when needed, `gateway.nodes.browser.mode` to remove ambiguity."
+  - title: "Harden for daily use"
+    content: "Keep the topology tailnet-only, use a dedicated browser profile, and avoid accidental dual-node control paths."
+keywords:
+  - "remote browser"
+  - "node host"
+  - "Chrome extension relay"
+  - "gateway.nodes.browser.node"
+  - "gateway.nodes.browser.mode"
+  - "remote mode"
+  - "127.0.0.1:18792"
+---
+
+One of the easiest ways to confuse yourself in OpenClaw is this setup:
+
+- the **gateway** runs on a VPS or another machine,
+- your **browser** lives on your laptop,
+- and more than one node can potentially proxy browser actions.
+
+When this setup is stable, it feels magical.
+
+When it is not, the symptoms all look similar:
+
+- browser takeover fails,
+- the extension relay never seems to start,
+- `127.0.0.1:18792` is not listening,
+- or the CLI/UI looks like it is talking to the wrong machine.
+
+This guide is about making that topology boring.
+
+If the topology only became flaky **after an upgrade**, validate the upgrade boundary first:
+
+- [/guides/updating-and-migration](/guides/updating-and-migration)
+
+If you are already seeing a generic browser timeout, also check:
+
+- [/guides/openclaw-browser-automation-timeouts](/guides/openclaw-browser-automation-timeouts)
+- [/troubleshooting/solutions/browser-control-service-timeout](/troubleshooting/solutions/browser-control-service-timeout)
+
+---
+
+## 1) The right mental model
+
+Think of remote browser automation as **two separate paths**:
+
+1. the client path to the **gateway**,
+2. the gateway path to the **browser-capable node**.
+
+Those are different problems.
+
+If you debug them as one blob, you get a lot of “it says unreachable” confusion.
+
+Recommended topology:
+
+- keep the gateway on the always-on machine,
+- keep Chrome/Brave/Edge on the machine where you actually use the browser,
+- run a node host on that browser machine,
+- and let the gateway proxy browser actions to that node.
+
+If that same node host is also used for host-side command execution, remember that browser routing and command approvals are different systems:
+
+- [/guides/openclaw-exec-approvals-and-safe-bins](/guides/openclaw-exec-approvals-and-safe-bins)
+
+---
+
+## 2) First prove which gateway you are actually probing
+
+Start here:
+
+```bash
+openclaw gateway status
+```
+
+What you are looking for:
+
+- is the CLI in local mode or remote mode,
+- which URL it thinks the gateway lives at,
+- whether the gateway you are probing is the one you intended.
+
+This matters because a local service and a remote gateway can both exist at the same time, and the symptoms look deceptively similar.
+
+If this part is already confused, fix it first:
+
+- [/troubleshooting/solutions/gateway-cli-probing-wrong-gateway-remote-mode](/troubleshooting/solutions/gateway-cli-probing-wrong-gateway-remote-mode)
+- [/troubleshooting/solutions/gateway-service-running-but-probe-fails](/troubleshooting/solutions/gateway-service-running-but-probe-fails)
+
+---
+
+## 3) Prefer one intentional browser-capable node
+
+If the gateway runs remotely but the browser is local, the clean setup is:
+
+- **one** browser machine,
+- **one** node host on that machine,
+- and one obvious route for browser control.
+
+The setup gets fragile when you have multiple browser-capable nodes connected at once, for example:
+
+- a macOS app node,
+- and a CLI node host,
+- both able to proxy browser actions.
+
+At that point, “auto” is no longer your friend.
+
+---
+
+## 4) Pin browser routing before you call it flaky
+
+When multiple nodes can handle browser proxying, pin the target explicitly.
+
+Use config like this conceptually:
+
+```json5
+{
+  gateway: {
+    nodes: {
+      browser: {
+        mode: "manual",
+        node: "my-browser-node"
+      }
+    }
+  }
+}
+```
+
+Practical rule:
+
+- if there is only one browser-capable node, `auto` can be fine,
+- if there are two or more, pin the node.
+
+Why this helps:
+
+- it removes routing ambiguity,
+- it makes failures reproducible,
+- and it prevents “sometimes the relay starts, sometimes it doesn’t” behavior caused by the wrong node being selected.
+
+---
+
+## 5) Distinguish a dead relay from a wrong routing decision
+
+If takeover fails, do not jump straight to “the extension is broken.”
+
+Ask two different questions:
+
+### 5.1 Is the chosen browser node correct?
+
+- Did the gateway route to the node you expected?
+- Are multiple browser-capable nodes present?
+- Did you actually pin one?
+
+### 5.2 Did the local relay start on the browser machine?
+
+On the browser machine, check whether the extension relay is listening:
+
+```bash
+lsof -nP -iTCP:18792 -sTCP:LISTEN
+```
+
+If nothing is listening there, that usually means the browser-side relay path never initialized on the intended machine.
+
+That is a routing/topology clue, not just a generic timeout clue.
+
+---
+
+## 6) Recommended operator flow for remote browser setups
+
+Use this order every time:
+
+1. confirm the gateway target with `openclaw gateway status`
+2. confirm the correct browser node is paired and healthy
+3. pin `gateway.nodes.browser.node` when more than one node can proxy
+4. restart the affected services if you changed config
+5. test one tiny browser action before trying a full takeover workflow
+
+That order saves a lot of time because it separates:
+
+- gateway reachability,
+- node routing,
+- browser relay startup,
+- and page-level automation problems.
+
+---
+
+## 7) Security and reliability defaults that age well
+
+For long-lived remote setups:
+
+- keep the gateway and node hosts tailnet-only,
+- use a dedicated browser profile instead of your daily-driver profile,
+- do not expose relay/control ports publicly,
+- and disable browser proxy routing entirely when you do not need it.
+
+If you also use the node host for command execution, keep the approvals posture explicit rather than assuming “trusted browser node” automatically means “trusted exec node”:
+
+- [/guides/openclaw-exec-approvals-and-safe-bins](/guides/openclaw-exec-approvals-and-safe-bins)
+
+This setup is not just about security — it also reduces mysterious cross-machine state drift.
+
+---
+
+## 8) Common failure patterns and the right page to read next
+
+### The CLI/UI seems to hit the wrong machine
+
+Read:
+
+- [/troubleshooting/solutions/gateway-cli-probing-wrong-gateway-remote-mode](/troubleshooting/solutions/gateway-cli-probing-wrong-gateway-remote-mode)
+
+### Browser runs time out in general
+
+Read:
+
+- [/guides/openclaw-browser-automation-timeouts](/guides/openclaw-browser-automation-timeouts)
+- [/troubleshooting/solutions/browser-control-service-timeout](/troubleshooting/solutions/browser-control-service-timeout)
+
+### Windows node-host behavior itself is unstable
+
+Read:
+
+- [/guides/openclaw-native-windows-field-guide](/guides/openclaw-native-windows-field-guide)
+- [/troubleshooting/solutions/windows-native-node-run-hangs-or-runtime-unstable](/troubleshooting/solutions/windows-native-node-run-hangs-or-runtime-unstable)
+
+---
+
+## Quick checklist
+
+- [ ] `openclaw gateway status` points at the gateway you intended
+- [ ] The browser machine has exactly one intentional browser-capable node, or you pinned one
+- [ ] `gateway.nodes.browser.node` is set when multiple nodes are connected
+- [ ] `gateway.nodes.browser.mode` is not left ambiguous for a non-trivial setup
+- [ ] The relay actually listens on the browser machine before you blame page automation
+
+## Related
+
+- [Gateway: CLI/UI is probing the wrong machine (local vs remote mode mismatch)](/troubleshooting/solutions/gateway-cli-probing-wrong-gateway-remote-mode)
+- [Browser tool: 'browser control service timeout'](/troubleshooting/solutions/browser-control-service-timeout)
+- [OpenClaw Browser Automation Timeouts: Fix 'browser control service timeout'](/guides/openclaw-browser-automation-timeouts)

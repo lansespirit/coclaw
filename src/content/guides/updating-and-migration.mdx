@@ -9,11 +9,11 @@ platforms:
   - "Windows (WSL2)"
 time: "20 min"
 publishDate: 2026-02-01
-lastUpdated: 2026-02-01
+lastUpdated: 2026-03-10
 steps:
   - title: "Snapshot your state directory"
     content: >
-      Back up the full state directory (default `~/.openclaw/`) before changing anything.
+      On `2026.3.8+`, prefer `openclaw backup create --verify` before changing anything.
   - title: "Update OpenClaw via your install method"
     content: >
       For global installs, use `npm i -g openclaw@latest` (or pnpm). For source installs, use `openclaw update`.
@@ -36,6 +36,11 @@ OpenClaw moves fast. Most "update regressions" are actually one of these:
 - You have multiple installs (brew/node version manager) and launchd/systemd is using a different PATH.
 - You partially migrated state (copied config but not credentials/sessions).
 
+And if the breakage shows up specifically in:
+
+- custom provider / relay traffic, read [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+- host exec / node-host command behavior, read [/guides/openclaw-exec-approvals-and-safe-bins](/guides/openclaw-exec-approvals-and-safe-bins)
+
 Official references:
 
 - Updating guide: https://docs.openclaw.ai/install/updating
@@ -47,13 +52,31 @@ Default state directory:
 
 - `~/.openclaw/`
 
-Backup:
+On `2026.3.8+`, prefer the built-in backup command:
+
+```bash
+openclaw backup create --verify
+```
+
+Useful variants:
+
+```bash
+openclaw backup create --only-config --verify
+openclaw backup create --no-include-workspace --verify
+openclaw backup create --dry-run --json
+```
+
+If you are on an older build or want a second belt-and-suspenders copy, a manual archive still helps:
 
 ```bash
 tar -czf openclaw-state-backup.tgz ~/.openclaw
 ```
 
 This contains secrets. Store it securely.
+
+Deep dive:
+
+- [/guides/openclaw-backup-and-rollback](/guides/openclaw-backup-and-rollback)
 
 ## 2) Update (global installs)
 
@@ -68,6 +91,51 @@ openclaw doctor
 openclaw gateway restart
 openclaw health
 ```
+
+If you are on macOS and the update path leaves the service disabled or half-recovered, use the boring recovery path:
+
+```bash
+openclaw gateway install --force
+openclaw gateway restart
+```
+
+## 2.5) Roll back / pin (when something breaks)
+
+If an update breaks a critical workflow, rolling back to a known-good version is often faster than trying to “repair forward” under pressure.
+
+Pin the last working version (replace `<version>`):
+
+```bash
+npm i -g openclaw@<version>
+```
+
+Then run the same verification loop:
+
+```bash
+openclaw doctor
+openclaw gateway restart
+openclaw health
+```
+
+### If rollback causes “config was written by a newer OpenClaw” warning spam
+
+After a downgrade, you may see warnings like:
+
+> `Config was last written by a newer OpenClaw (...); current version is ...`
+
+Some builds have emitted that warning on *every* CLI invocation.
+
+Practical fixes:
+
+1. **Preferred:** pick one version and align everything (re-upgrade when possible).
+2. If you must stay downgraded, make the downgraded version rewrite the config metadata once:
+
+```bash
+openclaw config unset meta.lastTouchedVersion
+openclaw gateway restart
+```
+
+If `config unset` can’t reach the field in your version, open your config file and delete the `meta.lastTouchedVersion` entry manually, then restart the gateway.
 
 ## 3) Update (from source)
 
@@ -96,6 +164,10 @@ Then re-open the dashboard:
 ```bash
 openclaw dashboard
 ```
+
+If your setup depends on a remote gateway plus a browser on another machine, also verify the browser-node topology after the upgrade:
+
+- [/guides/openclaw-remote-browser-node-host](/guides/openclaw-remote-browser-node-host)
 
 ## 5) Migration: copy the entire state directory
 
@@ -126,3 +198,27 @@ openclaw health
 - Do not copy only `openclaw.json` and call it a migration.
 - Do not delete `~/.openclaw/` as a first-line fix; you will lose creds and sessions.
 - Do not expose the Control UI publicly while debugging auth; use SSH tunnel or Tailscale instead.
+
+## 7) A practical `2026.3.8+` operator checklist
+
+When upgrading modern OpenClaw builds, the safest order is:
+
+1. `openclaw backup create --verify`
+2. `openclaw doctor`
+3. upgrade (`npm i -g openclaw@latest` or `openclaw update`)
+4. `openclaw doctor`
+5. `openclaw gateway restart`
+6. `openclaw health`
+
+If something feels wrong after the upgrade, prefer these before deeper surgery:
+
+- `openclaw gateway status`
+- `openclaw gateway install --force`
+- `openclaw gateway restart`
+- and a single real workflow test (one chat, one tool, one channel) instead of broad guesswork.
+
+Then branch by symptom instead of guessing:
+
+- provider / 403 / proxy weirdness → [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+- browser lives on another machine → [/guides/openclaw-remote-browser-node-host](/guides/openclaw-remote-browser-node-host)
+- host exec policy suddenly feels stricter than expected → [/guides/openclaw-exec-approvals-and-safe-bins](/guides/openclaw-exec-approvals-and-safe-bins)

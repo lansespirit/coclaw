@@ -1,0 +1,239 @@
+---
+title: "OpenClaw Talk Mode: How to Tune `talk.silenceTimeoutMs` Without Making Voice Feel Weird"
+description: "A practical guide to OpenClaw Talk Mode's silence timeout: understand the platform defaults, decide when to shorten or lengthen the pause window, and tune for dictation, natural conversation, or slow-thinking workflows."
+category: "advanced"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "iOS"
+  - "Android"
+time: "10 min"
+publishDate: 2026-03-10
+lastUpdated: 2026-03-10
+steps:
+  - title: "Start from the default before tuning"
+    content: "OpenClaw already has sensible platform defaults; only change the timeout when your real speaking pattern is consistently mismatched."
+  - title: "Decide whether your problem is premature send or sluggish send"
+    content: "Most Talk Mode frustration is either 'it sends too early' or 'it waits too long' — those need opposite fixes."
+  - title: "Tune in small increments"
+    content: "Move by a few hundred milliseconds, not giant jumps, and test with your real speaking style."
+  - title: "Match the timeout to the workflow"
+    content: "Fast back-and-forth chat, dictation, and multilingual speech pauses often need different settings."
+  - title: "Keep interruption behavior separate in your mind"
+    content: "`interruptOnSpeech` and `silenceTimeoutMs` affect different parts of the conversation loop."
+keywords:
+  - "talk.silenceTimeoutMs"
+  - "Talk Mode"
+  - "voice pause"
+  - "speech timeout"
+  - "interruptOnSpeech"
+  - "OpenClaw Talk"
+---
+
+`2026.3.8` made `talk.silenceTimeoutMs` a top-level config you can tune deliberately.
+
+That is a good change, because Talk Mode frustration is often **not** a model problem or a TTS problem — it is simply that the pause window does not match how you speak.
+
+This guide helps you tune that one variable without making Talk Mode feel robotic or laggy.
+
+Official default behavior is:
+
+- `700 ms` on macOS and Android
+- `900 ms` on iOS
+
+If you leave `talk.silenceTimeoutMs` unset, OpenClaw keeps those platform defaults.
+
+---
+
+## 1) What this setting actually controls
+
+Talk Mode is a loop:
+
+1. listen for speech,
+2. build the transcript,
+3. wait for a silence window,
+4. send the transcript,
+5. speak the response.
+
+`talk.silenceTimeoutMs` controls **step 3** only.
+
+It is the amount of user silence OpenClaw waits before treating the current utterance as “done enough to send.”
+
+This setting does **not** decide:
+
+- how fast the model thinks,
+- how fast TTS starts,
+- or whether the assistant stops speaking when you interrupt it.
+
+---
+
+## 2) The two failure modes
+
+Most Talk Mode complaints fall into one of these buckets:
+
+### A) It sends too early
+
+Symptoms:
+
+- you pause briefly to think,
+- Talk sends mid-thought,
+- you end up with fragmented turns.
+
+Fix direction:
+
+- increase `talk.silenceTimeoutMs`.
+
+### B) It feels sluggish and waits too long
+
+Symptoms:
+
+- you finished speaking,
+- but Talk keeps listening,
+- the whole flow feels sticky or hesitant.
+
+Fix direction:
+
+- decrease `talk.silenceTimeoutMs`.
+
+The trick is not to “optimize for low latency” blindly. The trick is to match the pause window to your speech rhythm.
+
+---
+
+## 3) Start with small changes
+
+Good tuning pattern:
+
+- change by `200–300 ms`,
+- test with real speech,
+- keep the rest of the setup constant.
+
+Example config:
+
+```json5
+{
+  talk: {
+    silenceTimeoutMs: 1200,
+  },
+}
+```
+
+If you jump from `700` to `2500` immediately, it becomes hard to tell whether you improved the experience or just made it slow in a different way.
+
+---
+
+## 4) Practical presets by use case
+
+### 4.1 Fast conversational back-and-forth
+
+Best when:
+
+- you speak in short bursts,
+- you want quick turn-taking,
+- you are optimizing for responsiveness.
+
+Try:
+
+- stay near the platform default,
+- or raise only slightly if you keep getting accidental early sends.
+
+### 4.2 Slower, thoughtful speech
+
+Best when:
+
+- you pause mid-sentence often,
+- you speak while thinking,
+- you want fewer broken-up turns.
+
+Try:
+
+- `1000–1500 ms` first,
+- then move upward only if you still get premature sends.
+
+### 4.3 Dictation-style use
+
+Best when:
+
+- you are speaking longer chunks,
+- you want coherent transcript blocks,
+- and speed matters less than chunk quality.
+
+Try:
+
+- a longer silence timeout than conversational defaults,
+- but keep testing because very high values can make the experience feel unresponsive.
+
+### 4.4 Multilingual speech or frequent self-correction
+
+Best when:
+
+- you switch languages,
+- restart phrases,
+- or insert filler pauses while searching for words.
+
+Try:
+
+- a somewhat longer timeout than your first instinct.
+
+These workflows often need more patience from the silence detector.
+
+---
+
+## 5) Keep `interruptOnSpeech` separate in your head
+
+This is a common debugging mistake.
+
+`interruptOnSpeech` answers:
+
+> Should the assistant stop talking when I start talking?
+
+`silenceTimeoutMs` answers:
+
+> How long should OpenClaw wait before deciding I finished my turn?
+
+Those are different behaviors.
+
+If your complaint is “the assistant keeps talking over me,” changing the silence timeout may not fix the real problem.
+
+If your complaint is “my own sentence gets sent too early,” that is exactly where `silenceTimeoutMs` matters.
+
+---
+
+## 6) A reliable tuning routine
+
+Use one test script like this:
+
+1. say one short sentence normally
+2. say one sentence with a deliberate thinking pause in the middle
+3. say one longer, more natural multi-clause turn
+4. repeat after each config change
+
+Do not test only with clipped demo phrases. Real speech has hesitation, resets, and uneven pacing.
+
+---
+
+## 7) When *not* to tune this yet
+
+Do not touch the timeout first if:
+
+- microphone permissions are broken,
+- Talk Mode itself is unstable,
+- TTS is the real bottleneck,
+- or the device/platform path is not healthy yet.
+
+In that case, you are tuning around a deeper problem.
+
+---
+
+## Quick checklist
+
+- [ ] I know whether the problem is early send or delayed send
+- [ ] I started from the platform default
+- [ ] I changed the timeout in small steps
+- [ ] I tested with real speech, not one perfect phrase
+- [ ] I did not confuse silence timeout with interruption behavior
+
+## Related
+
+- [OpenClaw Configuration Guide: openclaw.json, Models, Gateway, Channels, and Plugins](/guides/openclaw-configuration)
+- [OpenClaw Control UI Auth & Pairing: Fix 'unauthorized', 1008, and Remote Dashboard Access](/guides/control-ui-auth-and-pairing)
+
