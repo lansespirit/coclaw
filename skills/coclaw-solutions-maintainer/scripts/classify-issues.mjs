@@ -38,10 +38,12 @@ const ISSUE_TYPES = [
 function parseArgs(argv) {
   const args = {
     triageFile: path.resolve('.cache', 'coclaw-solutions-maintainer', 'triage-latest.json'),
+    stateFile: path.resolve('.cache', 'coclaw-solutions-maintainer', 'state.json'),
     issuesFile: DEFAULT_ISSUES_FILE,
     outputFile: null,
     limit: null,
     includeClosed: false,
+    filterGone: true,
     json: false,
   };
 
@@ -53,6 +55,14 @@ function parseArgs(argv) {
       i += 1;
       if (!value) throw new Error('Missing value for --triage');
       args.triageFile = path.resolve(value);
+      continue;
+    }
+
+    if (arg === '--state') {
+      const value = argv[i + 1];
+      i += 1;
+      if (!value) throw new Error('Missing value for --state');
+      args.stateFile = path.resolve(value);
       continue;
     }
 
@@ -86,6 +96,11 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === '--no-filter-gone') {
+      args.filterGone = false;
+      continue;
+    }
+
     if (arg === '--json') {
       args.json = true;
       continue;
@@ -97,10 +112,12 @@ function parseArgs(argv) {
 
 Options:
   --triage <path>       Triage JSON path (default: .cache/coclaw-solutions-maintainer/triage-latest.json)
+  --state <path>        Triage state JSON path (default: .cache/coclaw-solutions-maintainer/state.json)
   --issues <path>       Full issues dataset path (default: skills/coclaw-solutions-maintainer/data/openclaw-issues.json)
   --output <path>       Also write result JSON to this path
   --limit <n>           Only include first N triage items
   --include-closed      Keep closed issues in the queue (default: false)
+  --no-filter-gone      Do not filter deleted/unavailable issues (default: filter)
   --json                Print machine-readable JSON
 `);
       process.exit(0);
@@ -414,6 +431,18 @@ function pickPriority(issue, triageItem, classification) {
   return 'low';
 }
 
+async function loadGoneSet(stateFile) {
+  try {
+    const raw = await fs.readFile(stateFile, 'utf8');
+    const json = JSON.parse(raw);
+    const gone = json?.gone;
+    if (typeof gone !== 'object' || !gone) return new Set();
+    return new Set(Object.keys(gone).map(String));
+  } catch {
+    return new Set();
+  }
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
 
@@ -424,9 +453,16 @@ async function main() {
   const issues = Array.isArray(issuesRaw?.issues) ? issuesRaw.issues : [];
   const issuesByNumber = new Map(issues.map((issue) => [String(issue.number), issue]));
 
+  const goneSet = args.filterGone ? await loadGoneSet(args.stateFile) : new Set();
+  const triageItemsFiltered = args.filterGone
+    ? triageItems.filter((item) => !goneSet.has(String(item.number)))
+    : triageItems;
+
   const filteredByState = args.includeClosed
-    ? triageItems
-    : triageItems.filter((item) => String(item?.state ?? 'open').toLowerCase() !== 'closed');
+    ? triageItemsFiltered
+    : triageItemsFiltered.filter(
+        (item) => String(item?.state ?? 'open').toLowerCase() !== 'closed'
+      );
 
   const limitedItems = args.limit ? filteredByState.slice(0, args.limit) : filteredByState;
 

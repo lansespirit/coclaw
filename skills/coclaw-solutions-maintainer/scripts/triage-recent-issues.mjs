@@ -17,6 +17,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+import { execFileSync } from 'node:child_process';
 
 const DEFAULT_ISSUES_FILE = path.resolve(
   'skills',
@@ -24,6 +25,9 @@ const DEFAULT_ISSUES_FILE = path.resolve(
   'data',
   'openclaw-issues.json'
 );
+
+const OWNER = 'openclaw';
+const REPO = 'openclaw';
 
 function parseArgs(argv) {
   const args = {
@@ -130,9 +134,10 @@ async function loadState(stateFile) {
     return {
       lastRunAt: typeof json?.lastRunAt === 'string' ? json.lastRunAt : null,
       processed: normalizeProcessedMap(json?.processed),
+      gone: normalizeGoneMap(json?.gone),
     };
   } catch {
-    return { lastRunAt: null, processed: {} };
+    return { lastRunAt: null, processed: {}, gone: {} };
   }
 }
 
@@ -179,6 +184,29 @@ function normalizeProcessedEntry(value) {
     lastSeenAt: null,
     lastTriagedAt: null,
   };
+}
+
+function normalizeGoneMap(gone) {
+  if (typeof gone !== 'object' || !gone) return {};
+
+  return Object.fromEntries(
+    Object.entries(gone).map(([issueNumber, value]) => [issueNumber, normalizeGoneEntry(value)])
+  );
+}
+
+function normalizeGoneEntry(value) {
+  if (typeof value === 'number') {
+    return { status: value, checkedAt: null };
+  }
+  if (typeof value === 'object' && value) {
+    const status = Number.parseInt(String(value.status ?? ''), 10);
+    return {
+      status: Number.isFinite(status) ? status : 410,
+      checkedAt: typeof value.checkedAt === 'string' ? value.checkedAt : null,
+      reason: typeof value.reason === 'string' ? value.reason : null,
+    };
+  }
+  return { status: 410, checkedAt: null, reason: null };
 }
 
 async function saveState(stateFile, state) {
@@ -229,6 +257,55 @@ function matchesStateFilter(state, stateFilter) {
   return state === stateFilter;
 }
 
+function getAuthHeader() {
+  const envToken = process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim();
+  if (envToken) return { Authorization: `Bearer ${envToken}` };
+
+  try {
+    const ghToken = execFileSync('gh', ['auth', 'token'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    if (ghToken) return { Authorization: `Bearer ${ghToken}` };
+  } catch {
+    // ignore
+  }
+
+  return {};
+}
+
+async function checkIssueAvailability(issueNumber) {
+  const url = `https://api.github.com/repos/${OWNER}/${REPO}/issues/${issueNumber}`;
+  const res = await fetch(url, {
+    headers: {
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'CoClaw-Triage',
+      'X-GitHub-Api-Version': '2022-11-28',
+      ...getAuthHeader(),
+    },
+  });
+
+  // NOTE: 410 = deleted issue ("Gone"). 404 can also happen for transferred/hidden issues.
+  if (res.status === 410) return { ok: false, status: 410, reason: 'gone' };
+  if (res.status === 404) return { ok: false, status: 404, reason: 'not_found' };
+  if (!res.ok) return { ok: true, status: res.status, reason: 'unknown_error' };
+  return { ok: true, status: 200, reason: null };
+}
+
+async function runWithConcurrency(items, limit, fn) {
+  const results = new Array(items.length);
+  let cursor = 0;
+  const workers = Array.from({ length: Math.max(1, limit) }, async () => {
+    while (cursor < items.length) {
+      const idx = cursor;
+      cursor += 1;
+      results[idx] = await fn(items[idx], idx);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const issuesFile = args.issuesFile;
@@ -251,7 +328,29 @@ async function main() {
     return updatedAt >= cutoffIso;
   });
 
-  const selectedIssues = recentIssues
+  // Filter issues that were deleted (GitHub REST returns HTTP 410).
+  // This avoids generating triage/classification queues for issues we can no longer view/comment on.
+  const gone = { ...(state.gone ?? {}) };
+  const toCheck = recentIssues.filter((issue) => !gone[String(issue.number)]);
+  await runWithConcurrency(toCheck, 6, async (issue) => {
+    const numberKey = String(issue.number);
+    try {
+      const status = await checkIssueAvailability(issue.number);
+      if (!status.ok && (status.status === 410 || status.status === 404)) {
+        gone[numberKey] = {
+          status: status.status,
+          checkedAt: new Date().toISOString(),
+          reason: status.reason,
+        };
+      }
+    } catch {
+      // If the availability check fails transiently, do not exclude the issue.
+    }
+  });
+
+  const availableRecentIssues = recentIssues.filter((issue) => !gone[String(issue.number)]);
+
+  const selectedIssues = availableRecentIssues
     .map((issue) => {
       const numberKey = String(issue.number);
       const previous = normalizeProcessedEntry(state.processed?.[numberKey] ?? null);
@@ -336,9 +435,10 @@ async function main() {
     const nextState = {
       lastRunAt: new Date().toISOString(),
       processed: { ...(state.processed ?? {}) },
+      gone,
     };
 
-    for (const issue of recentIssues) {
+    for (const issue of availableRecentIssues) {
       const snapshot = snapshotIssue(issue);
       nextState.processed[String(issue.number)] = {
         updatedAt: snapshot.updatedAt ?? new Date().toISOString(),
