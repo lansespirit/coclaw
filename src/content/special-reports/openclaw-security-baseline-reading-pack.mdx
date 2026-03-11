@@ -1,0 +1,145 @@
+---
+title: "OpenClaw Security Baseline: A Safe-Operator Reading Pack"
+description: "A no-drama baseline for running OpenClaw safely: pick the right trust model, treat skills and documents as adversarial inputs, and keep powerful execution behind explicit approvals and recovery paths."
+publishDate: 2026-03-11
+lastUpdated: 2026-03-11
+featured: false
+status: evergreen
+audience:
+  - Operators
+  - Self-hosters
+  - Teams
+highlights:
+  - title: "Start with a trust model, not a feature checklist"
+    summary: "Most unsafe setups happen when one runtime silently inherits too much trust. This pack helps you pick the right operating model and keep boundaries explicit."
+  - title: "Treat skills and documents as hostile inputs"
+    summary: "Skill installs and PDF ingestion are high-leverage risk surfaces. Use supply-chain hygiene and prompt-injection guardrails early."
+  - title: "Make approvals and rollback part of the workflow"
+    summary: "Security improves when failure is boring: explicit approvals, safe bins, backups, and recoverability."
+readingPathTitle: "OpenClaw security baseline reading path"
+readingPath:
+  - title: "OpenClaw Security Architecture Blueprint"
+    href: "/blog/openclaw-security-architecture-blueprint"
+    badge: "Start Here"
+    reason: "Pick the right operating model (lab, household, team) before enabling capabilities."
+  - title: "OpenClaw Security Playbook: Skill Supply Chain Safety & Prompt Injection Defense"
+    href: "/guides/openclaw-skill-safety-and-prompt-injection"
+    badge: "Skills"
+    reason: "A practical checklist for reducing skill and prompt-injection risk without breaking usefulness."
+  - title: "OpenClaw Exec Approvals and Safe Bins"
+    href: "/guides/openclaw-exec-approvals-and-safe-bins"
+    badge: "Trust Model"
+    reason: "Understand why exec can still be blocked, and how to design safe approval boundaries."
+  - title: "PDF Ingestion Safety"
+    href: "/blog/openclaw-pdf-ingestion-safety"
+    badge: "Documents"
+    reason: "If you ingest PDFs, treat them as adversarial and design your extraction workflow accordingly."
+  - title: "A Phone Number Is Not Permission"
+    href: "/blog/openclaw-phone-and-sms-boundaries"
+    badge: "Boundary"
+    reason: "Keep outbound contact workflows safe when messaging, calling, or touching real people."
+  - title: "Privacy-First AI"
+    href: "/blog/privacy-first-ai"
+    badge: "Background"
+    reason: "A concise framing of why keeping data on your infrastructure changes the risk profile."
+relatedGuides:
+  - openclaw-skill-safety-and-prompt-injection
+  - openclaw-exec-approvals-and-safe-bins
+  - openclaw-backup-and-rollback
+  - openclaw-pairing-explained
+relatedTroubleshooting:
+  - solutions/fake-ip-ssrf-blocks-public-hosts
+  - solutions/google-gemini-cli-oauth-ssrf-fake-ip
+  - solutions/custom-openai-compatible-endpoint-rejects-tools
+relatedBlog:
+  - openclaw-security-architecture-blueprint
+  - openclaw-pdf-ingestion-safety
+  - openclaw-phone-and-sms-boundaries
+  - openclaw-security-privacy-nightmare
+  - privacy-first-ai
+keywords:
+  - OpenClaw
+  - Security
+  - Prompt injection
+  - Supply chain
+  - Least privilege
+  - Approvals
+  - PDF ingestion
+---
+
+OpenClaw security gets confusing when people start in the wrong place.
+
+They start with **capabilities** (browser, exec, messaging, email, remote access) and only later ask what the instance was allowed to do. By then, one runtime has quietly inherited too much trust: a laptop, a home network, a team workspace, or a set of credentials it should not have had.
+
+This report is the opposite of a panic checklist. It is a baseline you can actually run.
+
+## Who This Is For
+
+Use this pack if any of these are true:
+
+- you install skills from outside your own repo
+- you ingest documents (PDFs, screenshots, long emails) and ask the agent to “extract the important stuff”
+- you allow tool execution (shell, browser control, file edits) and want it to stay useful without being reckless
+- you are moving from “personal lab” toward “always-on household assistant” or “team operator”
+
+## The One Security Question That Stops Most Mistakes
+
+Do not ask: “Is OpenClaw safe?”
+
+Ask: **“What failures must this instance survive?”**
+
+That framing forces you to choose an operating model (lab vs household vs team), and it makes the rest of the decisions less fuzzy. The architecture blueprint in the reading path is the best starting point for that reason.
+
+## The Two Surfaces That Bite the Most
+
+If you want a short version of operator security, it is this:
+
+1. **Extensions (skills, plugins, tooling layers)** create *supply-chain* risk.
+2. **Inputs (documents, web pages, tickets, chat logs)** create *prompt-injection* risk.
+
+Everything else is downstream: permissions, isolation, approvals, and recovery.
+
+## A Practical Baseline (What “Good” Looks Like)
+
+If you are trying to turn security from vibes into something you can maintain, aim for these properties:
+
+- **Role separation:** the “experiment” instance is not the “always-on” instance.
+- **Narrow identities:** the agent uses accounts that can be revoked without blowing up your real life.
+- **Explicit approvals:** execution is powerful *because* it is gated, not because it is disabled.
+- **Evidence and recovery:** you can answer “what happened?” and you can roll back quickly.
+- **Adversarial input hygiene:** skills and documents are treated as untrusted by default.
+
+## How To Use This Pack (Fast Path)
+
+If you only have 15–20 minutes:
+
+1. Read the architecture blueprint and pick the operating model for *your* setup.
+2. Read the skill + prompt-injection playbook and adopt the “default-deny” habits that do not kill productivity.
+3. Read the exec approvals guide and decide what your “safe bins” and escalation workflow should be.
+
+Then, only if it applies to you:
+
+- add the PDF ingestion safety piece (documents are a repeat offender),
+- add the phone/SMS boundary piece (real-world contact is where stakes jump),
+- skim privacy-first background if you need language for explaining the design to others.
+
+## Common Traps (And The Page That Fixes Each)
+
+- “It’s fine, it’s just a PDF.” → `/blog/openclaw-pdf-ingestion-safety`
+- “I enabled exec, but it still won’t run.” → `/guides/openclaw-exec-approvals-and-safe-bins`
+- “We installed a bunch of skills and now we’re nervous.” → `/guides/openclaw-skill-safety-and-prompt-injection`
+- “We made it reachable from a phone; now it can contact people.” → `/blog/openclaw-phone-and-sms-boundaries`
+- “Everything is self-hosted, so we’re safe.” (Not automatically.) → `/blog/openclaw-security-architecture-blueprint`
+
+## A Minimal Operator Checklist
+
+Before you call a setup “safe enough to leave running,” check these:
+
+- You can back up state and roll back without improvising. (If not: read the backup guide.)
+- The agent’s identity is disposable (dedicated tokens/accounts, not your personal everything).
+- Skills are installed intentionally (source understood, updates controlled, rollback available).
+- Document ingestion is done with boundaries (extract, summarize, route; do not blindly execute).
+- Execution requires an approval path that matches your risk tolerance and environment.
+- Remote access (Control UI, channels) is configured as an operator surface with clear recovery.
+
+This baseline will not make OpenClaw “perfectly safe.” It will make failures boring, recoverable, and far less expensive.

@@ -29,6 +29,12 @@ const guideMap = new Map(allGuides.map((item) => [item.slug, item]));
 const troubleshootingMap = new Map(allTroubleshooting.map((item) => [item.slug, item]));
 const blogMap = new Map(allBlog.map((item) => [item.slug, item]));
 
+const resolveTroubleshootingSlug = (slug: string) =>
+  troubleshootingMap.get(slug) ??
+  // Back-compat: allow reports to reference basename-only slugs.
+  troubleshootingMap.get(`solutions/${slug}`) ??
+  troubleshootingMap.get(`issues/${slug}`);
+
 const guideItems = entry.data.relatedGuides
   .map((slug) => guideMap.get(slug))
   .filter(Boolean)
@@ -40,7 +46,7 @@ const guideItems = entry.data.relatedGuides
   }));
 
 const troubleshootingItems = entry.data.relatedTroubleshooting
-  .map((slug) => troubleshootingMap.get(slug))
+  .map((slug) => resolveTroubleshootingSlug(slug))
   .filter(Boolean)
   .map((item) => ({
     href: `/troubleshooting/${item!.slug}`,

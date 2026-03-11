@@ -1,0 +1,149 @@
+---
+title: "Models, Routing, and Cost: A Reading Pack for OpenClaw Provider Setups"
+description: "Provider setups fail in predictable ways. This pack helps you choose a serving path (Ollama, OpenAI-compatible /v1, vLLM, LiteLLM), design routing for reliability and cost, and debug the classic 'empty reply / all models failed' incidents."
+publishDate: 2026-03-11
+lastUpdated: 2026-03-11
+featured: false
+status: evergreen
+audience:
+  - Operators
+  - Self-hosters
+  - Cost-conscious teams
+highlights:
+  - title: "Routing is a product decision"
+    summary: "The goal is not a leaderboard. It is predictable cost, reliability, and a model mix that matches tasks."
+  - title: "Compatibility failures are usually structural"
+    summary: "Most provider bugs are about OpenAI-compatible edge cases: tools, streaming, store flags, or reasoning behavior."
+  - title: "Treat proxies and relays as operational surfaces"
+    summary: "If curl works but OpenClaw does not, it is often environment, TLS, proxy headers, or endpoint semantics."
+readingPathTitle: "Models, routing, and cost reading path"
+readingPath:
+  - title: "OpenClaw Model Strategy Is Not a Leaderboard"
+    href: "/blog/openclaw-model-routing-and-cost-strategy"
+    badge: "Start Here"
+    reason: "A mental model for routing by task fit, reliability, and cost."
+  - title: "How to Choose Between Native Ollama, OpenAI-Compatible /v1, vLLM, and LiteLLM"
+    href: "/guides/choose-local-ai-api-path-for-openclaw"
+    badge: "Decision"
+    reason: "Pick the right serving path for your hardware and desired operational complexity."
+  - title: "Self-Hosted AI API Compatibility Matrix"
+    href: "/guides/self-hosted-ai-api-compatibility-matrix"
+    badge: "Matrix"
+    reason: "A quick way to predict which features will break on which stack."
+  - title: "OpenClaw Relay & API Proxy Troubleshooting"
+    href: "/guides/openclaw-relay-and-api-proxy-troubleshooting"
+    badge: "Proxy"
+    reason: "The canonical playbook for 403/404/empty replies and proxy/relay edge cases."
+  - title: "The Real Cost of Running OpenClaw"
+    href: "/blog/openclaw-cost-api-challenges"
+    badge: "Background"
+    reason: "Cost is often driven by configuration friction, not just token price."
+relatedGuides:
+  - choose-local-ai-api-path-for-openclaw
+  - self-hosted-ai-api-compatibility-matrix
+  - openclaw-relay-and-api-proxy-troubleshooting
+  - openclaw-configuration
+relatedTroubleshooting:
+  - solutions/models-all-models-failed
+  - solutions/openai-compatible-endpoint-rejects-stream-or-store
+  - solutions/custom-openai-compatible-endpoint-rejects-tools
+  - solutions/custom-provider-reasoning-breaks-openai-compatible
+  - solutions/local-openai-compatible-tool-calling-compatibility
+relatedBlog:
+  - openclaw-model-routing-and-cost-strategy
+  - openclaw-cost-api-challenges
+keywords:
+  - OpenClaw
+  - Models
+  - Routing
+  - Cost
+  - Providers
+  - OpenAI compatible
+  - LiteLLM
+  - vLLM
+  - Ollama
+---
+
+OpenClaw provider setup is where “it should work” turns into hours of guessing.
+
+Not because the ideas are hard, but because the failure modes are subtle:
+
+- the endpoint is “OpenAI-compatible” but not compatible with *your* tool-calling path,
+- streaming flags or store semantics are rejected,
+- a reverse proxy changes headers or TLS in ways curl doesn’t reveal,
+- a reasoning model behaves differently under an OpenAI-compatible facade,
+- routing looks correct until fallback kicks in under load.
+
+This report is a reading pack for making provider setups **boring**: stable, explainable, and cost-predictable.
+
+## Start With Routing, Not Model Hype
+
+The first reading item is deliberately philosophical: `/blog/openclaw-model-routing-and-cost-strategy`.
+
+If you start with “which model is best,” you will end up with a config that is:
+
+- expensive in the wrong places,
+- brittle under rate limits,
+- and impossible to debug because every request is different.
+
+Routing is not a leaderboard decision. It is an operator decision.
+
+## Pick a Serving Path You Can Actually Operate
+
+Most teams need one of these:
+
+- **Native local** (Ollama) when you want simplicity and accept hardware limits.
+- **Direct /v1** when you want control and you trust the provider’s semantics.
+- **vLLM** when you want throughput and you own more of the stack.
+- **LiteLLM** when you need a routing/proxy layer that normalizes providers.
+
+The decision guide (`/guides/choose-local-ai-api-path-for-openclaw`) is here so you don’t overbuild.
+
+## Compatibility Is About Semantics, Not URLs
+
+“OpenAI-compatible” has a long tail of edge cases. If you want a quick reality check, use:
+
+- `/guides/self-hosted-ai-api-compatibility-matrix`
+
+It is the fastest way to predict:
+
+- whether tool calling will work,
+- whether streaming is safe,
+- whether a provider breaks on certain parameters,
+- and which layers tend to be the source of weirdness.
+
+## Debugging: The 4 Incidents You Will See Repeatedly
+
+If you are mid-incident, start with the symptom:
+
+1. **All models failed** → `/troubleshooting/solutions/models-all-models-failed`
+2. **Endpoint rejects stream/store flags** → `/troubleshooting/solutions/openai-compatible-endpoint-rejects-stream-or-store`
+3. **Tools are rejected / tools silently fail** → `/troubleshooting/solutions/custom-openai-compatible-endpoint-rejects-tools` and `/troubleshooting/solutions/local-openai-compatible-tool-calling-compatibility`
+4. **Reasoning breaks under a proxy** → `/troubleshooting/solutions/custom-provider-reasoning-breaks-openai-compatible`
+
+Treat these as a known set of compatibility edges, not as “random provider instability.”
+
+## Cost: The Hidden Driver Is Configuration Friction
+
+If you want to understand why teams overspend, read:
+
+- `/blog/openclaw-cost-api-challenges`
+
+Most cost blowups are not “token price.” They are:
+
+- retries and silent failures,
+- fallbacks you didn’t notice,
+- routing that sends everything to the expensive path,
+- and a proxy layer that adds latency until timeouts trigger more retries.
+
+## A Minimal “Good Enough” Standard
+
+If you want a small set of rules that prevents most provider pain:
+
+- Have one default model that is cheap and reliable.
+- Add one “high-quality” model for the small percent of tasks that deserve it.
+- Make fallback explicit and observable (know when it triggers).
+- Keep the proxy/relay layer minimal until you have evidence you need it.
+- When debugging, reduce to one agent + one provider + one endpoint until it is stable.
+
+Once those are true, you can get fancy. Before that, fancy routing is just hidden complexity.

@@ -1,0 +1,141 @@
+---
+title: "Self-Hosting & Ops Stability: A Reading Pack for OpenClaw That Does Not Flake"
+description: "A practical self-hosting pack for OpenClaw: pick a deployment you can recover, make 24/7 behavior real (cron/heartbeat), and build the minimal observability you need to debug 'no output' and gateway weirdness fast."
+publishDate: 2026-03-11
+lastUpdated: 2026-03-11
+featured: false
+status: evergreen
+audience:
+  - Self-hosters
+  - Homelab operators
+  - On-call maintainers
+highlights:
+  - title: "Ops problems repeat across installs"
+    summary: "Most instability is predictable: service env mismatch, ports, proxies, and missing observability."
+  - title: "24/7 behavior is a design choice"
+    summary: "Cron and heartbeat only feel reliable when you make uptime and evidence a first-class goal."
+  - title: "Start with a minimal stable baseline"
+    summary: "Pick a deployment approach you can recover and roll back, then add features."
+readingPathTitle: "Self-hosting and stability reading path"
+readingPath:
+  - title: "OpenClaw Deployment Options Explained"
+    href: "/blog/openclaw-deployment-form-factors-comparison"
+    badge: "Start Here"
+    reason: "Pick an install model you can maintain: official install, Docker, one-click, or wrappers."
+  - title: "Self-Hosting OpenClaw with Docker"
+    href: "/guides/docker-deployment"
+    badge: "Docker"
+    reason: "A clean baseline for Linux/Docker operators."
+  - title: "OpenClaw Cron & Heartbeat: Make Your Agent Actually Run 24/7"
+    href: "/guides/openclaw-cron-and-heartbeat-24x7"
+    badge: "24/7"
+    reason: "Turn 'sometimes works' into 'stays working' with realistic uptime assumptions."
+  - title: "OpenClaw Operability: Logs, Evidence, and a Simple Task Board"
+    href: "/guides/openclaw-operability-and-observability"
+    badge: "Evidence"
+    reason: "If you cannot explain what happened, you cannot debug stability."
+  - title: "OpenClaw Stability Playbook"
+    href: "/blog/openclaw-stability-playbook"
+    badge: "Patterns"
+    reason: "A practical taxonomy of no output, duplicates, false rate limits, and context loss."
+relatedGuides:
+  - docker-deployment
+  - openclaw-cron-and-heartbeat-24x7
+  - openclaw-operability-and-observability
+  - openclaw-backup-and-rollback
+  - updating-and-migration
+relatedTroubleshooting:
+  - solutions/gateway-service-running-but-probe-fails
+  - solutions/gateway-lock-eaddrinuse
+  - solutions/gateway-refusing-to-bind-without-auth
+  - solutions/api-works-in-curl-but-openclaw-fails
+  - solutions/tui-no-output-after-send
+relatedBlog:
+  - openclaw-deployment-form-factors-comparison
+  - openclaw-stability-playbook
+  - openclaw-for-homelab
+keywords:
+  - OpenClaw
+  - Self hosting
+  - Docker
+  - Gateway
+  - Stability
+  - Observability
+  - Cron
+  - Heartbeat
+---
+
+Self-hosting is not hard because OpenClaw is complicated.
+
+It is hard because when something fails, you discover you do not have two things:
+
+- **a stable baseline** (a deployment you can reproduce and recover), and
+- **evidence** (logs and probes that explain what actually happened).
+
+This report is the operator pack for building both.
+
+## What “Stability” Actually Means in Practice
+
+Stable does not mean “never errors.”
+
+Stable means:
+
+- when something breaks, you can tell *which layer* broke (gateway, provider, proxy, channel, OS service),
+- you can fix it without deleting state,
+- and you can upgrade without turning every release into a multi-hour incident.
+
+## Start With a Deployment You Can Maintain
+
+The first reading item is about form factors for a reason. The “best” install is the one you can:
+
+- back up,
+- restart cleanly,
+- and roll back under pressure.
+
+If you are not sure, start with `/blog/openclaw-deployment-form-factors-comparison`, then pick a baseline (Docker or official install) and stick with it until it is boring.
+
+## Make 24/7 Behavior a Design Choice (Not a Wish)
+
+Operators often say “it worked yesterday” when they really mean “it worked while I was watching it.”
+
+If you expect your agent to keep moving while you sleep, you need:
+
+- a gateway that stays up,
+- cron/heartbeat configured intentionally,
+- and some way to verify it is still alive.
+
+That is why `/guides/openclaw-cron-and-heartbeat-24x7` is in the core path.
+
+## Evidence: The Fastest Way to Stop Guessing
+
+The operability guide exists because most self-hosted incidents are not mysterious; they are undocumented.
+
+If you cannot answer “what changed?” and “what logs prove it?”, you will keep re-running installs and hoping.
+
+Read `/guides/openclaw-operability-and-observability` and adopt at least:
+
+- one place you always check for logs,
+- one health check you trust,
+- and one simple task board / evidence habit that prevents repeated work.
+
+## Common Symptoms and Where to Go
+
+Use these as a quick index:
+
+- “Gateway is up but probes fail” → `/troubleshooting/solutions/gateway-service-running-but-probe-fails`
+- “It won’t bind / it says EADDRINUSE” → `/troubleshooting/solutions/gateway-lock-eaddrinuse`
+- “It refuses to bind without auth” → `/troubleshooting/solutions/gateway-refusing-to-bind-without-auth`
+- “curl works but OpenClaw doesn’t” → `/troubleshooting/solutions/api-works-in-curl-but-openclaw-fails`
+- “The TUI sends but nothing happens” → `/troubleshooting/solutions/tui-no-output-after-send`
+
+## A Minimal Self-Hosting Runbook (The 5 Things To Standardize)
+
+If you want to get most of the benefit without building a full SRE program, standardize:
+
+1. backup + rollback (`/guides/openclaw-backup-and-rollback`)
+2. service restart procedure (what you restart, in what order)
+3. where logs live and how you collect evidence
+4. how you confirm the running gateway matches the version/config you intended
+5. a default debugging sequence for “no output” and “silent failures”
+
+Once you have those, the stability playbook stops being theory and starts being a checklist you actually use.
