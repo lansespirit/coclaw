@@ -33,6 +33,11 @@ const regular = reports.filter((entry) => entry.slug !== featured?.slug);
       class="absolute inset-x-0 top-0 h-[520px] bg-[radial-gradient(circle_at_top_left,rgba(0,111,238,0.18),transparent_50%)] pointer-events-none"
     >
     </div>
+    {/* Fade the hero tint into the base background to avoid a hard edge at the bottom. */}
+    <div
+      class="absolute inset-x-0 top-0 h-[520px] bg-gradient-to-b from-transparent via-background/30 to-background pointer-events-none"
+    >
+    </div>
     <div
       class="absolute right-[-10rem] top-12 h-[28rem] w-[28rem] rounded-full bg-secondary/10 blur-[130px] pointer-events-none"
     >

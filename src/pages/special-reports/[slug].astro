@@ -111,6 +111,11 @@ const readingPathTitle = entry.data.readingPathTitle ?? `${entry.data.title} rea
       class="absolute inset-x-0 top-0 h-[560px] bg-[radial-gradient(circle_at_top_left,rgba(0,111,238,0.18),transparent_52%)] pointer-events-none"
     >
     </div>
+    {/* Fade the hero tint into the base background to avoid a hard edge at the bottom. */}
+    <div
+      class="absolute inset-x-0 top-0 h-[560px] bg-gradient-to-b from-transparent via-background/30 to-background pointer-events-none"
+    >
+    </div>
     <div
       class="absolute right-[-8rem] top-20 h-[26rem] w-[26rem] rounded-full bg-secondary/10 blur-[125px] pointer-events-none"
     >
