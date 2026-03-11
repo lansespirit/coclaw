@@ -38,9 +38,9 @@ function baseState(): OpenClawConfigGeneratorState {
         model: {
           id: 'gpt-5.2',
           name: 'GPT-5.2',
-          reasoning: false,
+          reasoning: true,
           inputText: true,
-          inputImage: false,
+          inputImage: true,
           contextWindow: 400000,
           maxTokens: 128000,
         },

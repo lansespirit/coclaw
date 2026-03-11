@@ -262,9 +262,9 @@ const defaultState: OpenClawConfigGeneratorState = {
       model: {
         id: 'gpt-5.2',
         name: 'GPT-5.2',
-        reasoning: false,
+        reasoning: true,
         inputText: true,
-        inputImage: false,
+        inputImage: true,
         contextWindow: 400000,
         maxTokens: 128000,
       },
@@ -738,69 +738,72 @@ export default function OpenClawConfigGenerator() {
                             </div>
                           )}
                         </div>
-
-                        <div className="flex flex-col sm:flex-row gap-4">
-                          <Switch
-                            isSelected={state.ai.custom.model.reasoning}
-                            onValueChange={(v) =>
-                              setState((s) => ({
-                                ...s,
-                                ai: {
-                                  ...s.ai,
-                                  custom: {
-                                    ...s.ai.custom,
-                                    model: { ...s.ai.custom.model, reasoning: v },
-                                  },
-                                },
-                              }))
-                            }
-                          >
-                            reasoning
-                          </Switch>
-                          <div className="flex items-center gap-4">
-                            <Checkbox
-                              isSelected={state.ai.custom.model.inputText}
-                              onValueChange={(v) =>
-                                setState((s) => ({
-                                  ...s,
-                                  ai: {
-                                    ...s.ai,
-                                    custom: {
-                                      ...s.ai.custom,
-                                      model: { ...s.ai.custom.model, inputText: v },
-                                    },
-                                  },
-                                }))
-                              }
-                            >
-                              text
-                            </Checkbox>
-                            <Checkbox
-                              isSelected={state.ai.custom.model.inputImage}
-                              onValueChange={(v) =>
-                                setState((s) => ({
-                                  ...s,
-                                  ai: {
-                                    ...s.ai,
-                                    custom: {
-                                      ...s.ai.custom,
-                                      model: { ...s.ai.custom.model, inputImage: v },
-                                    },
-                                  },
-                                }))
-                              }
-                            >
-                              image
-                            </Checkbox>
-                          </div>
-                        </div>
                       </>
                     ) : (
                       <div className="text-xs text-default-700 dark:text-default-500">
-                        This preset uses the recommended model defaults for context window, output
-                        size, and capabilities.
+                        This preset uses the recommended model defaults for context window and
+                        output size.
                       </div>
                     )}
+
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <Switch
+                        size="sm"
+                        isSelected={state.ai.custom.model.reasoning}
+                        onValueChange={(v) =>
+                          setState((s) => ({
+                            ...s,
+                            ai: {
+                              ...s.ai,
+                              custom: {
+                                ...s.ai.custom,
+                                model: { ...s.ai.custom.model, reasoning: v },
+                              },
+                            },
+                          }))
+                        }
+                      >
+                        reasoning
+                      </Switch>
+                      <div className="flex items-center gap-4">
+                        <Checkbox
+                          size="sm"
+                          isSelected={state.ai.custom.model.inputText}
+                          onValueChange={(v) =>
+                            setState((s) => ({
+                              ...s,
+                              ai: {
+                                ...s.ai,
+                                custom: {
+                                  ...s.ai.custom,
+                                  model: { ...s.ai.custom.model, inputText: v },
+                                },
+                              },
+                            }))
+                          }
+                        >
+                          text
+                        </Checkbox>
+                        <Checkbox
+                          size="sm"
+                          isSelected={state.ai.custom.model.inputImage}
+                          onValueChange={(v) =>
+                            setState((s) => ({
+                              ...s,
+                              ai: {
+                                ...s.ai,
+                                custom: {
+                                  ...s.ai.custom,
+                                  model: { ...s.ai.custom.model, inputImage: v },
+                                },
+                              },
+                            }))
+                          }
+                        >
+                          image
+                        </Checkbox>
+                      </div>
+                    </div>
 
                     <div className="text-xs text-default-700 dark:text-default-500">
                       Primary model id will be:{' '}
@@ -1029,6 +1032,7 @@ export default function OpenClawConfigGenerator() {
 
                 <div className="grid sm:grid-cols-2 gap-3">
                   <Checkbox
+                    size="sm"
                     isSelected={state.channels.telegram.enabled}
                     onValueChange={(v) =>
                       setState((s) => ({
@@ -1047,6 +1051,7 @@ export default function OpenClawConfigGenerator() {
                   </Checkbox>
 
                   <Checkbox
+                    size="sm"
                     isSelected={state.channels.whatsapp.enabled}
                     onValueChange={(v) =>
                       setState((s) => ({
@@ -1065,6 +1070,7 @@ export default function OpenClawConfigGenerator() {
                   </Checkbox>
 
                   <Checkbox
+                    size="sm"
                     isSelected={state.channels.discord.enabled}
                     onValueChange={(v) =>
                       setState((s) => ({
@@ -1080,6 +1086,7 @@ export default function OpenClawConfigGenerator() {
                   </Checkbox>
 
                   <Checkbox
+                    size="sm"
                     isSelected={state.channels.slack.enabled}
                     onValueChange={(v) =>
                       setState((s) => ({
