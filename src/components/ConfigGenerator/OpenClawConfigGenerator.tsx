@@ -1026,7 +1026,9 @@ export default function OpenClawConfigGenerator() {
                 <div>
                   <h2 className="text-xl font-bold">Channels</h2>
                   <p className="text-sm text-default-700 dark:text-default-500">
-                    Pick the messaging channels you want to enable.
+                    Pick the messaging channels you want to enable. If you're not sure, skip this
+                    for now—start OpenClaw first, then ask it to walk you through installing and
+                    configuring the channel you need.
                   </p>
                 </div>
 
