@@ -1,0 +1,112 @@
+---
+title: "OpenClaw OOM crash loop: gateway or openclaw-message hits JavaScript heap out of memory (Node v24)"
+description: "Fix OpenClaw gateway or openclaw-message OOM crash loops caused by Node.js v24 by pinning the runtime to Node v22 (LTS) and verifying your service actually uses the expected Node binary."
+kind: "solution"
+component: "gateway"
+severity: "critical"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel: []
+errorSignatures:
+  - "JavaScript heap out of memory"
+  - "Allocation failed - JavaScript heap out of memory"
+  - "Reached heap limit Allocation failed"
+  - "Ineffective mark-compacts near heap limit"
+keywords:
+  - "oom"
+  - "out of memory"
+  - "node"
+  - "nodejs"
+  - "v24"
+  - "v22"
+  - "gateway"
+publishDate: 2026-03-11
+lastUpdated: 2026-03-11
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 42662
+    - 41778
+  guides:
+    - "/guides/openclaw-installation-troubleshooting"
+    - "/guides/openclaw-backup-and-rollback"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+One of these patterns:
+
+- The gateway enters a crash loop (LaunchAgent/systemd/pm2 keeps restarting it), and you see memory climb rapidly.
+- `openclaw message send ...` (or `openclaw-message`) fails with an OOM stack trace on smaller servers.
+
+Common crash signatures:
+
+- `FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory`
+- `FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory`
+
+## Cause
+
+In multiple recent reports, the trigger is **Node.js v24.x** (for example `v24.13.0`).
+
+The same OpenClaw versions become stable again when the runtime is pinned to **Node.js v22.x (LTS)**.
+
+## Fix
+
+### 1) Pin the runtime to Node.js v22 (recommended)
+
+On the machine that actually runs the gateway (or the CLI command):
+
+```bash
+node -v
+```
+
+Switch to Node 22 using your preferred manager (nvm/fnm/asdf/apt/homebrew), then confirm:
+
+```bash
+node -v
+```
+
+Restart and re-test:
+
+```bash
+openclaw gateway restart
+
+# If your symptom is CLI-only, re-run the exact command that was OOM'ing:
+openclaw message send --channel <channel> --target <target> --message "test"
+```
+
+### 2) Make sure your service uses the same Node you tested
+
+This is the most common "it still OOMs" trap:
+
+- your interactive shell uses Node 22,
+- but launchd/systemd/Docker is still running Node 24.
+
+Verify the gateway's Node version in the service context (the exact method depends on how you run the gateway).
+
+If you are unsure, the pragmatic check is: restart the service and inspect the process environment/path and the resolved Node binary.
+
+### 3) If you cannot change Node on that host: roll back OpenClaw temporarily
+
+This does not fix the underlying Node runtime trigger, but it can be a short-term stability move while you migrate Node:
+
+```bash
+npm uninstall -g openclaw
+npm install -g openclaw@2026.3.2
+openclaw --version
+```
+
+## Verify
+
+- `node -v` reports Node 22.x.
+- The gateway stays up for at least 10 minutes without entering an OOM restart loop.
+- `openclaw gateway status` / `openclaw health` works reliably.
+- If you were hitting the CLI symptom: the previously failing `openclaw message send ...` command completes.
+
+## Related
+
+- [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
+- [/guides/openclaw-backup-and-rollback](/guides/openclaw-backup-and-rollback)
