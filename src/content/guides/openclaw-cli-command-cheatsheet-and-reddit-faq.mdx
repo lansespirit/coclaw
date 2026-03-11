@@ -1,0 +1,348 @@
+---
+title: "OpenClaw CLI Command Cheat Sheet (and the Reddit FAQ)"
+description: "A task-first map of OpenClaw commands, plus the recurring questions from Reddit: gateway disconnected (4008), dashboard unauthorized, pairing required (1008), TUI loops, and “what do I run to debug this?”"
+category: "advanced"
+difficulty: "Beginner"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "VPS"
+  - "Self-hosted"
+time: "15 min"
+publishDate: 2026-03-11
+lastUpdated: 2026-03-11
+featured: true
+steps:
+  - title: "Learn the mental model"
+    content: "Gateway vs UI vs channels vs models; most failures are just “wrong host” or “wrong token”."
+  - title: "Memorize the 60-second diagnosis"
+    content: "Use `status --all`, `gateway status`, `models status --probe`, and `channels status --probe` to locate the failure layer."
+  - title: "Fix auth and pairing fast"
+    content: "Use `dashboard` for tokenized URLs, and `devices list/approve` for 1008 pairing errors."
+  - title: "Operate day-to-day from the CLI"
+    content: "Manage channels, send messages, tail logs, and open the TUI without guessing flags."
+  - title: "Keep it maintainable"
+    content: "Use `backup`, `update`, and `config validate`; avoid “reset” until you have a backup."
+keywords:
+  - "openclaw cli"
+  - "commands"
+  - "cheatsheet"
+  - "tui"
+  - "dashboard"
+  - "gateway status"
+  - "doctor"
+  - "devices approve"
+  - "pairing required"
+  - "1008"
+  - "4008"
+  - "unauthorized"
+---
+
+OpenClaw has a lot of subcommands, and the docs are deep — but most real-world usage (and most Reddit threads) repeatedly
+circle the same themes:
+
+- “Is my gateway even running?”
+- “Why does the dashboard say unauthorized?”
+- “Why does the UI/TUI disconnect with pairing required (1008)?”
+- “Gateway disconnected (4008)… what do I run first?”
+- “What’s the smallest set of commands I can paste when asking for help?”
+
+This guide is a **practical command map** plus a **community-driven FAQ**. It also links to deeper CoClaw pages when you
+need them.
+
+If you want one thing to remember: **always start from `--help`**.
+
+```bash
+openclaw --help
+openclaw <command> --help
+```
+
+---
+
+## 0) The mental model (why “random commands” don’t help)
+
+Most issues are not “OpenClaw is broken”. They’re typically one of these:
+
+1. **Gateway layer**: service not running, wrong port/bind, wrong host, wrong profile.
+2. **Auth layer**: token mismatch (dashboard unauthorized) or password mismatch.
+3. **Pairing layer**: new device not approved (1008 pairing required).
+4. **Channel layer**: WhatsApp/Telegram/Slack session expired or disconnected.
+5. **Model layer**: API key missing/expired, rate limit, wrong endpoint (OpenAI-compatible relays).
+
+The sections below map commands to these layers so you can stop guessing.
+
+---
+
+## 1) The 60-second diagnosis pack (pasteable)
+
+When Reddit asks “what do I run?”, this is the high-signal bundle.
+
+Run on the **gateway host** (local machine, container shell, or SSH session to the server):
+
+```bash
+# 1) “Tell me everything that’s safe to paste”
+openclaw status --all
+
+# 2) Is the gateway service alive and reachable?
+openclaw gateway status
+
+# 3) Can it actually call your model provider (live)?
+openclaw models status --probe
+
+# 4) Are channels authorized and probeable?
+openclaw channels status --probe
+
+# 5) Tail recent logs (use --plain when sharing)
+openclaw logs --limit 200 --plain
+```
+
+Notes:
+
+- `openclaw status --all` is intentionally designed to be “copy/paste friendly”.
+- `openclaw doctor` is your next move if the above indicates service/auth drift:
+  ```bash
+  openclaw doctor
+  ```
+  Only use repair modes when you understand the tradeoff:
+  `openclaw doctor --repair` / `openclaw doctor --force`.
+
+Deep dives:
+
+- Operability patterns: [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability)
+- “No response / rate limits”: [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
+
+---
+
+## 2) The commands people actually use (task-first cheat sheet)
+
+### Setup / onboarding
+
+```bash
+openclaw onboard
+openclaw onboard --install-daemon
+openclaw configure
+```
+
+### Open the dashboard (Control UI)
+
+```bash
+openclaw dashboard
+```
+
+If you’re on a remote host, the CLI prints a tokenized URL. That is often the fastest fix for “unauthorized”.
+
+Deep dive:
+
+- [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+
+### Terminal UI (TUI)
+
+```bash
+openclaw tui
+```
+
+Common remote pattern (when you need to be explicit):
+
+```bash
+openclaw tui --url ws://HOST:PORT --token "$OPENCLAW_GATEWAY_TOKEN"
+```
+
+### Gateway service operations (VPS/Docker/always-on)
+
+```bash
+openclaw gateway run
+openclaw gateway install
+openclaw gateway start
+openclaw gateway stop
+openclaw gateway restart
+openclaw gateway status
+openclaw gateway probe
+```
+
+If you’re publishing access (LAN / Tailnet / reverse proxy), pay attention to `--bind`:
+
+```bash
+openclaw gateway run --bind loopback --port 18789
+```
+
+Related:
+
+- Deployment troubleshooting: [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+- Docker deployment: [/guides/docker-deployment](/guides/docker-deployment)
+
+### Devices (pairing required, 1008 loops)
+
+If the UI/TUI disconnects with **1008: pairing required**, the fix is usually a one-time device approval:
+
+```bash
+openclaw devices list
+openclaw devices approve <requestId>
+```
+
+Last-resort cleanup (use with care on shared hosts):
+
+```bash
+openclaw devices remove <deviceId>
+openclaw devices clear
+```
+
+Deep dive:
+
+- [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+
+### Channels (connectors)
+
+```bash
+openclaw channels list
+openclaw channels login --channel whatsapp
+openclaw channels add --channel telegram --token <token>
+openclaw channels status --probe
+openclaw channels logs
+```
+
+Channel guides:
+
+- [/guides/telegram-setup](/guides/telegram-setup)
+- [/guides/whatsapp-setup](/guides/whatsapp-setup)
+
+### Messaging (send/read)
+
+```bash
+openclaw message send --target <id-or-number> --message "Hello"
+openclaw message read --target <id-or-number>
+```
+
+If you need IDs (common on Discord/Slack/Telegram):
+
+```bash
+openclaw directory self
+openclaw directory peers
+openclaw directory groups
+```
+
+### Models (what is configured, what is actually reachable)
+
+```bash
+openclaw models list
+openclaw models status
+openclaw models status --probe
+openclaw models set <model>
+```
+
+Local / OpenAI-compatible relays:
+
+- [/guides/self-hosted-ai-api-compatibility-matrix](/guides/self-hosted-ai-api-compatibility-matrix)
+- [/guides/choose-local-ai-api-path-for-openclaw](/guides/choose-local-ai-api-path-for-openclaw)
+
+### Config (read, set, validate)
+
+```bash
+openclaw config file
+openclaw config validate
+openclaw config get <dot.path>
+openclaw config set <dot.path> <value>
+```
+
+### Logs (when you need evidence)
+
+```bash
+openclaw logs --limit 200
+openclaw logs --follow
+openclaw logs --plain --limit 200
+```
+
+### Backup + update (before you do anything scary)
+
+```bash
+openclaw backup create
+openclaw backup verify <archive>
+
+openclaw update status
+openclaw update
+```
+
+Deep dives:
+
+- [/guides/openclaw-backup-and-rollback](/guides/openclaw-backup-and-rollback)
+- [/guides/updating-and-migration](/guides/updating-and-migration)
+
+---
+
+## 3) The Reddit FAQ (what people worry about)
+
+### “Gateway disconnected (4008)”
+
+Common causes:
+
+- gateway service isn’t running (or running under a different profile)
+- you’re hitting the wrong host/port (local vs remote)
+- auth token mismatch, or device pairing is required
+
+Start here:
+
+```bash
+openclaw gateway status
+openclaw status --all
+openclaw logs --plain --limit 200
+```
+
+If you see repeated reconnect loops, treat it as auth/pairing first:
+
+- [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+
+### “Dashboard says unauthorized”
+
+Almost always: **you opened a non-tokenized URL** or your token sources disagree.
+
+Do this first:
+
+```bash
+openclaw dashboard
+```
+
+Then confirm you didn’t override the token in a different place (`OPENCLAW_GATEWAY_TOKEN`, config profile, container env,
+reverse proxy headers).
+
+### “Pairing required (1008) loop in the UI/TUI”
+
+Approve the device once on the gateway host:
+
+```bash
+openclaw devices list
+openclaw devices approve <requestId>
+```
+
+If you keep re-pairing on every reconnect, you likely have **non-persistent state** (common in containers) or multiple
+gateways fighting each other.
+
+Start with:
+
+- [/guides/docker-deployment](/guides/docker-deployment)
+- [/guides/openclaw-state-workspace-and-memory](/guides/openclaw-state-workspace-and-memory)
+
+### “I set exec to full, but tools still won’t run”
+
+This is usually an **approvals / allowlist** problem on the actual execution host (gateway host or node host).
+
+Start with:
+
+- [/guides/openclaw-exec-approvals-and-safe-bins](/guides/openclaw-exec-approvals-and-safe-bins)
+
+---
+
+## 4) Community threads (Reddit) worth reading
+
+These are representative threads that match the FAQ themes above (good for seeing real logs, real setups, and common
+pitfalls):
+
+- Unauthorized dashboard access: https://www.reddit.com/r/openclaw/comments/1joyaco/unauthorized_gateway_when_opening_dashboard_on/
+- Gateway disconnected (4008): https://www.reddit.com/r/openclaw/comments/1j2b9zf/anyone_else_have_gateway_disconnected_4008_after_fresh_install/
+- Pairing required loop in the TUI: https://www.reddit.com/r/openclaw/comments/1jxt1ze/pairing_required_loop_when_opening_the_tui/
+- “Stopped responding, what do I run?”: https://www.reddit.com/r/openclaw/comments/1h6en83/my_clawdbot_suddenly_stopped_responding_what_to_do/
+- CLI command not found after install: https://www.reddit.com/r/clawdbot/comments/1ik8pe1/clawdbot_openclaw_cli_command_not_found_after_installing/
+
+Tip: when you read older threads, always check whether the commands still exist with `openclaw --help`. Subcommands do
+change across releases.
