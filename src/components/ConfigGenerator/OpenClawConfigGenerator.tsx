@@ -27,6 +27,7 @@ import {
   type GroupPolicy,
   type ModelApi,
   type OpenClawConfigGeneratorState,
+  type ThinkingDepth,
 } from '../../lib/openclaw-config/generator';
 import { inferOfficialModelLimits } from '../../lib/openclaw-config/official-model-limits';
 import {
@@ -248,6 +249,7 @@ const defaultState: OpenClawConfigGeneratorState = {
   sandboxToolsAllow: [],
   sandboxToolsDeny: [],
   modelFallbacksRaw: '',
+  thinkingDepth: 'low',
   ai: {
     mode: 'custom',
     builtIn: {
@@ -262,7 +264,6 @@ const defaultState: OpenClawConfigGeneratorState = {
       model: {
         id: 'gpt-5.2',
         name: 'GPT-5.2',
-        reasoning: true,
         inputText: true,
         inputImage: true,
         contextWindow: 400000,
@@ -414,6 +415,10 @@ export default function OpenClawConfigGenerator() {
   }
 
   const groupPolicyKeys: GroupPolicy[] = ['allowlist', 'open', 'disabled'];
+  const thinkingOptions: ThinkingDepth[] = ['none', 'low', 'high', 'xhigh'];
+  const selectedThinking = thinkingOptions.includes(state.thinkingDepth)
+    ? state.thinkingDepth
+    : 'none';
 
   return (
     <HeroUIProvider>
@@ -746,62 +751,83 @@ export default function OpenClawConfigGenerator() {
                       </div>
                     )}
 
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <Switch
-                        size="sm"
-                        isSelected={state.ai.custom.model.reasoning}
-                        onValueChange={(v) =>
-                          setState((s) => ({
-                            ...s,
-                            ai: {
-                              ...s.ai,
-                              custom: {
-                                ...s.ai.custom,
-                                model: { ...s.ai.custom.model, reasoning: v },
-                              },
-                            },
-                          }))
-                        }
-                      >
-                        reasoning
-                      </Switch>
-                      <div className="flex items-center gap-4">
-                        <Checkbox
-                          size="sm"
-                          isSelected={state.ai.custom.model.inputText}
-                          onValueChange={(v) =>
-                            setState((s) => ({
-                              ...s,
-                              ai: {
-                                ...s.ai,
-                                custom: {
-                                  ...s.ai.custom,
-                                  model: { ...s.ai.custom.model, inputText: v },
-                                },
-                              },
-                            }))
-                          }
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1 text-xs font-semibold">
+                        thinking depth
+                        <Tooltip content="Controls the default /think level OpenClaw uses when starting a session. Choose none to disable thinking/reasoning params for compatibility testing.">
+                          <span className="inline-flex items-center text-default-500 cursor-help">
+                            <IconInfoSolid className="w-3.5 h-3.5" aria-hidden="true" />
+                          </span>
+                        </Tooltip>
+                      </div>
+
+                      <div className="mt-1 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
+                        <div
+                          role="radiogroup"
+                          aria-label="thinking depth"
+                          className="grid grid-cols-4 gap-1 rounded-xl bg-default-100 dark:bg-content2 p-1 w-full sm:w-[360px]"
                         >
-                          text
-                        </Checkbox>
-                        <Checkbox
-                          size="sm"
-                          isSelected={state.ai.custom.model.inputImage}
-                          onValueChange={(v) =>
-                            setState((s) => ({
-                              ...s,
-                              ai: {
-                                ...s.ai,
-                                custom: {
-                                  ...s.ai.custom,
-                                  model: { ...s.ai.custom.model, inputImage: v },
+                          {thinkingOptions.map((opt) => {
+                            const isSelected = selectedThinking === opt;
+                            return (
+                              <button
+                                key={opt}
+                                type="button"
+                                role="radio"
+                                aria-checked={isSelected}
+                                onClick={() => setState((s) => ({ ...s, thinkingDepth: opt }))}
+                                className={[
+                                  'rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors',
+                                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                                  isSelected
+                                    ? 'bg-background text-foreground shadow-small'
+                                    : 'text-default-600 dark:text-default-500 hover:bg-background/60 hover:text-foreground',
+                                ].join(' ')}
+                              >
+                                {opt}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <div className="flex items-center gap-4 shrink-0">
+                          <Checkbox
+                            size="sm"
+                            isSelected={state.ai.custom.model.inputText}
+                            onValueChange={(v) =>
+                              setState((s) => ({
+                                ...s,
+                                ai: {
+                                  ...s.ai,
+                                  custom: {
+                                    ...s.ai.custom,
+                                    model: { ...s.ai.custom.model, inputText: v },
+                                  },
                                 },
-                              },
-                            }))
-                          }
-                        >
-                          image
-                        </Checkbox>
+                              }))
+                            }
+                          >
+                            text
+                          </Checkbox>
+                          <Checkbox
+                            size="sm"
+                            isSelected={state.ai.custom.model.inputImage}
+                            onValueChange={(v) =>
+                              setState((s) => ({
+                                ...s,
+                                ai: {
+                                  ...s.ai,
+                                  custom: {
+                                    ...s.ai.custom,
+                                    model: { ...s.ai.custom.model, inputImage: v },
+                                  },
+                                },
+                              }))
+                            }
+                          >
+                            image
+                          </Checkbox>
+                        </div>
                       </div>
                     </div>
 

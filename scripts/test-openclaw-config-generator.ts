@@ -24,6 +24,7 @@ function baseState(): OpenClawConfigGeneratorState {
     sandboxToolsAllow: [],
     sandboxToolsDeny: [],
     modelFallbacksRaw: '',
+    thinkingDepth: 'low',
     ai: {
       mode: 'built-in',
       builtIn: {
@@ -38,7 +39,6 @@ function baseState(): OpenClawConfigGeneratorState {
         model: {
           id: 'gpt-5.2',
           name: 'GPT-5.2',
-          reasoning: true,
           inputText: true,
           inputImage: true,
           contextWindow: 400000,

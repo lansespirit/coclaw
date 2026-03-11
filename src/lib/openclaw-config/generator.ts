@@ -4,6 +4,7 @@ export type GatewayBindMode = 'loopback' | 'auto' | 'lan' | 'tailnet' | 'custom'
 export type GatewayAuthMode = 'off' | 'token' | 'password';
 export type ModelApi = 'openai-completions' | 'openai-responses' | 'anthropic-messages';
 export type ToolsProfile = 'minimal' | 'messaging' | 'coding' | 'full';
+export type ThinkingDepth = 'none' | 'low' | 'high' | 'xhigh';
 
 export type ConfigIssueLevel = 'error' | 'warning' | 'info';
 
@@ -61,6 +62,7 @@ export type OpenClawConfigGeneratorState = {
   sandboxToolsAllow: string[];
   sandboxToolsDeny: string[];
   modelFallbacksRaw?: string;
+  thinkingDepth: ThinkingDepth;
   ai: {
     mode: 'built-in' | 'custom';
     builtIn: {
@@ -75,7 +77,6 @@ export type OpenClawConfigGeneratorState = {
       model: {
         id: string;
         name: string;
-        reasoning: boolean;
         inputText: boolean;
         inputImage: boolean;
         contextWindow: number;
@@ -335,6 +336,7 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
   cfg.agents = {
     defaults: {
       model: { primary: primaryModel, ...(fallbacks.length ? { fallbacks } : {}) },
+      thinkingDefault: state.thinkingDepth === 'none' ? 'off' : state.thinkingDepth,
       ...(state.sandboxMode === 'non-main' ? { sandbox: { mode: 'non-main' } } : {}),
     },
   };
@@ -450,7 +452,7 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
               {
                 id: modelId,
                 name: state.ai.custom.model.name.trim() || modelId,
-                reasoning: !!state.ai.custom.model.reasoning,
+                reasoning: state.thinkingDepth !== 'none',
                 input,
                 cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
                 contextWindow,
