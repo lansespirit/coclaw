@@ -13,6 +13,8 @@ import {
   Select,
   SelectItem,
   Switch,
+  Tab,
+  Tabs,
   Textarea,
   Tooltip,
 } from '@heroui/react';
@@ -25,9 +27,13 @@ import {
   type GroupPolicy,
   type ModelApi,
   type OpenClawConfigGeneratorState,
-  type SecretsMode,
 } from '../../lib/openclaw-config/generator';
 import { inferOfficialModelLimits } from '../../lib/openclaw-config/official-model-limits';
+import {
+  PRESET_DEFINITIONS,
+  applyPresetToState,
+  type GeneratorPresetId,
+} from '../../lib/openclaw-config/presets';
 import { OPENCLAW_REF } from '../../lib/openclaw-ref';
 import {
   IconCopy,
@@ -124,7 +130,7 @@ function dmPolicyCopy(
   switch (policy) {
     case 'pairing':
       return {
-        title: 'pairing',
+        title: 'Approval required',
         shortHint: 'Approve unknown senders.',
         tooltip:
           'Default secure mode. Unknown senders receive a pairing code and messages are ignored until you approve them.',
@@ -133,40 +139,40 @@ function dmPolicyCopy(
     case 'allowlist': {
       const allowFromHint =
         channel === 'whatsapp'
-          ? 'E.164 numbers in allowFrom.'
+          ? 'E.164 numbers in your allowed senders list.'
           : channel === 'telegram'
-            ? 'Sender IDs/usernames in allowFrom.'
-            : 'User IDs in dm.allowFrom.';
+            ? 'Sender IDs or usernames in your allowed senders list.'
+            : 'User IDs in your allowed senders list.';
       return {
-        title: 'allowlist',
+        title: 'Allowed senders only',
         shortHint: `Only allow ${allowFromHint} (or already paired).`,
         tooltip:
           channel === 'telegram'
-            ? 'Only allow Telegram DMs from channels.telegram.allowFrom (and/or previously paired senders).'
+            ? 'Only people in your allowed senders list can start a Telegram DM, unless you have already approved them.'
             : channel === 'whatsapp'
-              ? 'Only allow WhatsApp DMs from channels.whatsapp.allowFrom (E.164) (and/or previously paired senders).'
+              ? 'Only people in your allowed senders list can start a WhatsApp DM, unless you have already approved them.'
               : channel === 'discord'
-                ? 'Only allow Discord DMs from channels.discord.dm.allowFrom (and/or previously paired senders).'
-                : 'Only allow Slack DMs from channels.slack.dm.allowFrom (and/or previously paired senders).',
+                ? 'Only people in your allowed senders list can start a Discord DM, unless you have already approved them.'
+                : 'Only people in your allowed senders list can start a Slack DM, unless you have already approved them.',
       };
     }
     case 'open':
       return {
-        title: 'open',
-        shortHint: 'Anyone who can DM the account can trigger the agent.',
+        title: 'Anyone',
+        shortHint: 'Anyone who can DM the account can trigger the assistant.',
         tooltip:
           channel === 'telegram'
-            ? 'Opens inbound Telegram DMs. OpenClaw requires allowFrom to include "*" for dmPolicy="open".'
+            ? 'Anyone who can DM your Telegram bot can trigger it. Add "*" to the allowed senders list to make this work.'
             : channel === 'whatsapp'
-              ? 'Opens inbound WhatsApp DMs. OpenClaw requires allowFrom to include "*" for dmPolicy="open".'
+              ? 'Anyone who can DM your WhatsApp number can trigger it. Add "*" to the allowed senders list to make this work.'
               : channel === 'discord'
-                ? 'Opens inbound Discord DMs. OpenClaw requires dm.allowFrom to include "*" for dmPolicy="open".'
-                : 'Opens inbound Slack DMs. OpenClaw requires dm.allowFrom to include "*" for dmPolicy="open".',
+                ? 'Anyone who can DM your Discord bot can trigger it. Add "*" to the allowed senders list to make this work.'
+                : 'Anyone in the Slack workspace who can DM the bot can trigger it. Add "*" to the allowed senders list to make this work.',
         badge: { text: 'Risky', tone: 'warning' },
       };
     case 'disabled':
       return {
-        title: 'disabled',
+        title: 'Off',
         shortHint: 'Ignore inbound DMs.',
         tooltip: 'Disable inbound DMs entirely for this channel.',
       };
@@ -188,31 +194,70 @@ function downloadTextFile(filename: string, content: string) {
 const dmPolicyKeys: DmPolicy[] = ['pairing', 'allowlist', 'open', 'disabled'];
 
 const bindOptions: Array<{ key: GatewayBindMode; label: string; hint: string }> = [
-  { key: 'loopback', label: 'loopback', hint: 'Local-only (127.0.0.1).' },
+  {
+    key: 'loopback',
+    label: 'Local only',
+    hint: 'Only this machine can reach the Gateway (127.0.0.1).',
+  },
   {
     key: 'auto',
-    label: 'auto',
-    hint: 'Prefer loopback; fall back to 0.0.0.0 if loopback is unavailable.',
+    label: 'Auto',
+    hint: 'Try local only first, then fall back to 0.0.0.0 if loopback is unavailable.',
   },
-  { key: 'lan', label: 'lan', hint: 'All interfaces (0.0.0.0). Public if the host is public.' },
-  { key: 'tailnet', label: 'tailnet', hint: 'Bind to Tailnet IP when available.' },
-  { key: 'custom', label: 'custom', hint: 'Bind to a specific IP (customBindHost).' },
+  {
+    key: 'lan',
+    label: 'LAN / public',
+    hint: 'Listen on all interfaces (0.0.0.0). Public if the host is public.',
+  },
+  { key: 'tailnet', label: 'Tailnet', hint: 'Bind to a Tailnet IP when available.' },
+  { key: 'custom', label: 'Custom IP', hint: 'Bind to a specific IP address.' },
 ];
 
+const selectPopoverProps = {
+  classNames: {
+    base: 'z-[120]',
+    backdrop: 'z-[110]',
+  },
+} as const;
+
+const AUTO_GATEWAY_TOKEN = '__AUTO_GATEWAY_TOKEN__';
+
+function generateFriendlyGatewayToken(): string {
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+  const bytes = new Uint8Array(24);
+
+  if (typeof globalThis.crypto?.getRandomValues === 'function') {
+    globalThis.crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < bytes.length; i += 1) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
+  }
+
+  const body = Array.from(bytes, (value) => alphabet[value % alphabet.length]).join('');
+  return `ocw_${body}`;
+}
+
+const DEFAULT_PRESET_ID: GeneratorPresetId = 'personal';
+
 const defaultState: OpenClawConfigGeneratorState = {
-  safeMode: true,
-  secretsMode: 'env',
+  toolsProfile: 'coding',
+  toolsAllow: [],
+  toolsDeny: [],
+  sandboxMode: 'non-main',
+  sandboxToolsAllow: [],
+  sandboxToolsDeny: [],
   modelFallbacksRaw: '',
   ai: {
-    mode: 'built-in',
+    mode: 'custom',
     builtIn: {
       primaryModel: 'anthropic/claude-opus-4.6',
     },
     custom: {
-      providerId: 'custom-proxy',
+      providerId: 'my-provider',
       api: 'openai-responses',
-      baseUrl: 'http://localhost:4000/v1',
-      apiKeyEnvVar: 'CUSTOM_PROVIDER_API_KEY',
+      baseUrl: 'https://api.example.com/v1',
+      apiKeyEnvVar: 'MY_PROVIDER_API_KEY',
       apiKey: '',
       model: {
         id: 'gpt-5.2',
@@ -230,8 +275,8 @@ const defaultState: OpenClawConfigGeneratorState = {
     bind: 'loopback',
     customBindHost: '',
     authMode: 'token',
-    authToken: '',
-    authPassword: '',
+    authToken: AUTO_GATEWAY_TOKEN,
+    authPassword: 'change-this-password',
   },
   channels: {
     telegram: {
@@ -279,11 +324,23 @@ const defaultState: OpenClawConfigGeneratorState = {
 };
 
 export default function OpenClawConfigGenerator() {
-  const [state, setState] = useState<OpenClawConfigGeneratorState>(defaultState);
+  const [selectedPreset, setSelectedPreset] = useState<GeneratorPresetId>(DEFAULT_PRESET_ID);
+  const [state, setState] = useState<OpenClawConfigGeneratorState>(() =>
+    applyPresetToState(defaultState, DEFAULT_PRESET_ID)
+  );
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [showExpert, setShowExpert] = useState(false);
   const [autoModelLimits, setAutoModelLimits] = useState(true);
+
+  useEffect(() => {
+    setState((current) =>
+      current.gateway.authToken === AUTO_GATEWAY_TOKEN
+        ? {
+            ...current,
+            gateway: { ...current.gateway, authToken: generateFriendlyGatewayToken() },
+          }
+        : current
+    );
+  }, []);
 
   const officialModelLimits = useMemo(
     () => inferOfficialModelLimits(state.ai.custom.api, state.ai.custom.model.id),
@@ -329,6 +386,15 @@ export default function OpenClawConfigGenerator() {
   }, [autoModelLimits, officialModelLimits, state.ai.mode]);
 
   const result = useMemo(() => buildOpenClawConfig(state), [state]);
+  const activePreset = PRESET_DEFINITIONS[selectedPreset];
+  const customProviderSecretValue = state.ai.custom.apiKey || state.ai.custom.apiKeyEnvVar;
+  const showModelTuning = activePreset.ui.showModelTuning;
+  const showModelFallbacks = activePreset.ui.showModelFallbacks;
+  const showGatewayCard = activePreset.ui.showGateway;
+  const showGatewayNetworkControls = activePreset.ui.showGatewayNetworkControls;
+  const showGatewayPasswordAuth = activePreset.ui.showGatewayPasswordAuth;
+  const showGroupControls = activePreset.ui.showGroupControls;
+  const showMentionControls = activePreset.ui.showMentionControls;
 
   const errors = result.issues.filter((i) => i.level === 'error');
   const warnings = result.issues.filter((i) => i.level === 'warning');
@@ -349,11 +415,6 @@ export default function OpenClawConfigGenerator() {
 
   const groupPolicyKeys: GroupPolicy[] = ['allowlist', 'open', 'disabled'];
 
-  const onAdvancedToggle = (v: boolean) => {
-    setShowAdvanced(v);
-    if (!v) setShowExpert(false);
-  };
-
   return (
     <HeroUIProvider>
       <div className="space-y-6">
@@ -370,107 +431,81 @@ export default function OpenClawConfigGenerator() {
           </div>
 
           <div className="text-sm text-default-700 dark:text-default-500">
-            Keep it simple by default; reveal advanced options only when needed.
+            Pick a preset, generate a config that matches your workflow, then tweak only what you
+            need.
           </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6 items-start">
           <div className="space-y-6">
             <Card>
-              <CardBody className="gap-5">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <CardBody className="gap-4">
+                <div className="space-y-2">
                   <div>
-                    <h2 className="text-xl font-bold">Core</h2>
+                    <h2 className="text-xl font-bold">Choose your starting point</h2>
                     <p className="text-sm text-default-700 dark:text-default-500">
-                      Start with a safe baseline and grow from there.
+                      Start with the preset that best matches the OpenClaw experience you want.
                     </p>
                   </div>
-                  <div className="flex items-center gap-3 sm:pt-1">
-                    <Switch isSelected={showAdvanced} onValueChange={onAdvancedToggle}>
-                      Advanced
-                    </Switch>
-                    {showAdvanced && (
-                      <Switch isSelected={showExpert} onValueChange={setShowExpert}>
-                        Expert
-                      </Switch>
-                    )}
-                  </div>
-                </div>
 
-                <div className="grid sm:grid-cols-2 gap-4 items-center">
-                  <Switch
-                    isSelected={state.safeMode}
-                    onValueChange={(v) => setState((s) => ({ ...s, safeMode: v }))}
-                  >
-                    <span className="inline-flex items-center gap-1">
-                      Safe Mode
-                      <Tooltip content="Recommended: sandbox non-main sessions + safer tool defaults.">
-                        <span className="inline-flex items-center text-default-500 cursor-help">
-                          <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
-                        </span>
-                      </Tooltip>
-                    </span>
-                  </Switch>
-                  <Select
-                    label={
-                      <span className="inline-flex items-center gap-1">
-                        Secrets
-                        <Tooltip content="Prefer env vars or ${ENV_VAR} substitution to keep keys out of JSON.">
-                          <span className="inline-flex items-center text-default-500 cursor-help">
-                            <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
-                          </span>
-                        </Tooltip>
-                      </span>
-                    }
-                    selectedKeys={[state.secretsMode]}
-                    onSelectionChange={(keys) => {
-                      if (keys === 'all') return;
-                      const mode = [...keys][0] as SecretsMode | undefined;
-                      if (!mode) return;
-                      setState((s) => ({ ...s, secretsMode: mode }));
+                  <Tabs
+                    aria-label="Config presets"
+                    selectedKey={selectedPreset}
+                    onSelectionChange={(key) => {
+                      const presetId = String(key) as GeneratorPresetId;
+                      setSelectedPreset(presetId);
+                      setState((current) => applyPresetToState(current, presetId));
                     }}
-                    variant="bordered"
+                    variant="underlined"
+                    classNames={{
+                      tabList:
+                        'gap-6 w-full relative rounded-none p-0 border-b border-divider overflow-x-auto',
+                      cursor: 'w-full bg-primary',
+                      tab: 'max-w-fit px-0 h-11',
+                      tabContent: 'group-data-[selected=true]:text-primary font-semibold',
+                    }}
                   >
-                    <SelectItem
-                      key="env"
-                      description="Recommended. Use env vars and keep openclaw.json clean."
-                    >
-                      Env vars
-                    </SelectItem>
-                    <SelectItem
-                      key="inline"
-                      description="Not recommended. Writes secrets directly into JSON."
-                    >
-                      Inline in JSON
-                    </SelectItem>
-                  </Select>
+                    {Object.values(PRESET_DEFINITIONS).map((preset) => {
+                      const title = preset.caution ? (
+                        <span className="inline-flex items-center gap-1">
+                          <span>{preset.tabLabel}</span>
+                          <Tooltip content={preset.caution}>
+                            <span className="inline-flex items-center text-default-500 cursor-help">
+                              <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                            </span>
+                          </Tooltip>
+                        </span>
+                      ) : (
+                        preset.tabLabel
+                      );
+                      return <Tab key={preset.id} title={title} />;
+                    })}
+                  </Tabs>
                 </div>
 
-                {!state.safeMode && (
-                  <Alert
-                    color="warning"
-                    title="Safe Mode is off"
-                    description="If you plan to use groups/channels, consider enabling sandboxing for non-main sessions."
-                    className="mt-1"
-                  />
-                )}
+                <p className="text-sm text-default-700 dark:text-default-500">
+                  <span className="font-semibold text-foreground">{activePreset.title}</span> -{' '}
+                  {activePreset.summary}
+                </p>
               </CardBody>
             </Card>
 
             <Card>
               <CardBody className="gap-5">
                 <div>
-                  <h2 className="text-xl font-bold">AI Providers</h2>
+                  <h2 className="text-xl font-bold">AI API Provider</h2>
                   <p className="text-sm text-default-700 dark:text-default-500">
-                    Use a built-in model id, or define a custom provider (baseUrl + apiKey).
+                    Choose how OpenClaw connects to your model: use OpenClaw sign-in, or connect
+                    your own provider.
                   </p>
                 </div>
 
                 <Select
+                  popoverProps={selectPopoverProps}
                   label={
                     <span className="inline-flex items-center gap-1">
-                      Mode
-                      <Tooltip content="Built-in: only pick a model id. Custom: generate models.providers with baseUrl + apiKey.">
+                      Provider Mode
+                      <Tooltip content="Use OpenClaw sign-in when you want OpenClaw to handle access. Use your own provider when you want to enter the base URL and API key details here.">
                         <span className="inline-flex items-center text-default-500 cursor-help">
                           <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                         </span>
@@ -490,22 +525,22 @@ export default function OpenClawConfigGenerator() {
                 >
                   <SelectItem
                     key="built-in"
-                    description="Enter a model id like anthropic/claude-opus-4.6; keys are usually env vars."
+                    description="Use OpenClaw sign-in or your own environment variables outside this generator."
                   >
-                    Built-in
+                    Use OpenClaw sign-in
                   </SelectItem>
                   <SelectItem
                     key="custom"
-                    description="Generate models.providers with your baseUrl and apiKey (${ENV_VAR} supported)."
+                    description="Recommended. Enter your own base URL and API key details here."
                   >
-                    Custom baseUrl
+                    Use your own provider
                   </SelectItem>
                 </Select>
 
                 {state.ai.mode === 'built-in' ? (
                   <div className="space-y-3">
                     <Input
-                      label="Primary model (agents.defaults.model.primary)"
+                      label="Model name"
                       placeholder="anthropic/claude-opus-4.6"
                       value={state.ai.builtIn.primaryModel}
                       onValueChange={(v) =>
@@ -516,20 +551,18 @@ export default function OpenClawConfigGenerator() {
                       }
                       variant="bordered"
                     />
-                    {state.secretsMode === 'env' && (
-                      <p className="text-xs text-default-700 dark:text-default-500">
-                        Tip: OpenClaw usually reads provider keys from env vars (for example{' '}
-                        <Code className="px-1 py-0.5">ANTHROPIC_API_KEY</Code> or{' '}
-                        <Code className="px-1 py-0.5">OPENAI_API_KEY</Code>).
-                      </p>
-                    )}
+                    <Alert
+                      color="default"
+                      title="API key is handled elsewhere"
+                      description="Built-in models do not add an API key here. After you copy the config, sign in inside OpenClaw or set the provider environment variables before starting OpenClaw."
+                    />
                   </div>
                 ) : (
                   <div className="space-y-4">
                     <div className="grid sm:grid-cols-2 gap-4">
                       <Input
-                        label="providerId"
-                        placeholder="custom-proxy"
+                        label="Provider name"
+                        placeholder="my-provider"
                         value={state.ai.custom.providerId}
                         onValueChange={(v) =>
                           setState((s) => ({
@@ -540,7 +573,8 @@ export default function OpenClawConfigGenerator() {
                         variant="bordered"
                       />
                       <Select
-                        label="api"
+                        popoverProps={selectPopoverProps}
+                        label="API type"
                         selectedKeys={[state.ai.custom.api]}
                         onSelectionChange={(keys) => {
                           if (keys === 'all') return;
@@ -560,8 +594,8 @@ export default function OpenClawConfigGenerator() {
                     </div>
 
                     <Input
-                      label="baseUrl"
-                      placeholder="http://localhost:4000/v1"
+                      label="Base URL"
+                      placeholder="https://api.example.com/v1"
                       value={state.ai.custom.baseUrl}
                       onValueChange={(v) =>
                         setState((s) => ({
@@ -572,62 +606,30 @@ export default function OpenClawConfigGenerator() {
                       variant="bordered"
                     />
 
-                    {state.secretsMode === 'inline' ? (
-                      <Input
-                        label="apiKey"
-                        placeholder="YOUR_API_KEY"
-                        value={state.ai.custom.apiKey}
-                        onValueChange={(v) =>
-                          setState((s) => ({
-                            ...s,
-                            ai: { ...s.ai, custom: { ...s.ai.custom, apiKey: v } },
-                          }))
-                        }
-                        variant="bordered"
-                      />
-                    ) : (
-                      <Input
-                        label="apiKey env var"
-                        placeholder="CUSTOM_PROVIDER_API_KEY"
-                        value={state.ai.custom.apiKeyEnvVar}
-                        onValueChange={(v) =>
-                          setState((s) => {
-                            // "Magic mode": if the user pastes a real API key into the env-var field,
-                            // switch to inline secrets automatically so the exported JSON is immediately usable.
-                            if (
-                              s.secretsMode === 'env' &&
-                              s.ai.mode === 'custom' &&
-                              looksLikeApiKey(v)
-                            ) {
-                              return {
-                                ...s,
-                                secretsMode: 'inline',
-                                ai: {
-                                  ...s.ai,
-                                  custom: {
-                                    ...s.ai.custom,
-                                    apiKey: v,
-                                  },
-                                },
-                              };
-                            }
-
-                            return {
-                              ...s,
-                              ai: { ...s.ai, custom: { ...s.ai.custom, apiKeyEnvVar: v } },
-                            };
-                          })
-                        }
-                        variant="bordered"
-                        description="Will be rendered as ${ENV_VAR} in openclaw.json"
-                      />
-                    )}
+                    <Input
+                      label="API key or environment variable name"
+                      placeholder="MY_PROVIDER_API_KEY or sk-..."
+                      value={customProviderSecretValue}
+                      onValueChange={(v) =>
+                        setState((s) => ({
+                          ...s,
+                          ai: {
+                            ...s.ai,
+                            custom: looksLikeApiKey(v)
+                              ? { ...s.ai.custom, apiKey: v, apiKeyEnvVar: '' }
+                              : { ...s.ai.custom, apiKey: '', apiKeyEnvVar: v },
+                          },
+                        }))
+                      }
+                      variant="bordered"
+                      description="Paste a real API key to write it into JSON, or enter an uppercase environment variable name like MY_PROVIDER_API_KEY to render ${MY_PROVIDER_API_KEY}."
+                    />
 
                     <Divider />
 
                     <div className="grid sm:grid-cols-2 gap-4">
                       <Input
-                        label="model id"
+                        label="Model ID"
                         placeholder={modelIdPlaceholder}
                         value={state.ai.custom.model.id}
                         onValueChange={(v) =>
@@ -642,7 +644,7 @@ export default function OpenClawConfigGenerator() {
                         variant="bordered"
                       />
                       <Input
-                        label="model name"
+                        label="Display name"
                         placeholder={modelNamePlaceholder}
                         value={state.ai.custom.model.name}
                         onValueChange={(v) =>
@@ -658,12 +660,12 @@ export default function OpenClawConfigGenerator() {
                       />
                     </div>
 
-                    {showAdvanced ? (
+                    {showModelTuning ? (
                       <>
                         <div className="grid sm:grid-cols-2 gap-4">
                           <Input
                             type="number"
-                            label="contextWindow"
+                            label="Context window"
                             value={String(state.ai.custom.model.contextWindow)}
                             isDisabled={autoModelLimits && !!officialModelLimits}
                             onValueChange={(v) =>
@@ -689,7 +691,7 @@ export default function OpenClawConfigGenerator() {
                           />
                           <Input
                             type="number"
-                            label="maxTokens"
+                            label="Max output tokens"
                             value={String(state.ai.custom.model.maxTokens)}
                             isDisabled={autoModelLimits && !!officialModelLimits}
                             onValueChange={(v) =>
@@ -726,8 +728,9 @@ export default function OpenClawConfigGenerator() {
                               <Code className="px-1 py-0.5">
                                 {state.ai.custom.model.id.trim() || modelIdPlaceholder}
                               </Code>{' '}
-                              → contextWindow {officialModelLimits.contextWindow.toLocaleString()},
-                              maxTokens {officialModelLimits.maxTokens.toLocaleString()}
+                              {'->'} context window{' '}
+                              {officialModelLimits.contextWindow.toLocaleString()}, max output
+                              tokens {officialModelLimits.maxTokens.toLocaleString()}
                             </div>
                           ) : (
                             <div className="text-xs text-default-700 dark:text-default-500">
@@ -794,7 +797,8 @@ export default function OpenClawConfigGenerator() {
                       </>
                     ) : (
                       <div className="text-xs text-default-700 dark:text-default-500">
-                        Advanced model settings hidden (context window, max tokens, capabilities).
+                        This preset uses the recommended model defaults for context window, output
+                        size, and capabilities.
                       </div>
                     )}
 
@@ -807,14 +811,14 @@ export default function OpenClawConfigGenerator() {
                   </div>
                 )}
 
-                {showAdvanced && (
+                {showModelFallbacks && (
                   <div className="space-y-2">
                     <Divider />
                     <Textarea
                       label={
                         <span className="inline-flex items-center gap-1">
                           Model fallbacks (optional)
-                          <Tooltip content="Optional fallback models (agents.defaults.model.fallbacks). One per line.">
+                          <Tooltip content="Optional backup models. Add one per line.">
                             <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                               <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                             </span>
@@ -836,133 +840,141 @@ export default function OpenClawConfigGenerator() {
               </CardBody>
             </Card>
 
-            <Card>
-              <CardBody className="gap-5">
-                <div>
-                  <h2 className="text-xl font-bold">Gateway</h2>
-                  <p className="text-sm text-default-700 dark:text-default-500">
-                    Controls the WebSocket + Control UI server binding.
-                  </p>
-                </div>
+            {showGatewayCard && (
+              <Card>
+                <CardBody className="gap-5">
+                  <div>
+                    <h2 className="text-xl font-bold">Gateway</h2>
+                    <p className="text-sm text-default-700 dark:text-default-500">
+                      Controls the WebSocket + Control UI server binding.
+                    </p>
+                  </div>
 
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <Input
-                    type="number"
-                    label="Port"
-                    value={String(state.gateway.port)}
-                    onValueChange={(v) =>
-                      setState((s) => ({ ...s, gateway: { ...s.gateway, port: asInt(v, 18789) } }))
-                    }
-                    variant="bordered"
-                    min={1}
-                    max={65535}
-                  />
-
-                  <Select
-                    label="Bind mode"
-                    selectedKeys={[state.gateway.bind]}
-                    onSelectionChange={(keys) => {
-                      if (keys === 'all') return;
-                      const bind = [...keys][0] as GatewayBindMode | undefined;
-                      if (!bind) return;
-                      setState((s) => ({
-                        ...s,
-                        gateway: {
-                          ...s.gateway,
-                          bind,
-                          authMode:
-                            (bind === 'lan' || bind === 'tailnet' || bind === 'custom') &&
-                            s.gateway.authMode === 'off'
-                              ? 'token'
-                              : s.gateway.authMode,
-                        },
-                      }));
-                    }}
-                    variant="bordered"
-                  >
-                    {bindOptions.map((o) => (
-                      <SelectItem key={o.key} description={o.hint}>
-                        {o.label}
-                      </SelectItem>
-                    ))}
-                  </Select>
-                </div>
-
-                {state.gateway.bind === 'custom' && (
-                  <Input
-                    label="customBindHost"
-                    placeholder="203.0.113.10"
-                    value={state.gateway.customBindHost}
-                    onValueChange={(v) =>
-                      setState((s) => ({ ...s, gateway: { ...s.gateway, customBindHost: v } }))
-                    }
-                    variant="bordered"
-                  />
-                )}
-
-                {state.gateway.bind !== 'loopback' && (
-                  <div className="space-y-3">
-                    <Divider />
-
-                    <Select
-                      label={
-                        <span className="inline-flex items-center gap-1">
-                          Auth
-                          <Tooltip content="Gateway binds beyond loopback require auth (OpenClaw will refuse to start without it).">
-                            <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
-                              <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
-                            </span>
-                          </Tooltip>
-                        </span>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <Input
+                      type="number"
+                      label="Port"
+                      value={String(state.gateway.port)}
+                      onValueChange={(v) =>
+                        setState((s) => ({
+                          ...s,
+                          gateway: { ...s.gateway, port: asInt(v, 18789) },
+                        }))
                       }
-                      selectedKeys={[state.gateway.authMode]}
-                      onSelectionChange={(keys) => {
-                        if (keys === 'all') return;
-                        const authMode = [...keys][0] as GatewayAuthMode | undefined;
-                        if (!authMode) return;
-                        setState((s) => ({ ...s, gateway: { ...s.gateway, authMode } }));
-                      }}
                       variant="bordered"
-                    >
-                      <SelectItem key="token" description="Recommended. Set a long random token.">
-                        token
-                      </SelectItem>
-                      <SelectItem
-                        key="password"
-                        description="Use a password (required for Tailscale funnel)."
-                      >
-                        password
-                      </SelectItem>
-                      <SelectItem key="off" description="Not recommended (may fail to start).">
-                        off
-                      </SelectItem>
-                    </Select>
+                      min={1}
+                      max={65535}
+                    />
 
-                    {state.gateway.authMode === 'token' &&
-                      (state.secretsMode === 'inline' ? (
+                    {showGatewayNetworkControls ? (
+                      <Select
+                        popoverProps={selectPopoverProps}
+                        label="Bind mode"
+                        selectedKeys={[state.gateway.bind]}
+                        onSelectionChange={(keys) => {
+                          if (keys === 'all') return;
+                          const bind = [...keys][0] as GatewayBindMode | undefined;
+                          if (!bind) return;
+                          setState((s) => ({
+                            ...s,
+                            gateway: {
+                              ...s.gateway,
+                              bind,
+                              authMode:
+                                (bind === 'lan' || bind === 'tailnet' || bind === 'custom') &&
+                                s.gateway.authMode === 'off'
+                                  ? 'token'
+                                  : s.gateway.authMode,
+                            },
+                          }));
+                        }}
+                        variant="bordered"
+                      >
+                        {bindOptions.map((o) => (
+                          <SelectItem key={o.key} description={o.hint}>
+                            {o.label}
+                          </SelectItem>
+                        ))}
+                      </Select>
+                    ) : (
+                      <p className="text-sm text-default-700 dark:text-default-500">
+                        This preset keeps the Gateway on
+                        <Code className="mx-1 px-1 py-0.5">local only</Code>
+                        with token auth.
+                      </p>
+                    )}
+                  </div>
+
+                  {showGatewayNetworkControls && state.gateway.bind === 'custom' && (
+                    <Input
+                      label="Custom host or IP"
+                      placeholder="203.0.113.10"
+                      value={state.gateway.customBindHost}
+                      onValueChange={(v) =>
+                        setState((s) => ({ ...s, gateway: { ...s.gateway, customBindHost: v } }))
+                      }
+                      variant="bordered"
+                    />
+                  )}
+
+                  {showGatewayNetworkControls && state.gateway.bind !== 'loopback' && (
+                    <div className="space-y-3">
+                      <Divider />
+
+                      <Select
+                        popoverProps={selectPopoverProps}
+                        label={
+                          <span className="inline-flex items-center gap-1">
+                            Sign-in protection
+                            <Tooltip content="If other devices can reach this Gateway, you must turn on sign-in protection.">
+                              <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
+                                <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
+                              </span>
+                            </Tooltip>
+                          </span>
+                        }
+                        selectedKeys={[state.gateway.authMode]}
+                        onSelectionChange={(keys) => {
+                          if (keys === 'all') return;
+                          const authMode = [...keys][0] as GatewayAuthMode | undefined;
+                          if (!authMode) return;
+                          setState((s) => ({ ...s, gateway: { ...s.gateway, authMode } }));
+                        }}
+                        variant="bordered"
+                      >
+                        <SelectItem key="token" description="Recommended. Use a long random token.">
+                          Token
+                        </SelectItem>
+                        {showGatewayPasswordAuth && (
+                          <SelectItem
+                            key="password"
+                            description="Use a password only when you specifically need it, such as Tailscale Funnel."
+                          >
+                            Password
+                          </SelectItem>
+                        )}
+                        <SelectItem key="off" description="Not recommended and may fail to start.">
+                          Off
+                        </SelectItem>
+                      </Select>
+
+                      {state.gateway.authMode === 'token' && (
                         <Input
-                          label="gateway.auth.token"
-                          placeholder="long-random-token"
+                          label="Gateway token or environment variable name"
+                          placeholder="Auto-generated token"
                           value={state.gateway.authToken}
                           onValueChange={(v) =>
                             setState((s) => ({ ...s, gateway: { ...s.gateway, authToken: v } }))
                           }
                           variant="bordered"
+                          description="A ready-to-use token is generated for you. You can keep it as-is, replace it with your own token, or enter an uppercase environment variable name if you already manage secrets that way."
                         />
-                      ) : (
-                        <Alert
-                          color="default"
-                          title="Token via env var"
-                          description="Set OPENCLAW_GATEWAY_TOKEN in your environment."
-                        />
-                      ))}
+                      )}
 
-                    {state.gateway.authMode === 'password' &&
-                      (state.secretsMode === 'inline' ? (
+                      {showGatewayPasswordAuth && state.gateway.authMode === 'password' && (
                         <Input
-                          type="password"
-                          label="gateway.auth.password"
-                          placeholder="strong-password"
+                          label="Gateway password or environment variable name"
+                          placeholder="OPENCLAW_GATEWAY_PASSWORD or strong-password"
                           value={state.gateway.authPassword}
                           onValueChange={(v) =>
                             setState((s) => ({
@@ -971,42 +983,40 @@ export default function OpenClawConfigGenerator() {
                             }))
                           }
                           variant="bordered"
+                          description="Paste the real password to write it into JSON, or enter an uppercase environment variable name like OPENCLAW_GATEWAY_PASSWORD."
                         />
-                      ) : (
-                        <Alert
-                          color="default"
-                          title="Password via env var"
-                          description="Set OPENCLAW_GATEWAY_PASSWORD in your environment."
-                        />
-                      ))}
+                      )}
 
-                    {state.gateway.authMode === 'off' && (
+                      {state.gateway.authMode === 'off' && (
+                        <Alert
+                          color="warning"
+                          title="Sign-in protection is off"
+                          description="OpenClaw will not let the Gateway listen beyond this machine unless sign-in protection is turned on. Use a token unless you have a specific reason not to."
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {showGatewayNetworkControls &&
+                    state.gateway.bind !== 'loopback' &&
+                    state.gateway.bind !== 'auto' && (
                       <Alert
                         color="warning"
-                        title="Gateway auth is off"
-                        description="OpenClaw refuses to bind the Gateway to non-loopback hosts without auth. Use token auth unless you have a specific reason."
+                        title="Public access risk"
+                        description="If this Gateway is reachable from the public internet, lock it down with strong sign-in protection."
                       />
                     )}
-                  </div>
-                )}
 
-                {state.gateway.bind !== 'loopback' && state.gateway.bind !== 'auto' && (
-                  <Alert
-                    color="warning"
-                    title="Public binding risk"
-                    description="If you bind beyond loopback on a public host, lock down Gateway auth and network exposure."
-                  />
-                )}
-
-                {state.gateway.bind === 'auto' && (
-                  <Alert
-                    color="default"
-                    title="Bind mode: auto"
-                    description="Auto usually binds to 127.0.0.1, but may fall back to 0.0.0.0 on some hosts. If you expose the Gateway, configure auth."
-                  />
-                )}
-              </CardBody>
-            </Card>
+                  {showGatewayNetworkControls && state.gateway.bind === 'auto' && (
+                    <Alert
+                      color="default"
+                      title="Auto network mode"
+                      description="Auto usually stays local to this machine, but on some hosts it can open to other devices. If you expose the Gateway, turn on sign-in protection."
+                    />
+                  )}
+                </CardBody>
+              </Card>
+            )}
 
             <Card>
               <CardBody className="gap-5">
@@ -1097,16 +1107,16 @@ export default function OpenClawConfigGenerator() {
                     {state.channels.telegram.dmPolicy === 'open' && (
                       <Alert
                         color="warning"
-                        title='Telegram DM policy is "open"'
-                        description='Anyone can DM your bot and trigger the agent. OpenClaw requires allowFrom to include "*".'
+                        title="Telegram DMs are open to everyone"
+                        description='Anyone can DM your bot and trigger the assistant. Add "*" to the allowed senders list to make this work.'
                       />
                     )}
 
                     <RadioGroup
                       label={
                         <span className="inline-flex items-center gap-1">
-                          DM policy
-                          <Tooltip content="Controls inbound Telegram DMs (channels.telegram.dmPolicy).">
+                          Who can message this assistant
+                          <Tooltip content="Choose who can start a Telegram DM with this assistant.">
                             <span className="inline-flex items-center text-default-500 cursor-help">
                               <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                             </span>
@@ -1150,40 +1160,33 @@ export default function OpenClawConfigGenerator() {
                       })}
                     </RadioGroup>
 
-                    {state.secretsMode === 'inline' ? (
-                      <Input
-                        label="botToken"
-                        placeholder="123456:ABCDEF..."
-                        value={state.channels.telegram.botToken}
-                        onValueChange={(v) =>
-                          setState((s) => ({
-                            ...s,
-                            channels: {
-                              ...s.channels,
-                              telegram: { ...s.channels.telegram, botToken: v },
-                            },
-                          }))
-                        }
-                        variant="bordered"
-                      />
-                    ) : (
-                      <Alert
-                        color="default"
-                        title="Token via env var"
-                        description="Set TELEGRAM_BOT_TOKEN in your environment (env wins over config)."
-                      />
-                    )}
+                    <Input
+                      label="Bot token or environment variable name"
+                      placeholder="TELEGRAM_BOT_TOKEN or 123456:ABCDEF..."
+                      value={state.channels.telegram.botToken}
+                      onValueChange={(v) =>
+                        setState((s) => ({
+                          ...s,
+                          channels: {
+                            ...s.channels,
+                            telegram: { ...s.channels.telegram, botToken: v },
+                          },
+                        }))
+                      }
+                      variant="bordered"
+                      description="Paste the real bot token to write it into JSON, or enter an uppercase environment variable name like TELEGRAM_BOT_TOKEN."
+                    />
 
                     {(state.channels.telegram.dmPolicy === 'open' ||
                       state.channels.telegram.dmPolicy === 'allowlist' ||
-                      showAdvanced ||
+                      showGroupControls ||
                       !!state.channels.telegram.allowFromRaw.trim()) && (
                       <div className="space-y-1">
                         <Textarea
                           label={
                             <span className="inline-flex items-center gap-1">
-                              allowFrom
-                              <Tooltip content='Allowlist for Telegram DMs. Required for dmPolicy="allowlist". For dmPolicy="open", include "*".'>
+                              Allowed DM senders
+                              <Tooltip content='Only these people can start a Telegram DM. If you choose Anyone, include "*".'>
                                 <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                   <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                 </span>
@@ -1207,8 +1210,8 @@ export default function OpenClawConfigGenerator() {
                         />
                         {state.channels.telegram.dmPolicy === 'open' && (
                           <p className="text-xs text-warning">
-                            Required: include <Code className="px-1 py-0.5">*</Code> in allowFrom
-                            for dmPolicy=&quot;open&quot;.
+                            Required: include <Code className="px-1 py-0.5">*</Code> in the allowed
+                            senders list when Anyone is selected.
                           </p>
                         )}
                         {state.channels.telegram.dmPolicy === 'allowlist' &&
@@ -1221,22 +1224,22 @@ export default function OpenClawConfigGenerator() {
                       </div>
                     )}
 
-                    {showAdvanced && (
+                    {showGroupControls && (
                       <div className="space-y-4 pt-2">
                         <Divider />
                         <div>
-                          <h4 className="text-sm font-bold">Groups (Advanced)</h4>
+                          <h4 className="text-sm font-bold">Group Messages</h4>
                           <p className="text-xs text-default-700 dark:text-default-500">
-                            Controls Telegram group message handling. Defaults are conservative
-                            (groups typically blocked unless explicitly configured).
+                            Telegram group messages stay locked down until you open them up here.
                           </p>
                         </div>
 
                         <Select
+                          popoverProps={selectPopoverProps}
                           label={
                             <span className="inline-flex items-center gap-1">
-                              groupPolicy
-                              <Tooltip content="Controls how Telegram group messages are handled (channels.telegram.groupPolicy).">
+                              Who can trigger here
+                              <Tooltip content="Choose who can trigger this assistant from Telegram groups.">
                                 <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                   <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                 </span>
@@ -1263,13 +1266,17 @@ export default function OpenClawConfigGenerator() {
                               key={key}
                               description={
                                 key === 'allowlist'
-                                  ? 'Only allow group messages from allowlisted senders.'
+                                  ? 'Only the people you list below can trigger the assistant from groups.'
                                   : key === 'open'
-                                    ? 'Allow group messages from anyone (mention-gating may still apply).'
-                                    : 'Block all group messages.'
+                                    ? 'Anyone in the group can trigger the assistant.'
+                                    : 'Ignore group messages.'
                               }
                             >
-                              {key}
+                              {key === 'allowlist'
+                                ? 'Allowed list only'
+                                : key === 'open'
+                                  ? 'Anyone here'
+                                  : 'Off'}
                             </SelectItem>
                           ))}
                         </Select>
@@ -1277,8 +1284,8 @@ export default function OpenClawConfigGenerator() {
                         {state.channels.telegram.groupPolicy === 'open' && (
                           <Alert
                             color="warning"
-                            title='Telegram groupPolicy is "open"'
-                            description="Higher risk: anyone in allowed groups can trigger the agent. Consider Safe Mode + explicit allowlists."
+                            title="Telegram group messages are open to everyone here"
+                            description="Higher risk: anyone in the Telegram groups you allow can trigger the assistant."
                           />
                         )}
 
@@ -1287,8 +1294,8 @@ export default function OpenClawConfigGenerator() {
                             <Textarea
                               label={
                                 <span className="inline-flex items-center gap-1">
-                                  groupAllowFrom
-                                  <Tooltip content="Optional sender allowlist for group messages (user ids / usernames). If empty, groups will be blocked in allowlist mode.">
+                                  Allowed people in groups
+                                  <Tooltip content="Add the Telegram users who are allowed to trigger this assistant from groups. Leave this empty to keep group messages off.">
                                     <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                       <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                     </span>
@@ -1312,14 +1319,14 @@ export default function OpenClawConfigGenerator() {
                             />
                             {!state.channels.telegram.groupAllowFromRaw.trim() && (
                               <p className="text-xs text-default-700 dark:text-default-500">
-                                Optional. If you leave this empty in allowlist mode, Telegram group
-                                messages will be blocked.
+                                Optional. If you leave this empty while Allowed senders only is
+                                selected, Telegram group messages stay off.
                               </p>
                             )}
                           </div>
                         )}
 
-                        {showExpert && (
+                        {showMentionControls && (
                           <div className="space-y-4">
                             <Switch
                               isSelected={state.channels.telegram.groupRequireMention}
@@ -1333,14 +1340,14 @@ export default function OpenClawConfigGenerator() {
                                 }))
                               }
                             >
-                              Require mention in groups (groups.*.requireMention)
+                              Only respond when mentioned in groups
                             </Switch>
 
                             <Textarea
                               label={
                                 <span className="inline-flex items-center gap-1">
-                                  groups allowlist (ids)
-                                  <Tooltip content='Optional allowlist of Telegram group chat IDs (one per line). Empty = no group allowlist. Use "*" in config to allow all.'>
+                                  Allowed groups
+                                  <Tooltip content="Add the Telegram group chat IDs that are allowed to trigger this assistant. Leave this empty to keep group messages off.">
                                     <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                       <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                     </span>
@@ -1412,16 +1419,16 @@ export default function OpenClawConfigGenerator() {
                     {state.channels.whatsapp.dmPolicy === 'open' && (
                       <Alert
                         color="warning"
-                        title='WhatsApp DM policy is "open"'
-                        description='Anyone who can DM this number can trigger the agent. OpenClaw requires allowFrom to include "*".'
+                        title="WhatsApp DMs are open to everyone"
+                        description='Anyone who can DM this number can trigger the assistant. Add "*" to the allowed senders list to make this work.'
                       />
                     )}
 
                     <RadioGroup
                       label={
                         <span className="inline-flex items-center gap-1">
-                          DM policy
-                          <Tooltip content="Controls inbound WhatsApp DMs (channels.whatsapp.dmPolicy).">
+                          Who can message this assistant
+                          <Tooltip content="Choose who can start a WhatsApp chat with this assistant.">
                             <span className="inline-flex items-center text-default-500 cursor-help">
                               <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                             </span>
@@ -1489,14 +1496,14 @@ export default function OpenClawConfigGenerator() {
 
                     {(state.channels.whatsapp.dmPolicy === 'open' ||
                       state.channels.whatsapp.dmPolicy === 'allowlist' ||
-                      showAdvanced ||
+                      showGroupControls ||
                       !!state.channels.whatsapp.allowFromRaw.trim()) && (
                       <div className="space-y-1">
                         <Textarea
                           label={
                             <span className="inline-flex items-center gap-1">
-                              allowFrom
-                              <Tooltip content='Allowlist for WhatsApp DMs (E.164). Required for dmPolicy="allowlist". For dmPolicy="open", include "*".'>
+                              Allowed DM senders
+                              <Tooltip content='Only these numbers can start a WhatsApp chat. If you choose Anyone, include "*".'>
                                 <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                   <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                 </span>
@@ -1520,8 +1527,8 @@ export default function OpenClawConfigGenerator() {
                         />
                         {state.channels.whatsapp.dmPolicy === 'open' && (
                           <p className="text-xs text-warning">
-                            Required: include <Code className="px-1 py-0.5">*</Code> in allowFrom
-                            for dmPolicy=&quot;open&quot;.
+                            Required: include <Code className="px-1 py-0.5">*</Code> in the allowed
+                            senders list when Anyone is selected.
                           </p>
                         )}
                         {state.channels.whatsapp.dmPolicy === 'allowlist' &&
@@ -1534,22 +1541,22 @@ export default function OpenClawConfigGenerator() {
                       </div>
                     )}
 
-                    {showAdvanced && (
+                    {showGroupControls && (
                       <div className="space-y-4 pt-2">
                         <Divider />
                         <div>
-                          <h4 className="text-sm font-bold">Groups (Advanced)</h4>
+                          <h4 className="text-sm font-bold">Group Messages</h4>
                           <p className="text-xs text-default-700 dark:text-default-500">
-                            Controls WhatsApp group message handling. Defaults are conservative
-                            (groups typically blocked unless explicitly configured).
+                            WhatsApp group messages stay locked down until you open them up here.
                           </p>
                         </div>
 
                         <Select
+                          popoverProps={selectPopoverProps}
                           label={
                             <span className="inline-flex items-center gap-1">
-                              groupPolicy
-                              <Tooltip content="Controls how WhatsApp group messages are handled (channels.whatsapp.groupPolicy).">
+                              Who can trigger here
+                              <Tooltip content="Choose who can trigger this assistant from WhatsApp groups.">
                                 <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                   <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                 </span>
@@ -1576,13 +1583,17 @@ export default function OpenClawConfigGenerator() {
                               key={key}
                               description={
                                 key === 'allowlist'
-                                  ? 'Only allow group messages from allowlisted senders.'
+                                  ? 'Only the people you list below can trigger the assistant from groups.'
                                   : key === 'open'
-                                    ? 'Allow group messages from anyone (mention-gating may still apply).'
-                                    : 'Block all group messages.'
+                                    ? 'Anyone in the group can trigger the assistant.'
+                                    : 'Ignore group messages.'
                               }
                             >
-                              {key}
+                              {key === 'allowlist'
+                                ? 'Allowed list only'
+                                : key === 'open'
+                                  ? 'Anyone here'
+                                  : 'Off'}
                             </SelectItem>
                           ))}
                         </Select>
@@ -1590,8 +1601,8 @@ export default function OpenClawConfigGenerator() {
                         {state.channels.whatsapp.groupPolicy === 'open' && (
                           <Alert
                             color="warning"
-                            title='WhatsApp groupPolicy is "open"'
-                            description="Higher risk: anyone in groups can trigger the agent. Consider Safe Mode + explicit allowlists."
+                            title="WhatsApp group messages are open to everyone here"
+                            description="Higher risk: anyone in the WhatsApp groups you allow can trigger the assistant."
                           />
                         )}
 
@@ -1600,8 +1611,8 @@ export default function OpenClawConfigGenerator() {
                             <Textarea
                               label={
                                 <span className="inline-flex items-center gap-1">
-                                  groupAllowFrom
-                                  <Tooltip content="Optional sender allowlist for group messages (E.164). If empty, groups will be blocked in allowlist mode.">
+                                  Allowed people in groups
+                                  <Tooltip content="Add the WhatsApp numbers that are allowed to trigger this assistant from groups. Leave this empty to keep group messages off.">
                                     <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                       <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                     </span>
@@ -1625,14 +1636,14 @@ export default function OpenClawConfigGenerator() {
                             />
                             {!state.channels.whatsapp.groupAllowFromRaw.trim() && (
                               <p className="text-xs text-default-700 dark:text-default-500">
-                                Optional. If you leave this empty in allowlist mode, WhatsApp group
-                                messages will be blocked.
+                                Optional. If you leave this empty while Allowed senders only is
+                                selected, WhatsApp group messages stay off.
                               </p>
                             )}
                           </div>
                         )}
 
-                        {showExpert && (
+                        {showMentionControls && (
                           <div className="space-y-4">
                             <Switch
                               isSelected={state.channels.whatsapp.groupRequireMention}
@@ -1646,14 +1657,14 @@ export default function OpenClawConfigGenerator() {
                                 }))
                               }
                             >
-                              Require mention in groups (groups.*.requireMention)
+                              Only respond when mentioned in groups
                             </Switch>
 
                             <Textarea
                               label={
                                 <span className="inline-flex items-center gap-1">
-                                  groups allowlist (ids)
-                                  <Tooltip content='Optional allowlist of WhatsApp group IDs (JIDs, one per line). Empty = no group allowlist. Use "*" in config to allow all.'>
+                                  Allowed groups
+                                  <Tooltip content="Add the WhatsApp group IDs that are allowed to trigger this assistant. Leave this empty to keep group messages off.">
                                     <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                       <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                     </span>
@@ -1692,16 +1703,16 @@ export default function OpenClawConfigGenerator() {
                     {state.channels.discord.dmPolicy === 'open' && (
                       <Alert
                         color="warning"
-                        title='Discord DM policy is "open"'
-                        description='Anyone can DM the bot and trigger the agent. OpenClaw requires dm.allowFrom to include "*".'
+                        title="Discord DMs are open to everyone"
+                        description='Anyone can DM the bot and trigger the assistant. Add "*" to the allowed senders list to make this work.'
                       />
                     )}
 
                     <RadioGroup
                       label={
                         <span className="inline-flex items-center gap-1">
-                          DM policy
-                          <Tooltip content="Controls inbound Discord DMs (channels.discord.dm.policy).">
+                          Who can message this assistant
+                          <Tooltip content="Choose who can start a Discord DM with this assistant.">
                             <span className="inline-flex items-center text-default-500 cursor-help">
                               <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                             </span>
@@ -1745,40 +1756,33 @@ export default function OpenClawConfigGenerator() {
                       })}
                     </RadioGroup>
 
-                    {state.secretsMode === 'inline' ? (
-                      <Input
-                        label="token"
-                        placeholder="DISCORD_BOT_TOKEN..."
-                        value={state.channels.discord.token}
-                        onValueChange={(v) =>
-                          setState((s) => ({
-                            ...s,
-                            channels: {
-                              ...s.channels,
-                              discord: { ...s.channels.discord, token: v },
-                            },
-                          }))
-                        }
-                        variant="bordered"
-                      />
-                    ) : (
-                      <Alert
-                        color="default"
-                        title="Token via env var"
-                        description="Set DISCORD_BOT_TOKEN in your environment (env wins over config)."
-                      />
-                    )}
+                    <Input
+                      label="Bot token or environment variable name"
+                      placeholder="DISCORD_BOT_TOKEN or your-bot-token"
+                      value={state.channels.discord.token}
+                      onValueChange={(v) =>
+                        setState((s) => ({
+                          ...s,
+                          channels: {
+                            ...s.channels,
+                            discord: { ...s.channels.discord, token: v },
+                          },
+                        }))
+                      }
+                      variant="bordered"
+                      description="Paste the real bot token to write it into JSON, or enter an uppercase environment variable name like DISCORD_BOT_TOKEN."
+                    />
 
                     {(state.channels.discord.dmPolicy === 'open' ||
                       state.channels.discord.dmPolicy === 'allowlist' ||
-                      showAdvanced ||
+                      showGroupControls ||
                       !!state.channels.discord.allowFromRaw.trim()) && (
                       <div className="space-y-1">
                         <Textarea
                           label={
                             <span className="inline-flex items-center gap-1">
-                              dm.allowFrom
-                              <Tooltip content='DM allowlist (Discord user IDs). Required for dmPolicy="allowlist". For dmPolicy="open", include "*".'>
+                              Allowed DM senders
+                              <Tooltip content='Only these Discord users can start a DM. If you choose Anyone, include "*".'>
                                 <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                   <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                 </span>
@@ -1802,8 +1806,8 @@ export default function OpenClawConfigGenerator() {
                         />
                         {state.channels.discord.dmPolicy === 'open' && (
                           <p className="text-xs text-warning">
-                            Required: include <Code className="px-1 py-0.5">*</Code> in dm.allowFrom
-                            for dmPolicy=&quot;open&quot;.
+                            Required: include <Code className="px-1 py-0.5">*</Code> in the allowed
+                            senders list when Anyone is selected.
                           </p>
                         )}
                         {state.channels.discord.dmPolicy === 'allowlist' &&
@@ -1815,22 +1819,22 @@ export default function OpenClawConfigGenerator() {
                       </div>
                     )}
 
-                    {showAdvanced && (
+                    {showGroupControls && (
                       <div className="space-y-4 pt-2">
                         <Divider />
                         <div>
-                          <h4 className="text-sm font-bold">Guilds (Advanced)</h4>
+                          <h4 className="text-sm font-bold">Guild Messages</h4>
                           <p className="text-xs text-default-700 dark:text-default-500">
-                            Discord server messages are gated by{' '}
-                            <Code className="px-1 py-0.5">groupPolicy</Code> + guild allowlists.
+                            Discord server messages follow the server access choices you set here.
                           </p>
                         </div>
 
                         <Select
+                          popoverProps={selectPopoverProps}
                           label={
                             <span className="inline-flex items-center gap-1">
-                              groupPolicy
-                              <Tooltip content="Controls how Discord guild messages are handled (channels.discord.groupPolicy).">
+                              Who can trigger here
+                              <Tooltip content="Choose who can trigger this assistant from Discord servers.">
                                 <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                   <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                 </span>
@@ -1857,13 +1861,17 @@ export default function OpenClawConfigGenerator() {
                               key={key}
                               description={
                                 key === 'allowlist'
-                                  ? 'Only allow server messages from configured guilds.'
+                                  ? 'Only the servers you list below can trigger the assistant.'
                                   : key === 'open'
-                                    ? 'Allow server messages from any guild (high exposure).'
-                                    : 'Block all server messages.'
+                                    ? 'Any server the bot can access can trigger the assistant.'
+                                    : 'Ignore server messages.'
                               }
                             >
-                              {key}
+                              {key === 'allowlist'
+                                ? 'Allowed list only'
+                                : key === 'open'
+                                  ? 'Anyone here'
+                                  : 'Off'}
                             </SelectItem>
                           ))}
                         </Select>
@@ -1871,8 +1879,8 @@ export default function OpenClawConfigGenerator() {
                         {state.channels.discord.groupPolicy === 'open' && (
                           <Alert
                             color="warning"
-                            title='Discord groupPolicy is "open"'
-                            description="Higher risk: any server/channel can reach the agent. Consider Safe Mode + explicit allowlists."
+                            title="Discord server messages are open to everyone here"
+                            description="Higher risk: any server the bot can access can trigger the assistant."
                           />
                         )}
 
@@ -1882,8 +1890,8 @@ export default function OpenClawConfigGenerator() {
                             <Textarea
                               label={
                                 <span className="inline-flex items-center gap-1">
-                                  guilds allowlist (ids)
-                                  <Tooltip content="Optional allowlist of Discord guild (server) IDs. Empty in allowlist mode blocks all server messages.">
+                                  Allowed servers
+                                  <Tooltip content="Add the Discord server IDs that are allowed to trigger this assistant. Leave this empty to keep server messages off.">
                                     <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                       <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                     </span>
@@ -1908,14 +1916,14 @@ export default function OpenClawConfigGenerator() {
                             {state.channels.discord.groupPolicy === 'allowlist' &&
                               !state.channels.discord.guildIdsRaw.trim() && (
                                 <p className="text-xs text-default-700 dark:text-default-500">
-                                  Optional. If you leave this empty in allowlist mode, Discord
-                                  server messages will be blocked (DMs still work).
+                                  Optional. If you leave this empty while Allowed servers is
+                                  selected, Discord server messages stay off (DMs still work).
                                 </p>
                               )}
                           </div>
                         )}
 
-                        {showExpert && (
+                        {showMentionControls && (
                           <Switch
                             isSelected={state.channels.discord.guildRequireMention}
                             onValueChange={(v) =>
@@ -1928,7 +1936,7 @@ export default function OpenClawConfigGenerator() {
                               }))
                             }
                           >
-                            Require mention in guilds (guilds.*.requireMention)
+                            Only respond when mentioned in servers
                           </Switch>
                         )}
                       </div>
@@ -1946,16 +1954,16 @@ export default function OpenClawConfigGenerator() {
                     {state.channels.slack.dmPolicy === 'open' && (
                       <Alert
                         color="warning"
-                        title='Slack DM policy is "open"'
-                        description='Anyone in the workspace can DM the bot and trigger the agent. OpenClaw requires dm.allowFrom to include "*".'
+                        title="Slack DMs are open to everyone"
+                        description='Anyone in the workspace can DM the bot and trigger the assistant. Add "*" to the allowed senders list to make this work.'
                       />
                     )}
 
                     <RadioGroup
                       label={
                         <span className="inline-flex items-center gap-1">
-                          DM policy
-                          <Tooltip content="Controls inbound Slack DMs (channels.slack.dm.policy).">
+                          Who can message this assistant
+                          <Tooltip content="Choose who can start a Slack DM with this assistant.">
                             <span className="inline-flex items-center text-default-500 cursor-help">
                               <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                             </span>
@@ -1999,57 +2007,51 @@ export default function OpenClawConfigGenerator() {
                       })}
                     </RadioGroup>
 
-                    {state.secretsMode === 'inline' ? (
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <Input
-                          label="botToken"
-                          placeholder="xoxb-..."
-                          value={state.channels.slack.botToken}
-                          onValueChange={(v) =>
-                            setState((s) => ({
-                              ...s,
-                              channels: {
-                                ...s.channels,
-                                slack: { ...s.channels.slack, botToken: v },
-                              },
-                            }))
-                          }
-                          variant="bordered"
-                        />
-                        <Input
-                          label="appToken (socket)"
-                          placeholder="xapp-..."
-                          value={state.channels.slack.appToken}
-                          onValueChange={(v) =>
-                            setState((s) => ({
-                              ...s,
-                              channels: {
-                                ...s.channels,
-                                slack: { ...s.channels.slack, appToken: v },
-                              },
-                            }))
-                          }
-                          variant="bordered"
-                        />
-                      </div>
-                    ) : (
-                      <Alert
-                        color="default"
-                        title="Tokens via env vars"
-                        description="Set SLACK_BOT_TOKEN and SLACK_APP_TOKEN in your environment (env wins over config)."
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <Input
+                        label="Bot token or environment variable name"
+                        placeholder="SLACK_BOT_TOKEN or xoxb-..."
+                        value={state.channels.slack.botToken}
+                        onValueChange={(v) =>
+                          setState((s) => ({
+                            ...s,
+                            channels: {
+                              ...s.channels,
+                              slack: { ...s.channels.slack, botToken: v },
+                            },
+                          }))
+                        }
+                        variant="bordered"
+                        description="Paste the real bot token to write it into JSON, or enter an uppercase environment variable name like SLACK_BOT_TOKEN."
                       />
-                    )}
+                      <Input
+                        label="App token or environment variable name"
+                        placeholder="SLACK_APP_TOKEN or xapp-..."
+                        value={state.channels.slack.appToken}
+                        onValueChange={(v) =>
+                          setState((s) => ({
+                            ...s,
+                            channels: {
+                              ...s.channels,
+                              slack: { ...s.channels.slack, appToken: v },
+                            },
+                          }))
+                        }
+                        variant="bordered"
+                        description="Paste the real app token to write it into JSON, or enter an uppercase environment variable name like SLACK_APP_TOKEN."
+                      />
+                    </div>
 
                     {(state.channels.slack.dmPolicy === 'open' ||
                       state.channels.slack.dmPolicy === 'allowlist' ||
-                      showAdvanced ||
+                      showGroupControls ||
                       !!state.channels.slack.allowFromRaw.trim()) && (
                       <div className="space-y-1">
                         <Textarea
                           label={
                             <span className="inline-flex items-center gap-1">
-                              dm.allowFrom
-                              <Tooltip content='DM allowlist (Slack user IDs). Required for dmPolicy="allowlist". For dmPolicy="open", include "*".'>
+                              Allowed DM senders
+                              <Tooltip content='Only these Slack users can start a DM. If you choose Anyone, include "*".'>
                                 <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                   <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                 </span>
@@ -2073,8 +2075,8 @@ export default function OpenClawConfigGenerator() {
                         />
                         {state.channels.slack.dmPolicy === 'open' && (
                           <p className="text-xs text-warning">
-                            Required: include <Code className="px-1 py-0.5">*</Code> in dm.allowFrom
-                            for dmPolicy=&quot;open&quot;.
+                            Required: include <Code className="px-1 py-0.5">*</Code> in the allowed
+                            senders list when Anyone is selected.
                           </p>
                         )}
                         {state.channels.slack.dmPolicy === 'allowlist' &&
@@ -2086,22 +2088,22 @@ export default function OpenClawConfigGenerator() {
                       </div>
                     )}
 
-                    {showAdvanced && (
+                    {showGroupControls && (
                       <div className="space-y-4 pt-2">
                         <Divider />
                         <div>
-                          <h4 className="text-sm font-bold">Channels (Advanced)</h4>
+                          <h4 className="text-sm font-bold">Channel Messages</h4>
                           <p className="text-xs text-default-700 dark:text-default-500">
-                            Slack channel messages are gated by{' '}
-                            <Code className="px-1 py-0.5">groupPolicy</Code> + channel allowlists.
+                            Slack channel messages follow the channel access choices you set here.
                           </p>
                         </div>
 
                         <Select
+                          popoverProps={selectPopoverProps}
                           label={
                             <span className="inline-flex items-center gap-1">
-                              groupPolicy
-                              <Tooltip content="Controls how Slack channel messages are handled (channels.slack.groupPolicy).">
+                              Who can trigger here
+                              <Tooltip content="Choose who can trigger this assistant from Slack channels.">
                                 <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                   <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                 </span>
@@ -2128,13 +2130,17 @@ export default function OpenClawConfigGenerator() {
                               key={key}
                               description={
                                 key === 'allowlist'
-                                  ? 'Only allow messages from configured channels.'
+                                  ? 'Only the channels you list below can trigger the assistant.'
                                   : key === 'open'
-                                    ? 'Allow messages from any channel (high exposure).'
-                                    : 'Block all channel messages.'
+                                    ? 'Any channel the bot can access can trigger the assistant.'
+                                    : 'Ignore channel messages.'
                               }
                             >
-                              {key}
+                              {key === 'allowlist'
+                                ? 'Allowed list only'
+                                : key === 'open'
+                                  ? 'Anyone here'
+                                  : 'Off'}
                             </SelectItem>
                           ))}
                         </Select>
@@ -2142,8 +2148,8 @@ export default function OpenClawConfigGenerator() {
                         {state.channels.slack.groupPolicy === 'open' && (
                           <Alert
                             color="warning"
-                            title='Slack groupPolicy is "open"'
-                            description="Higher risk: any channel can reach the agent. Consider Safe Mode + explicit allowlists."
+                            title="Slack channel messages are open to everyone here"
+                            description="Higher risk: any channel the bot can access can trigger the assistant."
                           />
                         )}
 
@@ -2153,8 +2159,8 @@ export default function OpenClawConfigGenerator() {
                             <Textarea
                               label={
                                 <span className="inline-flex items-center gap-1">
-                                  channels allowlist (ids or names)
-                                  <Tooltip content='Optional allowlist of Slack channel IDs or names. Examples: "C012ABCDEF", "#general". Empty in allowlist mode blocks all channel messages.'>
+                                  Allowed channels
+                                  <Tooltip content='Add the Slack channels that are allowed to trigger this assistant. Examples: "C012ABCDEF", "#general". Leave this empty to keep channel messages off.'>
                                     <span className="inline-flex items-center text-default-500 cursor-help pointer-events-auto">
                                       <IconInfoSolid className="w-4 h-4" aria-hidden="true" />
                                     </span>
@@ -2179,14 +2185,14 @@ export default function OpenClawConfigGenerator() {
                             {state.channels.slack.groupPolicy === 'allowlist' &&
                               !state.channels.slack.channelIdsRaw.trim() && (
                                 <p className="text-xs text-default-700 dark:text-default-500">
-                                  Optional. If you leave this empty in allowlist mode, Slack channel
-                                  messages will be blocked (DMs still work).
+                                  Optional. If you leave this empty while Allowed channels is
+                                  selected, Slack channel messages stay off (DMs still work).
                                 </p>
                               )}
                           </div>
                         )}
 
-                        {showExpert && state.channels.slack.channelIdsRaw.trim() && (
+                        {showMentionControls && state.channels.slack.channelIdsRaw.trim() && (
                           <Switch
                             isSelected={state.channels.slack.channelRequireMention}
                             onValueChange={(v) =>
@@ -2199,7 +2205,7 @@ export default function OpenClawConfigGenerator() {
                               }))
                             }
                           >
-                            Require mention in allowed channels (channels.*.requireMention)
+                            Only respond when mentioned in allowed channels
                           </Switch>
                         )}
                       </div>
@@ -2215,7 +2221,7 @@ export default function OpenClawConfigGenerator() {
               <CardBody className="gap-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h2 className="text-xl font-bold">Preview</h2>
+                    <h2 className="text-xl font-bold">Generated Config</h2>
                     <p className="text-sm text-default-700 dark:text-default-500">
                       Generated <span className="font-mono">openclaw.json</span>
                     </p>
@@ -2282,12 +2288,12 @@ export default function OpenClawConfigGenerator() {
                   </div>
                 )}
 
-                {state.secretsMode === 'env' && result.requiredEnvVars.length > 0 && (
+                {result.requiredEnvVars.length > 0 && (
                   <Card className="bg-content2">
                     <CardBody className="gap-2">
                       <div className="flex items-center gap-2 text-sm font-semibold">
                         <IconWarning className="w-4 h-4" aria-hidden="true" />
-                        Required env vars
+                        Required environment variables
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {result.requiredEnvVars.map((k) => (
@@ -2297,8 +2303,9 @@ export default function OpenClawConfigGenerator() {
                         ))}
                       </div>
                       <p className="text-xs text-default-700 dark:text-default-500">
-                        You selected “Keep secrets out of JSON”, so tokens are expected via env
-                        vars.
+                        Any uppercase environment variable name you entered is rendered as{' '}
+                        <Code className="px-1 py-0.5">{'${ENV_VAR}'}</Code> in the exported config.
+                        Set these values before you start OpenClaw.
                       </p>
                     </CardBody>
                   </Card>

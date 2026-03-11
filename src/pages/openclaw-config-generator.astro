@@ -5,15 +5,15 @@ import OpenClawConfigGenerator from '../components/ConfigGenerator/OpenClawConfi
 ---
 
 <BaseLayout
-  title="OpenClaw Config Generator | CoClaw"
+  title="OpenClaw Config Generator / openclaw.json | CoClaw"
   description="Generate a secure OpenClaw configuration (openclaw.json) visually. Runs 100% client-side."
   keywords="OpenClaw config generator, openclaw.json, OpenClaw configuration, allowlist, dmPolicy, sandbox"
 >
-  <Section containerClass="max-w-6xl">
-    <h1 class="text-4xl md:text-5xl font-bold mb-4">OpenClaw Config Generator</h1>
+  <Section containerClass="!z-0 max-w-6xl">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">OpenClaw Config Generator / openclaw.json</h1>
     <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed mb-8 max-w-3xl">
-      Build a safer <code class="text-primary">openclaw.json</code> without hand-editing JSON. This tool
-      runs entirely in your browser.
+      Build a Friendly OpenClaw Config. Generate an <code class="text-primary">openclaw.json</code>
+      that matches how you actually want OpenClaw to behave, without hand-editing JSON.
     </p>
 
     <OpenClawConfigGenerator client:load />

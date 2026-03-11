@@ -5,6 +5,7 @@ import {
   type OpenClawConfigGeneratorState,
 } from '../src/lib/openclaw-config/generator';
 import { inferOfficialModelLimits } from '../src/lib/openclaw-config/official-model-limits';
+import { applyPresetToState } from '../src/lib/openclaw-config/presets';
 
 function hasIssue(
   res: ReturnType<typeof buildOpenClawConfig>,
@@ -16,8 +17,12 @@ function hasIssue(
 
 function baseState(): OpenClawConfigGeneratorState {
   return {
-    safeMode: true,
-    secretsMode: 'env',
+    toolsProfile: 'coding',
+    toolsAllow: [],
+    toolsDeny: [],
+    sandboxMode: 'non-main',
+    sandboxToolsAllow: [],
+    sandboxToolsDeny: [],
     modelFallbacksRaw: '',
     ai: {
       mode: 'built-in',
@@ -25,10 +30,10 @@ function baseState(): OpenClawConfigGeneratorState {
         primaryModel: 'anthropic/claude-opus-4.6',
       },
       custom: {
-        providerId: 'custom-proxy',
+        providerId: 'my-provider',
         api: 'openai-responses',
-        baseUrl: 'http://localhost:4000/v1',
-        apiKeyEnvVar: 'CUSTOM_PROVIDER_API_KEY',
+        baseUrl: 'https://api.example.com/v1',
+        apiKeyEnvVar: 'MY_PROVIDER_API_KEY',
         apiKey: '',
         model: {
           id: 'gpt-5.2',
@@ -46,15 +51,15 @@ function baseState(): OpenClawConfigGeneratorState {
       bind: 'loopback',
       customBindHost: '',
       authMode: 'off',
-      authToken: '',
-      authPassword: '',
+      authToken: 'ocw_test_gateway_token',
+      authPassword: 'test-gateway-password',
     },
     channels: {
       telegram: {
         enabled: false,
         dmPolicy: 'pairing',
         allowFromRaw: '',
-        botToken: '',
+        botToken: 'TELEGRAM_BOT_TOKEN',
         groupPolicy: 'allowlist',
         groupAllowFromRaw: '',
         groupIdsRaw: '',
@@ -76,7 +81,7 @@ function baseState(): OpenClawConfigGeneratorState {
         enabled: false,
         dmPolicy: 'pairing',
         allowFromRaw: '',
-        token: '',
+        token: 'DISCORD_BOT_TOKEN',
         groupPolicy: 'allowlist',
         guildIdsRaw: '',
         guildRequireMention: true,
@@ -85,8 +90,8 @@ function baseState(): OpenClawConfigGeneratorState {
         enabled: false,
         dmPolicy: 'pairing',
         allowFromRaw: '',
-        botToken: '',
-        appToken: '',
+        botToken: 'SLACK_BOT_TOKEN',
+        appToken: 'SLACK_APP_TOKEN',
         groupPolicy: 'allowlist',
         channelIdsRaw: '',
         channelRequireMention: true,
@@ -142,6 +147,34 @@ function run() {
     });
   }
 
+  // 0b) Presets should apply the expected profile and guardrail defaults
+  {
+    const developer = applyPresetToState(baseState(), 'developer');
+    assert.equal(developer.toolsProfile, 'coding');
+    assert.equal(developer.gateway.bind, 'loopback');
+
+    const personal = applyPresetToState(baseState(), 'personal');
+    assert.equal(personal.toolsProfile, 'coding');
+    assert.equal(personal.sandboxMode, 'non-main');
+    assert.deepEqual(personal.toolsAllow, ['group:web', 'browser', 'pdf']);
+    assert.deepEqual(personal.toolsDeny, ['cron']);
+
+    const message = applyPresetToState(baseState(), 'message');
+    assert.equal(message.toolsProfile, 'messaging');
+    assert.deepEqual(message.toolsAllow, ['group:fs', 'group:runtime']);
+    assert.equal(message.channels.telegram.dmPolicy, 'pairing');
+
+    const full = applyPresetToState(baseState(), 'full');
+    assert.equal(full.toolsProfile, 'full');
+    const fullConfig = buildOpenClawConfig(full).config as { tools?: { profile?: unknown } };
+    assert.equal(fullConfig.tools?.profile, 'full');
+
+    const remote = applyPresetToState(baseState(), 'remote');
+    assert.equal(remote.toolsProfile, 'coding');
+    assert.deepEqual(remote.toolsDeny, ['browser', 'cron']);
+    assert.equal(remote.gateway.authMode, 'token');
+  }
+
   // 1) Gateway: bind=custom must set customBindHost
   {
     const s = baseState();
@@ -152,15 +185,66 @@ function run() {
     assert.ok(hasIssue(res, 'error', 'gateway.customBindHost'));
   }
 
-  // 1b) Generator should always pin tools.profile to coding
+  // 1b) Base state should export tools.profile="coding" by default
   {
     const s = baseState();
-    s.safeMode = false;
     const res = buildOpenClawConfig(s);
     const cfg = res.config as unknown as {
       tools?: { profile?: unknown };
     };
     assert.equal(cfg.tools?.profile, 'coding');
+  }
+
+  // 1c) Preset sandbox policy should be exported without a separate safe-mode flag
+  {
+    const s = applyPresetToState(baseState(), 'personal');
+    const res = buildOpenClawConfig(s);
+    const cfg = res.config as unknown as {
+      agents?: { defaults?: { sandbox?: { mode?: unknown } } };
+      tools?: { sandbox?: { tools?: { allow?: unknown; deny?: unknown } } };
+    };
+    assert.equal(cfg.agents?.defaults?.sandbox?.mode, 'non-main');
+    assert.deepEqual(cfg.tools?.sandbox?.tools?.allow, [
+      'bash',
+      'process',
+      'read',
+      'write',
+      'edit',
+      'sessions_list',
+      'sessions_history',
+      'sessions_send',
+      'sessions_spawn',
+    ]);
+    assert.deepEqual(cfg.tools?.sandbox?.tools?.deny, [
+      'browser',
+      'canvas',
+      'nodes',
+      'cron',
+      'discord',
+      'gateway',
+    ]);
+  }
+
+  // 1c) Message preset should export friendly allow/deny defaults
+  {
+    const s = applyPresetToState(baseState(), 'message');
+    const res = buildOpenClawConfig(s);
+    const cfg = res.config as unknown as {
+      tools?: { allow?: unknown; deny?: unknown };
+    };
+    assert.deepEqual(cfg.tools?.allow, ['group:fs', 'group:runtime']);
+    assert.deepEqual(cfg.tools?.deny, ['browser', 'cron']);
+  }
+
+  // 1d) Personal preset should export broader everyday tools
+  {
+    const s = applyPresetToState(baseState(), 'personal');
+    const res = buildOpenClawConfig(s);
+    const cfg = res.config as unknown as {
+      tools?: { allow?: unknown; deny?: unknown };
+    };
+    assert.deepEqual(cfg.tools?.allow, ['group:web', 'browser', 'pdf']);
+    assert.deepEqual(cfg.tools?.deny, ['cron']);
   }
 
   // 2) Gateway: binding beyond loopback requires auth
@@ -182,21 +266,23 @@ function run() {
     assert.ok(hasIssue(res, 'warning', 'gateway.auth'));
   }
 
-  // 3) Gateway: env secrets + token auth should surface required env var
+  // 3) Gateway: env var names should surface as required env vars
   {
     const s = baseState();
     s.gateway.bind = 'lan';
     s.gateway.authMode = 'token';
+    s.gateway.authToken = 'OPENCLAW_GATEWAY_TOKEN';
     const res = buildOpenClawConfig(s);
     assert.equal(res.issues.filter((i) => i.level === 'error').length, 0);
     assert.ok(res.requiredEnvVars.includes('OPENCLAW_GATEWAY_TOKEN'));
   }
 
-  // 3b) Gateway: env secrets + password auth should surface required env var
+  // 3b) Gateway: password env var names should surface as required env vars
   {
     const s = baseState();
     s.gateway.bind = 'lan';
     s.gateway.authMode = 'password';
+    s.gateway.authPassword = 'OPENCLAW_GATEWAY_PASSWORD';
     const res = buildOpenClawConfig(s);
     assert.equal(res.issues.filter((i) => i.level === 'error').length, 0);
     assert.ok(res.requiredEnvVars.includes('OPENCLAW_GATEWAY_PASSWORD'));
@@ -255,14 +341,30 @@ function run() {
     assert.deepEqual(cfg.agents?.defaults?.model?.fallbacks, ['openai/gpt-4.1']);
   }
 
-  // 6b) Custom provider: env var names must be uppercase (OpenClaw only substitutes ${VARS} for uppercase)
+  // 6b) Custom provider: uppercase env var names should be exported as env refs
   {
     const s = baseState();
-    s.secretsMode = 'env';
+    s.ai.mode = 'custom';
+    s.ai.custom.apiKeyEnvVar = 'MY_PROVIDER_API_KEY';
+    const res = buildOpenClawConfig(s);
+    assert.ok(res.requiredEnvVars.includes('MY_PROVIDER_API_KEY'));
+    const cfg = res.config as unknown as {
+      models?: { providers?: Record<string, { apiKey?: string }> };
+    };
+    assert.equal(cfg.models?.providers?.['my-provider']?.apiKey, '${MY_PROVIDER_API_KEY}');
+  }
+
+  // 6c) Custom provider: non-env-style values stay inline
+  {
+    const s = baseState();
     s.ai.mode = 'custom';
     s.ai.custom.apiKeyEnvVar = 'custom_provider_api_key';
     const res = buildOpenClawConfig(s);
-    assert.ok(hasIssue(res, 'error', 'ai.custom.apiKeyEnvVar'));
+    assert.ok(!res.requiredEnvVars.includes('custom_provider_api_key'));
+    const cfg = res.config as unknown as {
+      models?: { providers?: Record<string, { apiKey?: string }> };
+    };
+    assert.equal(cfg.models?.providers?.['my-provider']?.apiKey, 'custom_provider_api_key');
   }
 
   // 7) Discord guild allowlist: allowlist mode + empty guilds should not error (blocks guild msgs)

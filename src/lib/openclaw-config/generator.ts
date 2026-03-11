@@ -2,8 +2,8 @@ export type DmPolicy = 'pairing' | 'allowlist' | 'open' | 'disabled';
 export type GroupPolicy = 'open' | 'allowlist' | 'disabled';
 export type GatewayBindMode = 'loopback' | 'auto' | 'lan' | 'tailnet' | 'custom';
 export type GatewayAuthMode = 'off' | 'token' | 'password';
-export type SecretsMode = 'env' | 'inline';
 export type ModelApi = 'openai-completions' | 'openai-responses' | 'anthropic-messages';
+export type ToolsProfile = 'minimal' | 'messaging' | 'coding' | 'full';
 
 export type ConfigIssueLevel = 'error' | 'warning' | 'info';
 
@@ -30,7 +30,7 @@ export type TelegramState = ChannelStateBase & {
 };
 
 export type WhatsAppState = ChannelStateBase;
-export type WhatsAppStateAdvanced = ChannelStateBase & {
+export type WhatsAppChannelState = ChannelStateBase & {
   selfChatMode: boolean;
   groupPolicy: GroupPolicy;
   groupAllowFromRaw: string;
@@ -54,8 +54,12 @@ export type SlackState = ChannelStateBase & {
 };
 
 export type OpenClawConfigGeneratorState = {
-  safeMode: boolean;
-  secretsMode: SecretsMode;
+  toolsProfile: ToolsProfile;
+  toolsAllow: string[];
+  toolsDeny: string[];
+  sandboxMode: 'non-main' | 'off';
+  sandboxToolsAllow: string[];
+  sandboxToolsDeny: string[];
   modelFallbacksRaw?: string;
   ai: {
     mode: 'built-in' | 'custom';
@@ -89,7 +93,7 @@ export type OpenClawConfigGeneratorState = {
   };
   channels: {
     telegram: TelegramState;
-    whatsapp: WhatsAppStateAdvanced;
+    whatsapp: WhatsAppChannelState;
     discord: DiscordState;
     slack: SlackState;
   };
@@ -117,6 +121,37 @@ function uniq<T>(items: T[]): T[] {
   return [...new Set(items)];
 }
 
+const ENV_VAR_NAME_RE = /^[A-Z_][A-Z0-9_]*$/;
+
+function isEnvVarName(value: string): boolean {
+  return ENV_VAR_NAME_RE.test(value.trim());
+}
+
+function resolveSecretValue(
+  value: string,
+  path: string,
+  missingMessage: string,
+  issues: ConfigIssue[],
+  requiredEnvVars: string[]
+): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    issues.push({
+      level: 'error',
+      path,
+      message: missingMessage,
+    });
+    return null;
+  }
+
+  if (isEnvVarName(trimmed)) {
+    requiredEnvVars.push(trimmed);
+    return `\${${trimmed}}`;
+  }
+
+  return trimmed;
+}
+
 function hasAnyEnabledChannel(state: OpenClawConfigGeneratorState): boolean {
   return (
     state.channels.telegram.enabled ||
@@ -126,7 +161,7 @@ function hasAnyEnabledChannel(state: OpenClawConfigGeneratorState): boolean {
   );
 }
 
-function inferProviderEnvVarFromModelId(modelId: string): string | null {
+export function inferProviderEnvVarFromModelId(modelId: string): string | null {
   const provider = modelId.split('/')[0]?.trim();
   if (!provider) return null;
   const map: Record<string, string> = {
@@ -140,11 +175,6 @@ function inferProviderEnvVarFromModelId(modelId: string): string | null {
     zai: 'ZAI_API_KEY',
   };
   return map[provider] ?? null;
-}
-
-function ensureEnvVarName(name: string): string {
-  const trimmed = name.trim();
-  return trimmed || 'CUSTOM_PROVIDER_API_KEY';
 }
 
 function makePrimaryModelId(state: OpenClawConfigGeneratorState): string {
@@ -183,6 +213,7 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
     const providerId = state.ai.custom.providerId.trim();
     const baseUrl = state.ai.custom.baseUrl.trim();
     const modelId = state.ai.custom.model.id.trim();
+    const customApiKeyInput = state.ai.custom.apiKey.trim() || state.ai.custom.apiKeyEnvVar.trim();
 
     if (!providerId) {
       issues.push({
@@ -280,30 +311,15 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
       });
     }
 
-    if (state.secretsMode === 'inline') {
-      if (!state.ai.custom.apiKey.trim()) {
-        issues.push({
-          level: 'error',
-          path: `models.providers.${providerId || '<providerId>'}.apiKey`,
-          message: 'apiKey is required in inline mode.',
-        });
-      }
-    } else {
-      const envVar = ensureEnvVarName(state.ai.custom.apiKeyEnvVar);
-      if (!/^[A-Z_][A-Z0-9_]*$/.test(envVar)) {
-        issues.push({
-          level: 'error',
-          path: 'ai.custom.apiKeyEnvVar',
-          message:
-            'Env var names must be uppercase (example: CUSTOM_PROVIDER_API_KEY). OpenClaw only substitutes ${VARS} for uppercase names.',
-        });
-      } else {
-        requiredEnvVars.push(envVar);
-      }
+    if (!customApiKeyInput) {
+      issues.push({
+        level: 'error',
+        path: `models.providers.${providerId || '<providerId>'}.apiKey`,
+        message: 'Enter an API key or an env var name for the custom provider.',
+      });
+    } else if (isEnvVarName(customApiKeyInput)) {
+      requiredEnvVars.push(customApiKeyInput.trim());
     }
-  } else if (state.secretsMode === 'env') {
-    const inferred = inferProviderEnvVarFromModelId(primaryModel);
-    if (inferred) requiredEnvVars.push(inferred);
   }
 
   if (!hasAnyEnabledChannel(state)) {
@@ -314,21 +330,12 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
     });
   }
 
-  if (!state.safeMode) {
-    issues.push({
-      level: 'warning',
-      path: 'agents.defaults.sandbox.mode',
-      message:
-        'Safe Mode is OFF. Non-main sessions (groups/channels) may run on the host unless you configure sandboxing.',
-    });
-  }
-
   const cfg: Record<string, unknown> = {};
 
   cfg.agents = {
     defaults: {
       model: { primary: primaryModel, ...(fallbacks.length ? { fallbacks } : {}) },
-      ...(state.safeMode ? { sandbox: { mode: 'non-main' } } : {}),
+      ...(state.sandboxMode === 'non-main' ? { sandbox: { mode: 'non-main' } } : {}),
     },
   };
 
@@ -368,37 +375,23 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
   if (authMode !== 'off') {
     const auth: Record<string, unknown> = { mode: authMode };
     if (authMode === 'token') {
-      if (state.secretsMode === 'inline') {
-        const token = state.gateway.authToken.trim();
-        if (!token) {
-          issues.push({
-            level: 'error',
-            path: 'gateway.auth.token',
-            message: 'gateway.auth.mode="token" requires gateway.auth.token in inline mode.',
-          });
-        } else {
-          auth.token = token;
-        }
-      } else {
-        requiredEnvVars.push('OPENCLAW_GATEWAY_TOKEN');
-        auth.token = `\${OPENCLAW_GATEWAY_TOKEN}`;
-      }
+      const token = resolveSecretValue(
+        state.gateway.authToken,
+        'gateway.auth.token',
+        'gateway.auth.mode="token" requires a token or env var name.',
+        issues,
+        requiredEnvVars
+      );
+      if (token) auth.token = token;
     } else if (authMode === 'password') {
-      if (state.secretsMode === 'inline') {
-        const password = state.gateway.authPassword.trim();
-        if (!password) {
-          issues.push({
-            level: 'error',
-            path: 'gateway.auth.password',
-            message: 'gateway.auth.mode="password" requires gateway.auth.password in inline mode.',
-          });
-        } else {
-          auth.password = password;
-        }
-      } else {
-        requiredEnvVars.push('OPENCLAW_GATEWAY_PASSWORD');
-        auth.password = `\${OPENCLAW_GATEWAY_PASSWORD}`;
-      }
+      const password = resolveSecretValue(
+        state.gateway.authPassword,
+        'gateway.auth.password',
+        'gateway.auth.mode="password" requires a password or env var name.',
+        issues,
+        requiredEnvVars
+      );
+      if (password) auth.password = password;
     }
     gatewayCfg.auth = auth;
   }
@@ -414,23 +407,15 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
   }
 
   cfg.tools = {
-    profile: 'coding',
-    ...(state.safeMode
+    profile: state.toolsProfile,
+    ...(state.toolsAllow.length > 0 ? { allow: state.toolsAllow } : {}),
+    ...(state.toolsDeny.length > 0 ? { deny: state.toolsDeny } : {}),
+    ...(state.sandboxMode === 'non-main'
       ? {
           sandbox: {
             tools: {
-              allow: [
-                'bash',
-                'process',
-                'read',
-                'write',
-                'edit',
-                'sessions_list',
-                'sessions_history',
-                'sessions_send',
-                'sessions_spawn',
-              ],
-              deny: ['browser', 'canvas', 'nodes', 'cron', 'discord', 'gateway'],
+              ...(state.sandboxToolsAllow.length > 0 ? { allow: state.sandboxToolsAllow } : {}),
+              ...(state.sandboxToolsDeny.length > 0 ? { deny: state.sandboxToolsDeny } : {}),
             },
           },
         }
@@ -441,15 +426,15 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
     const providerId = state.ai.custom.providerId.trim();
     const baseUrl = state.ai.custom.baseUrl.trim();
     const modelId = state.ai.custom.model.id.trim();
+    const customApiKeyInput = state.ai.custom.apiKey.trim() || state.ai.custom.apiKeyEnvVar.trim();
     const input: Array<'text' | 'image'> = [];
     if (state.ai.custom.model.inputText) input.push('text');
     if (state.ai.custom.model.inputImage) input.push('image');
 
     if (providerId && baseUrl && modelId) {
-      const apiKey =
-        state.secretsMode === 'inline'
-          ? state.ai.custom.apiKey.trim()
-          : `\${${ensureEnvVarName(state.ai.custom.apiKeyEnvVar)}}`;
+      const apiKey = isEnvVarName(customApiKeyInput)
+        ? `\${${customApiKeyInput.trim()}}`
+        : customApiKeyInput;
 
       const contextWindow = state.ai.custom.model.contextWindow;
       const maxTokens = Math.min(state.ai.custom.model.maxTokens, contextWindow);
@@ -508,7 +493,7 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
         level: 'warning',
         path: 'channels.telegram.groupPolicy',
         message:
-          'groupPolicy="open" allows any sender in groups to reach the agent (mention-gating may still apply). Consider sandboxing (Safe Mode) + allowlists.',
+          'groupPolicy="open" allows any sender in groups to reach the agent (mention-gating may still apply). Consider sandboxing + allowlists.',
       });
     } else if (groupPolicy === 'allowlist' && groupAllowFrom.length === 0) {
       issues.push({
@@ -563,22 +548,23 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
       telegram.webhookUrl = webhookUrl;
     }
     if (webhookSecret) {
-      telegram.webhookSecret = webhookSecret;
+      if (isEnvVarName(webhookSecret)) {
+        requiredEnvVars.push(webhookSecret.trim());
+        telegram.webhookSecret = `\${${webhookSecret.trim()}}`;
+      } else {
+        telegram.webhookSecret = webhookSecret;
+      }
     }
 
-    if (state.secretsMode === 'inline') {
-      if (!state.channels.telegram.botToken.trim()) {
-        issues.push({
-          level: 'error',
-          path: 'channels.telegram.botToken',
-          message: 'Telegram requires a bot token.',
-        });
-      } else {
-        telegram.botToken = state.channels.telegram.botToken.trim();
-      }
-    } else {
-      requiredEnvVars.push('TELEGRAM_BOT_TOKEN');
-      telegram.botToken = `\${TELEGRAM_BOT_TOKEN}`;
+    const telegramBotToken = resolveSecretValue(
+      state.channels.telegram.botToken,
+      'channels.telegram.botToken',
+      'Telegram requires a bot token or env var name.',
+      issues,
+      requiredEnvVars
+    );
+    if (telegramBotToken) {
+      telegram.botToken = telegramBotToken;
     }
 
     channelsCfg.telegram = telegram;
@@ -620,7 +606,7 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
         level: 'warning',
         path: 'channels.whatsapp.groupPolicy',
         message:
-          'groupPolicy="open" allows any sender in groups to reach the agent (mention-gating may still apply). Consider sandboxing (Safe Mode) + allowlists.',
+          'groupPolicy="open" allows any sender in groups to reach the agent (mention-gating may still apply). Consider sandboxing + allowlists.',
       });
     } else if (groupPolicy === 'allowlist' && groupAllowFrom.length === 0) {
       issues.push({
@@ -701,7 +687,7 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
         level: 'warning',
         path: 'channels.discord.groupPolicy',
         message:
-          'groupPolicy="open" allows messages from any server/channel (mention-gating may still apply). Consider Safe Mode + explicit allowlists.',
+          'groupPolicy="open" allows messages from any server/channel (mention-gating may still apply). Consider sandboxing + explicit allowlists.',
       });
     } else if (groupPolicy === 'allowlist' && guildIds.length === 0) {
       issues.push({
@@ -743,19 +729,15 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
       );
     }
 
-    if (state.secretsMode === 'inline') {
-      if (!state.channels.discord.token.trim()) {
-        issues.push({
-          level: 'error',
-          path: 'channels.discord.token',
-          message: 'Discord requires a bot token.',
-        });
-      } else {
-        discord.token = state.channels.discord.token.trim();
-      }
-    } else {
-      requiredEnvVars.push('DISCORD_BOT_TOKEN');
-      discord.token = `\${DISCORD_BOT_TOKEN}`;
+    const discordToken = resolveSecretValue(
+      state.channels.discord.token,
+      'channels.discord.token',
+      'Discord requires a bot token or env var name.',
+      issues,
+      requiredEnvVars
+    );
+    if (discordToken) {
+      discord.token = discordToken;
     }
 
     channelsCfg.discord = discord;
@@ -795,7 +777,7 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
         level: 'warning',
         path: 'channels.slack.groupPolicy',
         message:
-          'groupPolicy="open" allows messages from any channel (mention-gating may still apply). Consider Safe Mode + explicit allowlists.',
+          'groupPolicy="open" allows messages from any channel (mention-gating may still apply). Consider sandboxing + explicit allowlists.',
       });
     } else if (groupPolicy === 'allowlist' && channelIds.length === 0) {
       issues.push({
@@ -837,29 +819,26 @@ export function buildOpenClawConfig(state: OpenClawConfigGeneratorState): BuildR
       );
     }
 
-    if (state.secretsMode === 'inline') {
-      if (!state.channels.slack.botToken.trim()) {
-        issues.push({
-          level: 'error',
-          path: 'channels.slack.botToken',
-          message: 'Slack requires botToken.',
-        });
-      } else {
-        slack.botToken = state.channels.slack.botToken.trim();
-      }
-      if (!state.channels.slack.appToken.trim()) {
-        issues.push({
-          level: 'error',
-          path: 'channels.slack.appToken',
-          message: 'Slack (socket mode) requires appToken.',
-        });
-      } else {
-        slack.appToken = state.channels.slack.appToken.trim();
-      }
-    } else {
-      requiredEnvVars.push('SLACK_BOT_TOKEN', 'SLACK_APP_TOKEN');
-      slack.botToken = `\${SLACK_BOT_TOKEN}`;
-      slack.appToken = `\${SLACK_APP_TOKEN}`;
+    const slackBotToken = resolveSecretValue(
+      state.channels.slack.botToken,
+      'channels.slack.botToken',
+      'Slack requires botToken or an env var name.',
+      issues,
+      requiredEnvVars
+    );
+    if (slackBotToken) {
+      slack.botToken = slackBotToken;
+    }
+
+    const slackAppToken = resolveSecretValue(
+      state.channels.slack.appToken,
+      'channels.slack.appToken',
+      'Slack (socket mode) requires appToken or an env var name.',
+      issues,
+      requiredEnvVars
+    );
+    if (slackAppToken) {
+      slack.appToken = slackAppToken;
     }
 
     channelsCfg.slack = slack;
