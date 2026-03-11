@@ -1,0 +1,224 @@
+---
+import { Button } from '@heroui/react';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/layout/Section.astro';
+import {
+  IconBookOpen,
+  IconCog,
+  IconGithub,
+  IconLifebuoy,
+  IconUserGroup,
+} from '../components/icons';
+
+const lastUpdated = 'March 11, 2026';
+---
+
+<BaseLayout
+  title="About | CoClaw"
+  description="Learn what CoClaw is, who maintains it, and how it supports the OpenClaw community."
+  keywords="CoClaw, OpenClaw community, about CoClaw, OpenClaw guides, OpenClaw troubleshooting"
+>
+  <div class="bg-background min-h-screen overflow-x-hidden relative">
+    <Section py="py-20 lg:py-24" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div class="space-y-6">
+          <p
+            class="text-xs font-semibold uppercase tracking-wider text-default-700 dark:text-default-600"
+          >
+            About
+          </p>
+          <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.08]">
+            Built by the community <span class="text-default-700 dark:text-default-500">for</span>{
+              ' '
+            }
+            the OpenClaw ecosystem
+          </h1>
+          <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed max-w-xl">
+            CoClaw is a community-maintained support hub for OpenClaw (formerly ClawDBot). We turn
+            scattered setup notes and troubleshooting threads into practical, searchable resources.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4">
+            <Button
+              as="a"
+              href="/getting-started"
+              color="primary"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Get Started
+            </Button>
+            <Button
+              as="a"
+              href="/contributing"
+              color="default"
+              variant="bordered"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Contribute
+            </Button>
+            <Button
+              as="a"
+              href="/contact"
+              color="default"
+              variant="light"
+              radius="full"
+              size="lg"
+              className="font-semibold px-6"
+              client:visible
+            >
+              Contact
+            </Button>
+          </div>
+
+          <p class="text-sm text-default-700 dark:text-default-600">
+            <strong>Last updated:</strong>
+            {lastUpdated}
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+            <div class="flex items-center gap-3 mb-3">
+              <IconBookOpen className="w-5 h-5 text-primary" aria-hidden="true" />
+              <h2 class="font-bold text-foreground">Guides</h2>
+            </div>
+            <p class="text-sm text-default-800 dark:text-default-600">
+              Clear, step-by-step docs that prioritize real-world setup flows.
+            </p>
+          </div>
+          <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+            <div class="flex items-center gap-3 mb-3">
+              <IconLifebuoy className="w-5 h-5 text-primary" aria-hidden="true" />
+              <h2 class="font-bold text-foreground">Troubleshooting</h2>
+            </div>
+            <p class="text-sm text-default-800 dark:text-default-600">
+              A searchable knowledge base with reproducible fixes and context.
+            </p>
+          </div>
+          <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+            <div class="flex items-center gap-3 mb-3">
+              <IconCog className="w-5 h-5 text-primary" aria-hidden="true" />
+              <h2 class="font-bold text-foreground">Tools</h2>
+            </div>
+            <p class="text-sm text-default-800 dark:text-default-600">
+              Practical helpers like the Visual Config Generator for safer configs.
+            </p>
+          </div>
+          <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+            <div class="flex items-center gap-3 mb-3">
+              <IconUserGroup className="w-5 h-5 text-primary" aria-hidden="true" />
+              <h2 class="font-bold text-foreground">Community</h2>
+            </div>
+            <p class="text-sm text-default-800 dark:text-default-600">
+              Links and conventions that help people help each other faster.
+            </p>
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="py-10" containerClass="max-w-6xl mx-auto">
+      <div class="m-card-glass-soft p-8">
+        <h2 class="text-xl font-bold text-foreground mb-3">Affiliation and disclaimer</h2>
+        <p class="text-default-800 dark:text-default-600 leading-relaxed">
+          CoClaw is <strong>not an official OpenClaw project</strong>. We are community ecosystem
+          supporters: we organize knowledge, share proven solutions, and help reduce time-to-setup
+          for new users.
+        </p>
+      </div>
+    </Section>
+
+    <Section py="py-20" containerClass="max-w-6xl mx-auto">
+      <div class="flex items-end justify-between gap-8 mb-10">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Maintainers</h2>
+          <p class="text-default-800 dark:text-default-600 mt-3 max-w-2xl">
+            CoClaw is maintained by the CoClaw Team with help from contributors.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        {
+          [
+            { handle: 'lansespirit', href: 'https://github.com/lansespirit' },
+            { handle: 'newcodebook', href: 'https://github.com/newcodebook' },
+            { handle: 'openclawcom', href: 'https://github.com/openclawcom' },
+          ].map((m) => (
+            <a
+              href={m.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="m-card-surface m-card-hover-border m-card-hover-lift p-6 group"
+            >
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-content2 flex items-center justify-center font-bold text-foreground">
+                  {m.handle.slice(0, 1).toUpperCase()}
+                </div>
+                <div class="min-w-0">
+                  <div class="font-bold text-foreground truncate">@{m.handle}</div>
+                  <div class="text-sm text-default-800 dark:text-default-600 flex items-center gap-2">
+                    <IconGithub className="w-4 h-4" aria-hidden="true" />
+                    GitHub
+                  </div>
+                </div>
+              </div>
+            </a>
+          ))
+        }
+      </div>
+    </Section>
+
+    <Section py="py-20" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div class="m-card-surface p-8">
+          <h2 class="text-2xl font-bold text-foreground mb-3">Want to help?</h2>
+          <p class="text-default-800 dark:text-default-600 leading-relaxed mb-6">
+            The highest impact contributions are usually small: fix unclear steps, add a missing
+            edge case, or turn a solved thread into a troubleshooting article.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <Button
+              as="a"
+              href="/contributing"
+              color="primary"
+              radius="full"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Contributing Guide
+            </Button>
+            <Button
+              as="a"
+              href="mailto:contact@coclaw.com"
+              color="default"
+              variant="bordered"
+              radius="full"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Email the Team
+            </Button>
+          </div>
+        </div>
+
+        <div class="m-card-glass-soft p-8">
+          <h2 class="text-2xl font-bold text-foreground mb-3">Sponsor or collaborate</h2>
+          <p class="text-default-800 dark:text-default-600 leading-relaxed mb-6">
+            If you want to partner with CoClaw, sponsor improvements, or help maintain parts of the
+            site, reach out anytime.
+          </p>
+          <a href="/contact" class="text-primary font-semibold hover:underline underline-offset-4">
+            See contact options
+          </a>
+        </div>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>

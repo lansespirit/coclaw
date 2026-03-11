@@ -1,0 +1,210 @@
+---
+import { Button } from '@heroui/react';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/layout/Section.astro';
+import {
+  IconChat,
+  IconDiscord,
+  IconGithub,
+  IconLifebuoy,
+  IconShieldCheckSolid,
+  IconSparkles,
+} from '../components/icons';
+
+const responseTime = '1-2 days';
+const lastUpdated = 'March 11, 2026';
+---
+
+<BaseLayout
+  title="Contact | CoClaw"
+  description="Contact the CoClaw Team for support, collaboration, or sponsorship."
+  keywords="CoClaw contact, OpenClaw support, CoClaw Team, OpenClaw help"
+>
+  <div class="bg-background min-h-screen overflow-x-hidden relative">
+    <Section py="py-20 lg:py-24" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div class="space-y-6">
+          <p
+            class="text-xs font-semibold uppercase tracking-wider text-default-700 dark:text-default-600"
+          >
+            Contact
+          </p>
+          <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.08]">
+            Reach the CoClaw Team
+          </h1>
+          <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed max-w-xl">
+            The primary contact channel is email. We usually reply within <strong
+              >{responseTime}</strong
+            >{' '}
+            (best effort).
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4">
+            <Button
+              as="a"
+              href="mailto:contact@coclaw.com"
+              color="primary"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Email contact@coclaw.com
+            </Button>
+            <Button
+              as="a"
+              href="https://forum.coclaw.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              color="default"
+              variant="bordered"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Ask on the Forum
+            </Button>
+          </div>
+
+          <p class="text-sm text-default-700 dark:text-default-600">
+            <strong>Last updated:</strong>
+            {lastUpdated}
+          </p>
+        </div>
+
+        <div class="m-card-glass-soft p-8">
+          <h2 class="text-xl font-bold text-foreground mb-4">Fast support checklist</h2>
+          <p class="text-default-800 dark:text-default-600 mb-6">
+            If you are requesting help, include these details to reduce back-and-forth:
+          </p>
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-default-800 dark:text-default-600"
+          >
+            <div class="m-pill px-4 py-3">OS and version</div>
+            <div class="m-pill px-4 py-3">OpenClaw version and install method</div>
+            <div class="m-pill px-4 py-3">Channel/integration (Telegram, Slack, etc.)</div>
+            <div class="m-pill px-4 py-3">Exact error message (redact secrets)</div>
+            <div class="m-pill px-4 py-3">Relevant logs (sanitized)</div>
+            <div class="m-pill px-4 py-3">Expected vs actual behavior</div>
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="py-20" containerClass="max-w-6xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-10">What can we help with?</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <IconLifebuoy className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h3 class="font-bold text-foreground">Support</h3>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600 mb-5">
+            Broken links, unclear docs, missing edge cases, and requests for new troubleshooting
+            pages.
+          </p>
+          <a
+            href="mailto:contact@coclaw.com?subject=%5BSupport%5D%20CoClaw%20help"
+            class="text-primary font-semibold hover:underline underline-offset-4"
+          >
+            Email with [Support]
+          </a>
+        </div>
+
+        <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <IconSparkles className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h3 class="font-bold text-foreground">Collaboration</h3>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600 mb-5">
+            Co-authoring guides, improving tooling UX, partnerships, or content planning.
+          </p>
+          <a
+            href="mailto:contact@coclaw.com?subject=%5BCollaboration%5D%20CoClaw"
+            class="text-primary font-semibold hover:underline underline-offset-4"
+          >
+            Email with [Collaboration]
+          </a>
+        </div>
+
+        <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <IconGithub className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h3 class="font-bold text-foreground">Contributing</h3>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600 mb-5">
+            Want to contribute content or code? We can help you pick a good first issue.
+          </p>
+          <a
+            href="/contributing"
+            class="text-primary font-semibold hover:underline underline-offset-4"
+          >
+            Read contributing guide
+          </a>
+        </div>
+
+        <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <IconShieldCheckSolid className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h3 class="font-bold text-foreground">Sponsorship</h3>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600 mb-5">
+            Sponsor maintenance, content creation, or specific improvements.
+          </p>
+          <a
+            href="mailto:contact@coclaw.com?subject=%5BSponsorship%5D%20CoClaw"
+            class="text-primary font-semibold hover:underline underline-offset-4"
+          >
+            Email with [Sponsorship]
+          </a>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="py-16" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <a
+          href="https://forum.coclaw.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="m-card-glass p-6"
+        >
+          <div class="flex items-center gap-3 mb-3">
+            <IconChat className="w-5 h-5 text-primary" aria-hidden="true" />
+            <div class="font-bold text-foreground">Forum</div>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600">
+            Ask questions, share solutions, and help others.
+          </p>
+        </a>
+        <a
+          href="https://discord.gg/clawd"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="m-card-glass p-6"
+        >
+          <div class="flex items-center gap-3 mb-3">
+            <IconDiscord className="w-5 h-5 text-primary" aria-hidden="true" />
+            <div class="font-bold text-foreground">Discord</div>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600">Real-time community chat.</p>
+        </a>
+        <a
+          href="https://github.com/lansespirit/coclaw"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="m-card-glass p-6"
+        >
+          <div class="flex items-center gap-3 mb-3">
+            <IconGithub className="w-5 h-5 text-primary" aria-hidden="true" />
+            <div class="font-bold text-foreground">CoClaw GitHub</div>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600">
+            Report site issues and contribute improvements.
+          </p>
+        </a>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>

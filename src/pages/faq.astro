@@ -1,0 +1,197 @@
+---
+import { Button } from '@heroui/react';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { FAQAccordion } from '../components/FAQAccordion';
+import Section from '../components/layout/Section.astro';
+import {
+  IconLifebuoy,
+  IconQuestionMarkCircle,
+  IconSearch,
+  IconSparkles,
+} from '../components/icons';
+
+const lastUpdated = 'March 11, 2026';
+const faqs = [
+  {
+    question: 'What is CoClaw?',
+    answer:
+      'CoClaw is a community-driven support hub for OpenClaw with guides, troubleshooting articles, and tools that help users set up and operate OpenClaw reliably.',
+  },
+  {
+    question: 'Is CoClaw official?',
+    answer:
+      'No. CoClaw is not an official OpenClaw project. We support the ecosystem by organizing knowledge and sharing practical solutions.',
+  },
+  {
+    question: 'Where should I ask for help?',
+    answer:
+      'For community help, use the forum or Discord. For collaborations, sponsorship, or website issues, email contact@coclaw.com.',
+  },
+  {
+    question: 'How fast do you respond to email?',
+    answer: 'Best effort: typically within 1-2 days.',
+  },
+  {
+    question: 'What is the Config Generator?',
+    answer:
+      'It is a visual tool that helps you create OpenClaw configurations without manually editing JSON. It is designed to make common setups faster and less error-prone.',
+  },
+  {
+    question: 'How can I contribute?',
+    answer:
+      'You can contribute by fixing docs, adding troubleshooting articles, improving UI/UX, or reporting issues. Start at the Contributing page.',
+  },
+  {
+    question: 'Can I request a new guide or troubleshooting article?',
+    answer:
+      'Yes. The best way is to open an issue on the CoClaw site repo with the problem you are trying to solve and any logs/screenshots. You can also email us.',
+  },
+  {
+    question: 'Do you run analytics or tracking?',
+    answer: 'CoClaw may run analytics on production builds. See the Privacy Policy for details.',
+  },
+  {
+    question: 'How do I report a security issue?',
+    answer:
+      'Please follow the Security page and email contact@coclaw.com with details. Do not post sensitive findings publicly.',
+  },
+  {
+    question: 'How can I sponsor CoClaw?',
+    answer: 'Email contact@coclaw.com and tell us what you would like to support.',
+  },
+  {
+    question: 'Can you remove or correct content?',
+    answer:
+      'Yes. If you find incorrect, outdated, or unsafe instructions, open a GitHub issue or email contact@coclaw.com with the URL and the suggested fix.',
+  },
+  {
+    question: 'What should I include in a support request?',
+    answer:
+      'Include your OS and version, OpenClaw version/install method, the channel/integration you are configuring, exact error messages, and sanitized logs (redact secrets).',
+  },
+];
+---
+
+<BaseLayout
+  title="FAQ | CoClaw"
+  description="Frequently asked questions about CoClaw, OpenClaw support, and contributing."
+  keywords="CoClaw FAQ, OpenClaw FAQ, OpenClaw support, CoClaw contributing"
+>
+  <div class="bg-background min-h-screen overflow-x-hidden relative">
+    <Section py="py-20 lg:py-24" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div class="space-y-6">
+          <p
+            class="text-xs font-semibold uppercase tracking-wider text-default-700 dark:text-default-600"
+          >
+            FAQ
+          </p>
+          <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.08]">
+            Quick answers, faster setup
+          </h1>
+          <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed max-w-xl">
+            If you are new to CoClaw or OpenClaw, start here. If your question is not answered,
+            contact us or ask the community.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <Button
+              as="a"
+              href="/getting-started"
+              color="primary"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Get Started
+            </Button>
+            <Button
+              as="a"
+              href="/contact"
+              color="default"
+              variant="bordered"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Contact
+            </Button>
+          </div>
+          <p class="text-sm text-default-700 dark:text-default-600">
+            <strong>Last updated:</strong>
+            {lastUpdated}
+          </p>
+        </div>
+
+        <div class="m-card-glass-soft p-8">
+          <h2 class="text-xl font-bold text-foreground mb-4">Popular next steps</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <a href="/resources" class="m-pill px-4 py-3 flex items-center gap-3">
+              <IconSearch className="w-5 h-5 text-primary" aria-hidden="true" />
+              <span class="font-semibold text-foreground">Browse Resources</span>
+            </a>
+            <a href="/troubleshooting" class="m-pill px-4 py-3 flex items-center gap-3">
+              <IconLifebuoy className="w-5 h-5 text-primary" aria-hidden="true" />
+              <span class="font-semibold text-foreground">Troubleshooting</span>
+            </a>
+            <a href="/openclaw-config-generator" class="m-pill px-4 py-3 flex items-center gap-3">
+              <IconSparkles className="w-5 h-5 text-primary" aria-hidden="true" />
+              <span class="font-semibold text-foreground">Config Generator</span>
+            </a>
+            <a href="/contributing" class="m-pill px-4 py-3 flex items-center gap-3">
+              <IconQuestionMarkCircle className="w-5 h-5 text-primary" aria-hidden="true" />
+              <span class="font-semibold text-foreground">Contributing</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="py-20" containerClass="max-w-6xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-10">
+        Frequently asked questions
+      </h2>
+      <FAQAccordion faqs={faqs} client:visible />
+    </Section>
+
+    <Section py="py-16" containerClass="max-w-6xl mx-auto">
+      <div
+        class="m-card-glass-soft p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6"
+      >
+        <div class="space-y-2">
+          <h2 class="text-2xl font-bold text-foreground">Still stuck?</h2>
+          <p class="text-default-800 dark:text-default-600">
+            Ask on the forum/Discord, or email the CoClaw Team for collaboration and sponsorship
+            requests.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <Button
+            as="a"
+            href="https://forum.coclaw.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            color="default"
+            variant="bordered"
+            radius="full"
+            className="font-semibold px-8"
+            client:visible
+          >
+            Forum
+          </Button>
+          <Button
+            as="a"
+            href="mailto:contact@coclaw.com?subject=%5BFAQ%5D%20CoClaw"
+            color="primary"
+            radius="full"
+            className="font-semibold px-8"
+            client:visible
+          >
+            Email us
+          </Button>
+        </div>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>

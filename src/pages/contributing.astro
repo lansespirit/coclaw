@@ -1,0 +1,194 @@
+---
+import { Button } from '@heroui/react';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/layout/Section.astro';
+import {
+  IconBookOpen,
+  IconCheck,
+  IconCodeBracket,
+  IconDocumentText,
+  IconGithub,
+  IconLifebuoy,
+} from '../components/icons';
+
+const lastUpdated = 'March 11, 2026';
+const repoUrl = 'https://github.com/lansespirit/coclaw';
+---
+
+<BaseLayout
+  title="Contributing | CoClaw"
+  description="How to contribute to CoClaw: improve docs, add troubleshooting articles, and build tools."
+  keywords="Contributing to CoClaw, OpenClaw community, CoClaw GitHub, docs contribution"
+>
+  <div class="bg-background min-h-screen overflow-x-hidden relative">
+    <Section py="py-20 lg:py-24" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div class="space-y-6">
+          <p
+            class="text-xs font-semibold uppercase tracking-wider text-default-700 dark:text-default-600"
+          >
+            Contributing
+          </p>
+          <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.08]">
+            Make CoClaw better
+          </h1>
+          <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed max-w-xl">
+            CoClaw exists to make OpenClaw installation, configuration, and troubleshooting more
+            searchable, reusable, and maintainable. Contributions of all sizes are welcome.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <Button
+              as="a"
+              href={repoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              color="primary"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              <IconGithub className="w-4 h-4 mr-2" aria-hidden="true" />
+              Open repository
+            </Button>
+            <Button
+              as="a"
+              href={`${repoUrl}/issues`}
+              target="_blank"
+              rel="noopener noreferrer"
+              color="default"
+              variant="bordered"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Browse issues
+            </Button>
+          </div>
+          <p class="text-sm text-default-700 dark:text-default-600">
+            <strong>Last updated:</strong>
+            {lastUpdated}
+          </p>
+        </div>
+
+        <div class="m-card-glass-soft p-8">
+          <h2 class="text-xl font-bold text-foreground mb-4">Quick start</h2>
+          <ol class="space-y-4 text-default-800 dark:text-default-600">
+            <li class="flex gap-3">
+              <IconCheck className="w-5 h-5 text-primary mt-0.5" aria-hidden="true" />
+              <span>Pick an issue or propose a small improvement.</span>
+            </li>
+            <li class="flex gap-3">
+              <IconCheck className="w-5 h-5 text-primary mt-0.5" aria-hidden="true" />
+              <span>Keep changes focused, with clear repro steps or before/after screenshots.</span>
+            </li>
+            <li class="flex gap-3">
+              <IconCheck className="w-5 h-5 text-primary mt-0.5" aria-hidden="true" />
+              <span>Run lint/build locally before opening a PR.</span>
+            </li>
+          </ol>
+          <div
+            class="mt-6 m-card-glass-soft p-4 font-mono text-sm text-default-800 dark:text-default-600"
+          >
+            <div class="text-default-900 dark:text-default-700 select-none mb-2">$</div>
+            <div>pnpm install</div>
+            <div>pnpm dev</div>
+            <div class="mt-3 text-default-700 dark:text-default-600">Before PR:</div>
+            <div>pnpm lint</div>
+            <div>pnpm format:check</div>
+            <div>pnpm build</div>
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="py-20" containerClass="max-w-6xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-10">Ways to contribute</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <IconDocumentText className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h3 class="font-bold text-foreground">Improve docs</h3>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600">
+            Fix typos, clarify steps, add missing edge cases, and include screenshots.
+          </p>
+        </div>
+        <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <IconLifebuoy className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h3 class="font-bold text-foreground">Add troubleshooting</h3>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600">
+            Turn solved issues into reproducible solutions with logs and exact fixes.
+          </p>
+        </div>
+        <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <IconBookOpen className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h3 class="font-bold text-foreground">Write guides</h3>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600">
+            Share complete setups and best practices that save others time.
+          </p>
+        </div>
+        <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <IconCodeBracket className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h3 class="font-bold text-foreground">UI and tools</h3>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600">
+            Improve UI polish, accessibility, performance, or build new helpers.
+          </p>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="py-16" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="m-card-glass-soft p-8">
+          <h2 class="text-2xl font-bold text-foreground mb-3">Content authoring</h2>
+          <ul class="space-y-3 text-default-800 dark:text-default-600">
+            <li>Content lives in <code class="font-mono">src/content/**</code>.</li>
+            <li>Keep titles action-oriented (what problem it solves).</li>
+            <li>Include exact error messages/logs and the concrete fix.</li>
+            <li>Try to keep URLs stable; renames should be rare.</li>
+          </ul>
+        </div>
+        <div class="m-card-glass-soft p-8">
+          <h2 class="text-2xl font-bold text-foreground mb-3">Need help choosing a task?</h2>
+          <p class="text-default-800 dark:text-default-600 mb-6">
+            Open an issue describing what you want to improve, or email us and we will point you to
+            a good first contribution.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <Button
+              as="a"
+              href={`${repoUrl}/issues/new`}
+              target="_blank"
+              rel="noopener noreferrer"
+              color="primary"
+              radius="full"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Open an issue
+            </Button>
+            <Button
+              as="a"
+              href="mailto:contact@coclaw.com?subject=%5BContributing%5D%20Where%20to%20start"
+              color="default"
+              variant="bordered"
+              radius="full"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Email contact@coclaw.com
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>

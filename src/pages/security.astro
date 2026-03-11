@@ -1,0 +1,151 @@
+---
+import { Button } from '@heroui/react';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/layout/Section.astro';
+import { IconClock, IconShieldCheckSolid, IconWarning } from '../components/icons';
+
+const lastUpdated = 'March 11, 2026';
+---
+
+<BaseLayout
+  title="Security | CoClaw"
+  description="How to report security vulnerabilities related to coclaw.com."
+  keywords="CoClaw security, vulnerability disclosure, report security issue, coclaw.com"
+>
+  <div class="bg-background min-h-screen overflow-x-hidden relative">
+    <Section py="py-20 lg:py-24" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div class="space-y-6">
+          <p
+            class="text-xs font-semibold uppercase tracking-wider text-default-700 dark:text-default-600"
+          >
+            Security
+          </p>
+          <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.08]">
+            Responsible disclosure
+          </h1>
+          <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed max-w-xl">
+            If you believe you have found a vulnerability that affects the CoClaw website or its
+            tooling, we appreciate responsible disclosure.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <Button
+              as="a"
+              href="mailto:contact@coclaw.com?subject=%5BSecurity%5D%20Vulnerability%20report"
+              color="primary"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Report via email
+            </Button>
+            <Button
+              as="a"
+              href="/contact"
+              color="default"
+              variant="bordered"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Contact page
+            </Button>
+          </div>
+          <p class="text-sm text-default-700 dark:text-default-600">
+            <strong>Last updated:</strong>
+            {lastUpdated}
+          </p>
+        </div>
+
+        <div class="m-card-glass-soft p-8">
+          <div class="flex items-center gap-3 mb-3">
+            <IconShieldCheckSolid className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="text-xl font-bold text-foreground">What to include</h2>
+          </div>
+          <ul class="space-y-3 text-default-800 dark:text-default-600">
+            <li>A clear description of the issue and potential impact</li>
+            <li>Steps to reproduce (or a proof of concept)</li>
+            <li>Affected URLs, parameters, and environments</li>
+            <li>Logs or screenshots (redact secrets)</li>
+          </ul>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="py-20" containerClass="max-w-6xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-10">Scope</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="m-card-surface p-8">
+          <div class="font-bold text-foreground mb-2">In scope</div>
+          <p class="text-sm text-default-800 dark:text-default-600">
+            coclaw.com and its hosted web application code, including pages and tools served from
+            coclaw.com (for example, the Config Generator).
+          </p>
+        </div>
+        <div class="m-card-surface p-8">
+          <div class="font-bold text-foreground mb-2">Out of scope</div>
+          <p class="text-sm text-default-800 dark:text-default-600">
+            Third-party services we link to (GitHub, Discord, etc.) and the OpenClaw project itself.
+          </p>
+        </div>
+        <div class="m-card-surface p-8">
+          <div class="font-bold text-foreground mb-2">Privacy</div>
+          <p class="text-sm text-default-800 dark:text-default-600">
+            Please do not access or modify data that does not belong to you. Redact secrets in all
+            reports.
+          </p>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="py-16" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="m-card-glass-soft p-8">
+          <div class="flex items-center gap-3 mb-3">
+            <IconClock className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="text-2xl font-bold text-foreground">Response timeline</h2>
+          </div>
+          <p class="text-default-800 dark:text-default-600 mb-6">
+            Best effort: we aim to acknowledge reports within <strong>1-2 days</strong> and will keep
+            you updated as we investigate and remediate.
+          </p>
+          <div
+            class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-default-800 dark:text-default-600"
+          >
+            <div class="m-pill px-4 py-3">Ack</div>
+            <div class="m-pill px-4 py-3">Investigate</div>
+            <div class="m-pill px-4 py-3">Fix and notify</div>
+          </div>
+        </div>
+
+        <div class="m-card-glass-soft p-8">
+          <div class="flex items-center gap-3 mb-3">
+            <IconWarning className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="text-2xl font-bold text-foreground">Please do not</h2>
+          </div>
+          <ul class="space-y-3 text-default-800 dark:text-default-600">
+            <li>Publicly disclose the issue before we have a chance to fix it.</li>
+            <li>Run denial-of-service attacks or automated scanning that harms availability.</li>
+            <li>
+              Exfiltrate data or attempt privilege escalation beyond what is needed to demonstrate
+              impact.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="py-16" containerClass="max-w-6xl mx-auto">
+      <div class="m-card-surface p-8">
+        <h2 class="text-2xl font-bold text-foreground mb-3">Safe harbor</h2>
+        <p class="text-default-800 dark:text-default-600 leading-relaxed">
+          If you make a good-faith effort to follow this policy, we will not pursue legal action
+          against you for your security research. Please minimize disruption and respect user
+          privacy.
+        </p>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>

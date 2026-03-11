@@ -1,0 +1,137 @@
+---
+import { Button } from '@heroui/react';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/layout/Section.astro';
+import { IconShieldCheckSolid, IconUserGroup, IconWarning } from '../components/icons';
+
+const effectiveDate = 'March 11, 2026';
+---
+
+<BaseLayout
+  title="Code of Conduct | CoClaw"
+  description="Community guidelines for participating in the CoClaw ecosystem."
+  keywords="CoClaw code of conduct, community guidelines, OpenClaw community"
+>
+  <div class="bg-background min-h-screen overflow-x-hidden relative">
+    <Section py="py-20 lg:py-24" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div class="space-y-6">
+          <p
+            class="text-xs font-semibold uppercase tracking-wider text-default-700 dark:text-default-600"
+          >
+            Community policy
+          </p>
+          <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.08]">
+            Code of Conduct
+          </h1>
+          <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed max-w-xl">
+            CoClaw is a community space. We want it to be welcoming, constructive, and safe for
+            everyone who participates.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <Button
+              as="a"
+              href="mailto:contact@coclaw.com?subject=%5BCoC%5D%20Report"
+              color="primary"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Report an incident
+            </Button>
+            <Button
+              as="a"
+              href="/contact"
+              color="default"
+              variant="bordered"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Contact page
+            </Button>
+          </div>
+          <p class="text-sm text-default-700 dark:text-default-600">
+            <strong>Effective date:</strong>
+            {effectiveDate}
+          </p>
+        </div>
+
+        <div class="m-card-glass-soft p-8">
+          <div class="flex items-center gap-3 mb-3">
+            <IconShieldCheckSolid className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="text-xl font-bold text-foreground">How to report</h2>
+          </div>
+          <p class="text-default-800 dark:text-default-600 mb-6">
+            Email <strong>contact@coclaw.com</strong> with links, screenshots, and context. Please do
+            not amplify harm by reposting private or sensitive content.
+          </p>
+          <div class="text-sm text-default-800 dark:text-default-600">
+            If someone is in immediate danger, contact local emergency services first.
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="py-20" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="m-card-surface p-8">
+          <div class="flex items-center gap-3 mb-4">
+            <IconUserGroup className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="text-2xl font-bold text-foreground">Our standards</h2>
+          </div>
+          <ul class="space-y-3 text-default-800 dark:text-default-600">
+            <li>Be respectful and considerate in language and actions.</li>
+            <li>Assume good intent and focus on facts and reproducible details.</li>
+            <li>Be patient with beginners and provide actionable help.</li>
+            <li>Disagree constructively and avoid personal attacks.</li>
+            <li>Respect privacy: do not share secrets, private logs, or personal data.</li>
+          </ul>
+        </div>
+
+        <div class="m-card-surface p-8">
+          <div class="flex items-center gap-3 mb-4">
+            <IconWarning className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="text-2xl font-bold text-foreground">Unacceptable behavior</h2>
+          </div>
+          <ul class="space-y-3 text-default-800 dark:text-default-600">
+            <li>Harassment, hate speech, or discriminatory language.</li>
+            <li>Threats, doxxing, or encouraging self-harm.</li>
+            <li>Sexual content or unwanted sexual attention.</li>
+            <li>Spamming, scams, or malicious links.</li>
+            <li>Publishing other people&apos;s private information without consent.</li>
+          </ul>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="py-16" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="m-card-glass p-6">
+          <div class="font-bold text-foreground mb-2">Scope</div>
+          <p class="text-sm text-default-800 dark:text-default-600">
+            This policy applies to CoClaw-managed spaces (this site) and community channels where
+            CoClaw moderation is present. Behavior elsewhere may still be considered if it impacts
+            community safety.
+          </p>
+        </div>
+        <div class="m-card-glass p-6">
+          <div class="font-bold text-foreground mb-2">Enforcement</div>
+          <p class="text-sm text-default-800 dark:text-default-600">
+            The CoClaw Team may warn, remove content, temporarily suspend, or permanently ban. We
+            may escalate to platform administrators when appropriate.
+          </p>
+        </div>
+        <div class="m-card-glass p-6">
+          <div class="font-bold text-foreground mb-2">Appeals</div>
+          <p class="text-sm text-default-800 dark:text-default-600">
+            If you believe an action was applied in error, reply to the decision email with
+            additional context. We will review appeals in good faith.
+          </p>
+        </div>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>

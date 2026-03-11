@@ -1,0 +1,194 @@
+---
+import { Button } from '@heroui/react';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Section from '../components/layout/Section.astro';
+import {
+  IconCog,
+  IconGithub,
+  IconShieldCheckSolid,
+  IconSparkles,
+  IconUserGroup,
+} from '../components/icons';
+
+const lastUpdated = 'March 11, 2026';
+---
+
+<BaseLayout
+  title="Careers | CoClaw"
+  description="Join the CoClaw Team: internships, volunteer contributions, maintainers, and sponsorship."
+  keywords="CoClaw careers, CoClaw internship, OpenClaw community, volunteer, maintainers, sponsorship"
+>
+  <div class="bg-background min-h-screen overflow-x-hidden relative">
+    <Section py="py-20 lg:py-24" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <div class="space-y-6">
+          <p
+            class="text-xs font-semibold uppercase tracking-wider text-default-700 dark:text-default-600"
+          >
+            Careers
+          </p>
+          <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.08]">
+            Opportunities to build CoClaw
+          </h1>
+          <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed max-w-xl">
+            CoClaw is community-maintained. If you want to help the OpenClaw ecosystem with better
+            docs, faster troubleshooting, and practical tools, you are in the right place.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <Button
+              as="a"
+              href="/contributing"
+              color="primary"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Start Contributing
+            </Button>
+            <Button
+              as="a"
+              href="mailto:contact@coclaw.com?subject=%5BOpportunities%5D%20CoClaw"
+              color="default"
+              variant="bordered"
+              radius="full"
+              size="lg"
+              className="font-semibold px-8"
+              client:visible
+            >
+              Email the Team
+            </Button>
+          </div>
+          <p class="text-sm text-default-700 dark:text-default-600">
+            <strong>Last updated:</strong>
+            {lastUpdated}
+          </p>
+        </div>
+
+        <div class="m-card-glass-soft p-8">
+          <h2 class="text-xl font-bold text-foreground mb-4">Where we need help</h2>
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-default-800 dark:text-default-600"
+          >
+            <div class="m-pill px-4 py-3">Turn solved issues into KB pages</div>
+            <div class="m-pill px-4 py-3">Improve Config Generator UX</div>
+            <div class="m-pill px-4 py-3">Add screenshots and edge cases to guides</div>
+            <div class="m-pill px-4 py-3">Accessibility and performance polish</div>
+          </div>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="py-20" containerClass="max-w-6xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <IconSparkles className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="font-bold text-foreground">Remote interns</h2>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600 mb-5">
+            We are open to internships when capacity allows. Typical projects include content
+            curation, tooling UX, and community operations.
+          </p>
+          <a
+            href="mailto:contact@coclaw.com?subject=%5BInternship%5D%20CoClaw"
+            class="text-primary font-semibold hover:underline underline-offset-4"
+          >
+            Email with [Internship]
+          </a>
+        </div>
+
+        <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <IconUserGroup className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="font-bold text-foreground">Volunteer contributors</h2>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600 mb-5">
+            Great first wins: fix unclear steps, add screenshots, and write small troubleshooting
+            solutions from real logs.
+          </p>
+          <a
+            href="/contributing"
+            class="text-primary font-semibold hover:underline underline-offset-4"
+          >
+            See how to contribute
+          </a>
+        </div>
+
+        <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <IconCog className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="font-bold text-foreground">Maintainers</h2>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600 mb-5">
+            Own an area: Troubleshooting, Channels, Guides, or tooling. Tell us what you want to
+            maintain and how much time you can commit.
+          </p>
+          <a
+            href="mailto:contact@coclaw.com?subject=%5BMaintainer%5D%20CoClaw"
+            class="text-primary font-semibold hover:underline underline-offset-4"
+          >
+            Email with [Maintainer]
+          </a>
+        </div>
+
+        <div class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <div class="flex items-center gap-3 mb-3">
+            <IconShieldCheckSolid className="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="font-bold text-foreground">Sponsorship</h2>
+          </div>
+          <p class="text-sm text-default-800 dark:text-default-600 mb-5">
+            Sponsor domain/hosting, content creation, or specific roadmap items.
+          </p>
+          <a
+            href="mailto:contact@coclaw.com?subject=%5BSponsorship%5D%20CoClaw"
+            class="text-primary font-semibold hover:underline underline-offset-4"
+          >
+            Email with [Sponsorship]
+          </a>
+        </div>
+      </div>
+    </Section>
+
+    <Section py="py-16" containerClass="max-w-6xl mx-auto">
+      <div
+        class="m-card-glass-soft p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6"
+      >
+        <div class="space-y-2">
+          <h2 class="text-2xl font-bold text-foreground">Prefer GitHub-first?</h2>
+          <p class="text-default-800 dark:text-default-600">
+            Explore issues, propose improvements, and submit PRs.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <Button
+            as="a"
+            href="https://github.com/lansespirit/coclaw"
+            target="_blank"
+            rel="noopener noreferrer"
+            color="default"
+            variant="bordered"
+            radius="full"
+            className="font-semibold px-8"
+            client:visible
+          >
+            <IconGithub className="w-4 h-4 mr-2" aria-hidden="true" />
+            Open repo
+          </Button>
+          <Button
+            as="a"
+            href="https://github.com/lansespirit/coclaw/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            color="primary"
+            radius="full"
+            className="font-semibold px-8"
+            client:visible
+          >
+            Browse issues
+          </Button>
+        </div>
+      </div>
+    </Section>
+  </div>
+</BaseLayout>
