@@ -1,0 +1,121 @@
+---
+title: "Telegram: channel stops working because persisted session state JSON is bad"
+description: "Recover a Telegram channel that looks mysteriously broken by identifying the bad persisted Telegram session-state JSON, backing it up, resetting only that file, and restarting the gateway."
+kind: "solution"
+component: "channel"
+severity: "high"
+os:
+  - "linux"
+  - "macos"
+  - "windows"
+channel:
+  - "telegram"
+errorSignatures:
+  - "openclaw status telegram"
+  - "session state"
+  - "connect failed"
+  - "telegram stopped working"
+keywords:
+  - "telegram"
+  - "session json"
+  - "state corruption"
+  - "status telegram"
+  - "recovery"
+publishDate: 2026-03-12
+lastUpdated: 2026-03-12
+author: "CoClaw Team"
+related:
+  docs:
+    - "https://docs.openclaw.ai/channels/telegram"
+    - "https://docs.openclaw.ai/channels/troubleshooting"
+  githubIssues:
+    - 43549
+  guides:
+    - "/guides/openclaw-state-workspace-and-memory"
+    - "/guides/telegram-setup"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Telegram had been working, but then suddenly stops routing messages correctly.
+- Generic Telegram troubleshooting does not point to token/auth/allowlist/network as the root cause.
+- `openclaw status telegram` points at a persisted Telegram session/state JSON that is malformed, oversized, or otherwise suspicious.
+- Restarting the gateway alone does **not** fix the problem.
+
+## Cause
+
+This is usually a **bad local Telegram state artifact**, not a Telegram Bot API outage.
+
+If OpenClaw keeps reloading the same broken persisted session JSON on startup, the channel can stay wedged even though:
+
+- your bot token is still valid,
+- the gateway is still running,
+- and the broader network path to Telegram is fine.
+
+In other words: the problem is often **the local state file itself**, not the outer transport/auth layer.
+
+## Fix
+
+### 1) Use `status telegram` to identify the exact bad state file
+
+On the gateway host:
+
+```bash
+openclaw status telegram
+```
+
+Why this helps: you want the exact Telegram file/path OpenClaw is complaining about, not a blind cleanup of `~/.openclaw/`.
+
+### 2) Back up that specific Telegram session/state JSON first
+
+Once you have the path, copy it aside before changing anything.
+
+For example:
+
+```bash
+cp /path/to/the-problem-file.json /path/to/the-problem-file.json.bak
+```
+
+Why this helps: if you later need to compare file size/content or hand evidence upstream, you still have the original artifact.
+
+### 3) Move aside or delete only that bad file
+
+After backing it up, remove or rename the specific Telegram state file flagged by `openclaw status telegram`.
+
+For example:
+
+```bash
+mv /path/to/the-problem-file.json /path/to/the-problem-file.json.bad
+```
+
+Why this helps: a plain restart keeps reusing the poisoned state. Resetting only the bad artifact forces Telegram to rebuild local state instead of reloading the broken JSON again.
+
+### 4) Restart the gateway
+
+```bash
+openclaw gateway restart
+```
+
+Then retest Telegram with a simple DM.
+
+## Verify
+
+- `openclaw status telegram` no longer reports the bad session/state JSON.
+- Telegram starts receiving/routing messages again.
+- A fresh DM produces a normal response after the gateway restart.
+
+If it still fails, capture:
+
+- the exact `openclaw status telegram` output,
+- the flagged file path and size,
+- and the first gateway log lines after restart.
+
+That is the minimum evidence needed to separate bad local state from a network/DNS problem.
+
+## Related
+
+- [/guides/openclaw-state-workspace-and-memory](/guides/openclaw-state-workspace-and-memory)
+- [/guides/telegram-setup](/guides/telegram-setup)
+- [/troubleshooting/solutions/telegram-bot-connected-but-no-messages](/troubleshooting/solutions/telegram-bot-connected-but-no-messages)
+- [/troubleshooting/solutions/telegram-network-request-failed-ipv6-dns](/troubleshooting/solutions/telegram-network-request-failed-ipv6-dns)

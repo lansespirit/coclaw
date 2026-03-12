@@ -11,14 +11,14 @@ platforms:
   - "Self-hosted"
 time: "25 min"
 publishDate: 2026-03-02
-lastUpdated: 2026-03-02
+lastUpdated: 2026-03-12
 steps:
   - title: "Verify the gateway is truly always-on"
     content: "Cron/heartbeat are gateway features. If your gateway isn’t running continuously, automation cannot be reliable."
   - title: "Prove cron execution with runs + logs (not assumptions)"
     content: "Use `openclaw cron runs` and gateway logs to confirm jobs actually executed, not just scheduled."
-  - title: "Fix the three common cron failure modes"
-    content: "Jobs never fire (scheduler regression/timezone), announce delivery fails, or announce delivers only a summary."
+  - title: "Fix the common cron failure modes"
+    content: "Jobs never fire, isolated runs deadlock or fail validation, announce delivery fails, or announce delivers only a summary."
   - title: "Design cron prompts that always leave evidence"
     content: "Write outputs to files, send explicit messages, and use webhooks when announce is flaky."
   - title: "Harden for upgrades and resets"
@@ -94,7 +94,7 @@ Dedicated fix page:
 
 ---
 
-## 2) The 3 most common cron failure modes (and what to do)
+## 2) The most common cron failure modes (and what to do)
 
 ### 2.1 Cron never executes (runs stay empty)
 
@@ -140,6 +140,39 @@ Symptoms:
 Fix page:
 
 - [/troubleshooting/solutions/cron-isolated-tools-function-validation](/troubleshooting/solutions/cron-isolated-tools-function-validation)
+
+### 2.5 Isolated `agentTurn` jobs enqueue, then stall or time out under default concurrency
+
+Symptoms:
+
+- `openclaw cron run <job-id>` says the run was accepted/enqueued.
+- A session stub may appear, but the real transcript/run never materializes.
+- `openclaw cron runs --id <job-id>` stays empty or only shows timeouts.
+- Logs can include lane-wait messages while using `sessionTarget: "isolated"` + `payload.kind: "agentTurn"`.
+
+High-value workaround:
+
+1. Raise cron concurrency:
+
+```json5
+{
+  cron: {
+    maxConcurrentRuns: 2,
+  },
+}
+```
+
+2. Restart the gateway and retest:
+
+```bash
+openclaw gateway restart
+openclaw cron run <job-id>
+openclaw cron runs --id <job-id> --limit 20
+```
+
+Why this helps: the documented default is still `maxConcurrentRuns: 1`, but isolated `agentTurn` jobs can end up waiting on work queued behind the cron lane itself. Raising concurrency to `2` removes that self-blocking path in affected versions.
+
+If you cannot change concurrency right now, move the job to `sessionTarget: "main"` + `systemEvent` temporarily so it avoids the isolated execution path while you validate the rest of the workflow.
 
 ---
 
@@ -187,4 +220,3 @@ Useful references:
 
 - [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
 - [/guides/updating-and-migration](/guides/updating-and-migration)
-
