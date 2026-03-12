@@ -1,0 +1,122 @@
+---
+title: "Feishu: streaming replies show up as duplicate messages"
+description: "Fix Feishu cases where enabling streaming causes two identical replies to be sent by disabling block streaming (or streaming entirely) and aligning plugin/core versions."
+kind: "solution"
+component: "channel"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "feishu"
+errorSignatures:
+  - "开启流式输出后重复发送两条消息"
+  - "Feishu duplicate messages"
+  - "channels.feishu.streaming"
+  - "blockStreaming"
+keywords:
+  - "feishu"
+  - "streaming"
+  - "blockStreaming"
+  - "duplicate reply"
+publishDate: 2026-03-12
+lastUpdated: 2026-03-12
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 44085
+  docs:
+    - "https://docs.openclaw.ai/channels/feishu"
+    - "https://docs.openclaw.ai/gateway/logging"
+  guides:
+    - "/channels/feishu"
+    - "/guides/openclaw-configuration"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- In Feishu group chats, turning on streaming causes **two identical replies** for a single user message.
+- The duplication disappears when you set `channels.feishu.streaming: false`.
+- This can happen with both card and non-card render modes, depending on plugin/core versions.
+
+## Cause
+
+Feishu streaming is implemented as a “progressive delivery” mode. If the channel/plugin path sends:
+
+- a streaming update, **and**
+- a final message
+
+as two separate sends (instead of “update in place”), Feishu users will see two messages that look identical.
+
+This is more likely when:
+
+- plugin version and OpenClaw core version are out of sync (especially beta plugin builds), or
+- block streaming / coalescing behavior disagrees with the streaming sender’s “final” behavior.
+
+## Fix
+
+### 1) Keep `streaming: true`, disable block streaming
+
+This is the smallest change that often removes the duplicate “final send” behavior while keeping streaming UX:
+
+```json5
+{
+  channels: {
+    feishu: {
+      streaming: true,
+      blockStreaming: false,
+    },
+  },
+}
+```
+
+Restart the gateway after editing config:
+
+```bash
+openclaw gateway restart
+```
+
+### 2) If duplicates remain, disable streaming entirely (most stable)
+
+```json5
+{
+  channels: {
+    feishu: {
+      streaming: false,
+    },
+  },
+}
+```
+
+Then restart:
+
+```bash
+openclaw gateway restart
+```
+
+### 3) Align Feishu plugin version with your OpenClaw version
+
+If you’re running a beta plugin build (or any plugin version far from your OpenClaw core version),
+update or downgrade so they match more closely, then retest.
+
+Why this helps: streaming/card rendering paths change across versions, and version skew can surface as “double send”.
+
+## Verify
+
+- Send a single message in a Feishu group chat.
+- Confirm you receive **exactly one** assistant reply (not two).
+- If you keep streaming enabled, confirm you still see progressive output without an extra final duplicate.
+
+If it’s still happening, capture:
+
+- your `channels.feishu.*` config block
+- plugin version + OpenClaw version
+- one gateway log snippet around the Feishu send path
+
+## Related
+
+- [/channels/feishu](/channels/feishu)
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- OpenClaw docs: Feishu, gateway logging

@@ -1,0 +1,120 @@
+---
+title: "Feishu: TTS voice replies fail in group chats with error 234001"
+description: "Work around Feishu group-chat voice send failures (234001 Invalid request param) by avoiding auto-TTS in groups and using DM or tagged TTS until the plugin is patched."
+kind: "solution"
+component: "channel"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "feishu"
+errorSignatures:
+  - "234001"
+  - "Invalid request param"
+  - "Request failed with status code 400"
+keywords:
+  - "feishu"
+  - "tts"
+  - "voice"
+  - "group chat"
+  - "234001"
+publishDate: 2026-03-12
+lastUpdated: 2026-03-12
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 43964
+  docs:
+    - "https://docs.openclaw.ai/channels/feishu"
+    - "https://docs.openclaw.ai/tts"
+  guides:
+    - "/channels/feishu"
+    - "/guides/openclaw-configuration"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- TTS is enabled (Edge / OpenAI / ElevenLabs), and **DM voice replies work**.
+- In Feishu **group chats**, the voice send fails with a Feishu API error like:
+
+```json
+{ "code": 234001, "msg": "Invalid request param." }
+```
+
+and the gateway logs show a 400 error on the send call.
+
+## Cause
+
+Feishu’s message send API uses different identifiers for different destinations:
+
+- DMs typically route by `open_id`
+- Group chats route by `chat_id`
+
+When the sender uses the wrong `receive_id_type` (or passes the wrong id for a group), Feishu returns `234001 Invalid request param`.
+
+As an operator, you usually cannot fix this purely via `openclaw.json` if the mapping is hardcoded in the Feishu plugin’s send path.
+
+## Fix
+
+Until the Feishu plugin is patched, treat this as “voice in groups is unreliable” and use one of these workarounds.
+
+### 1) Disable always-on auto-TTS (recommended for groups)
+
+Switch auto-TTS to tagged mode so voice is only generated when you explicitly request it:
+
+```json5
+{
+  messages: {
+    tts: {
+      auto: "tagged",
+    },
+  },
+}
+```
+
+Then restart the gateway:
+
+```bash
+openclaw gateway restart
+```
+
+Operational rule: do not use tagged TTS in Feishu groups until the sender bug is fixed. Use it in DMs only.
+
+### 2) If you need voice, use a DM thread instead of a group
+
+Because DMs and groups have different identifier rules, a DM is often the fastest way to keep voice replies working.
+
+### 3) Disable TTS entirely (most predictable)
+
+If voice failures are creating user confusion, turn TTS off while you operate in groups:
+
+```json5
+{
+  messages: {
+    tts: {
+      auto: "off",
+    },
+  },
+}
+```
+
+## Verify
+
+- In a Feishu group chat, trigger a reply that would normally produce TTS.
+- Confirm OpenClaw sends a normal text reply (and does not attempt to send voice).
+- In a DM (optional), confirm tagged TTS works when you explicitly request it.
+
+If you still see `234001`, capture:
+
+- the exact `234001` error block from logs
+- your `messages.tts.*` config block
+- your `channels.feishu.*` config block
+
+## Related
+
+- [/channels/feishu](/channels/feishu)
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- OpenClaw docs: TTS, Feishu

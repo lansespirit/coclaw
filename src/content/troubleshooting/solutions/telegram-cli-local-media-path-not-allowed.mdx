@@ -1,0 +1,106 @@
+---
+title: "Telegram CLI: LocalMediaAccessError for --media paths outside allowed directories"
+description: "Fix `openclaw message send --channel telegram --media <path>` failures by staging the file under OpenClaw's allowed media roots (such as ~/.openclaw/media) before sending."
+kind: "solution"
+component: "channel"
+severity: "medium"
+os:
+  - "macos"
+  - "linux"
+  - "windows"
+channel:
+  - "telegram"
+errorSignatures:
+  - "LocalMediaAccessError"
+  - "Local media path is not under an allowed directory"
+  - "--media"
+keywords:
+  - "telegram"
+  - "message send"
+  - "local media"
+  - "allowlist"
+  - "LocalMediaAccessError"
+publishDate: 2026-03-12
+lastUpdated: 2026-03-12
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 44078
+  docs:
+    - "https://docs.openclaw.ai/cli/message"
+    - "https://docs.openclaw.ai/channels/telegram"
+  guides:
+    - "/guides/telegram-setup"
+    - "/guides/openclaw-configuration"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Telegram is healthy in `openclaw status --deep`, but a CLI send with a local file fails:
+
+```bash
+openclaw message send --channel telegram --target <chat> --media /some/path/image.jpg
+```
+
+- You see an error like:
+
+```text
+LocalMediaAccessError: Local media path is not under an allowed directory: /some/path/image.jpg
+```
+
+- If you copy the file into `~/.openclaw/*` and try again, the send succeeds.
+
+## Cause
+
+OpenClaw treats local-file media reads as a **security boundary**.
+
+By default, it only allows local media paths under specific OpenClaw-managed directories
+(state/media/workspace/tmp roots). This reduces the risk of accidentally uploading arbitrary host files.
+
+So an explicit `--media /root/clawd/cat.jpg` path can still be rejected if it is outside those allowed roots.
+
+## Fix
+
+### 1) Stage the file under an OpenClaw-managed media directory (recommended)
+
+On the same host where you run `openclaw message send`:
+
+```bash
+mkdir -p ~/.openclaw/media
+cp /some/path/image.jpg ~/.openclaw/media/image.jpg
+```
+
+Then send the staged path:
+
+```bash
+openclaw message send \\
+  --channel telegram \\
+  --target <chat> \\
+  --media ~/.openclaw/media/image.jpg \\
+  --message \"test local image\"
+```
+
+Why this helps: the staged file lives under an allowed root, so OpenClaw can safely read and upload it.
+
+### 2) Prefer OpenClaw-managed temp/media paths for automation
+
+If you generate files programmatically (screenshots, charts, exports), write them directly into an OpenClaw-managed directory like `~/.openclaw/media` so you can send them without extra copy steps.
+
+## Verify
+
+- Re-run the same `openclaw message send` command using the staged `~/.openclaw/media/...` path.
+- Confirm Telegram receives the image and the CLI output indicates success.
+- Confirm the original failing path still fails (expected) — that means the guard is working as designed.
+
+If it still fails, collect:
+
+- your exact CLI command (redact tokens)
+- the full `LocalMediaAccessError` line
+- your OS + whether the file path is a symlink (OpenClaw resolves symlinks when validating)
+
+## Related
+
+- [/guides/telegram-setup](/guides/telegram-setup)
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- OpenClaw docs: `openclaw message`, Telegram
