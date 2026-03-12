@@ -620,6 +620,11 @@ Every page should pass these questions before publication.
 
 If you cannot answer that, the piece is usually not finished.
 
+### 11.6 Repo Checks (When Writing in This Repo)
+
+- Run `pnpm content:check` (structure checks; especially `troubleshooting/solutions`)
+- Run `pnpm build` (schema + rendering + search index)
+
 ---
 
 ## 12. Special Rules Learned From the Stories Rewrite

@@ -141,6 +141,7 @@ pnpm analyze:issues
 3. `errorSignatures` 不要过宽、不要引入明显歧义
 4. 更新 `lastUpdated`（新文章才设置 `publishDate`）
 5. 本地执行：
+   - `pnpm content:check`
    - `pnpm build`
 6. 自测：
    - 页面能正常渲染（`/troubleshooting/solutions/<slug>/`）

@@ -17,11 +17,12 @@ keywords:
   - "scheduler"
   - "nextRunAtMs"
 publishDate: 2026-02-20
-lastUpdated: 2026-02-20
+lastUpdated: 2026-03-13
 author: "CoClaw Team"
 related:
   githubIssues:
     - 12502
+    - 43937
   docs:
     - "https://docs.openclaw.ai/automation/cron-jobs"
     - "https://docs.openclaw.ai/cli/cron"
@@ -35,6 +36,8 @@ layout: ../../../layouts/TroubleshootingLayout.astro
   - no logs appear for the run,
   - `openclaw cron runs --id <job-id>` stays empty,
   - and `nextRunAtMs` **advances** to the next occurrence anyway (as if it ran).
+- Variant: cron jobs fire on gateway start (startup catch-up), then **stop firing entirely**
+  until the next service restart.
 
 ## Cause
 
@@ -72,6 +75,16 @@ If the job is supposed to run at a specific wall-clock time, set an explicit tim
 openclaw cron edit <job-id> --tz "America/Los_Angeles"
 ```
 
+### 3) If you need reliability right now, use an external scheduler as a stopgap
+
+If you are hitting the “runs only at startup catch-up” variant, treat it as a scheduler
+stall until proven otherwise.
+
+Operational fallback options:
+
+- systemd timer / Task Scheduler calls `openclaw cron run <job-id>` on your desired cadence, or
+- move the critical work to heartbeat (main session) so it runs on a known interval.
+
 ## Verify
 
 - Wait for the next scheduled time and confirm the job appears in:
@@ -81,7 +94,6 @@ openclaw cron edit <job-id> --tz "America/Los_Angeles"
 
 ## Related
 
-- OpenClaw docs: Cron Jobs
-- OpenClaw CLI: `openclaw cron`
-- GitHub: #12502
-
+- OpenClaw docs: [Cron Jobs](https://docs.openclaw.ai/automation/cron-jobs)
+- OpenClaw CLI: [`openclaw cron`](https://docs.openclaw.ai/cli/cron)
+- GitHub: #12502, #43937

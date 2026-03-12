@@ -10,5 +10,6 @@ What problem does this solve / what user value does it add?
 
 - [ ] `pnpm lint`
 - [ ] `pnpm format:check`
+- [ ] `pnpm content:check` (if content changed)
 - [ ] `pnpm build`
 - [ ] Screenshots for UI/content changes (if applicable)

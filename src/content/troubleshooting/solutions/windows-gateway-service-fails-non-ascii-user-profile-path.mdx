@@ -1,0 +1,91 @@
+---
+title: "Windows: Gateway service fails to start when the user profile path is non-ASCII"
+description: "Fix cases where `openclaw gateway start` works in the foreground but exits immediately when launched via Scheduled Task because the command path includes non-ASCII characters."
+kind: "solution"
+component: "gateway"
+severity: "high"
+os:
+  - "windows"
+channel: []
+errorSignatures:
+  - "openclaw gateway start"
+  - "Scheduled Task"
+  - "non-ASCII profile path"
+keywords:
+  - "windows"
+  - "scheduled task"
+  - "schtasks"
+  - "unicode"
+  - "npm prefix"
+publishDate: 2026-03-13
+lastUpdated: 2026-03-13
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 43943
+  docs:
+    - "https://docs.openclaw.ai/cli/gateway"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- `openclaw gateway start` (background/service mode) exits immediately on Windows.
+- The same machine can run the Gateway in the foreground:
+  - `openclaw gateway run` works, or
+  - running the Node entrypoint manually works.
+- The install path for OpenClaw (or Node) includes a Windows user directory with **non-ASCII characters** (for example CJK characters), or other locale-sensitive path edge cases.
+
+## Cause
+
+On native Windows, the Gateway “service” is typically implemented as a **Scheduled Task**.
+
+If the Scheduled Task’s command line (or working directory / quoting) is constructed or persisted in a way that does not round-trip non-ASCII paths correctly, the background launcher can fail even though the underlying Node program can run fine.
+
+This is why foreground runs can work while `gateway start` fails.
+
+## Fix
+
+### 1) Move the global install prefix to an ASCII-only path (recommended)
+
+The most reliable operator workaround is to keep the global OpenClaw install path out of `C:\Users\<non-ascii>\...`.
+
+In PowerShell:
+
+```powershell
+npm config set prefix C:\\openclaw-npm
+npm install -g openclaw@latest
+
+openclaw gateway uninstall
+openclaw gateway install
+openclaw gateway start
+```
+
+If you use pnpm for global installs, set its global dir to an ASCII-only location and reinstall similarly.
+
+### 2) Confirm what the Scheduled Task is actually running
+
+Before guessing, capture the exact command line:
+
+```powershell
+openclaw gateway status --deep
+```
+
+If `status --deep` shows a command path under a non-ASCII user profile directory, apply Fix (1) and reinstall the task.
+
+## Verify
+
+- `openclaw gateway status --deep` shows the Gateway as running.
+- Opening the Control UI works (default: `http://127.0.0.1:18789/` on the Gateway host).
+- Restart survives a stop/start cycle:
+
+```powershell
+openclaw gateway stop
+openclaw gateway start
+```
+
+## Related
+
+- OpenClaw CLI: [Gateway](https://docs.openclaw.ai/cli/gateway)
+- GitHub: #43943
+

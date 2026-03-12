@@ -56,6 +56,9 @@ jobs:
       - name: Token check
         run: pnpm -s tokens:check
 
+      - name: Content check
+        run: pnpm -s content:check
+
       - name: Config generator tests
         run: pnpm -s test:config-generator
 

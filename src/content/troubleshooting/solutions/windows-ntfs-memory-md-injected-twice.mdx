@@ -1,0 +1,75 @@
+---
+title: "Windows (NTFS/WSL2): MEMORY.md is injected twice (case-insensitive filesystem)"
+description: "Fix doubled bootstrap token cost when `MEMORY.md` and `memory.md` resolve to the same file on a case-insensitive NTFS workspace mount."
+kind: "solution"
+component: "gateway"
+severity: "medium"
+os:
+  - "windows"
+channel: []
+errorSignatures:
+  - "MEMORY.md injected twice"
+  - "case-insensitive filesystem"
+keywords:
+  - "windows"
+  - "wsl2"
+  - "ntfs"
+  - "memory"
+  - "bootstrap"
+publishDate: 2026-03-13
+lastUpdated: 2026-03-13
+author: "CoClaw Team"
+related:
+  githubIssues:
+    - 43931
+  docs:
+    - "https://docs.openclaw.ai/concepts/agent-workspace"
+    - "https://docs.openclaw.ai/concepts/memory"
+layout: ../../../layouts/TroubleshootingLayout.astro
+---
+
+## Symptoms
+
+- Every new session costs noticeably more tokens than expected.
+- You see `MEMORY.md` content appear **twice** in the injected bootstrap context.
+- This happens on Windows when the workspace is on **NTFS** (often via WSL2 / Docker bind mounts).
+
+## Cause
+
+Some OpenClaw bootstrap logic may probe both of these paths:
+
+- `MEMORY.md`
+- `memory.md`
+
+On a case-insensitive filesystem (NTFS), those can resolve to the **same physical file**.
+If the runtime does not deduplicate by real path before injection, the content can be injected twice.
+
+## Fix
+
+### 1) Move the workspace to a case-sensitive filesystem (recommended)
+
+Choose one:
+
+- a native WSL2 ext4 path (inside the Linux filesystem), or
+- a Docker named volume (not a Windows bind mount).
+
+This keeps `MEMORY.md` and `memory.md` unambiguous.
+
+### 2) If you must stay on NTFS, reduce the blast radius
+
+If you cannot move the workspace yet:
+
+- delete `MEMORY.md` and rely on `memory/YYYY-MM-DD.md`, or
+- keep `MEMORY.md` extremely small (so double-injection does not double a large token payload).
+
+## Verify
+
+- Start a fresh session and confirm the bootstrap includes `MEMORY.md` only once.
+- Token usage drops back to expected levels for short prompts (relative to the doubled baseline).
+
+## Related
+
+- OpenClaw docs: [Agent workspace](https://docs.openclaw.ai/concepts/agent-workspace)
+- OpenClaw docs: [Memory](https://docs.openclaw.ai/concepts/memory)
+- GitHub: #43931
+
