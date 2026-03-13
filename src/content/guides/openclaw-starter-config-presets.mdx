@@ -1,0 +1,170 @@
+---
+title: "OpenClaw Starter Config Presets: 3 Safe Baselines You Can Actually Run"
+description: "Download a conservative openclaw.json preset for local, coding, or remote dashboard access. Start with a small blast radius, then verify with a minimal probe loop before you add channels, skills, or automation."
+category: "deployment"
+difficulty: "Beginner"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "VPS"
+time: "12 min"
+publishDate: 2026-03-14
+lastUpdated: 2026-03-14
+featured: true
+steps:
+  - title: "Pick a preset (local-safe, local-coding, or remote)"
+    content: "Choose the smallest blast radius that still matches your goal, then download the matching template."
+  - title: "Install the preset safely (backup + validate)"
+    content: "Back up your current openclaw.json, drop in the preset, and run config validation before restarting anything."
+  - title: "Make auth reproducible (token via env var)"
+    content: "Set OPENCLAW_GATEWAY_TOKEN as an environment variable so your dashboard link stays stable across restarts."
+  - title: "Restart and verify with probes"
+    content: "Use gateway status + model/channel probes to confirm the gateway is alive, authenticated, and able to deliver."
+  - title: "Expand deliberately"
+    content: "Add one channel or one capability at a time so you can always tell what change broke the system."
+keywords:
+  - "openclaw starter config"
+  - "openclaw.json"
+  - "preset"
+  - "gateway token"
+  - "tools profile"
+  - "bind loopback"
+  - "bind lan"
+  - "dashboard unauthorized"
+  - "pairing required"
+---
+
+Most OpenClaw "it doesn't work" reports are not deep bugs. They are *too much, too soon*:
+
+- remote dashboard access before auth is stable,
+- a tool profile that blocks the thing you expect,
+- channels enabled before you can probe the model path,
+- or a config edited without a rollback and a validation loop.
+
+This guide gives you **three starter presets** that keep your blast radius small and your verification path obvious.
+
+If you want the broader mental model (and more fix pages), keep these nearby:
+
+- [/guides/new-user-checklist](/guides/new-user-checklist)
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- [/guides/openclaw-cli-command-cheatsheet-and-reddit-faq](/guides/openclaw-cli-command-cheatsheet-and-reddit-faq)
+
+---
+
+## 0) Pick your preset (do not start from "full")
+
+Download one:
+
+1. **Local + safe messaging-first (recommended)**  
+   - Template: [/templates/openclaw/openclaw-starter-local-safe.json5](/templates/openclaw/openclaw-starter-local-safe.json5)
+   - Best for: you mainly want a reliable assistant, not an unbounded coding runtime.
+2. **Local + coding machine**  
+   - Template: [/templates/openclaw/openclaw-starter-local-coding.json5](/templates/openclaw/openclaw-starter-local-coding.json5)
+   - Best for: personal dev machines where you expect hands-on file edits and execution.
+3. **Remote dashboard access (LAN/tailnet)**
+   - Template: [/templates/openclaw/openclaw-starter-remote-lan-tailnet.json5](/templates/openclaw/openclaw-starter-remote-lan-tailnet.json5)
+   - Best for: running the gateway on another box (NAS/VPS/home server) and accessing the Control UI from your laptop/phone.
+
+Remote access gotchas are real. If the Control UI "worked, then broke" after you changed how you reach it, read:
+
+- [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+- [/guides/openclaw-remote-dashboard-access-playbook](/guides/openclaw-remote-dashboard-access-playbook)
+
+---
+
+## 1) Install the preset (backup first, always)
+
+On the gateway host, back up your current config:
+
+```bash
+cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak.$(date +%Y%m%d-%H%M%S) 2>/dev/null || true
+```
+
+Then replace `~/.openclaw/openclaw.json` with the template you chose.
+
+If you are not sure where your active config lives (service vs shell vs profile overrides), start here:
+
+- [/guides/openclaw-configuration](/guides/openclaw-configuration)
+
+---
+
+## 2) Make auth reproducible (this prevents "dashboard unauthorized" loops)
+
+All three presets use token auth via env var:
+
+- `OPENCLAW_GATEWAY_TOKEN`
+
+Set it in the environment that actually runs the gateway:
+
+- foreground debugging shell (fast, but not persistent), or
+- systemd/launchd service env (persistent), or
+- Docker/PaaS env settings (persistent).
+
+Quick test (foreground shell only):
+
+```bash
+export OPENCLAW_GATEWAY_TOKEN='your-long-random-token'
+```
+
+Then confirm the gateway sees it:
+
+```bash
+openclaw doctor
+openclaw config validate
+```
+
+If your config uses `${OPENCLAW_GATEWAY_TOKEN}` but the service still behaves unauthenticated, you are debugging **env propagation**, not JSON.
+
+Deep dive:
+
+- [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+
+---
+
+## 3) Restart and verify (the minimal probe loop)
+
+After swapping presets, restart the gateway and prove the basics:
+
+```bash
+openclaw doctor
+openclaw gateway restart
+openclaw gateway status
+```
+
+Then probe the two paths that most often "look fine" until you test them:
+
+```bash
+openclaw models status --probe
+openclaw channels status --probe
+```
+
+Finally, open the dashboard the right way (tokenized URL):
+
+```bash
+openclaw dashboard
+```
+
+If you see `unauthorized` or `pairing required (1008)` loops, do not keep regenerating tokens. Fix the access path + device approval layer:
+
+- [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+
+---
+
+## 4) Expand deliberately (the rule that keeps you sane)
+
+Once the preset is stable, expand in this order:
+
+1. **One model path** (verify `models status --probe` first)
+2. **One channel** (verify `channels status --probe` and a real send)
+3. **One extra capability** (tools profile, a plugin, a node host, or automation)
+
+If you broaden tools and suddenly the agent "only chats", that is usually `tools.profile` drift:
+
+- [/guides/openclaw-not-using-tools-after-update](/guides/openclaw-not-using-tools-after-update)
+
+If your goal is "coding + exec", do approvals deliberately instead of guessing:
+
+- [/guides/openclaw-exec-approvals-and-safe-bins](/guides/openclaw-exec-approvals-and-safe-bins)
+

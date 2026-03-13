@@ -1,0 +1,30 @@
+// CoClaw starter preset: remote gateway host + remote Control UI access.
+//
+// Goal: run OpenClaw on a server/NAS/VPS, and access the Control UI from another device.
+//
+// Notes:
+// - Binding beyond loopback requires auth (token/password). Use token auth via env var.
+// - Persist the OpenClaw state directory in Docker/PaaS, or tokens/devices will reset.
+// - Prefer SSH tunnel or tailnet HTTPS over public exposure of the UI.
+//
+// Related:
+// - /guides/openclaw-remote-dashboard-access-playbook
+// - /guides/openclaw-deployment-troubleshooting
+{
+  gateway: {
+    mode: "local",
+    bind: "lan",
+    port: 18789,
+    auth: { mode: "token", token: "${OPENCLAW_GATEWAY_TOKEN}" },
+    reload: { mode: "hybrid", debounceMs: 300 },
+  },
+
+  // Conservative default for a remote box:
+  // allow reading/editing files without enabling browser automation or cron by accident.
+  tools: {
+    profile: "messaging",
+    allow: ["group:fs", "group:runtime"],
+    deny: ["browser", "cron"],
+  },
+}
+

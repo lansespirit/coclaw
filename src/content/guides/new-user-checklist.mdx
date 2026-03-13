@@ -161,6 +161,15 @@ openclaw logs --follow
 ## 7) First-week wins (high ROI)
 
 - Set a strict DM policy for every channel you enable.
-- Decide your remote access story early (SSH tunnel vs Tailscale). Avoid public exposure of the Control UI.
+- Decide your remote access story early (SSH tunnel vs tailnet vs reverse proxy). Avoid public exposure of the Control UI:
+  [/guides/openclaw-remote-dashboard-access-playbook](/guides/openclaw-remote-dashboard-access-playbook)
 - Add a scheduled backup of `~/.openclaw/`.
 - Keep a "rescue path": you should be able to reinstall OpenClaw and restore state in under 15 minutes.
+
+If you want a safe starting point (and fewer footguns), start from presets:
+
+- [/guides/openclaw-starter-config-presets](/guides/openclaw-starter-config-presets)
+
+If you're stuck on a vague symptom, use the triage card:
+
+- [/guides/openclaw-symptom-first-triage-card](/guides/openclaw-symptom-first-triage-card)

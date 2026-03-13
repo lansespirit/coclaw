@@ -1,0 +1,27 @@
+// CoClaw starter preset: local gateway + coding workstation posture.
+//
+// Goal: a reliable local coding assistant. Still keep the gateway local-only unless you
+// explicitly want LAN/tailnet access.
+//
+// Notes:
+// - Exec approvals can still apply even when tools profile is broad.
+// - For remote access, use an SSH tunnel first instead of exposing raw ports.
+//
+// Related:
+// - /guides/openclaw-starter-config-presets
+// - /guides/openclaw-exec-approvals-and-safe-bins
+{
+  gateway: {
+    mode: "local",
+    bind: "loopback",
+    port: 18789,
+    auth: { mode: "token", token: "${OPENCLAW_GATEWAY_TOKEN}" },
+    reload: { mode: "hybrid", debounceMs: 300 },
+  },
+
+  // If you expect file edits + shell-style work, start from "coding" (not "full").
+  tools: {
+    profile: "coding",
+  },
+}
+

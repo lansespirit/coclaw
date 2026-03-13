@@ -1,0 +1,29 @@
+// CoClaw starter preset: local gateway + small blast radius.
+//
+// Goal: a stable Control UI + messaging-first assistant that can read/edit files,
+// without implicitly enabling browser automation, cron, or host exec.
+//
+// Notes:
+// - Keep secrets out of this file: set env vars in your gateway runtime environment.
+// - Always validate + restart the gateway after config changes.
+//
+// Related:
+// - /guides/openclaw-starter-config-presets
+// - /guides/control-ui-auth-and-pairing
+{
+  gateway: {
+    mode: "local",
+    bind: "loopback",
+    port: 18789,
+    auth: { mode: "token", token: "${OPENCLAW_GATEWAY_TOKEN}" },
+    reload: { mode: "hybrid", debounceMs: 300 },
+  },
+
+  // Messaging-first + minimal extra capability.
+  tools: {
+    profile: "messaging",
+    allow: ["group:fs"],
+    deny: ["browser", "cron", "exec"],
+  },
+}
+

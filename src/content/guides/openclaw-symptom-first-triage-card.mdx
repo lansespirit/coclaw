@@ -1,0 +1,161 @@
+---
+title: "OpenClaw Symptom-First Triage Card: Stop Guessing, Find the Right Layer"
+description: "A scannable triage flow for non-hardcore operators: map what you see (unauthorized, pairing required 1008, gateway disconnected 4008, no output, only chats) to the correct fix page, with a minimal command pack to prove each layer."
+category: "deployment"
+difficulty: "Beginner"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "VPS"
+  - "Self-hosted"
+time: "10 min"
+publishDate: 2026-03-14
+lastUpdated: 2026-03-14
+featured: false
+steps:
+  - title: "Run the minimal command pack (gateway host)"
+    content: "Use status + probes to prove whether the gateway, model path, and channel path are actually healthy."
+  - title: "Match the symptom to a layer"
+    content: "Unauthorized/pairing/4008 are control-plane problems; no output/false rate limit are model-path problems; silent delivery is channel-path."
+  - title: "Jump to the right fix page"
+    content: "Use the symptom cards below to land on the correct CoClaw page in one click."
+  - title: "Verify with one real action"
+    content: "After a fix, rerun probes and do one real send or dashboard refresh to confirm the loop is gone."
+keywords:
+  - "openclaw triage"
+  - "unauthorized"
+  - "pairing required"
+  - "1008"
+  - "4008"
+  - "no output"
+  - "only chats"
+  - "rate limit"
+  - "token mismatch"
+---
+
+If you keep "trying fixes" without a layer model, OpenClaw will punish you with wasted time.
+
+This page is the opposite: **start from what you see**, run a tiny command pack, and land on the correct fix page.
+
+---
+
+## 0) The 60-second command pack (gateway host)
+
+Run on the machine/container that runs the gateway:
+
+```bash
+openclaw status --all
+openclaw gateway status
+openclaw models status --probe
+openclaw channels status --probe
+openclaw logs --limit 200 --plain
+```
+
+If you can only do one thing: run `openclaw status --all` and stop guessing.
+
+---
+
+## 1) Symptom cards (what you see -> what it usually is -> where to go)
+
+### A) Control UI says "unauthorized" (or keeps reconnecting)
+
+This is usually:
+
+- token mismatch (wrong gateway, wrong env override), or
+- you opened the raw URL instead of the tokenized dashboard link.
+
+Do this:
+
+- Fix page: [/troubleshooting/solutions/control-ui-unauthorized](/troubleshooting/solutions/control-ui-unauthorized)
+- Guide (longer): [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+
+### B) Control UI / TUI says "pairing required (1008)"
+
+This is usually:
+
+- a new device identity that was never approved, often triggered by using a new origin (LAN/tailnet/reverse proxy).
+
+Do this:
+
+- Fix page: [/troubleshooting/solutions/control-ui-pairing-required](/troubleshooting/solutions/control-ui-pairing-required)
+- Explanation (why this happens): [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+
+### C) "Gateway disconnected (4008)" or "can't connect to gateway"
+
+This is usually:
+
+- the gateway isn't running,
+- you're hitting the wrong host/port,
+- bind is loopback-only but you are connecting remotely,
+- or auth is misaligned.
+
+Do this:
+
+- Start here: [/guides/openclaw-cli-command-cheatsheet-and-reddit-faq](/guides/openclaw-cli-command-cheatsheet-and-reddit-faq)
+- Remote deployments: [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+
+### D) "It only chats" / "it won't use tools anymore"
+
+This is usually:
+
+- `tools.profile` became narrower after an upgrade, or
+- a deny rule or per-agent override is still pinning tools.
+
+Do this:
+
+- Fix page: [/troubleshooting/solutions/openclaw-only-chats-no-tools-after-update](/troubleshooting/solutions/openclaw-only-chats-no-tools-after-update)
+- Guide: [/guides/openclaw-not-using-tools-after-update](/guides/openclaw-not-using-tools-after-update)
+
+### E) "No output" / "nothing comes back" / "everything looks rate-limited"
+
+This is usually:
+
+- model auth/quota/provider failure,
+- a relay/api-mode mismatch,
+- or a false rate limit classification that poisons your route.
+
+Do this:
+
+- Guide: [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
+- Relay mismatch deep dive: [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+
+### F) Docker/VPS "works" but Control UI is unreachable
+
+This is usually:
+
+- bind is still loopback,
+- health checks are killing the service,
+- state is not persisted (token/devices reset on restart),
+- or TLS/reverse proxy expectations changed after an update.
+
+Do this:
+
+- Guide: [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+- Fix page (proxy/TLS edge case): [/troubleshooting/solutions/gateway-reverse-proxy-breaks-after-tls-auto-generate](/troubleshooting/solutions/gateway-reverse-proxy-breaks-after-tls-auto-generate)
+
+### G) "It stops when I close the terminal" (or after SSH disconnect)
+
+This is usually:
+
+- you never installed a supervisor/daemon, so the gateway is just a foreground process.
+
+Do this:
+
+- Fix page (Linux): [/troubleshooting/solutions/linux-gateway-service-not-installed](/troubleshooting/solutions/linux-gateway-service-not-installed)
+- Guide: [/guides/new-user-checklist](/guides/new-user-checklist)
+
+---
+
+## 2) Verification (prove the fix, do not trust vibes)
+
+After any fix:
+
+1. rerun the 60-second command pack, and
+2. do one real action:
+   - dashboard refresh without loops (`openclaw dashboard`), or
+   - send a test message on your channel.
+
+If you cannot reproduce success twice in a row, you do not have a fix yet.
+

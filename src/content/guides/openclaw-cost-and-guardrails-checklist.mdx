@@ -1,0 +1,182 @@
+---
+title: "OpenClaw Cost and Guardrails Checklist: Prevent Runaway Runs Before They Happen"
+description: "A practical operator checklist to control blast radius and token spend: start with a bounded tool profile, tighten DM policies, make runs leave evidence, and keep a kill switch. Designed for real life, not perfect autonomy."
+category: "advanced"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "VPS"
+  - "Self-hosted"
+time: "20 min"
+publishDate: 2026-03-14
+lastUpdated: 2026-03-14
+featured: false
+steps:
+  - title: "Start bounded (tools + channels)"
+    content: "Most cost incidents are permission incidents. Use a bounded tools profile and strict DM policies first."
+  - title: "Make every run leave evidence"
+    content: "If outputs are invisible, you rerun tasks, and cost explodes. Adopt artifacts + logs as a default."
+  - title: "Make model failures debuggable"
+    content: "Probe the model path directly so you can distinguish real rate limits from false ones and relay mismatch."
+  - title: "Enable exec deliberately (if you need it)"
+    content: "Do not treat exec as a free capability. Approvals and safe bins exist because blast radius is real."
+  - title: "Install a kill switch"
+    content: "Have a one-minute response that stops sends, stops the gateway, and preserves evidence for debugging."
+keywords:
+  - "openclaw cost"
+  - "token spend"
+  - "guardrails"
+  - "blast radius"
+  - "duplicate messages"
+  - "loop"
+  - "tools profile"
+  - "dmPolicy"
+  - "approvals"
+  - "kill switch"
+---
+
+If OpenClaw ever made you think, "I just burned money and got nothing," you are not alone.
+
+Most cost incidents are not model-quality problems. They are *operator posture* problems:
+
+- runs that do not leave evidence (so you rerun them),
+- broad tools before you have a stable debug loop,
+- loose DM policies (so the system can be triggered too easily),
+- and no kill switch when something starts looping or flooding.
+
+This checklist is designed to be implemented in under an hour, even if you are not a hardcore operator.
+
+---
+
+## 0) The one rule: start bounded, expand deliberately
+
+Do not start from "full tools" and "open DMs" and then try to claw back safety.
+
+Start from a bounded posture that still produces useful outcomes, then expand one dimension at a time.
+
+If you want ready-made safe baselines, start here:
+
+- [/guides/openclaw-starter-config-presets](/guides/openclaw-starter-config-presets)
+
+---
+
+## 1) Tool guardrails (the fastest way to avoid runaway capability)
+
+If your agent "only chats" or "won't use tools", you are likely too narrow.
+
+If your agent can do everything, you are likely too broad.
+
+Pick a deliberate tools profile:
+
+- For messaging-first workflows: keep `profile: "messaging"` and add only what you need.
+- For a trusted coding machine: use `profile: "coding"` (not `full` by default).
+
+Fix guide + safe examples:
+
+- [/guides/openclaw-not-using-tools-after-update](/guides/openclaw-not-using-tools-after-update)
+
+---
+
+## 2) Channel guardrails (reduce who can trigger you)
+
+Cost and safety are channel problems too.
+
+Minimum defaults:
+
+- DMs: use `pairing` or `allowlist` (avoid `open`)
+- Groups: require mentions (avoid "reply to everything")
+
+Channel guides:
+
+- [/guides/telegram-setup](/guides/telegram-setup)
+- [/guides/whatsapp-setup](/guides/whatsapp-setup)
+
+If you are using your personal WhatsApp number for testing and nothing replies, that is often a self-chat policy issue:
+
+- [/troubleshooting/solutions/whatsapp-personal-number-no-replies-self-chat-mode](/troubleshooting/solutions/whatsapp-personal-number-no-replies-self-chat-mode)
+
+---
+
+## 3) Evidence guardrails (the cheapest reliability upgrade)
+
+When you cannot see what happened, you keep retrying, and spend becomes unpredictable.
+
+Adopt two defaults:
+
+1. runs always write an artifact (file) in the workspace
+2. runs always produce a short human-readable "done" message
+
+Start here:
+
+- [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability)
+- [/guides/openclaw-task-board-template](/guides/openclaw-task-board-template)
+
+---
+
+## 4) Model-path guardrails (probe, do not infer)
+
+If you see:
+
+- "no output",
+- "all models failed",
+- or "everything is rate limited",
+
+do not debug by conversation. Probe the model path directly:
+
+```bash
+openclaw models status --probe
+```
+
+Fix guide:
+
+- [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
+
+If you use relays/proxies, baseUrl + API mode mismatches are a classic cost sink:
+
+- [/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+
+---
+
+## 5) Exec guardrails (do not "accidentally" enable host power)
+
+If you want host execution, treat it as a deliberate operator choice.
+
+Two practical rules:
+
+1. do not try to bypass approvals by stuffing interpreters into `safeBins`
+2. decide whether commands run on the gateway host or a node host, because approvals are enforced where execution happens
+
+Start here:
+
+- [/guides/openclaw-exec-approvals-and-safe-bins](/guides/openclaw-exec-approvals-and-safe-bins)
+
+---
+
+## 6) Kill switch (one-minute incident response)
+
+When something starts looping or flooding, do not keep tweaking config mid-incident.
+
+Have a one-minute sequence that:
+
+1. stops sending (disable the channel or stop the gateway)
+2. preserves evidence (logs + state)
+3. restores from a known-good config if needed
+
+Minimum evidence capture:
+
+```bash
+openclaw status --all
+openclaw logs --limit 400 --plain
+```
+
+Backup/rollback discipline:
+
+- [/guides/openclaw-backup-and-rollback](/guides/openclaw-backup-and-rollback)
+
+If the symptom is duplicate/flashy streaming previews (a common "flood-looking" panic):
+
+- [/troubleshooting/solutions/telegram-preview-streaming-duplicate-or-flash](/troubleshooting/solutions/telegram-preview-streaming-duplicate-or-flash)
+

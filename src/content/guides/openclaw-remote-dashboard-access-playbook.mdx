@@ -1,0 +1,163 @@
+---
+title: "OpenClaw Remote Dashboard Access Playbook: SSH Tunnel, Tailnet, or Reverse Proxy"
+description: "A practical, step-by-step playbook for using the OpenClaw Control UI from another device (laptop/phone) without token mismatch, pairing loops (1008), or brittle public exposure. Pick one access pattern and make it stable."
+category: "deployment"
+difficulty: "Intermediate"
+platforms:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "VPS"
+  - "Self-hosted"
+time: "18 min"
+publishDate: 2026-03-14
+lastUpdated: 2026-03-14
+featured: false
+steps:
+  - title: "Choose one access pattern"
+    content: "SSH tunnel first for debugging, then either tailnet HTTPS or a reverse proxy for daily use. Avoid random IP:port access patterns."
+  - title: "Stabilize gateway identity (bind + token + persistence)"
+    content: "Most remote UI breakage is actually: bind wrong, token overridden, or state not persisted between restarts."
+  - title: "Use the tokenized dashboard link"
+    content: "Always open the UI via `openclaw dashboard` so the token is correct for the gateway you're actually reaching."
+  - title: "Approve devices and eliminate pairing loops"
+    content: "Remote access changes device identity and origin assumptions; approve devices explicitly and keep one stable origin."
+  - title: "Verify and lock it in"
+    content: "Refresh without loops, re-open from a second device, and confirm tokens/devices survive a gateway restart."
+keywords:
+  - "openclaw dashboard remote access"
+  - "ssh tunnel"
+  - "tailscale"
+  - "reverse proxy"
+  - "pairing required"
+  - "1008"
+  - "unauthorized"
+  - "token mismatch"
+  - "bind lan"
+---
+
+Remote dashboard access is where OpenClaw stops feeling like "a web page on a port" and starts behaving like what it is:
+an authenticated control plane with device identity.
+
+This playbook is intentionally boring: pick **one** access pattern and make it stable.
+
+If you want the longer, deeper map of auth + pairing, read:
+
+- [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+
+---
+
+## 0) The rule that prevents 80% of remote UI pain
+
+Do not treat these as equivalent:
+
+- `http://127.0.0.1:18789` on the gateway host
+- `http://<LAN-IP>:18789` from another machine
+- `https://<tailnet-name>` via a tailnet
+- a reverse-proxied HTTPS origin
+
+Pick one stable origin for daily use. Use SSH tunnel for first-time debugging.
+
+---
+
+## 1) Pattern A (recommended for first-time setup): SSH tunnel to loopback
+
+This keeps the gateway bound to `loopback` (safe), but lets you access it remotely through an encrypted tunnel.
+
+On your laptop (client machine):
+
+```bash
+ssh -L 18789:127.0.0.1:18789 <user>@<gateway-host>
+```
+
+Then open the dashboard **locally** through the tunnel:
+
+```bash
+openclaw dashboard
+```
+
+If you cannot run the CLI on the client machine, open:
+
+```text
+http://127.0.0.1:18789/
+```
+
+and use the tokenized URL from the gateway host output of `openclaw dashboard`.
+
+If this works but your LAN/reverse proxy path does not, you have proven the problem is **access path**, not "the UI is broken".
+
+---
+
+## 2) Pattern B: Tailnet access (Tailscale-style) for daily use
+
+If you want to reach the Control UI from your phone/laptop regularly, a tailnet is often the least fragile option.
+
+Key rules:
+
+1. Prefer **one stable hostname** (not random IPs).
+2. Prefer **HTTPS** when you can (browser storage, origin rules, and token persistence behave better).
+3. Keep the gateway token reproducible (env var), and keep state persistent.
+
+If you are moving from loopback to LAN/tailnet access, you will typically need:
+
+```json5
+{ gateway: { bind: "lan" } }
+```
+
+And you must keep auth on:
+
+- token or password auth is required when binding beyond loopback
+
+Deep dive:
+
+- [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+- [/troubleshooting/solutions/gateway-refusing-to-bind-without-auth](/troubleshooting/solutions/gateway-refusing-to-bind-without-auth)
+
+---
+
+## 3) Pattern C: Reverse proxy (nginx/Caddy/Traefik) for daily use
+
+Reverse proxy is fine, but it is the easiest way to create "worked yesterday, broke after update" incidents.
+
+Two high-frequency footguns:
+
+1. The gateway starts speaking HTTPS (TLS auto-generate enabled), but your proxy still forwards plain HTTP.
+2. You unknowingly changed the origin (host/port/scheme), so the browser's stored token/device identity no longer matches.
+
+If your proxy suddenly returns 502 or weird protocol errors after an update:
+
+- [/troubleshooting/solutions/gateway-reverse-proxy-breaks-after-tls-auto-generate](/troubleshooting/solutions/gateway-reverse-proxy-breaks-after-tls-auto-generate)
+
+---
+
+## 4) Token + pairing: the shortest stable loop
+
+When you access the UI remotely, always do these in order:
+
+1. On the gateway host, print the tokenized URL:
+   ```bash
+   openclaw dashboard
+   ```
+2. If the UI says `pairing required (1008)`, approve the device:
+   - [/troubleshooting/solutions/control-ui-pairing-required](/troubleshooting/solutions/control-ui-pairing-required)
+3. Stop mixing origins. If you alternate between raw IP, proxy URL, and tunnel URL, you will keep generating "new devices."
+
+If you want the full mental model (why this happens):
+
+- [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+
+---
+
+## 5) Verification (prove it's stable)
+
+You are done only if all of these are true:
+
+1. The Control UI loads without `unauthorized` loops.
+2. Refresh does not flip you back to `device identity required` / pairing.
+3. After `openclaw gateway restart`, you can still open the UI from the same origin without re-pairing.
+
+If (3) fails, you are likely not persisting state in Docker/PaaS, or your token source is drifting:
+
+- [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+
