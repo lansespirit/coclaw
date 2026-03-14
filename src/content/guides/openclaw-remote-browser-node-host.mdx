@@ -1,6 +1,19 @@
 ---
 title: "OpenClaw Remote Browser Setup: Gateway on One Machine, Browser on Another"
 description: "A practical guide to stable remote browser control in OpenClaw: run the gateway remotely, keep Chrome local, route through a node host, pin browser-capable nodes, and avoid the most common relay/probe confusions."
+seoTitle: "OpenClaw Remote Browser Setup and Node Host Guide"
+seoDescription: "A practical guide to stable remote browser control in OpenClaw: run the gateway remotely, keep Chrome local, route through a node host, pin browser-capable."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "advanced"
 difficulty: "Advanced"
 platforms:
@@ -30,6 +43,16 @@ keywords:
   - "gateway.nodes.browser.mode"
   - "remote mode"
   - "127.0.0.1:18792"
+sources:
+  - label: 'OpenClaw docs — Browser automation timeouts'
+    url: https://docs.openclaw.ai/guides/openclaw-browser-automation-timeouts
+    type: official-doc
+  - label: 'OpenClaw docs — Exec approvals and safe bins'
+    url: https://docs.openclaw.ai/guides/openclaw-exec-approvals-and-safe-bins
+    type: official-doc
+  - label: 'OpenClaw GitHub repository'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 ---
 
 One of the easiest ways to confuse yourself in OpenClaw is this setup:

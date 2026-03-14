@@ -10,6 +10,10 @@ import {
   IconSparkles,
 } from '../components/icons';
 
+const pageTitle = 'CoClaw FAQ: OpenClaw Setup, Support, and Contribution';
+const pageDescription =
+  'Answers to common CoClaw and OpenClaw questions: what CoClaw covers, where to get help, how to contribute, and how to report security or content issues.';
+const canonicalPath = '/faq';
 const lastUpdated = 'March 11, 2026';
 const faqs = [
   {
@@ -70,13 +74,32 @@ const faqs = [
       'Include your OS and version, OpenClaw version/install method, the channel/integration you are configuring, exact error messages, and sanitized logs (redact secrets).',
   },
 ];
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  name: pageTitle,
+  description: pageDescription,
+  url: new URL(canonicalPath, Astro.site).toString(),
+  dateModified: new Date('2026-03-11').toISOString(),
+  mainEntity: faqs.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.answer,
+    },
+  })),
+};
 ---
 
 <BaseLayout
-  title="FAQ | CoClaw"
-  description="Frequently asked questions about CoClaw, OpenClaw support, and contributing."
+  title={pageTitle}
+  description={pageDescription}
   keywords="CoClaw FAQ, OpenClaw FAQ, OpenClaw support, CoClaw contributing"
+  canonicalPath={canonicalPath}
 >
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
   <div class="bg-background min-h-screen overflow-x-hidden relative">
     <Section py="py-20 lg:py-24" containerClass="max-w-6xl mx-auto">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">

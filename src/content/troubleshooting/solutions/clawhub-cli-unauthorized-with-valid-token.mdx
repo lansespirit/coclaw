@@ -1,6 +1,19 @@
 ---
 title: "ClawHub CLI: 'Unauthorized' even with a valid token"
 description: "Work around ClawHub CLI token auth failures by using the www registry URL (and the no-browser login flow)."
+seoTitle: "Fix ClawHub CLI: 'Unauthorized' even with a valid token"
+seoDescription: "Work around ClawHub CLI token auth failures by switching to the www registry URL, retrying the no-browser login flow, and refreshing cached auth state."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Linux"
+  - "macOS"
+  - "Windows"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 45
+
 kind: "solution"
 component: "install"
 severity: "medium"
@@ -63,4 +76,3 @@ For example, retry the delete/install action after a successful login.
 ## Related
 
 - GitHub issue: #5483
-

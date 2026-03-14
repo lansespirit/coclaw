@@ -1,5 +1,46 @@
 import { defineCollection, z } from 'astro:content';
 
+const sourceTypeSchema = z.enum([
+  'official-doc',
+  'repo',
+  'issue',
+  'maintainer-comment',
+  'community-report',
+  'first-hand-test',
+  'news',
+  'other',
+]);
+
+const sourceSchema = z.object({
+  label: z.string(),
+  url: z.string().url(),
+  type: sourceTypeSchema.default('other'),
+  notes: z.string().optional(),
+});
+
+const seoFields = {
+  seoTitle: z.string().optional(),
+  seoDescription: z.string().optional(),
+  canonicalPath: z.string().optional(),
+  robots: z.string().optional(),
+  noindex: z.boolean().default(false),
+  searchIntent: z.string().optional(),
+  targetKeywords: z.array(z.string()).optional(),
+};
+
+const trustFields = {
+  reviewedBy: z.array(z.string()).optional(),
+  reviewedAt: z.date().optional(),
+  testedOn: z.array(z.string()).optional(),
+  sources: z.array(sourceSchema).optional(),
+  contentOwner: z.string().optional(),
+  reviewCadenceDays: z.number().int().positive().optional(),
+  verificationStatus: z
+    .enum(['reported', 'reviewed', 'tested', 'monitoring', 'deprecated'])
+    .optional(),
+  changeSummary: z.string().optional(),
+};
+
 const docsCollection = defineCollection({
   type: 'content',
   schema: z.object({
@@ -20,6 +61,7 @@ const docsCollection = defineCollection({
     ogImage: z.string().optional(),
     ogType: z.string().optional(),
     twitterCard: z.string().optional(),
+    ...seoFields,
 
     // Content Metadata
     author: z.string().default('CoClaw Team'),
@@ -27,6 +69,7 @@ const docsCollection = defineCollection({
     publishDate: z.date(),
     lastUpdated: z.date(),
     version: z.string().optional(),
+    ...trustFields,
 
     // Navigation & Organization
     order: z.number().optional(),
@@ -79,6 +122,8 @@ const troubleshootingCollection = defineCollection({
     author: z.string().default('CoClaw Team'),
     publishDate: z.date(),
     lastUpdated: z.date(),
+    ...seoFields,
+    ...trustFields,
 
     // Cross-linking
     related: z
@@ -122,14 +167,8 @@ const storiesCollection = defineCollection({
     updatedDate: z.date().optional(),
     topics: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
-    sources: z
-      .array(
-        z.object({
-          label: z.string(),
-          url: z.string().url(),
-        })
-      )
-      .optional(),
+    ...seoFields,
+    ...trustFields,
     draft: z.boolean().default(false),
   }),
 });
@@ -151,8 +190,11 @@ const guidesCollection = defineCollection({
     ),
     keywords: z.array(z.string()).optional(),
     ogImage: z.string().optional(),
+    author: z.string().default('CoClaw Team'),
     publishDate: z.date(),
     lastUpdated: z.date(),
+    ...seoFields,
+    ...trustFields,
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),
   }),
@@ -163,6 +205,7 @@ const specialReportsCollection = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
+    author: z.string().default('CoClaw Team'),
     publishDate: z.date(),
     lastUpdated: z.date(),
     featured: z.boolean().default(false),
@@ -193,6 +236,8 @@ const specialReportsCollection = defineCollection({
     relatedBlog: z.array(z.string()).default([]),
     keywords: z.array(z.string()).optional(),
     ogImage: z.string().optional(),
+    ...seoFields,
+    ...trustFields,
   }),
 });
 

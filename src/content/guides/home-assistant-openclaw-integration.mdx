@@ -1,6 +1,19 @@
 ---
 title: "Integrating OpenClaw with Home Assistant: The Realistic Path"
 description: "A practical guide to using OpenClaw with Home Assistant without over-automating your house: where the boundary should live, what to delegate to an agent, and which risks to control first."
+seoTitle: "Integrate OpenClaw with Home Assistant Safely"
+seoDescription: "Keep Home Assistant as device truth while OpenClaw handles conversation, limits actions, and enforces risk reviews before expansion."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Home Assistant"
+  - "OpenClaw"
+  - "Self-hosted"
+  - "Docker"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "integration"
 difficulty: "Intermediate"
 platforms:
@@ -11,6 +24,16 @@ platforms:
 time: "25 min"
 publishDate: 2026-03-08
 lastUpdated: 2026-03-08
+sources:
+  - label: 'OpenClaw docs — Architecture & boundaries'
+    url: https://docs.openclaw.ai/concepts/architecture
+    type: official-doc
+  - label: 'OpenClaw docs — Gateway configuration'
+    url: https://docs.openclaw.ai/gateway/configuration
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 steps:
   - title: "Decide the system boundary first"
     content: "Keep Home Assistant as the source of truth for devices and deterministic automations, and use OpenClaw as a language and orchestration layer on top."

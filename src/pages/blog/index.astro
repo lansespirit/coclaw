@@ -4,6 +4,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 import { BlogCard } from '../../components/BlogCard';
 import { Button, Chip, Input } from '@heroui/react';
+import {
+  buildBreadcrumbList,
+  buildCollectionPage,
+  wrapSchemaGraph,
+} from '../../lib/structured-data';
 
 const entries = await getCollection('blog', ({ data }) => !data.draft);
 const blogPosts = entries
@@ -29,12 +34,30 @@ const blogPosts = entries
 
 const featuredPost = blogPosts.find((post) => post.featured);
 const regularPosts = blogPosts.filter((post) => !post.featured);
+
+const pageTitle = 'OpenClaw Blog & Insights | CoClaw';
+const pageDescription =
+  'Practical guides and insights on self-hosting, channel integrations, security, and running OpenClaw effectively.';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const structuredData = wrapSchemaGraph(
+  buildCollectionPage({
+    name: 'OpenClaw Blog & Insights',
+    description: pageDescription,
+    url: canonicalURL.toString(),
+    items: blogPosts.map((post) => ({
+      name: post.title,
+      url: new URL(post.href, Astro.site).toString(),
+      description: post.excerpt,
+    })),
+  }),
+  buildBreadcrumbList([
+    { name: 'Home', item: new URL('/', Astro.site).toString() },
+    { name: 'Blog', item: canonicalURL.toString() },
+  ])
+);
 ---
 
-<BaseLayout
-  title="OpenClaw Blog & Insights | CoClaw"
-  description="Practical guides and insights on self-hosting, channel integrations, security, and running OpenClaw effectively."
->
+<BaseLayout title={pageTitle} description={pageDescription} structuredData={structuredData}>
   <div class="bg-background min-h-screen relative overflow-hidden">
     <!-- Background Accents -->
     <div
@@ -150,6 +173,56 @@ const regularPosts = blogPosts.filter((post) => !post.featured);
           </div>
         )
       }
+    </Section>
+
+    <Section py="pb-6">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <a
+          href="/blog/openclaw-deployment-form-factors-comparison"
+          class="m-card-surface m-card-hover-border m-card-hover-lift p-6"
+        >
+          <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-default-500">
+            Deployment
+          </p>
+          <h3 class="mt-3 text-lg font-bold text-foreground">Choose your host shape</h3>
+          <p class="mt-2 text-sm text-default-600">
+            Official install vs Docker vs templates vs wrappers, with the day-2 costs spelled out.
+          </p>
+        </a>
+        <a
+          href="/blog/openclaw-model-routing-and-cost-strategy"
+          class="m-card-surface m-card-hover-border m-card-hover-lift p-6"
+        >
+          <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-default-500">
+            Model policy
+          </p>
+          <h3 class="mt-3 text-lg font-bold text-foreground">Route for cost and reliability</h3>
+          <p class="mt-2 text-sm text-default-600">
+            Tiered routing, fallback behavior, and relay compatibility without guessing.
+          </p>
+        </a>
+        <a
+          href="/blog/openclaw-stability-playbook"
+          class="m-card-surface m-card-hover-border m-card-hover-lift p-6"
+        >
+          <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-default-500">
+            Stability
+          </p>
+          <h3 class="mt-3 text-lg font-bold text-foreground">Hardening playbook</h3>
+          <p class="mt-2 text-sm text-default-600">
+            Map failures by layer, then harden the paths that keep breaking.
+          </p>
+        </a>
+        <a href="/resources" class="m-card-surface m-card-hover-border m-card-hover-lift p-6">
+          <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-default-500">
+            Resources
+          </p>
+          <h3 class="mt-3 text-lg font-bold text-foreground">Jump to the hub</h3>
+          <p class="mt-2 text-sm text-default-600">
+            Guides, troubleshooting, special reports, and stories in one directory.
+          </p>
+        </a>
+      </div>
     </Section>
 
     <!-- Content Section -->

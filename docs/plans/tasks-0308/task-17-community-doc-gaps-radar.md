@@ -28,7 +28,6 @@
 - 首页定位：`src/pages/index.astro`
 - 资源页定位：`src/pages/resources.astro`
 - Guides 栏目定位：`src/pages/guides/index.astro`
-- GitHub issue 派生排障页：`src/pages/troubleshooting/issues.astro`
 - GitHub issue 内容样例：`src/content/troubleshooting/github/**`
 
 如果主题与现有内容高度相邻，请额外阅读该主题对应的已有文章，明确：

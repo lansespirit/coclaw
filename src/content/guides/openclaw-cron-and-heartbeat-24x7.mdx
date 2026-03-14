@@ -1,6 +1,20 @@
 ---
 title: "OpenClaw Cron & Heartbeat: Make Your Agent Actually Run 24/7"
 description: "A pragmatic guide to OpenClaw automation reliability: how cron runs are scheduled and delivered, why jobs can 'advance nextRunAtMs' without executing, and how to design runs that always leave evidence and alert correctly."
+seoTitle: "OpenClaw Cron and Heartbeat Reliability Guide"
+seoDescription: "Keep the gateway running, prove cron jobs fire, fix scheduler/storage issues, and design evidence-leaving runs before claiming 24/7 automation."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "advanced"
 difficulty: "Intermediate"
 platforms:
@@ -12,6 +26,16 @@ platforms:
 time: "25 min"
 publishDate: 2026-03-02
 lastUpdated: 2026-03-12
+sources:
+  - label: 'OpenClaw docs — Automation cron jobs'
+    url: https://docs.openclaw.ai/automation/cron-jobs
+    type: official-doc
+  - label: 'OpenClaw docs — Gateway heartbeat'
+    url: https://docs.openclaw.ai/gateway/heartbeat
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 steps:
   - title: "Verify the gateway is truly always-on"
     content: "Cron/heartbeat are gateway features. If your gateway isn’t running continuously, automation cannot be reliable."

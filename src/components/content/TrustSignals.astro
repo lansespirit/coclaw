@@ -1,0 +1,310 @@
+---
+import { toDateLabel } from '../../lib/structured-data';
+
+interface SourceEntry {
+  label: string;
+  url: string;
+  type?: string;
+  notes?: string;
+}
+
+interface Props {
+  reviewedBy?: string[];
+  reviewedAt?: Date | string | number;
+  testedOn?: string[];
+  sources?: SourceEntry[];
+  verificationStatus?: string;
+  heading?: string;
+  class?: string;
+  context?: 'guide' | 'blog' | 'channel' | 'troubleshooting' | 'getting-started' | 'docs';
+}
+
+const {
+  reviewedBy = [],
+  reviewedAt,
+  testedOn = [],
+  sources = [],
+  verificationStatus,
+  heading = 'Verification & references',
+  class: className = '',
+  context = 'docs',
+} = Astro.props;
+
+const reviewerLabel = reviewedBy.filter(Boolean).join(', ');
+const reviewedAtLabel = toDateLabel(reviewedAt);
+const testedOnItems = testedOn.filter(Boolean);
+const sourceItems = sources.filter((source) => source?.label && source?.url);
+
+function toStatusLabel(raw?: string) {
+  if (!raw) return null;
+  if (raw === 'reviewed') return null;
+  return raw === 'tested'
+    ? 'Field-tested'
+    : raw === 'reported'
+      ? 'Reported behavior'
+      : raw === 'monitoring'
+        ? 'Under active monitoring'
+        : raw === 'deprecated'
+          ? 'Deprecated or time-sensitive'
+          : raw;
+}
+
+function toSourceTypeLabel(raw?: string) {
+  if (!raw) return null;
+  return raw === 'official-doc'
+    ? 'Official docs'
+    : raw === 'repo'
+      ? 'GitHub'
+      : raw === 'issue'
+        ? 'Issue'
+        : raw === 'maintainer-comment'
+          ? 'Maintainer'
+          : raw === 'community-report'
+            ? 'Community'
+            : raw === 'first-hand-test'
+              ? 'Field test'
+              : raw === 'news'
+                ? 'News'
+                : null;
+}
+
+function toSourceGroupLabel(raw?: string) {
+  if (!raw) return 'Other references';
+  return raw === 'first-hand-test'
+    ? 'Field tests'
+    : raw === 'official-doc'
+      ? 'Official docs'
+      : raw === 'issue'
+        ? 'Issue threads'
+        : raw === 'maintainer-comment'
+          ? 'Maintainer notes'
+          : raw === 'repo'
+            ? 'Repositories'
+            : raw === 'community-report'
+              ? 'Community reports'
+              : raw === 'news'
+                ? 'News'
+                : 'Other references';
+}
+
+function groupSources(items: SourceEntry[]) {
+  const buckets = new Map<string, SourceEntry[]>();
+  const known = new Set([
+    'first-hand-test',
+    'official-doc',
+    'issue',
+    'maintainer-comment',
+    'repo',
+    'community-report',
+    'news',
+    'other',
+  ]);
+  for (const item of items) {
+    const rawKey = item.type ?? 'other';
+    const key = known.has(rawKey) ? rawKey : 'other';
+    const group = buckets.get(key) ?? [];
+    group.push(item);
+    buckets.set(key, group);
+  }
+
+  const order = [
+    'first-hand-test',
+    'official-doc',
+    'issue',
+    'maintainer-comment',
+    'repo',
+    'community-report',
+    'news',
+    'other',
+  ];
+
+  return order
+    .map((key) => ({
+      key,
+      label: toSourceGroupLabel(key === 'other' ? undefined : key),
+      items: buckets.get(key) ?? [],
+    }))
+    .filter((entry) => entry.items.length > 0);
+}
+
+function getSourceWeight(source: SourceEntry) {
+  const type = source.type ?? 'other';
+  const base =
+    type === 'first-hand-test'
+      ? 0
+      : type === 'official-doc'
+        ? 1
+        : type === 'issue'
+          ? 2
+          : type === 'maintainer-comment'
+            ? 3
+            : type === 'repo'
+              ? 4
+              : type === 'community-report'
+                ? 5
+                : type === 'news'
+                  ? 6
+                  : 7;
+
+  if (context === 'troubleshooting') return base;
+  if (context === 'blog') return base;
+  if (context === 'channel') return base;
+  return base;
+}
+
+function sortSources(items: SourceEntry[]) {
+  return [...items].sort((a, b) => {
+    const weightA = getSourceWeight(a);
+    const weightB = getSourceWeight(b);
+    if (weightA !== weightB) return weightA - weightB;
+    return a.label.localeCompare(b.label);
+  });
+}
+
+const statusLabel = toStatusLabel(verificationStatus);
+const showReviewedBy = Boolean(reviewerLabel);
+const showReviewedAt = Boolean(reviewedAtLabel);
+const showTestedOn = testedOnItems.length > 0 && context !== 'blog';
+const showSources = sourceItems.length > 0;
+const showStatus =
+  Boolean(statusLabel) &&
+  (context === 'troubleshooting' ||
+    (context === 'channel' && ['monitoring', 'deprecated'].includes(verificationStatus ?? '')));
+const hasSignals = Boolean(
+  showReviewedBy || showReviewedAt || showTestedOn || showSources || showStatus
+);
+
+const previewLimit =
+  context === 'troubleshooting' ? 8 : context === 'blog' ? 6 : context === 'channel' ? 4 : 6;
+const sortedSources = sortSources(sourceItems);
+const previewSources =
+  context === 'troubleshooting' ? sortedSources : sortedSources.slice(0, previewLimit);
+const remainingSources = context === 'troubleshooting' ? [] : sortedSources.slice(previewLimit);
+---
+
+{
+  hasSignals ? (
+    <section id="verification" class:list={['border-t border-divider pt-7', className]}>
+      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-default-500">{heading}</p>
+
+      <ul class="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm leading-6 text-default-700 dark:text-default-400">
+        {showReviewedBy ? (
+          <li>
+            <span class="font-semibold text-default-500">Reviewed by:</span> {reviewerLabel}
+          </li>
+        ) : null}
+        {showReviewedAt ? (
+          <li>
+            <span class="font-semibold text-default-500">Last reviewed:</span> {reviewedAtLabel}
+          </li>
+        ) : null}
+        {showStatus ? (
+          <li>
+            <span class="font-semibold text-default-500">Status:</span> {statusLabel}
+          </li>
+        ) : null}
+        {showTestedOn ? (
+          <li>
+            <span class="font-semibold text-default-500">Verified on:</span>{' '}
+            {testedOnItems.join(' · ')}
+          </li>
+        ) : null}
+      </ul>
+
+      {showSources ? (
+        <div class="mt-6">
+          <p class="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-default-500">
+            References
+          </p>
+          {context === 'troubleshooting' ? (
+            <div class="mt-4 space-y-5">
+              {groupSources(previewSources).map((group) => (
+                <div class="space-y-2">
+                  <p class="text-xs font-semibold uppercase tracking-[0.14em] text-default-500">
+                    {group.label}
+                  </p>
+                  <ol class="divide-y divide-divider text-sm leading-6">
+                    {group.items.map((source) => (
+                      <li class="py-2 first:pt-0">
+                        <a
+                          href={source.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="font-medium text-primary hover:underline"
+                        >
+                          {source.label}
+                        </a>
+                        {source.notes ? (
+                          <p class="mt-1 text-xs leading-6 text-default-600 dark:text-default-500">
+                            {source.notes}
+                          </p>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <ol class="mt-3 divide-y divide-divider text-sm leading-6">
+              {previewSources.map((source) => (
+                <li class="py-2 first:pt-0">
+                  <a
+                    href={source.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="font-medium text-primary hover:underline"
+                  >
+                    {source.label}
+                  </a>
+                  {toSourceTypeLabel(source.type) ? (
+                    <span class="ml-2 text-xs uppercase tracking-[0.12em] text-default-500">
+                      {toSourceTypeLabel(source.type)}
+                    </span>
+                  ) : null}
+                  {source.notes ? (
+                    <p class="mt-1 text-xs leading-6 text-default-600 dark:text-default-500">
+                      {source.notes}
+                    </p>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          )}
+
+          {remainingSources.length ? (
+            <details class="mt-4">
+              <summary class="cursor-pointer text-sm font-medium text-default-700 dark:text-default-400">
+                Show all sources ({sortedSources.length})
+              </summary>
+              <ol class="mt-3 divide-y divide-divider text-sm leading-6">
+                {remainingSources.map((source) => (
+                  <li class="py-2 first:pt-0">
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="font-medium text-primary hover:underline"
+                    >
+                      {source.label}
+                    </a>
+                    {toSourceTypeLabel(source.type) ? (
+                      <span class="ml-2 text-xs uppercase tracking-[0.12em] text-default-500">
+                        {toSourceTypeLabel(source.type)}
+                      </span>
+                    ) : null}
+                    {source.notes ? (
+                      <p class="mt-1 text-xs leading-6 text-default-600 dark:text-default-500">
+                        {source.notes}
+                      </p>
+                    ) : null}
+                  </li>
+                ))}
+              </ol>
+            </details>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
+  ) : null
+}

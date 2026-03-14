@@ -1,6 +1,19 @@
 ---
 title: "OpenClaw Email (Gmail/IMAP) Setup: OAuth Reliability, Re-Auth Loops, and Safer Alternatives"
 description: "Email is powerful and risky. This guide covers how to set up OpenClaw email integrations, why Gmail OAuth often needs re-auth, how to reduce blast radius (separate accounts/scopes), and when to use IMAP/SMTP or a dedicated mailbox provider instead."
+seoTitle: "OpenClaw Email Setup: Gmail, OAuth, and Safer Options"
+seoDescription: "Email is powerful and risky. This guide covers how to set up OpenClaw email integrations, why Gmail OAuth often needs re-auth, how to reduce blast radius."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Gmail"
+  - "Google Workspace"
+  - "IMAP/SMTP"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "integration"
 difficulty: "Intermediate"
 platforms:
@@ -11,6 +24,16 @@ platforms:
 time: "25 min"
 publishDate: 2026-03-02
 lastUpdated: 2026-03-02
+sources:
+  - label: 'OpenClaw docs — OAuth concepts'
+    url: https://docs.openclaw.ai/concepts/oauth
+    type: official-doc
+  - label: 'OpenClaw docs — Troubleshooting'
+    url: https://docs.openclaw.ai/help/troubleshooting
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 steps:
   - title: "Decide your risk posture first (separate account, limited permissions)"
     content: "Do not start with your primary inbox. Use a dedicated mailbox and minimal scopes/permissions."
@@ -168,4 +191,3 @@ The best “alternative” is the one you can:
 - keep stable without daily manual login
 - monitor and audit
 - revoke quickly if compromised
-

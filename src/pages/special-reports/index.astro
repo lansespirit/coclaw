@@ -3,6 +3,11 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 import SpecialReportCard from '../../components/SpecialReportCard.astro';
+import {
+  buildBreadcrumbList,
+  buildCollectionPage,
+  wrapSchemaGraph,
+} from '../../lib/structured-data';
 
 const entries = await getCollection('special-reports', ({ data }) => !data.draft);
 const reports = [...entries].sort((a, b) => {
@@ -11,13 +16,29 @@ const reports = [...entries].sort((a, b) => {
 });
 
 const featured = reports.find((entry) => entry.data.featured) ?? reports[0];
-const regular = reports.filter((entry) => entry.slug !== featured?.slug);
+const pageTitle = 'OpenClaw Special Reports | Updates, Migration & Operations';
+const pageDescription =
+  'Curated OpenClaw report packs for releases, migration planning, operator workflows, and recurring troubleshooting themes.';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const structuredData = wrapSchemaGraph(
+  buildCollectionPage({
+    name: 'OpenClaw Special Reports',
+    description: pageDescription,
+    url: canonicalURL.toString(),
+    items: reports.map((entry) => ({
+      name: entry.data.title,
+      url: new URL(`/special-reports/${entry.slug}`, Astro.site).toString(),
+      description: entry.data.description,
+    })),
+  }),
+  buildBreadcrumbList([
+    { name: 'Home', item: new URL('/', Astro.site).toString() },
+    { name: 'Special Reports', item: canonicalURL.toString() },
+  ])
+);
 ---
 
-<BaseLayout
-  title="OpenClaw Special Reports: Updates, Migration Guides & Operator Briefings | CoClaw"
-  description="Read CoClaw Special Reports for OpenClaw updates, upgrade paths, migration planning, troubleshooting themes, and operator briefings. Each report pack connects the right guides for one major topic."
->
+<BaseLayout title={pageTitle} description={pageDescription} structuredData={structuredData}>
   <Fragment slot="head">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

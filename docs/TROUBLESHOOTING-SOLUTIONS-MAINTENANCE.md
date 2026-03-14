@@ -128,9 +128,8 @@ pnpm analyze:issues
 ## 4) 可见性与 SEO 策略
 
 - Solutions 对外可索引。
-- Issues Explorer / 原始 issues 页面仅内部使用，不在站内主流程推广：
-  - Solutions 或 Troubleshooting 主流程中不要链接 `/troubleshooting/issues`
-  - 保持 `noindex` + sitemap 排除（当前已做）
+- 原始 GitHub issues 不再作为站点发布面维护。
+- 站内主流程统一指向 curated solutions / guides，而不是 issue 镜像页。
 
 ## 5) 发布流程（合并前 checklist）
 

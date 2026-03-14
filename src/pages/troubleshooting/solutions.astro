@@ -3,6 +3,11 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 import { TroubleshootingSearch } from '../../components/troubleshooting/TroubleshootingSearch';
+import {
+  buildBreadcrumbList,
+  buildCollectionPage,
+  wrapSchemaGraph,
+} from '../../lib/structured-data';
 
 const troubleshootingEntries = await getCollection('troubleshooting', ({ data }) => !data.draft);
 const solutions = troubleshootingEntries
@@ -87,12 +92,35 @@ const filteredCards = cards.filter((c) => {
   if (filterSeverity !== 'all' && c.severity !== filterSeverity) return false;
   return true;
 });
+
+const pageTitle = 'OpenClaw Solutions | Curated Fixes for Common Errors';
+const pageDescription =
+  'Browse curated OpenClaw troubleshooting fixes for installation, configuration, channels, models, gateway, and AI API compatibility.';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const structuredData = wrapSchemaGraph(
+  buildCollectionPage({
+    name: 'OpenClaw Troubleshooting Solutions',
+    description: pageDescription,
+    url: canonicalURL.toString(),
+    items: solutions.map((entry) => ({
+      name: entry.data.title,
+      url: new URL(`/troubleshooting/${entry.slug}`, Astro.site).toString(),
+      description: entry.data.description,
+    })),
+  }),
+  buildBreadcrumbList([
+    { name: 'Home', item: new URL('/', Astro.site).toString() },
+    { name: 'Troubleshooting', item: new URL('/troubleshooting', Astro.site).toString() },
+    { name: 'Solutions', item: canonicalURL.toString() },
+  ])
+);
 ---
 
 <BaseLayout
-  title="All Troubleshooting Solutions - CoClaw"
-  description="Browse all curated troubleshooting solutions for OpenClaw: installation, configuration, channels, models, gateway, AI API compatibility, and more."
+  title={pageTitle}
+  description={pageDescription}
   keywords="OpenClaw troubleshooting solutions, OpenClaw fixes, OpenClaw help, OpenAI-compatible, Ollama, vLLM, LiteLLM"
+  structuredData={structuredData}
 >
   <div class="bg-background min-h-screen overflow-x-hidden relative">
     <Section py="pt-24 pb-12" containerClass="text-center">

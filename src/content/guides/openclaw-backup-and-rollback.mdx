@@ -1,6 +1,20 @@
 ---
 title: "OpenClaw Backup and Rollback: How to Use `openclaw backup create` and `verify` Safely"
 description: "A practical guide to OpenClaw's built-in backup commands: choose the right backup scope, verify archives before risky changes, and keep a real rollback path for upgrades, migrations, and config surgery."
+seoTitle: "OpenClaw Backup and Rollback with Safe CLI Commands"
+seoDescription: "Choose the right backup scope, verify archives, and rehearse rollbacks before upgrades, migrations, or config edits with `openclaw backup create` and `verify`."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "deployment"
 difficulty: "Intermediate"
 platforms:
@@ -12,6 +26,16 @@ platforms:
 time: "14 min"
 publishDate: 2026-03-10
 lastUpdated: 2026-03-10
+sources:
+  - label: 'OpenClaw docs — Gateway runbooks'
+    url: https://docs.openclaw.ai/gateway
+    type: official-doc
+  - label: 'OpenClaw docs — Help & FAQ'
+    url: https://docs.openclaw.ai/help/faq
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 steps:
   - title: "Choose the smallest backup that still protects you"
     content: "Use full-state backups before upgrades or migrations, config-only backups before risky config edits, and exclude workspaces only when you already back them up separately."

@@ -1,6 +1,16 @@
 ---
 title: 'iMessage'
 description: 'Legacy iMessage support for OpenClaw via imsg: transition guidance, risk notes, verification expectations, and when to prefer BlueBubbles instead.'
+seoTitle: 'Legacy iMessage maintenance and migration for OpenClaw'
+seoDescription: 'Summarize OpenClaw legacy iMessage via imsg, highlighting when to keep it, how to verify Mac permissions, and why BlueBubbles is the preferred migration path.'
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "iMessage"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 75
 category: 'Channel Integration'
 subcategory: 'Legacy Integration'
 platform: 'iMessage'
@@ -19,11 +29,13 @@ keywords:
   - 'bluebubbles migration'
 ---
 
-> OpenClaw’s `imessage` channel is a **legacy compatibility lane** built on `imsg` JSON-RPC over stdio. The upstream docs are explicit: **new iMessage deployments should use BlueBubbles instead**. Treat this page as maintenance guidance for an existing path, not as the default way to add Apple messaging.
+> OpenClaw’s `imessage` channel is a **legacy compatibility lane** built on `imsg` JSON-RPC over stdio. The upstream docs are explicit: **new iMessage deployments should use BlueBubbles instead**. Treat this page as maintenance guidance for an existing path, not as the default way to add Apple messaging, and keep a migration plan that follows the trust themes in [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained).
 
 ## The first decision: should you use this at all
 
-For a new deployment, the answer is usually no.
+For a new deployment, the answer is usually no; instead treat BlueBubbles and the remote pairings described in [/guides/openclaw-remote-dashboard-access-playbook](/guides/openclaw-remote-dashboard-access-playbook) as the future-friendly option.
+
+Keep the configuration checklist as explicit as the one in [/guides/openclaw-configuration](/guides/openclaw-configuration) so you can see every dependency before touching the host.
 
 The official channel docs say two things very clearly:
 
@@ -68,7 +80,7 @@ The official docs call out two requirements that matter operationally:
 - Full Disk Access is required for the process context that runs OpenClaw / `imsg`
 - first-run approvals may depend on the same interactive context if you run through LaunchAgent, SSH, or another headless path
 
-This is a classic macOS footgun: permissions are granted to a process context, not to your abstract intent.
+This is a classic macOS footgun: permissions are granted to a process context, not to your abstract intent, so treat the install steps like the runners in [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting) document.
 
 ### Layer 3: stdio execution path
 
@@ -152,7 +164,7 @@ openclaw pairing list imessage
 openclaw pairing approve imessage <CODE>
 ```
 
-That is the right posture for a legacy lane because it makes trust decisions visible while you assess whether the channel should remain in service at all.
+That is the right posture for a legacy lane because it makes trust decisions visible while you assess whether the channel should remain in service at all, mirroring the entry checklist in [/troubleshooting/solutions/control-ui-pairing-required](/troubleshooting/solutions/control-ui-pairing-required).
 
 ## Step 4: handle groups as a separate problem
 
@@ -168,7 +180,7 @@ The documented group modes are:
 
 Group sender control uses `groupAllowFrom`.
 
-The docs also note a runtime fallback: if `groupAllowFrom` is unset, group sender checks fall back to `allowFrom` when available.
+The docs also note a runtime fallback: if `groupAllowFrom` is unset, group sender checks fall back to `allowFrom` when available, so keep the monitoring mindset from [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability) when you need to correlate runtime guards with host signals.
 
 That is useful, but it is safer to configure group intent explicitly instead of relying on fallback behavior.
 
@@ -201,7 +213,7 @@ That is useful for keeping the gateway off the Mac, but it introduces more movin
 - host trust must already be established,
 - and `remoteHost` matters when attachments are involved.
 
-This is a good example of why `imessage` should be judged as a maintenance lane. It can work, but the operational surface grows faster than the interface suggests.
+This is a good example of why `imessage` should be judged as a maintenance lane. It can work, but the operational surface grows faster than the interface suggests, and the remote deployments described in [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting) give you the templates for managing those complexities.
 
 ## Verification drill
 

@@ -78,12 +78,14 @@ const siblingReports = allReports
 
 const quickStart = entry.data.readingPath.slice(0, 3);
 const primaryHighlights = entry.data.highlights.slice(0, 4);
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = new URL(entry.data.canonicalPath || Astro.url.pathname, Astro.site);
+const seoTitle = entry.data.seoTitle ?? `${entry.data.title} | CoClaw Special Reports`;
+const seoDescription = entry.data.seoDescription ?? entry.data.description;
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
   name: entry.data.title,
-  description: entry.data.description,
+  description: seoDescription,
   mainEntityOfPage: canonicalURL.toString(),
 };
 const statusLabel = entry.data.status === 'evergreen' ? 'Evergreen Topic' : 'Operator Briefing';
@@ -91,8 +93,13 @@ const readingPathTitle = entry.data.readingPathTitle ?? `${entry.data.title} rea
 ---
 
 <BaseLayout
-  title={`${entry.data.title} | CoClaw Special Reports`}
-  description={entry.data.description}
+  title={seoTitle}
+  description={seoDescription}
+  keywords={entry.data.keywords?.join(', ')}
+  canonicalPath={entry.data.canonicalPath}
+  robots={entry.data.robots}
+  noindex={entry.data.noindex}
+  author={entry.data.author}
   type="article"
 >
   <Fragment slot="head">

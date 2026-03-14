@@ -1,6 +1,19 @@
 ---
 title: "Gateway won't start: 'refusing to bind ... without auth'"
 description: "Fix gateway startup failures when binding to LAN/tailnet without token/password auth configured."
+seoTitle: "Fix Gateway won't start: 'refusing to bind ... without auth'"
+seoDescription: "Fix gateway startup failures when binding to LAN or tailnet addresses by enabling token or password auth before exposing the OpenClaw gateway."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Linux"
+  - "macOS"
+  - "Windows"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 45
+
 kind: "solution"
 component: "gateway"
 severity: "high"
@@ -57,4 +70,3 @@ If you do not need LAN access, bind to loopback (127.0.0.1) and use SSH tunnel /
 
 - `openclaw gateway status` shows running.
 - You can open the Control UI and it stays connected.
-

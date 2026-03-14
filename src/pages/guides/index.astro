@@ -4,6 +4,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
 import { GuideCard } from '../../components/GuideCard';
 import { Button } from '@heroui/react';
+import {
+  buildBreadcrumbList,
+  buildCollectionPage,
+  wrapSchemaGraph,
+} from '../../lib/structured-data';
 
 const entries = await getCollection('guides', ({ data }) => !data.draft);
 const guides = entries
@@ -26,12 +31,30 @@ const categories = [
   { id: 'integration', name: 'Integrations' },
   { id: 'advanced', name: 'Advanced Kernels' },
 ];
+
+const pageTitle = 'OpenClaw Guides | Setup, Integrations & Operations';
+const pageDescription =
+  'Practical OpenClaw guides for deployment, configuration, integrations, AI API compatibility, and day-2 operations.';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const structuredData = wrapSchemaGraph(
+  buildCollectionPage({
+    name: 'OpenClaw Guides',
+    description: pageDescription,
+    url: canonicalURL.toString(),
+    items: guides.map((guide) => ({
+      name: guide.title,
+      url: new URL(guide.href, Astro.site).toString(),
+      description: guide.description,
+    })),
+  }),
+  buildBreadcrumbList([
+    { name: 'Home', item: new URL('/', Astro.site).toString() },
+    { name: 'Guides', item: canonicalURL.toString() },
+  ])
+);
 ---
 
-<BaseLayout
-  title="OpenClaw Guides | CoClaw"
-  description="Community-maintained guides for installing, deploying, safely extending, and troubleshooting advanced OpenClaw integrations including AI API compatibility."
->
+<BaseLayout title={pageTitle} description={pageDescription} structuredData={structuredData}>
   <div class="bg-background min-h-screen relative">
     <!-- Grid Background -->
     <div

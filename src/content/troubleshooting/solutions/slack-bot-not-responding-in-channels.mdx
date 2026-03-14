@@ -1,6 +1,19 @@
 ---
 title: "Slack: bot doesn't respond in channels (but DMs work)"
 description: "Fix Slack channel non-responses by inviting the app to the channel, checking mention/allowlist rules, and verifying events/scopes."
+seoTitle: "Fix Slack: bot doesn't respond in channels (but DMs work)"
+seoDescription: "Fix Slack channel non-responses by inviting the app to the channel, checking mention/allowlist rules, and verifying events/scopes."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 45
+
 kind: "solution"
 component: "channel"
 severity: "high"
@@ -38,6 +51,9 @@ Most common causes:
 - Your config requires **mentions**, but you are not mentioning the bot.
 - The Slack app is missing required **events/scopes** (or wasn’t reinstalled after changes).
 
+For the fuller Slack operating model - workspace scope, mention posture, and where channel policy
+belongs - read [/channels/slack](/channels/slack) with this fix page.
+
 ## Fix
 
 ### 1) Invite the app to the channel
@@ -62,3 +78,5 @@ Then restart the gateway.
 - Mentioning the bot in a channel produces a reply.
 - `openclaw channels status --probe` shows Slack healthy.
 
+If the bot still fails before events arrive at all, continue with
+[/troubleshooting/solutions/slack-socket-mode-auth-failed](/troubleshooting/solutions/slack-socket-mode-auth-failed).

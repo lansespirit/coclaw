@@ -1,6 +1,19 @@
 ---
 title: "One Gateway, Many Agents: Practical Routing, Bindings, and Multi-Account Patterns"
 description: "A practical guide to running multiple OpenClaw agents behind one gateway without turning your setup into guesswork. Learn how bindings, channel accounts, routing boundaries, workspace design, and Telegram-specific pitfalls fit together."
+seoTitle: "OpenClaw Multi-Agent Routing and Bindings Guide"
+seoDescription: "A practical guide to running multiple OpenClaw agents behind one gateway without turning your setup into guesswork."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Telegram"
+  - "Self-hosted"
+  - "Docker"
+  - "Messaging"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "advanced"
 difficulty: "Advanced"
 platforms:
@@ -11,6 +24,16 @@ platforms:
 time: "18 min"
 publishDate: 2026-03-08
 lastUpdated: 2026-03-08
+sources:
+  - label: 'OpenClaw docs — Architecture'
+    url: https://docs.openclaw.ai/concepts/architecture
+    type: official-doc
+  - label: 'OpenClaw docs — Telegram channel'
+    url: https://docs.openclaw.ai/channels/telegram
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 steps:
   - title: "Separate identity, route, and memory"
     content: "A second bot account is only an ingress identity; you still need explicit bindings, context boundaries, and handoff rules."

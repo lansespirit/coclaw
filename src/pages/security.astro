@@ -3,14 +3,30 @@ import { Button } from '@heroui/react';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/layout/Section.astro';
 import { IconClock, IconShieldCheckSolid, IconWarning } from '../components/icons';
+import { buildBreadcrumbList, buildWebPage, wrapSchemaGraph } from '../lib/structured-data';
 
 const lastUpdated = 'March 11, 2026';
+const pageTitle = 'Security | CoClaw';
+const pageDescription = 'How to report security vulnerabilities related to coclaw.com.';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const structuredData = wrapSchemaGraph(
+  buildWebPage({
+    name: 'CoClaw Security Policy',
+    description: pageDescription,
+    url: canonicalURL.toString(),
+  }),
+  buildBreadcrumbList([
+    { name: 'Home', item: new URL('/', Astro.site).toString() },
+    { name: 'Security', item: canonicalURL.toString() },
+  ])
+);
 ---
 
 <BaseLayout
-  title="Security | CoClaw"
-  description="How to report security vulnerabilities related to coclaw.com."
+  title={pageTitle}
+  description={pageDescription}
   keywords="CoClaw security, vulnerability disclosure, report security issue, coclaw.com"
+  structuredData={structuredData}
 >
   <div class="bg-background min-h-screen overflow-x-hidden relative">
     <Section py="py-20 lg:py-24" containerClass="max-w-6xl mx-auto">

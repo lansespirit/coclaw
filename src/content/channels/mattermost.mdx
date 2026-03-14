@@ -1,6 +1,16 @@
 ---
 title: 'Mattermost'
 description: 'Mattermost support for OpenClaw covers plugin installation, bot token and base URL setup, channel chat modes, slash-command callbacks, and self-hosted workspace routing boundaries.'
+seoTitle: 'Mattermost webhook operations and OpenClaw trust policy'
+seoDescription: 'Guide Mattermost OpenClaw lane, focusing on webhook wiring, bot token scope, chatmode safety, and explicitly gated DM/group trust to avoid oversharing.'
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Mattermost"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 75
 category: 'Channel Integration'
 subcategory: 'Community Plugin'
 platform: 'Mattermost'
@@ -72,6 +82,8 @@ That baseline does three useful things:
 - keeps channels on an explicit **allowlist** posture,
 - and keeps channel responses mention-gated through `chatmode: "oncall"`.
 
+Keep [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability) nearby so the evidence mindset stays active while you validate each link and webhook route.
+If you need to reorder or override those defaults, `/guides/openclaw-configuration` explains the precedence rules so you do not accidentally widen a policy gap.
 Do not enable native slash commands or button-heavy flows first. Mattermost is much calmer when you prove the plain conversational lane before adding callback dependencies.
 
 ## Step 1: Get the bot token and base URL right
@@ -102,6 +114,8 @@ Mattermost responds to DMs automatically. Channel behavior is the real design ch
 For most workspaces, `oncall` is the sober default. It preserves a clear boundary between ordinary team chat and assistant activation.
 
 If you need a command-style lane, `onchar` is safer than `onmessage` because it still keeps activation explicit. Reserve `onmessage` for rooms that exist specifically for the bot.
+
+For help aligning pairing policy with mention gating, see [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained) so team behavior matches your trust model.
 
 ## Step 3: Keep access control separate from chat mode
 
@@ -156,6 +170,8 @@ A clean Mattermost verification pass is short and specific:
 
 That order avoids collapsing three different problems into one: bot login, channel invocation rules, and callback reachability.
 
+When pairing itself is stalled, `/troubleshooting/solutions/control-ui-pairing-required` lists the Control UI symptoms and the approvals you need to keep an eye on.
+
 ## Advanced behaviors worth knowing early
 
 Mattermost has several advanced features that are valuable, but only after the core lane is stable.
@@ -166,7 +182,7 @@ They are not just a prettier way to send text. They depend on callback registrat
 
 ### Multi-account can separate operational roles
 
-The plugin supports `channels.mattermost.accounts`, which is useful when one workspace or cluster needs more than one bot identity. If you do this, follow the local routing guide's advice and make account-to-agent bindings explicit. A second account is a second ingress identity, not an automatic second routing policy.
+The plugin supports `channels.mattermost.accounts`, which is useful when one workspace or cluster needs more than one bot identity. If you do this, follow the local routing guide's advice and make account-to-agent bindings explicit. A second account is a second ingress identity, not an automatic second routing policy. The `/guides/openclaw-multi-agent-routing` guide lays out how to keep each account tied to a specific agent lane while preserving routing clarity.
 
 ### Reactions and directory resolution are built in
 
@@ -185,6 +201,8 @@ The docs are very specific here, especially for direct API integrations:
 
 That is an operator gift: most “buttons are broken” bugs reduce to malformed payloads or signing mismatches, not mysterious frontend behavior.
 
+Use [/blog/openclaw-stability-playbook](/blog/openclaw-stability-playbook) as the companion reading for the delivery, rate-limit, and context-loss symptoms referenced above.
+
 ## The first five Mattermost failures to expect
 
 The official docs point to a clear early failure pattern:
@@ -196,6 +214,8 @@ The official docs point to a clear early failure pattern:
 5. **Buttons render but fail on click** because IDs contain hyphens/underscores or the HMAC `_token` was generated incorrectly.
 
 These failures are all upstream-documented, which is exactly why Mattermost should be run with a written callback runbook rather than “it worked once on localhost.”
+
+Continue the Mattermost lane with [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting) and [/guides/openclaw-cost-and-guardrails-checklist](/guides/openclaw-cost-and-guardrails-checklist) when you want to treat channel policy as part of the broader platform or budget story.
 
 ## Recommended production posture
 

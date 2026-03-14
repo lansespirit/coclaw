@@ -1,6 +1,19 @@
 ---
 title: "Control UI shows 'unauthorized' / keeps reconnecting"
 description: "Fix OpenClaw dashboard/control UI auth errors (unauthorized, 1008, reconnect loop) by aligning gateway token/password and reachability."
+seoTitle: "Fix Control UI shows 'unauthorized' / keeps reconnecting"
+seoDescription: "Fix OpenClaw dashboard/control UI auth errors (unauthorized, 1008, reconnect loop) by aligning gateway token/password and reachability."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 45
+
 kind: "solution"
 component: "web-ui"
 severity: "high"
@@ -43,6 +56,12 @@ Common causes:
 - Your browser cached an old token in localStorage.
 - Your gateway token is being overridden by an environment variable (e.g. `OPENCLAW_GATEWAY_TOKEN`).
 - You are connecting to a remote host without an SSH tunnel / tailnet bind, so you are not actually reaching the gateway you think you are.
+
+If you need the full trust model instead of the short fix, the primary companion pages are
+[/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing),
+[/guides/openclaw-remote-dashboard-access-playbook](/guides/openclaw-remote-dashboard-access-playbook),
+and
+[/channels/webchat](/channels/webchat).
 
 ## Fix
 
@@ -92,3 +111,5 @@ Look for notes about launchd/systemd environment overrides.
 
 - GitHub issues: search for similar reports (for example: `unauthorized 1008`).
 - Docs: Dashboard auth notes and Control UI auth troubleshooting (see links above).
+- Deeper guide: [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+- Remote access playbook: [/guides/openclaw-remote-dashboard-access-playbook](/guides/openclaw-remote-dashboard-access-playbook)

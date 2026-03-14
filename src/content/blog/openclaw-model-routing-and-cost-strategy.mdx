@@ -1,8 +1,23 @@
 ---
 title: "OpenClaw Model Strategy Is Not a Leaderboard: How to Route for Cost, Reliability, and Agent Fit"
 description: "A practical strategy guide for choosing and routing models in OpenClaw. Learn how to think about cost, provider reliability, fallback behavior, relay complexity, and agent-task fit instead of chasing model rankings."
+seoTitle: "OpenClaw Model Routing for Cost, Reliability, and Fit"
+seoDescription: "Choose and route OpenClaw models by task fit, provider reliability, fallback behavior, and cost, instead of chasing leaderboard rankings."
 slug: "openclaw-model-routing-and-cost-strategy"
 category: "Deep Dive"
+sources:
+  - label: 'OpenClaw docs — Relay and API proxy troubleshooting'
+    url: https://docs.openclaw.ai/guides/openclaw-relay-and-api-proxy-troubleshooting
+    type: official-doc
+  - label: 'OpenClaw docs — Cost control and guardrails checklist'
+    url: https://docs.openclaw.ai/guides/openclaw-cost-and-guardrails-checklist
+    type: official-doc
+  - label: 'OpenClaw docs — Configuration mental model'
+    url: https://docs.openclaw.ai/guides/openclaw-configuration
+    type: official-doc
+  - label: 'OpenClaw blog — Cost & API challenges'
+    url: https://docs.openclaw.ai/blog/openclaw-cost-api-challenges
+    type: news
 author: "CoClaw Research Team"
 publishDate: 2026-03-08
 lastUpdated: 2026-03-08
@@ -45,6 +60,13 @@ It is:
 
 This article argues that model strategy should be designed as an **operating policy**, not a
 leaderboard decision.
+
+If your current problem is already showing up as silence, false limits, or proxy weirdness rather
+than abstract model choice, branch into the operational pages immediately:
+[/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting),
+[/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting),
+and
+[/guides/self-hosted-ai-api-compatibility-matrix](/guides/self-hosted-ai-api-compatibility-matrix).
 
 ---
 
@@ -176,12 +198,21 @@ That is why some operators experience the most confusing class of failures:
 
 This is not always a "bad model" problem. It is often a relay strategy problem.
 
+The fastest companion reads here are the
+[/guides/self-hosted-ai-api-compatibility-matrix](/guides/self-hosted-ai-api-compatibility-matrix)
+for boundary-setting and
+[/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+for concrete path and payload debugging.
+
 ### 4) Budget Sustainability
 
 A model strategy that only works for a weekend is not a strategy.
 
 OpenClaw becomes more useful the longer it runs and the more naturally you depend on it. That means
 cost should be evaluated on **normal usage over time**, not just one demo session.
+
+If you need the guardrail side of this question, not just the routing side, pair this page with
+[/guides/openclaw-cost-and-guardrails-checklist](/guides/openclaw-cost-and-guardrails-checklist).
 
 ---
 

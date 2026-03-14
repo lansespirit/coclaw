@@ -1,6 +1,21 @@
 ---
 title: "OpenClaw Remote Dashboard Access Playbook: SSH Tunnel, Tailnet, or Reverse Proxy"
 description: "A practical, step-by-step playbook for using the OpenClaw Control UI from another device (laptop/phone) without token mismatch, pairing loops (1008), or brittle public exposure. Pick one access pattern and make it stable."
+seoTitle: "OpenClaw Remote Dashboard Access and Pairing Fixes"
+seoDescription: "A practical, step-by-step playbook for using the OpenClaw Control UI from another device (laptop/phone) without token mismatch, pairing loops (1008), or."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "VPS"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "deployment"
 difficulty: "Intermediate"
 platforms:
@@ -35,6 +50,16 @@ keywords:
   - "unauthorized"
   - "token mismatch"
   - "bind lan"
+sources:
+  - label: 'OpenClaw docs — Control UI auth and pairing'
+    url: https://docs.openclaw.ai/guides/control-ui-auth-and-pairing
+    type: official-doc
+  - label: 'OpenClaw docs — Deployment troubleshooting'
+    url: https://docs.openclaw.ai/guides/openclaw-deployment-troubleshooting
+    type: official-doc
+  - label: 'OpenClaw GitHub repository'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 ---
 
 Remote dashboard access is where OpenClaw stops feeling like "a web page on a port" and starts behaving like what it is:
@@ -45,6 +70,13 @@ This playbook is intentionally boring: pick **one** access pattern and make it s
 If you want the longer, deeper map of auth + pairing, read:
 
 - [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing)
+
+If your remote path is part of a broader self-hosted deployment decision, also keep
+[/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+and
+[/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+close by. In practice, remote UI failures usually sit in the overlap between deployment shape,
+token persistence, and the pairing trust model.
 
 ---
 
@@ -160,4 +192,3 @@ You are done only if all of these are true:
 If (3) fails, you are likely not persisting state in Docker/PaaS, or your token source is drifting:
 
 - [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
-

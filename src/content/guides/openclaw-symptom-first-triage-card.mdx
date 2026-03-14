@@ -1,6 +1,21 @@
 ---
 title: "OpenClaw Symptom-First Triage Card: Stop Guessing, Find the Right Layer"
 description: "A scannable triage flow for non-hardcore operators: map what you see (unauthorized, pairing required 1008, gateway disconnected 4008, no output, only chats) to the correct fix page, with a minimal command pack to prove each layer."
+seoTitle: "OpenClaw Symptom-First Triage Guide by Failure Layer"
+seoDescription: "A scannable triage flow for non-hardcore operators: map what you see (unauthorized, pairing required 1008, gateway disconnected 4008, no output, only chats)."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "VPS"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "deployment"
 difficulty: "Beginner"
 platforms:
@@ -33,6 +48,19 @@ keywords:
   - "only chats"
   - "rate limit"
   - "token mismatch"
+sources:
+  - label: 'OpenClaw docs — Control UI auth and pairing'
+    url: https://docs.openclaw.ai/guides/control-ui-auth-and-pairing
+    type: official-doc
+  - label: 'OpenClaw docs — Deployment troubleshooting'
+    url: https://docs.openclaw.ai/guides/openclaw-deployment-troubleshooting
+    type: official-doc
+  - label: 'OpenClaw docs — Relay/API proxy troubleshooting'
+    url: https://docs.openclaw.ai/guides/openclaw-relay-and-api-proxy-troubleshooting
+    type: official-doc
+  - label: 'OpenClaw GitHub repository'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 ---
 
 If you keep "trying fixes" without a layer model, OpenClaw will punish you with wasted time.
@@ -158,4 +186,3 @@ After any fix:
    - send a test message on your channel.
 
 If you cannot reproduce success twice in a row, you do not have a fix yet.
-

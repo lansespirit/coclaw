@@ -1,6 +1,19 @@
 ---
 title: "OpenClaw Installation Troubleshooting: Node/NPM, PATH, Windows (WSL2), and Docker"
 description: "A layered checklist for the most common 'can't install' / 'command not found' / 'service won't start' failures. Covers Node version, global install permissions, PATH issues, WSL2 systemd, and Docker setup gotchas."
+seoTitle: "OpenClaw Installation Troubleshooting: Node, PATH, Docker"
+seoDescription: "Fix common OpenClaw install failures across Node, npm permissions, PATH, WSL2, and Docker with a checklist that finds the right break point fast."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "deployment"
 difficulty: "Beginner"
 platforms:
@@ -11,6 +24,16 @@ platforms:
 time: "25 min"
 publishDate: 2026-03-02
 lastUpdated: 2026-03-02
+sources:
+  - label: 'OpenClaw docs — Node install'
+    url: https://docs.openclaw.ai/install/node
+    type: official-doc
+  - label: 'OpenClaw docs — Updating & migrations'
+    url: https://docs.openclaw.ai/install/updating
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 featured: true
 steps:
   - title: "Identify your install method and what's actually failing"

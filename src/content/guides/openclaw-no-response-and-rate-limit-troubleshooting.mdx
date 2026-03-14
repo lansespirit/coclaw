@@ -1,6 +1,20 @@
 ---
 title: "OpenClaw Not Responding: Fix 'no output', Incorrect API, Rate Limits, and Silent Failures"
 description: "A high-signal checklist for when OpenClaw stops replying (TUI shows '(no output)', channels go quiet, or logs show 401/403/429). Covers config precedence, provider auth, model allowlists, relay API-mode mismatch, and rate-limit/billing traps."
+seoTitle: "OpenClaw Not Responding: No Output and Rate Limit Fixes"
+seoDescription: "A high-signal checklist for when OpenClaw stops replying (TUI shows '(no output)', channels go quiet, or logs show 401/403/429)."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "deployment"
 difficulty: "Beginner"
 platforms:
@@ -33,6 +47,16 @@ keywords:
   - "all models failed"
   - "blank reply"
   - "openclaw models status --probe"
+sources:
+  - label: 'OpenClaw docs — Configuration guide'
+    url: https://docs.openclaw.ai/guides/openclaw-configuration
+    type: official-doc
+  - label: 'OpenClaw docs — Relay/API proxy troubleshooting'
+    url: https://docs.openclaw.ai/guides/openclaw-relay-and-api-proxy-troubleshooting
+    type: official-doc
+  - label: 'OpenClaw GitHub repository'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 ---
 
 When OpenClaw “doesn’t respond”, the fastest path is to **stop guessing** and answer two questions:

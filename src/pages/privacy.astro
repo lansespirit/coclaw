@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/layout/Section.astro';
+import { buildBreadcrumbList, buildWebPage, wrapSchemaGraph } from '../lib/structured-data';
 
 const DEFAULT_GA_ID = 'G-7B78J3N2SD';
 const gaId =
@@ -10,12 +11,28 @@ const isProdBuild =
 const gaEnabled = isProdBuild && typeof gaId === 'string' && gaId.length > 0;
 
 const lastUpdated = gaEnabled ? 'February 15, 2026' : 'February 1, 2026';
+const pageTitle = 'Privacy Policy | CoClaw';
+const pageDescription =
+  'How CoClaw collects, uses, and protects your information when you visit coclaw.com.';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const structuredData = wrapSchemaGraph(
+  buildWebPage({
+    name: 'CoClaw Privacy Policy',
+    description: pageDescription,
+    url: canonicalURL.toString(),
+  }),
+  buildBreadcrumbList([
+    { name: 'Home', item: new URL('/', Astro.site).toString() },
+    { name: 'Privacy Policy', item: canonicalURL.toString() },
+  ])
+);
 ---
 
 <BaseLayout
-  title="Privacy Policy | CoClaw"
-  description="How CoClaw collects, uses, and protects your information when you visit coclaw.com."
+  title={pageTitle}
+  description={pageDescription}
   keywords="CoClaw privacy policy, OpenClaw community privacy, coclaw.com privacy"
+  structuredData={structuredData}
 >
   <div class="bg-background min-h-screen overflow-x-hidden relative">
     <Section containerClass="max-w-4xl mx-auto pt-24 pb-16">

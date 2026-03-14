@@ -3,9 +3,12 @@ import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
+import TrustSignals from '../../components/content/TrustSignals.astro';
 import { GuideStepsAccordion } from '../../components/GuideStepsAccordion';
 import RelatedLinks from '../../components/RelatedLinks.astro';
 import { buildWeightedTokens, topRelated } from '../../lib/related';
+import { toContributorEntities } from '../../lib/structured-data';
+import { deriveGuideSources } from '../../lib/trust-sources';
 import { Button, Chip } from '@heroui/react';
 
 export const getStaticPaths = (async () => {
@@ -19,9 +22,31 @@ export const getStaticPaths = (async () => {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 
-const { title, difficulty, platforms, time, description, steps } = entry.data;
+const {
+  title,
+  difficulty,
+  platforms,
+  time,
+  description,
+  steps,
+  seoTitle: customSeoTitle,
+  seoDescription,
+  canonicalPath,
+  robots,
+  noindex,
+  author,
+  reviewedBy,
+  reviewedAt,
+  testedOn,
+  verificationStatus,
+  contentOwner,
+  sources,
+} = entry.data;
 const platformLabel = platforms.join(' / ');
 const hasBody = Boolean(entry.body?.trim());
+const seoTitle = customSeoTitle ?? `${title} | CoClaw Guides`;
+const resolvedDescription = seoDescription ?? description;
+const trustSources = deriveGuideSources(entry.body, sources);
 
 const allGuides = await getCollection('guides', ({ data }) => !data.draft);
 const allSolutions = await getCollection(
@@ -102,18 +127,35 @@ const relatedGettingStarted = topRelated({
   badge: 'Start',
 }));
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = new URL(canonicalPath || Astro.url.pathname, Astro.site);
+const authorEntity = toContributorEntities([author || 'CoClaw Team']);
+const reviewedByEntities = toContributorEntities(reviewedBy);
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
   name: title,
-  description,
+  description: resolvedDescription,
   step: steps.map((s) => ({ '@type': 'HowToStep', name: s.title, text: s.content })),
+  author: authorEntity,
+  reviewer: reviewedByEntities,
+  datePublished: entry.data.publishDate.toISOString(),
+  dateModified: entry.data.lastUpdated.toISOString(),
+  keywords: entry.data.keywords,
+  citation: trustSources.map((source) => source.url),
   mainEntityOfPage: canonicalURL.toString(),
 };
 ---
 
-<BaseLayout title={`${title} | CoClaw Guides`} description={description} type="article">
+<BaseLayout
+  title={seoTitle}
+  description={resolvedDescription}
+  keywords={entry.data.keywords?.join(', ')}
+  canonicalPath={canonicalPath}
+  robots={robots}
+  noindex={noindex}
+  author={author}
+  type="article"
+>
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
   <div class="bg-background min-h-screen pt-32 pb-24">
     <Section containerSize="reading" containerGutter="docs">
@@ -143,6 +185,16 @@ const structuredData = {
           </article>
         ) : null
       }
+
+      <TrustSignals
+        reviewedBy={reviewedBy}
+        reviewedAt={reviewedAt}
+        testedOn={testedOn}
+        verificationStatus={verificationStatus}
+        sources={trustSources}
+        context="guide"
+        class="mt-12"
+      />
 
       <RelatedLinks
         title="Related Resources"

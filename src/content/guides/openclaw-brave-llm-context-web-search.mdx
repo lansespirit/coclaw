@@ -1,6 +1,20 @@
 ---
 title: "OpenClaw Brave `llm-context` Web Search: When It’s Better Than Normal Search"
 description: "A practical guide to Brave's `llm-context` mode in OpenClaw: what it returns, when to use it instead of normal web search, how to think about freshness and region, and how to avoid common key and environment mistakes."
+seoTitle: "When to Use Brave llm-context Search in OpenClaw"
+seoDescription: "Understand Brave's llm-context mode, keep queries tight, tune filters, and ensure the gateway sees BRAVE_API_KEY before relying on its grounding snippets."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "integration"
 difficulty: "Intermediate"
 platforms:
@@ -12,6 +26,16 @@ platforms:
 time: "12 min"
 publishDate: 2026-03-10
 lastUpdated: 2026-03-10
+sources:
+  - label: 'OpenClaw docs — Tools catalog'
+    url: https://docs.openclaw.ai/tools
+    type: official-doc
+  - label: 'OpenClaw docs — Gateway configuration reference'
+    url: https://docs.openclaw.ai/gateway/configuration-reference
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 steps:
   - title: "Understand what `llm-context` changes"
     content: "This mode is not just 'Brave search with a different name' — it is optimized to return extracted grounding snippets and source metadata."

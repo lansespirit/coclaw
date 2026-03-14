@@ -1,6 +1,19 @@
 ---
 title: "Signal: signal-cli not found / daemon won't start"
 description: "Fix Signal channel startup by installing signal-cli + Java, setting cliPath, and increasing startup timeout or using an external daemon (httpUrl)."
+seoTitle: "Fix Signal: signal-cli not found / daemon won't start"
+seoDescription: "Fix Signal channel startup by installing signal-cli + Java, setting cliPath, and increasing startup timeout or using an external daemon (httpUrl)."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Linux"
+  - "macOS"
+  - "Windows"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 45
+
 kind: "solution"
 component: "channel"
 severity: "high"
@@ -35,6 +48,9 @@ layout: ../../../layouts/TroubleshootingLayout.astro
 
 OpenClaw's Signal integration depends on **signal-cli** (and a working Java runtime).
 If `signal-cli` is not installed, not on PATH, or is slow to start, the gateway cannot connect to the Signal daemon.
+
+Use [/channels/signal](/channels/signal) for the higher-level lane design: number ownership,
+daemon posture, and what should stay in pairing versus groups.
 
 ## Fix
 
@@ -80,3 +96,5 @@ Option B (recommended on slow machines): run the daemon yourself and set `channe
 - `openclaw channels status --probe` shows Signal healthy.
 - Sending a DM to the Signal bot number triggers a reply.
 
+If startup succeeds but group delivery still fails, continue with
+[/troubleshooting/solutions/signal-group-id-lowercased-group-not-found](/troubleshooting/solutions/signal-group-id-lowercased-group-not-found).

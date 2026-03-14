@@ -1,6 +1,19 @@
 ---
 title: "OpenClaw Account Ban & ToS Risk: How to Reduce Provider/Platform Blowups"
 description: "A pragmatic risk guide: why some integrations trigger 403/disabled-account events, how to reduce blast radius with separate accounts and least privilege, and how to design workflows that don’t depend on fragile consumer OAuth."
+seoTitle: "How to Reduce OpenClaw Account Ban and ToS Risk"
+seoDescription: "Avoid 403/disabled events by isolating accounts, minimizing scopes, preferring stable APIs, and adding rate control plus audit trails for OpenClaw integrations."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Google"
+  - "Gmail"
+  - "OAuth"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "advanced"
 difficulty: "Advanced"
 platforms:
@@ -11,6 +24,16 @@ platforms:
 time: "20 min"
 publishDate: 2026-03-02
 lastUpdated: 2026-03-02
+sources:
+  - label: 'OpenClaw docs — Gateway authentication'
+    url: https://docs.openclaw.ai/gateway/authentication
+    type: official-doc
+  - label: 'OpenClaw docs — Help & FAQ'
+    url: https://docs.openclaw.ai/help/faq
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 steps:
   - title: "Assume platform policies can change without warning"
     content: "Treat consumer OAuth and automation flows as unstable dependencies; plan for revocation and fallback."
@@ -129,4 +152,3 @@ High-value next steps:
 Provider failure diagnosis (401/403/429):
 
 - [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
-

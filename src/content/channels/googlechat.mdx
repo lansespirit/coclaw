@@ -1,6 +1,16 @@
 ---
 title: 'Google Chat'
 description: 'Google Chat setup for OpenClaw covers Chat API apps, webhook delivery, workspace permissions, and a clean verification path for internal rollouts.'
+seoTitle: 'Google Chat webhook verification and OpenClaw policy'
+seoDescription: 'Describe how to launch OpenClaw on Google Chat, covering workspace app setup, public webhook exposure, audience verification, DM pairing, and space allowlists.'
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Google Chat"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 75
 category: 'Channel Integration'
 subcategory: 'Core Channel'
 platform: 'Google Chat'
@@ -135,7 +145,7 @@ Two operational details matter early:
 - the app can be private, and upstream notes it will not appear in the Marketplace browse list,
 - the webhook target should be the gateway’s public URL followed by `/googlechat` unless you deliberately changed `webhookPath`.
 
-Do not move on until you know exactly which project, service account, and app configuration own this lane.
+Do not move on until you know exactly which project, service account, and app configuration own this lane. If you are running multiple agents or binding this lane to a specific workspace, align that routing plan with [/guides/openclaw-multi-agent-routing](/guides/openclaw-multi-agent-routing) so each webhook identity stays mapped to the right agent workflow.
 
 ## Step 2: Configure audience verification on purpose
 
@@ -194,7 +204,7 @@ A Google Chat channel is only really working when all of these checks pass in se
 
 ### 1. Verify the public path, not the whole gateway
 
-Confirm that the webhook URL you configured is the one Google Chat is using, and that only the webhook path is publicly exposed.
+Confirm that the webhook URL you configured is the one Google Chat is using, and that only the webhook path is publicly exposed. Keep [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability) handy so the telemetry you record while exposing that path matches the runbook you expect.
 
 If you are publishing the entire gateway surface instead of just `/googlechat`, fix that first.
 
@@ -265,6 +275,8 @@ A few documented details are worth making explicit because they shape long-term 
 - `users/<userId>` is the stable allowlist target for direct users,
 - raw email matching is mutable and only re-enabled through `dangerouslyAllowNameMatching`,
 - and attachments, typing indicators, and reactions exist, but they should be treated as second-phase rollout concerns after the base lane is stable.
+
+Because that webhook path is public, pair the rollout conversation with [/guides/openclaw-cost-and-guardrails-checklist](/guides/openclaw-cost-and-guardrails-checklist) so compliance, security, and budget stakeholders all agree on what the exposure entails.
 
 The disciplined move is to validate delivery, auth, and policy first, then add richer behavior later.
 

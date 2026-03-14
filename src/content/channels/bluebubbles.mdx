@@ -1,6 +1,16 @@
 ---
 title: 'BlueBubbles'
 description: 'BlueBubbles for OpenClaw covers macOS server setup, REST connectivity, pairing boundaries, and advanced messaging behaviors for Apple-centric workflows.'
+seoTitle: 'BlueBubbles OpenClaw setup and webhook verification'
+seoDescription: 'Document BlueBubbles OpenClaw setup with macOS host planning, REST/webhook validation, pairing defaults, and bidirectional verification for dependable delivery.'
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "BlueBubbles"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 75
 category: 'Channel Integration'
 subcategory: 'Recommended Integration'
 platform: 'BlueBubbles'
@@ -107,7 +117,13 @@ This matters because delivery quality depends on host behavior more than on mess
 
 Upstream’s own recommendation is effectively “use a host you can trust to stay awake and healthy.”
 
-If you are building a durable Apple lane, a dedicated always-on host is the cleanest choice.
+If you are building a durable Apple lane, a dedicated always-on host is the cleanest choice and it mirrors the operability patterns in [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability).
+
+Treat the host decision like the deployments described in [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting) so your gateway health checks and Mac keepalives stay in sync.
+
+Write the resulting runbook the way the remote operators in [/guides/openclaw-remote-dashboard-access-playbook](/guides/openclaw-remote-dashboard-access-playbook) do it, so the people who replace you understand how to manage the Mac host.
+
+Pair those runbooks with the state backup guidance in [/guides/openclaw-backup-and-rollback](/guides/openclaw-backup-and-rollback) so your Messages state and host configuration can be restored within the observable window.
 
 ## Step 2: Bring up BlueBubbles as a service, not a demo
 
@@ -120,7 +136,7 @@ The key operating decisions are:
 - verify the REST endpoint responds,
 - and record the webhook path you want OpenClaw to accept.
 
-If your first validation is only “the Mac app opened,” you have not validated the lane yet.
+If your first validation is only “the Mac app opened,” you have not validated the lane yet; pair this with the checklist in [/guides/openclaw-configuration](/guides/openclaw-configuration) so you know which platform knobs to keep steady.
 
 The actual first checkpoint is:
 
@@ -153,7 +169,7 @@ Recommended default:
 
 - `dmPolicy: 'pairing'`
 
-That keeps unknown senders from automatically gaining conversational access just because the Apple-side integration is healthy.
+That keeps unknown senders from automatically gaining conversational access just because the Apple-side integration is healthy, and it follows the trust model explained in [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained).
 
 Useful commands:
 

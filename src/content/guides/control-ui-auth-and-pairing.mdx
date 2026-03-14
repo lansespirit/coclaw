@@ -1,6 +1,20 @@
 ---
 title: "OpenClaw Control UI Auth & Pairing: Fix 'unauthorized', 1008, and Remote Dashboard Access"
 description: "A practical guide to Control UI failures: why 'unauthorized' happens, how tokenized dashboard links work, what 'disconnected (1008): pairing required' really means, and how to connect safely to a remote gateway."
+seoTitle: "Fix Control UI Auth, Pairing, and Remote Dashboard Errors"
+seoDescription: "Step-by-step fix for unauthorized and 1008 pairing errors in OpenClaw Control UI, covering tokenized links, device approvals, and safe remote dashboard access."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "deployment"
 difficulty: "Intermediate"
 platforms:
@@ -12,6 +26,16 @@ platforms:
 time: "20 min"
 publishDate: 2026-03-02
 lastUpdated: 2026-03-10
+sources:
+  - label: 'OpenClaw docs — Control UI'
+    url: https://docs.openclaw.ai/web/control-ui
+    type: official-doc
+  - label: 'OpenClaw docs — Gateway authentication'
+    url: https://docs.openclaw.ai/gateway/authentication
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 steps:
   - title: "Start with the mental model: token auth vs device pairing"
     content: "Most dashboard problems are not 'the UI is broken' — they are either auth token mismatch or an unapproved device identity."

@@ -1,6 +1,19 @@
 ---
 title: "Slack: socket mode connection/auth fails (xapp/xoxb tokens)"
 description: "Fix Slack socket mode issues by validating xapp/xoxb tokens, enabling socket mode, and reinstalling the app with correct scopes/events."
+seoTitle: "Fix Slack: socket mode connection/auth fails (xapp/xoxb toke"
+seoDescription: "Fix Slack socket mode issues by validating xapp/xoxb tokens, enabling socket mode, and reinstalling the app with correct scopes/events."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 45
+
 kind: "solution"
 component: "channel"
 severity: "high"
@@ -47,6 +60,9 @@ Connection/auth fails when:
 - Socket Mode is not enabled in the Slack app.
 - The app was not reinstalled after changing scopes/events.
 
+If you need the broader channel rollout model - workspace policy, thread posture, and mention
+gating - keep [/channels/slack](/channels/slack) open beside this token fix.
+
 ## Fix
 
 ### 1) Validate you have both tokens configured
@@ -77,3 +93,5 @@ Even with correct tokens, Slack won’t deliver channel messages unless the bot 
 - `openclaw channels status --probe` shows Slack connected.
 - Mentioning the bot or sending a DM triggers a response.
 
+If auth is healthy but channels still stay quiet, continue with
+[/troubleshooting/solutions/slack-bot-not-responding-in-channels](/troubleshooting/solutions/slack-bot-not-responding-in-channels).

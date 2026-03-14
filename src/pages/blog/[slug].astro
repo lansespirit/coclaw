@@ -3,8 +3,11 @@ import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Section from '../../components/layout/Section.astro';
+import TrustSignals from '../../components/content/TrustSignals.astro';
 import RelatedLinks from '../../components/RelatedLinks.astro';
 import { buildWeightedTokens, topRelated } from '../../lib/related';
+import { toContributorEntities } from '../../lib/structured-data';
+import { deriveArticleSources } from '../../lib/trust-sources';
 import { Button, Chip, Avatar } from '@heroui/react';
 
 export const getStaticPaths = (async () => {
@@ -18,11 +21,33 @@ export const getStaticPaths = (async () => {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 
-const { title, description, author, publishDate, lastUpdated, category, ogImage, keywords } =
-  entry.data;
+const {
+  title,
+  description,
+  author,
+  publishDate,
+  lastUpdated,
+  category,
+  ogImage,
+  keywords,
+  seoTitle: customSeoTitle,
+  seoDescription,
+  canonicalPath,
+  robots,
+  noindex,
+  reviewedBy,
+  reviewedAt,
+  testedOn,
+  verificationStatus,
+  contentOwner,
+  sources,
+} = entry.data;
 const fallbackOgImage = '/images/og/og-main.png';
 const socialImage = ogImage || fallbackOgImage;
 const heroImage = ogImage || undefined;
+const seoTitle = customSeoTitle ?? `${title} | CoClaw Blog`;
+const resolvedDescription = seoDescription ?? description;
+const trustSources = deriveArticleSources(entry.body, sources);
 
 const allPosts = await getCollection('blog', ({ data }) => !data.draft);
 const seedTokens = buildWeightedTokens([
@@ -52,31 +77,39 @@ const relatedPosts = topRelated({
   badge: 'Blog',
 }));
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = new URL(canonicalPath || Astro.url.pathname, Astro.site);
 const publishedLabel = publishDate.toLocaleDateString('en-US', {
   year: 'numeric',
   month: 'short',
   day: 'numeric',
 });
+const authorEntity = toContributorEntities([author]);
+const reviewedByEntities = toContributorEntities(reviewedBy);
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
   headline: title,
-  description,
+  description: resolvedDescription,
   image: [new URL(socialImage, Astro.site).toString()],
-  author: { '@type': 'Person', name: author },
+  author: authorEntity,
+  reviewer: reviewedByEntities,
   publisher: { '@type': 'Organization', name: 'CoClaw', url: 'https://coclaw.com' },
   datePublished: publishDate.toISOString(),
   dateModified: lastUpdated.toISOString(),
+  citation: trustSources.map((source) => source.url),
   mainEntityOfPage: canonicalURL.toString(),
 };
 ---
 
 <BaseLayout
-  title={`${title} | CoClaw Blog`}
-  description={description}
+  title={seoTitle}
+  description={resolvedDescription}
   ogImage={socialImage}
   keywords={keywords?.join(', ')}
+  canonicalPath={canonicalPath}
+  robots={robots}
+  noindex={noindex}
+  author={author}
   type="article"
 >
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
@@ -152,6 +185,16 @@ const structuredData = {
       <article class="c-content prose prose-lg prose-primary max-w-none">
         <Content />
       </article>
+
+      <TrustSignals
+        reviewedBy={reviewedBy}
+        reviewedAt={reviewedAt}
+        testedOn={testedOn}
+        verificationStatus={verificationStatus}
+        sources={trustSources}
+        context="blog"
+        class="mt-12"
+      />
 
       <RelatedLinks title="Related Posts" items={relatedPosts} />
 

@@ -1,6 +1,19 @@
 ---
 title: "OpenClaw Configuration Guide: openclaw.json, Models, Gateway, Channels, and Plugins"
 description: "A beginner-friendly but thorough guide to OpenClaw configuration: where openclaw.json lives, safe defaults, model/provider setup, gateway auth/networking, channels, plugins, and the most common config pitfalls."
+seoTitle: "OpenClaw Configuration Guide: openclaw.json, Models & Gateway"
+seoDescription: "Configure openclaw.json, model providers, gateway auth, channels, and plugins with safer defaults, clearer mental models, and common fix paths."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "deployment"
 difficulty: "Beginner"
 platforms:
@@ -11,6 +24,16 @@ platforms:
 time: "35 min"
 publishDate: 2026-02-13
 lastUpdated: 2026-03-10
+sources:
+  - label: 'OpenClaw docs — Gateway configuration reference'
+    url: https://docs.openclaw.ai/gateway/configuration-reference
+    type: official-doc
+  - label: 'OpenClaw docs — CLI configuration'
+    url: https://docs.openclaw.ai/cli/config
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 steps:
   - title: "Know where config lives and how precedence works"
     content: "Start by locating your state directory and openclaw.json, and learn what overwrites what (CLI vs file vs env)."

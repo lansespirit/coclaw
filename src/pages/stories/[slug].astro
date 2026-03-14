@@ -39,6 +39,11 @@ const {
   updatedDate,
   sources,
   topics,
+  seoTitle: customSeoTitle,
+  seoDescription,
+  canonicalPath,
+  robots,
+  noindex,
 } = entry.data;
 
 const storyTypeLabels = {
@@ -53,6 +58,8 @@ const og = ogImage || '/images/og/og-main.png';
 const sourceList = sources ?? [];
 const topicList = topics ?? [];
 const keywordsMeta = topicList.join(', ');
+const resolvedDescription = seoDescription ?? summary;
+const seoTitle = customSeoTitle ?? `${title} | CoClaw Stories`;
 const publishedLabel = publishDate.toLocaleDateString('en-US', {
   year: 'numeric',
   month: 'short',
@@ -125,7 +132,7 @@ const relatedGuides = topRelated({
   badge: 'Guide',
 }));
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = new URL(canonicalPath || Astro.url.pathname, Astro.site);
 const copyBtnId = `copy-story-link-${entry.slug.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
 const copyLabelId = `${copyBtnId}-label`;
 
@@ -160,7 +167,7 @@ const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'Article',
   headline: title,
-  description: summary,
+  description: resolvedDescription,
   image: [new URL(og, Astro.site).toString()],
   datePublished: publishDate.toISOString(),
   dateModified: updatedAt.toISOString(),
@@ -174,10 +181,13 @@ const structuredData = {
 ---
 
 <BaseLayout
-  title={`${title} | CoClaw Stories`}
-  description={summary}
+  title={seoTitle}
+  description={resolvedDescription}
   keywords={keywordsMeta}
   ogImage={og}
+  canonicalPath={canonicalPath}
+  robots={robots}
+  noindex={noindex}
   type="article"
 >
   <Fragment slot="head">
@@ -296,11 +306,8 @@ const structuredData = {
 
           {
             sourceList.length ? (
-              <section
-                class="mt-16 rounded-[2rem] border border-divider bg-content1/75 p-8 dark:bg-content1/60"
-                id="sources"
-              >
-                <div class="flex flex-col gap-3 border-b border-divider pb-5 md:flex-row md:items-end md:justify-between">
+              <section class="mt-16 border-t border-divider pt-10" id="sources">
+                <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                   <div>
                     <p class="story-mono text-xs uppercase tracking-[0.28em] text-default-500">
                       Sources
@@ -314,9 +321,9 @@ const structuredData = {
                     threads, and project materials readers can inspect themselves.
                   </p>
                 </div>
-                <ul class="mt-8 space-y-4">
+                <ol class="mt-7 divide-y divide-divider">
                   {sourceList.map((source, index) => (
-                    <li class="rounded-[1.25rem] border border-divider bg-content2/55 p-5 dark:bg-content2/35">
+                    <li class="py-4 first:pt-0">
                       <a
                         href={source.url}
                         target="_blank"
@@ -338,7 +345,7 @@ const structuredData = {
                       </a>
                     </li>
                   ))}
-                </ul>
+                </ol>
               </section>
             ) : null
           }

@@ -2,7 +2,10 @@
 import BaseLayout from './BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import RelatedLinks from '../components/RelatedLinks.astro';
+import TrustSignals from '../components/content/TrustSignals.astro';
 import { buildWeightedTokens, topRelated } from '../lib/related';
+import { toContributorEntities, toDateValue } from '../lib/structured-data';
+import { deriveTrustedArticleSources } from '../lib/trust-sources';
 
 interface Props {
   frontmatter: {
@@ -14,6 +17,23 @@ interface Props {
     category: string;
     difficulty?: string;
     estimatedTime?: string;
+    keywords?: string[];
+    seoTitle?: string;
+    seoDescription?: string;
+    canonicalPath?: string;
+    robots?: string;
+    noindex?: boolean;
+    reviewedBy?: string[];
+    reviewedAt?: Date | string | number;
+    testedOn?: string[];
+    verificationStatus?: string;
+    contentOwner?: string;
+    sources?: Array<{
+      label: string;
+      url: string;
+      type?: string;
+      notes?: string;
+    }>;
   };
 }
 
@@ -30,6 +50,29 @@ const lastUpdated =
     : new Date(frontmatter.lastUpdated);
 const hasValidPublishDate = !Number.isNaN(publishDate.getTime());
 const hasValidLastUpdated = !Number.isNaN(lastUpdated.getTime());
+const seoTitle = frontmatter.seoTitle ?? frontmatter.title;
+const seoDescription = frontmatter.seoDescription ?? frontmatter.description;
+const authorEntity = toContributorEntities([frontmatter.author || 'CoClaw Team']);
+const reviewedByEntities = toContributorEntities(frontmatter.reviewedBy);
+const renderedContent = await Astro.slots.render('default');
+const trustSources = deriveTrustedArticleSources(renderedContent, frontmatter.sources, [
+  'docs.openclaw.ai',
+  'github.com',
+  'nodejs.org',
+]);
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: frontmatter.title,
+  description: seoDescription,
+  datePublished: toDateValue(publishDate),
+  dateModified: toDateValue(lastUpdated),
+  author: authorEntity,
+  reviewer: reviewedByEntities,
+  mainEntityOfPage: new URL(frontmatter.canonicalPath || Astro.url.pathname, Astro.site).toString(),
+  keywords: frontmatter.keywords,
+  citation: trustSources.map((source) => source.url),
+};
 
 const pathname = Astro.url?.pathname ?? '';
 const isGettingStarted = pathname.startsWith('/getting-started/');
@@ -122,7 +165,17 @@ if (docSlug) {
 }
 ---
 
-<BaseLayout title={frontmatter.title} description={frontmatter.description}>
+<BaseLayout
+  title={seoTitle}
+  description={seoDescription}
+  canonicalPath={frontmatter.canonicalPath}
+  robots={frontmatter.robots}
+  noindex={frontmatter.noindex}
+  author={frontmatter.author}
+  keywords={frontmatter.keywords?.join(', ')}
+  type="article"
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
   <div class="container mx-auto px-4 py-8 max-w-4xl">
     <article class="c-content prose prose-lg">
       <header class="mb-8">
@@ -183,6 +236,15 @@ if (docSlug) {
         </div>
       </header>
       <slot />
+      <TrustSignals
+        reviewedBy={frontmatter.reviewedBy}
+        reviewedAt={frontmatter.reviewedAt}
+        testedOn={frontmatter.testedOn}
+        verificationStatus={frontmatter.verificationStatus}
+        sources={trustSources}
+        context={isGettingStarted ? 'getting-started' : 'docs'}
+        class="mt-10 not-prose"
+      />
     </article>
 
     <RelatedLinks title="Related Resources" items={relatedItems} />

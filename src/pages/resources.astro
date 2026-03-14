@@ -10,6 +10,7 @@ import { UserStoryCard } from '../components/UserStoryCard';
 import { VideoGallery } from '../components/VideoGallery';
 import { ResourceSearchInput } from '../components/ResourceSearchInput';
 import { Button, Chip } from '@heroui/react';
+import { buildBreadcrumbList, buildCollectionPage, wrapSchemaGraph } from '../lib/structured-data';
 import {
   IconChevronRight,
   IconEmojiHappy,
@@ -249,26 +250,61 @@ const resourceSearchItems = [
     keywords: [v.category],
   })),
 ];
+
+const pageTitle = 'OpenClaw Resources Hub | CoClaw';
+const pageDescription =
+  'Curated OpenClaw guides, tutorials, FAQs, and community resources. Start here to install, configure channels, and troubleshoot.';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const collectionItems = [
+  ...(featuredBlog
+    ? [
+        {
+          name: featuredBlog.title,
+          url: new URL(featuredBlog.href, Astro.site).toString(),
+          description: featuredBlog.excerpt,
+        },
+      ]
+    : []),
+  ...guides.slice(0, 6).map((guide) => ({
+    name: guide.title,
+    url: new URL(guide.href, Astro.site).toString(),
+    description: guide.description,
+  })),
+  ...specialReports.map((report) => ({
+    name: report.title,
+    url: new URL(report.href, Astro.site).toString(),
+    description: report.description,
+  })),
+];
+const faqStructuredData = {
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: { '@type': 'Answer', text: faq.answer },
+  })),
+};
+const structuredData = wrapSchemaGraph(
+  buildCollectionPage({
+    name: 'OpenClaw Resources Hub',
+    description: pageDescription,
+    url: canonicalURL.toString(),
+    items: collectionItems,
+  }),
+  buildBreadcrumbList([
+    { name: 'Home', item: new URL('/', Astro.site).toString() },
+    { name: 'Resources', item: canonicalURL.toString() },
+  ]),
+  faqStructuredData
+);
 ---
 
 <BaseLayout
-  title="OpenClaw Resources Hub | CoClaw"
-  description="Curated OpenClaw guides, tutorials, FAQs, and community resources. Start here to install, configure channels, and troubleshoot."
+  title={pageTitle}
+  description={pageDescription}
   keywords="OpenClaw resources, OpenClaw guides, OpenClaw tutorials, OpenClaw help, OpenClaw community, install OpenClaw"
+  structuredData={structuredData}
 >
-  <script
-    type="application/ld+json"
-    slot="head"
-    set:html={JSON.stringify({
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: faqs.map((f) => ({
-        '@type': 'Question',
-        name: f.question,
-        acceptedAnswer: { '@type': 'Answer', text: f.answer },
-      })),
-    })}
-  />
   <div class="bg-background min-h-screen relative">
     <!-- Decorative Background Elements -->
     <div

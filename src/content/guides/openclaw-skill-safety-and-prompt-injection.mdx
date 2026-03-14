@@ -1,6 +1,18 @@
 ---
 title: "OpenClaw Security Playbook: Skill Supply Chain Safety & Prompt Injection Defense"
 description: "A practical hardening guide for OpenClaw operators: reduce skill malware risk, defend against prompt injection from emails/web pages, and design safe-by-default workflows (separate accounts, least privilege, allowlists, audit trails)."
+seoTitle: "OpenClaw Skill Safety and Prompt Injection Defense"
+seoDescription: "A practical hardening guide for OpenClaw operators: reduce skill malware risk, defend against prompt injection from emails/web pages, and design."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Self-hosted"
+  - "Docker"
+  - "VPS"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "advanced"
 difficulty: "Advanced"
 platforms:
@@ -30,6 +42,19 @@ keywords:
   - "malware"
   - "least privilege"
   - "allowlist"
+sources:
+  - label: 'OpenClaw docs — Control UI auth and pairing'
+    url: https://docs.openclaw.ai/guides/control-ui-auth-and-pairing
+    type: official-doc
+  - label: 'OpenClaw docs — Cron and heartbeat reliability'
+    url: https://docs.openclaw.ai/guides/openclaw-cron-and-heartbeat-24x7
+    type: official-doc
+  - label: 'OpenClaw docs — Installation troubleshooting'
+    url: https://docs.openclaw.ai/guides/openclaw-installation-troubleshooting
+    type: official-doc
+  - label: 'OpenClaw GitHub repository'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 ---
 
 This is the “operator’s version” of the security discussion: not fear, not hype — practical defenses.
@@ -183,4 +208,3 @@ If you’re building 24/7 automations, bake “evidence output” into every cro
 Install/runtime recovery:
 
 - [/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
-

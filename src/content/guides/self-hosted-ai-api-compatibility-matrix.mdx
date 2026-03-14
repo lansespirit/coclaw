@@ -1,6 +1,20 @@
 ---
 title: "Self-Hosted AI API Compatibility Matrix for OpenClaw"
 description: "A practical compatibility matrix for using OpenClaw with self-hosted and proxy AI APIs: native Ollama, Ollama /v1, llama.cpp, vLLM, LiteLLM, and OpenAI-compatible relays."
+seoTitle: "Self-Hosted AI API Compatibility Matrix for OpenClaw"
+seoDescription: "Compare Ollama, llama.cpp, vLLM, LiteLLM, and OpenAI-compatible relays for OpenClaw, with practical notes on tools, reasoning, and streaming."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "integration"
 difficulty: "Intermediate"
 platforms:
@@ -32,6 +46,19 @@ keywords:
   - "tool calling"
   - "reasoning"
   - "streaming"
+sources:
+  - label: 'OpenClaw docs — Relay/API proxy troubleshooting'
+    url: https://docs.openclaw.ai/guides/openclaw-relay-and-api-proxy-troubleshooting
+    type: official-doc
+  - label: 'OpenClaw docs — Configuration guide'
+    url: https://docs.openclaw.ai/guides/openclaw-configuration
+    type: official-doc
+  - label: 'OpenClaw docs — Deployment troubleshooting'
+    url: https://docs.openclaw.ai/guides/openclaw-deployment-troubleshooting
+    type: official-doc
+  - label: 'OpenClaw GitHub repository'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 ---
 
 If you run OpenClaw against self-hosted or proxy AI backends, the most useful question is not:
@@ -45,6 +72,13 @@ It is:
 That distinction matters because many integrations are compatible only at the **basic chat** layer. They answer a simple `curl` request, maybe even pass `openclaw models status --probe`, and then fail the moment OpenClaw sends a fuller runtime payload.
 
 This page is meant to be the high-level map you can use before choosing a backend and while debugging one.
+
+If you are still choosing an architecture, start with
+[/guides/choose-local-ai-api-path-for-openclaw](/guides/choose-local-ai-api-path-for-openclaw)
+first. If your backend is already live behind LiteLLM, NewAPI, OneAPI, or another proxy, keep
+[/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+next to this matrix so the topic cluster stays ordered: choose the path, classify the compatibility
+boundary, then debug the transport details.
 
 If you are already seeing concrete errors, start with these symptom pages too:
 
@@ -130,6 +164,10 @@ Weaknesses:
 - introduce another translation layer,
 - can hide real provider errors,
 - may support only a subset of modern runtime semantics.
+
+That is why this bucket should almost always be read together with
+[/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting),
+not in isolation.
 
 ---
 

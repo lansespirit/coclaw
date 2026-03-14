@@ -1,6 +1,20 @@
 ---
 title: "OpenClaw State, Workspace, and Memory: Persistence & Permissions Troubleshooting"
 description: "Fix 'memory not written', 'it said it saved files but nothing exists', and post-restart amnesia by understanding the state directory, workspace paths, container UID/GID, and how to make persistence reproducible across Docker/VPS/PaaS."
+seoTitle: "OpenClaw State, Workspace, and Memory Troubleshooting"
+seoDescription: "Fix 'memory not written', 'it said it saved files but nothing exists', and post-restart amnesia by understanding the state directory, workspace paths."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "deployment"
 difficulty: "Intermediate"
 platforms:
@@ -33,6 +47,19 @@ keywords:
   - "EACCES"
   - "OPENCLAW_STATE_DIR"
   - "OPENCLAW_WORKSPACE_DIR"
+sources:
+  - label: 'OpenClaw docs — Deployment troubleshooting'
+    url: https://docs.openclaw.ai/guides/openclaw-deployment-troubleshooting
+    type: official-doc
+  - label: 'OpenClaw docs — Configuration guide'
+    url: https://docs.openclaw.ai/guides/openclaw-configuration
+    type: official-doc
+  - label: 'OpenClaw docs — Control UI auth and pairing'
+    url: https://docs.openclaw.ai/guides/control-ui-auth-and-pairing
+    type: official-doc
+  - label: 'OpenClaw GitHub repository'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 ---
 
 If OpenClaw:
@@ -178,4 +205,3 @@ Back up the entire state directory as a unit, not “just openclaw.json”.
 CoClaw checklist:
 
 - [/guides/new-user-checklist](/guides/new-user-checklist)
-

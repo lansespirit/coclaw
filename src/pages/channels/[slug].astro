@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import TrustSignals from '../../components/content/TrustSignals.astro';
 import Section from '../../components/layout/Section.astro';
 import {
   IconArrowRight,
@@ -24,6 +25,8 @@ import {
   resolveChannelBlueprint,
   sortChannelEntries,
 } from '../../lib/channels';
+import { toContributorEntities } from '../../lib/structured-data';
+import { deriveChannelSources } from '../../lib/trust-sources';
 
 export const getStaticPaths = (async () => {
   const entries = sortChannelEntries(
@@ -43,6 +46,8 @@ const blueprint = resolveChannelBlueprint(entry.slug, entry.data.title);
 const title = entry.data.title;
 const description = entry.data.description;
 const keywords = normalizeKeywords(entry.data.keywords ?? blueprint.focusAreas);
+const seoTitle = entry.data.seoTitle ?? `${title} | CoClaw Channels`;
+const seoDescription = entry.data.seoDescription ?? description;
 const publishDate = coerceDate(entry.data.publishDate);
 const lastUpdated = coerceDate(entry.data.lastUpdated);
 const hasValidPublishDate = !Number.isNaN(publishDate.getTime());
@@ -183,6 +188,7 @@ if (entry.data.subcategory) {
 const operatorChecklist = blueprint.checklist;
 const routeTags = keywords.slice(0, 6);
 const keywordsMeta = keywords.length ? keywords.join(', ') : undefined;
+const trustSources = deriveChannelSources(entry.slug, entry.body, entry.data.sources);
 
 const fieldNotes = [
   {
@@ -260,27 +266,40 @@ const toneStyles = {
 } as const;
 
 const tone = toneStyles[blueprint.tone];
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = new URL(entry.data.canonicalPath || Astro.url.pathname, Astro.site);
+const authorEntity = toContributorEntities([entry.data.author || 'CoClaw Team']);
+const reviewedByEntities = toContributorEntities(entry.data.reviewedBy);
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'TechArticle',
   headline: title,
-  description,
+  description: seoDescription,
   datePublished: hasValidPublishDate ? publishDate.toISOString() : undefined,
   dateModified: hasValidLastUpdated
     ? lastUpdated.toISOString()
     : hasValidPublishDate
       ? publishDate.toISOString()
       : undefined,
-  author: { '@type': 'Organization', name: entry.data.author || 'CoClaw Team' },
+  author: authorEntity,
+  reviewer: reviewedByEntities,
   publisher: { '@type': 'Organization', name: 'CoClaw', url: 'https://coclaw.com' },
   keywords,
   articleSection: entry.data.category,
+  citation: trustSources.map((source) => source.url),
   mainEntityOfPage: canonicalURL.toString(),
 };
 ---
 
-<BaseLayout title={`${title} | CoClaw Channels`} description={description} keywords={keywordsMeta}>
+<BaseLayout
+  title={seoTitle}
+  description={seoDescription}
+  keywords={keywordsMeta}
+  canonicalPath={entry.data.canonicalPath}
+  robots={entry.data.robots}
+  noindex={entry.data.noindex}
+  author={entry.data.author}
+  type="article"
+>
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
   {
     hasValidPublishDate && (
@@ -474,6 +493,18 @@ const structuredData = {
           >
             <Content />
           </article>
+
+          <div class="px-6 pb-8 md:px-8 md:pb-10">
+            <TrustSignals
+              reviewedBy={entry.data.reviewedBy}
+              reviewedAt={entry.data.reviewedAt}
+              testedOn={entry.data.testedOn}
+              verificationStatus={entry.data.verificationStatus}
+              sources={trustSources}
+              context="channel"
+              class="not-prose mt-10"
+            />
+          </div>
         </div>
 
         <div class="space-y-4 xl:sticky xl:top-28">

@@ -1,6 +1,20 @@
 ---
 title: "OpenClaw Browser Automation Timeouts: Fix 'browser control service timeout'"
 description: "Stabilize OpenClaw browser runs (Playwright) when they time out: verify the browser service is alive, increase timeouts where appropriate, reduce page complexity, and fix common headless/container dependencies."
+seoTitle: "Fix OpenClaw Browser Automation and Timeout Failures"
+seoDescription: "Stabilize Playwright runs by confirming the browser service, simplifying repros, fixing headless/container issues, and tuning timeouts responsibly."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "advanced"
 difficulty: "Intermediate"
 platforms:
@@ -12,6 +26,16 @@ platforms:
 time: "20 min"
 publishDate: 2026-03-02
 lastUpdated: 2026-03-02
+sources:
+  - label: 'OpenClaw docs — Browser tools'
+    url: https://docs.openclaw.ai/tools/browser
+    type: official-doc
+  - label: 'OpenClaw docs — Troubleshooting'
+    url: https://docs.openclaw.ai/help/troubleshooting
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 steps:
   - title: "Prove the browser service is reachable"
     content: "Confirm the gateway is healthy, then isolate whether timeouts are caused by a dead browser service vs a slow page."
@@ -141,4 +165,3 @@ Related:
 If you see the specific error string, also check:
 
 - [/troubleshooting/solutions/browser-control-service-timeout](/troubleshooting/solutions/browser-control-service-timeout)
-

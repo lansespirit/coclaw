@@ -1,6 +1,19 @@
 ---
 title: "OpenClaw Exec Approvals and Safe Bins: Why `tools.exec.security=\"full\"` Can Still Be Blocked"
 description: "A practical guide to OpenClaw exec approvals: understand the difference between tool policy, elevated mode, allowlists, and safe bins; fix `allowlist miss`; and choose the right trust model for gateway and node hosts."
+seoTitle: "OpenClaw Exec Approvals, Safe Bins, and Allowlist Fixes"
+seoDescription: "A practical guide to OpenClaw exec approvals: understand the difference between tool policy, elevated mode, allowlists, and safe bins; fix `allowlist miss`."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "advanced"
 difficulty: "Advanced"
 platforms:
@@ -11,6 +24,16 @@ platforms:
 time: "18 min"
 publishDate: 2026-03-10
 lastUpdated: 2026-03-10
+sources:
+  - label: 'OpenClaw docs — Plugin tools & safety'
+    url: https://docs.openclaw.ai/plugins/agent-tools
+    type: official-doc
+  - label: 'OpenClaw docs — Gateway configuration'
+    url: https://docs.openclaw.ai/gateway/configuration
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 steps:
   - title: "Separate exec layers before debugging"
     content: "Tool allow/deny, sandbox location, elevated mode, and exec approvals are different controls; mixing them up is the fastest way to get lost."

@@ -1,6 +1,19 @@
 ---
 title: "Installer fails: 'spawn git ENOENT' (Git missing)"
 description: "Fix OpenClaw install/update failures caused by missing Git (common on fresh Windows/Linux machines)."
+seoTitle: "Fix Installer fails: 'spawn git ENOENT' (Git missing)"
+seoDescription: "Fix OpenClaw install and update failures caused by missing Git by installing Git, reopening the shell, and retrying on fresh Windows or Linux machines."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Windows"
+  - "Linux"
+  - "macOS"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 45
+
 kind: "solution"
 component: "install"
 severity: "medium"
@@ -55,4 +68,3 @@ Then rerun the installer or the command that failed.
 
 - `git --version` works in a fresh terminal.
 - Re-running the installer/update succeeds.
-

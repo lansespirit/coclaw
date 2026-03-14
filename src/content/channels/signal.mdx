@@ -1,6 +1,16 @@
 ---
 title: 'Signal'
 description: 'Signal for OpenClaw: signal-cli setup, linked-device or dedicated-number decisions, daemon health, DM and group policy, and the recovery posture privacy-focused operators should expect.'
+seoTitle: 'Signal OpenClaw number model and daemon verification'
+seoDescription: 'Frame the Signal OpenClaw lane, covering number/account posture, signal-cli daemon health, DM/group trust defaults, and restart/relink expectations.'
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Signal"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 75
 category: 'Channel Integration'
 subcategory: 'Core Channel'
 platform: 'Signal'
@@ -53,7 +63,7 @@ If this layer is fuzzy, every other configuration decision becomes fragile.
 
 ### Gate 2: `signal-cli` and daemon health
 
-OpenClaw talks to Signal through `signal-cli` over HTTP JSON-RPC + SSE.
+OpenClaw talks to Signal through `signal-cli` over HTTP JSON-RPC + SSE, so map the resulting knobs to the baseline document in [/guides/openclaw-configuration](/guides/openclaw-configuration) before you tune DM policy.
 
 That means the channel depends on:
 
@@ -167,7 +177,7 @@ You need to know whether the gateway will:
 
 ### Default style: local daemon managed by OpenClaw
 
-This is the simplest story if the gateway host is stable and you want a single-box deployment.
+This is the simplest story if the gateway host is stable and you want a single-box deployment, and it should be paired with the restore playbook in [/guides/openclaw-backup-and-rollback](/guides/openclaw-backup-and-rollback) so keying state can be recovered quickly.
 
 ### External daemon mode
 
@@ -202,7 +212,7 @@ openclaw pairing list signal
 openclaw pairing approve signal <CODE>
 ```
 
-This gives you a conservative default without requiring you to pre-load every possible sender.
+This gives you a conservative default without requiring you to pre-load every possible sender, and the decision flow in [/troubleshooting/solutions/control-ui-pairing-required](/troubleshooting/solutions/control-ui-pairing-required) shows the operator signals you need around approvals.
 
 ### Use `allowlist` when you already know the participants
 
@@ -309,11 +319,11 @@ That is why Signal documentation needs more runbook energy than most channels.
 
 ### 1. `signal-cli` not found or daemon will not start
 
-This is the foundational Signal failure. If the host cannot run or reach `signal-cli`, the lane never really came up.
+This is the foundational Signal failure. If the host cannot run or reach `signal-cli`, the lane never really came up, which is precisely the scenario documented in [/troubleshooting/solutions/signal-cli-not-found-or-daemon-wont-start](/troubleshooting/solutions/signal-cli-not-found-or-daemon-wont-start).
 
 Start here:
 
-- [/troubleshooting/solutions/signal-cli-not-found-or-daemon-wont-start](/troubleshooting/solutions/signal-cli-not-found-or-daemon-wont-start)
+- use the tracing guidance from [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability) so the daemon's slow-start behavior is observable and categorized.
 
 ### 2. Group sends fail because the group ID was normalized incorrectly
 

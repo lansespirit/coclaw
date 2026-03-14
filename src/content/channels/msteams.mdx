@@ -1,6 +1,16 @@
 ---
 title: 'Microsoft Teams'
 description: 'Microsoft Teams support for OpenClaw covers plugin-backed Azure Bot setup, Teams app manifest and RSC permissions, Graph-dependent media behavior, and tenant-scoped routing boundaries.'
+seoTitle: 'Microsoft Teams OpenClaw app manifest and permissions'
+seoDescription: 'Outline Microsoft Teams OpenClaw setup, covering Azure Bot/webhook reachability, manifest accuracy, RSC vs Graph choices, and conservative DM/group posture.'
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Microsoft Teams"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 75
 category: 'Channel Integration'
 subcategory: 'Community Plugin'
 platform: 'Microsoft Teams'
@@ -19,6 +29,8 @@ keywords:
 ---
 
 Microsoft Teams is the lane where operators most often confuse **bot credentials** with **deployment readiness**. The official plugin can work well, but only when you treat Azure Bot registration, Teams app packaging, tenant permissions, and OpenClaw policy as one coordinated rollout rather than one config block.
+
+If those pieces feel scattered, keep [/guides/control-ui-auth-and-pairing](/guides/control-ui-auth-and-pairing) and [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting) close at hand so token, manifest, and pairing conversations stay aligned.
 
 ## Why start with Microsoft Teams
 
@@ -46,6 +58,8 @@ Most Teams confusion comes from mixing those layers together. For example:
 - a webhook can be healthy while the app manifest is wrong,
 - the app can be installed while channel behavior is still blocked by mention requirements,
 - and channel media can still fail because Graph permissions were never granted.
+
+When you hit one of those scenarios, revisit [/guides/openclaw-configuration](/guides/openclaw-configuration) for precedence guidance and [/blog/openclaw-model-routing-and-cost-strategy](/blog/openclaw-model-routing-and-cost-strategy) for how routing, policy, and provider choices interact.
 
 ## Fastest safe baseline
 
@@ -134,6 +148,8 @@ Add Graph only when the operator actually needs those capabilities. The docs spe
 - `Chat.Read.All` or `ChatMessage.Read.All` for group chats,
 - and `User.Read.All` if you need to dynamically search and mention users outside the current conversation.
 
+Frame that permission and consent discussion with [/guides/openclaw-cost-and-guardrails-checklist](/guides/openclaw-cost-and-guardrails-checklist) so finance and security stakeholders see the cost/performance trade-offs while the tenant admins review Graph grants.
+
 That separation keeps the first rollout smaller and the permission conversation with tenant admins much easier.
 
 ## Step 4: Set OpenClaw policy in stable identities, not loose names
@@ -166,7 +182,7 @@ A disciplined verification sequence looks like this:
 4. **Install into one team** and verify one channel or group-chat path.
 5. If the channel uses the newer linear Threads UI, set `replyStyle` accordingly and retest.
 
-The docs also call out an easy ID mistake: the `groupId` query parameter in Teams URLs is **not** the team ID used for config. Team and channel IDs come from the URL path segment and should be URL-decoded there.
+The docs also call out an easy ID mistake: the `groupId` query parameter in Teams URLs is **not** the team ID used for config. Team and channel IDs come from the URL path segment and should be URL-decoded there. If you wind up with ambiguous symptoms, `/guides/openclaw-symptom-first-triage-card` keeps the order of checks consistent while you decide whether this is Azure, Graph, mention, or routing noise.
 
 ## Advanced behaviors worth knowing early
 
@@ -198,7 +214,7 @@ The official docs already tell you where the sharp edges are:
 4. **Webhook tests return 401** when hit manually without Azure JWTs — which the docs note is expected and only proves auth failed, not that the route is missing.
 5. **Channel targeting is inconsistent** because the wrong team or channel ID was copied from `groupId` instead of the URL path.
 
-These are not cosmetic issues. They are the normal interaction between Azure, Teams, Graph, and the gateway.
+These are not cosmetic issues. They are the normal interaction between Azure, Teams, Graph, and the gateway. When pairing or approvals get stuck, `/troubleshooting/solutions/control-ui-pairing-required` documents the Control UI cues that point you to the right workflow.
 
 ## Recommended production posture
 
@@ -225,6 +241,8 @@ The useful boundary is:
 - and **OpenClaw routing** decides which agent and workspace own the response.
 
 That makes Teams a powerful internal lane, but not a casual one. It should be treated like an application rollout with messaging behavior, not just like “another bot token.”
+
+Continue the Teams path by looping in [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability) for visibility requirements and [/blog/openclaw-deployment-form-factors-comparison](/blog/openclaw-deployment-form-factors-comparison) when you need to explain how this lane fits the broader self-hosted enterprise story.
 
 ## Continue the Teams path
 

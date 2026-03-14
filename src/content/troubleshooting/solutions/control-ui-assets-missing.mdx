@@ -1,6 +1,19 @@
 ---
 title: "Control UI assets missing"
 description: "Fix 'Control UI assets not found' by building UI assets (pnpm ui:build) or running openclaw doctor UI repair when sources are present."
+seoTitle: "Fix OpenClaw Control UI Assets Missing After Upgrade"
+seoDescription: "Fix 'Control UI assets not found' by building UI assets (pnpm ui:build) or running openclaw doctor UI repair when sources are present."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 45
+
 kind: "solution"
 component: "web-ui"
 severity: "medium"
@@ -57,4 +70,3 @@ Then restart the gateway (or rerun onboarding if you’re in the wizard flow).
 
 - Re-open the dashboard/control UI and confirm pages load.
 - `openclaw status --deep` succeeds.
-

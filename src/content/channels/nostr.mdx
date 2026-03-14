@@ -1,6 +1,16 @@
 ---
 title: 'Nostr'
 description: 'Nostr DM setup for OpenClaw: plugin install, relay strategy, private-key handling, DM policy, profile metadata, verification, and the protocol limits operators should understand before rollout.'
+seoTitle: 'Nostr OpenClaw DM protocol and relay strategy'
+seoDescription: 'Explain the Nostr OpenClaw lane, covering private-key custody, relay choices, DM policy, and the protocol limits operators must accept before launch.'
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Nostr"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 75
 category: 'Channel Integration'
 subcategory: 'Community Plugin'
 platform: 'Nostr'
@@ -20,6 +30,14 @@ keywords:
 ---
 
 > Nostr is not a mainstream bot API lane. It is a **protocol-native DM surface** where your real operational boundary is the combination of **private key custody**, **relay selection**, and **OpenClaw DM policy**.
+
+If you are deciding whether this channel is the right lane at all, start with the broader “choose an
+integration posture” guides:
+
+- Channel directory: [/channels](/channels)
+- Configuration basics: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- Pairing and allowlists (trust boundary): [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
+- “No response” diagnosis when the lane goes silent: [/guides/openclaw-no-response-and-rate-limit-troubleshooting](/guides/openclaw-no-response-and-rate-limit-troubleshooting)
 
 ## Why choose Nostr
 

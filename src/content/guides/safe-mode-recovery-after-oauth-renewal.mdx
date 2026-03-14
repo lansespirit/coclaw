@@ -1,6 +1,20 @@
 ---
 title: "OpenClaw Safe Mode Recovery After OAuth Renewal: auth-profiles.json vs provisioned copy"
 description: "Understand why OpenClaw recovery can keep looping after a successful OAuth renewal, and how to resync the live auth file, the provisioned copy, and safe-mode markers."
+seoTitle: "OpenClaw Safe Mode Recovery After OAuth Renewal"
+seoDescription: "Understand why OpenClaw recovery can keep looping after a successful OAuth renewal, and how to resync the live auth file, the provisioned copy, and."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows"
+  - "Docker"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "advanced"
 difficulty: "Intermediate"
 platforms:
@@ -27,6 +41,19 @@ keywords:
   - "recovery"
   - "auth-profiles.json"
   - "auth-profiles.provisioned.json"
+sources:
+  - label: 'OpenClaw docs — Installation troubleshooting'
+    url: https://docs.openclaw.ai/guides/openclaw-installation-troubleshooting
+    type: official-doc
+  - label: 'OpenClaw docs — Deployment troubleshooting'
+    url: https://docs.openclaw.ai/guides/openclaw-deployment-troubleshooting
+    type: official-doc
+  - label: 'OpenClaw docs — Configuration guide'
+    url: https://docs.openclaw.ai/guides/openclaw-configuration
+    type: official-doc
+  - label: 'OpenClaw GitHub repository'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 ---
 
 When OAuth renewal “works” but the host still keeps falling back into recovery or safe mode, the problem is often **not** that the new token is bad.

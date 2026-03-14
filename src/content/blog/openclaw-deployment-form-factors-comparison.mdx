@@ -1,6 +1,8 @@
 ---
 title: "OpenClaw Deployment Options Explained: Official Install, Docker, One-Click, or Desktop Wrapper?"
 description: "A practical decision guide to OpenClaw deployment form factors. Compare official local installs, Docker, one-click templates, and desktop wrappers by maintainability, risk, portability, and operator fit."
+seoTitle: "OpenClaw Deployment Options: Install, Docker, or Wrapper"
+seoDescription: "A practical decision guide to OpenClaw deployment form factors. Compare official local installs, Docker, one-click templates, and desktop wrappers by."
 category: "Deep Dive"
 author: "CoClaw Research Team"
 publishDate: 2026-03-08
@@ -21,6 +23,19 @@ relatedPages:
   - "/guides/openclaw-on-raspberry-pi"
   - "/guides/openclaw-windows-native-vs-wsl2"
   - "/guides/openclaw-deployment-troubleshooting"
+sources:
+  - label: 'OpenClaw docs — Deployment overview'
+    url: https://docs.openclaw.ai/deployment
+    type: official-doc
+  - label: 'OpenClaw docs — Docker deployment walkthrough'
+    url: https://docs.openclaw.ai/deployment/docker
+    type: official-doc
+  - label: 'OpenClaw docs — Getting started coverage'
+    url: https://docs.openclaw.ai/getting-started
+    type: official-doc
+  - label: 'OpenClaw GitHub release notes (v2026.1.30)'
+    url: https://github.com/openclaw/openclaw/releases/tag/v2026.1.30
+    type: repo
 lang: "en"
 ---
 
@@ -48,6 +63,13 @@ All four can be valid. None is universally best.
 This guide is not an installation tutorial. It is a **deployment decision guide**. The goal is to
 help you pick the form factor that matches your operator skill, failure tolerance, upgrade style,
 and long-term maintenance budget.
+
+If you need the execution-side companions instead of the decision framework, jump directly to
+[/getting-started](/getting-started),
+[/guides/docker-deployment](/guides/docker-deployment),
+[/guides/openclaw-windows-native-vs-wsl2](/guides/openclaw-windows-native-vs-wsl2),
+and
+[/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting).
 
 ---
 
@@ -107,6 +129,11 @@ Can you move the setup to a new machine or host without rebuilding everything fr
 
 When something breaks, can you see logs, config, environment, service state, and file paths clearly?
 
+This criterion becomes much easier to apply if you read it together with
+[/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability)
+and the broader
+[/blog/openclaw-stability-playbook](/blog/openclaw-stability-playbook).
+
 ### 4. Isolation
 
 How well does the form factor separate OpenClaw from the rest of the machine or workstation?
@@ -141,6 +168,12 @@ machine, usually with native shell access and local config files.
 - It is the shortest path from zero to a working OpenClaw instance
 - It teaches you the real moving parts instead of hiding them behind a platform layer
 - It makes debugging easier because the process, shell, and config are close at hand
+
+That is why this path pairs naturally with
+[/getting-started/quick-start](/getting-started/quick-start)
+for the first boot and
+[/guides/openclaw-installation-troubleshooting](/guides/openclaw-installation-troubleshooting)
+once local shell and service drift appear.
 
 ### What it does well
 
@@ -215,6 +248,14 @@ usually the difference between a manageable system and a snowflake deployment.
 - Better isolation than direct local processes
 - Easier to reason about service lifecycle
 - Good fit for VPS, NAS, mini-PC, or home server environments
+
+In practice, the Docker path should be read as a cluster, not a single page:
+[/guides/docker-deployment](/guides/docker-deployment)
+for the baseline,
+[/guides/openclaw-backup-and-rollback](/guides/openclaw-backup-and-rollback)
+for state discipline, and
+[/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+for day-2 failures.
 
 ### What it does poorly
 

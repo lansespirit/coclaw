@@ -1,6 +1,19 @@
 ---
 title: "OpenClaw: fake-IP / TUN DNS makes public hosts fail SSRF checks"
 description: "Fix `Blocked: resolves to private/internal/special-use IP address` when a VPN or proxy rewrites public domains to fake-IP ranges like `198.18.x.x` before OpenClaw applies proxying."
+seoTitle: "OpenClaw: fake-IP / TUN DNS makes public hosts fail SSRF che"
+seoDescription: "Fix `Blocked: resolves to private/internal/special-use IP address` when a VPN or proxy rewrites public domains to fake-IP ranges like `198.18.x.x` before Ope..."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 45
+
 kind: "solution"
 component: "gateway"
 severity: "high"

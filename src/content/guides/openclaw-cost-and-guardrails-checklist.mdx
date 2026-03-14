@@ -1,6 +1,21 @@
 ---
 title: "OpenClaw Cost and Guardrails Checklist: Prevent Runaway Runs Before They Happen"
 description: "A practical operator checklist to control blast radius and token spend: start with a bounded tool profile, tighten DM policies, make runs leave evidence, and keep a kill switch. Designed for real life, not perfect autonomy."
+seoTitle: "OpenClaw Cost Control and Guardrails Checklist"
+seoDescription: "Control blast radius and token spend with bounded tools, strict DM policies, evidence artifacts, deliberate exec, and a kill switch before runs go runaway."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "VPS"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "advanced"
 difficulty: "Intermediate"
 platforms:
@@ -13,6 +28,16 @@ platforms:
 time: "20 min"
 publishDate: 2026-03-14
 lastUpdated: 2026-03-14
+sources:
+  - label: 'OpenClaw docs — Gateway authentication'
+    url: https://docs.openclaw.ai/gateway/authentication
+    type: official-doc
+  - label: 'OpenClaw docs — Automation cron jobs'
+    url: https://docs.openclaw.ai/automation/cron-jobs
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 featured: false
 steps:
   - title: "Start bounded (tools + channels)"
@@ -179,4 +204,3 @@ Backup/rollback discipline:
 If the symptom is duplicate/flashy streaming previews (a common "flood-looking" panic):
 
 - [/troubleshooting/solutions/telegram-preview-streaming-duplicate-or-flash](/troubleshooting/solutions/telegram-preview-streaming-duplicate-or-flash)
-

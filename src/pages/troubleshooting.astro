@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/layout/Section.astro';
 import { TroubleshootingSearch } from '../components/troubleshooting/TroubleshootingSearch';
+import { buildBreadcrumbList, buildCollectionPage, wrapSchemaGraph } from '../lib/structured-data';
 
 import {
   IconChat,
@@ -71,12 +72,34 @@ const localIndex = solutions.map((entry) => ({
   severity: entry.data.severity ?? null,
   errorSignatures: entry.data.errorSignatures ?? [],
 }));
+
+const pageTitle = 'OpenClaw Troubleshooting | Fix Setup, Channel & Model Errors';
+const pageDescription =
+  'Find step-by-step OpenClaw fixes for installation, channel, configuration, auth, gateway, and AI API compatibility problems.';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const structuredData = wrapSchemaGraph(
+  buildCollectionPage({
+    name: 'OpenClaw Troubleshooting Hub',
+    description: pageDescription,
+    url: canonicalURL.toString(),
+    items: featuredSolutions.map((solution) => ({
+      name: solution.title,
+      url: new URL(solution.href, Astro.site).toString(),
+      description: solution.description,
+    })),
+  }),
+  buildBreadcrumbList([
+    { name: 'Home', item: new URL('/', Astro.site).toString() },
+    { name: 'Troubleshooting', item: canonicalURL.toString() },
+  ])
+);
 ---
 
 <BaseLayout
-  title="Troubleshooting - OpenClaw Solutions"
-  description="Find step-by-step solutions to common OpenClaw problems, including installation, channels, configuration, model auth, and OpenAI-compatible AI API compatibility issues."
+  title={pageTitle}
+  description={pageDescription}
   keywords="OpenClaw troubleshooting, OpenClaw errors, OpenClaw issues, OpenClaw problems, OpenClaw help, OpenClaw support, OpenAI-compatible, local model, Ollama, vLLM, LiteLLM"
+  structuredData={structuredData}
 >
   <div class="bg-background min-h-screen overflow-x-hidden relative">
     <!-- Hero + Search -->

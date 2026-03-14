@@ -1,6 +1,19 @@
 ---
 title: "OpenClaw on Native Windows: PATH, Scheduled Tasks, Node Host, and the Real Failure Modes"
 description: "A field guide to running OpenClaw on native Windows without guesswork. Learn why shell PATH and Scheduled Task PATH diverge, when `tools.exec.pathPrepend` helps or hurts, why `openclaw node run` can stall after printing PATH, and when WSL2 is the lower-risk choice."
+seoTitle: "OpenClaw Native Windows Guide: PATH, Tasks, and Node Host"
+seoDescription: "A field guide to running OpenClaw on native Windows without guesswork. Learn why shell PATH and Scheduled Task PATH diverge, when `tools.exec.pathPrepend`."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Windows 10"
+  - "Windows 11"
+  - "Windows (native)"
+  - "WSL2"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "deployment"
 difficulty: "Intermediate"
 platforms:
@@ -31,6 +44,16 @@ keywords:
   - "Windows 11 24H2"
   - "PATH mismatch"
   - "Windows Service vs Scheduled Task"
+sources:
+  - label: 'OpenClaw docs — Native Windows guidance'
+    url: https://docs.openclaw.ai/guides/openclaw-windows-native-vs-wsl2
+    type: official-doc
+  - label: 'OpenClaw docs — Configuration guide'
+    url: https://docs.openclaw.ai/guides/openclaw-configuration
+    type: official-doc
+  - label: 'OpenClaw GitHub repository'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 publishDate: 2026-03-08
 lastUpdated: 2026-03-08
 featured: true

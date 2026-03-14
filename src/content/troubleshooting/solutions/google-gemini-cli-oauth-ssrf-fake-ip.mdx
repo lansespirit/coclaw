@@ -1,6 +1,19 @@
 ---
 title: "Google Gemini CLI OAuth: SSRF blocked because Google resolves to fake-ip/private addresses"
 description: "Fix `google-gemini-cli` login failures where OAuth domains resolve to special-use addresses by verifying DNS on the gateway host and disabling fake-ip/proxy rewriting for Google OAuth hosts."
+seoTitle: "Fix Google Gemini CLI OAuth: SSRF blocked because Google res"
+seoDescription: "Fix `google-gemini-cli` login failures where OAuth domains resolve to special-use addresses by verifying DNS on the gateway host and disabling fake-ip/proxy..."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 45
+
 kind: "solution"
 component: "model"
 severity: "high"

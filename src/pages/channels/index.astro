@@ -21,6 +21,11 @@ import {
   resolveChannelBlueprint,
   sortChannelEntries,
 } from '../../lib/channels';
+import {
+  buildBreadcrumbList,
+  buildCollectionPage,
+  wrapSchemaGraph,
+} from '../../lib/structured-data';
 
 const entries = sortChannelEntries(
   await getCollection('channels', ({ data }) => !data.draft && !data.archived)
@@ -241,12 +246,33 @@ const toneStyles = {
     dot: 'bg-danger',
   },
 } as const;
+
+const pageTitle =
+  'OpenClaw Channels Directory | WhatsApp, Telegram, Discord, Slack, Signal, Teams & More';
+const pageDescription =
+  'OpenClaw channel guides for WhatsApp, Telegram, Discord, Slack, Signal, Microsoft Teams, Google Chat, LINE, Matrix, WebChat, BlueBubbles, and more. Compare setup, pairing, allowlists, webhooks, Socket Mode, QR login, and troubleshooting.';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const structuredData = wrapSchemaGraph(
+  buildCollectionPage({
+    name: 'OpenClaw Channels Directory',
+    description: pageDescription,
+    url: canonicalURL.toString(),
+    items: showcaseChannels
+      .filter((channel) => Boolean(channel.href))
+      .map((channel) => ({
+        name: channel.title,
+        url: new URL(channel.href!, Astro.site).toString(),
+        description: channel.description,
+      })),
+  }),
+  buildBreadcrumbList([
+    { name: 'Home', item: new URL('/', Astro.site).toString() },
+    { name: 'Channels', item: canonicalURL.toString() },
+  ])
+);
 ---
 
-<BaseLayout
-  title="OpenClaw Channels Directory | WhatsApp, Telegram, Discord, Slack, Signal, Teams & More"
-  description="OpenClaw channel guides for WhatsApp, Telegram, Discord, Slack, Signal, Microsoft Teams, Google Chat, LINE, Matrix, WebChat, BlueBubbles, and more. Compare setup, pairing, allowlists, webhooks, Socket Mode, QR login, and troubleshooting."
->
+<BaseLayout title={pageTitle} description={pageDescription} structuredData={structuredData}>
   <div class="channels-deck relative min-h-screen overflow-x-hidden bg-background">
     <div class="pointer-events-none absolute inset-0 overflow-hidden">
       <div

@@ -1,6 +1,19 @@
 ---
 title: "Compaction deadlock: /new and /reset hang — emergency out-of-band session reset"
 description: "If compaction timeouts deadlock the session lane and even `/new` / `/reset` hang, recover by stopping the gateway and resetting the stuck session from disk (backup first)."
+seoTitle: "Fix Compaction deadlock: /new and /reset hang — emergency ou"
+seoDescription: "If compaction timeouts deadlock the session lane and even `/new` / `/reset` hang, recover by stopping the gateway and resetting the stuck session from disk (..."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 45
+
 kind: "solution"
 component: "gateway"
 severity: "critical"

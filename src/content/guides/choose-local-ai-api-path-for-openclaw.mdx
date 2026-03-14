@@ -1,6 +1,20 @@
 ---
 title: "How to Choose Between Native Ollama, OpenAI-Compatible /v1, vLLM, and LiteLLM for OpenClaw"
 description: "A decision guide for choosing the right local or proxy AI API path for OpenClaw: native Ollama, Ollama /v1, llama.cpp, vLLM, LiteLLM, and generic OpenAI-compatible relays."
+seoTitle: "Choose the Right Local AI API Path for OpenClaw"
+seoDescription: "Pick the best local or proxy AI API path for OpenClaw: native Ollama, /v1 compatibility, vLLM, LiteLLM, or generic OpenAI-style relays."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "Linux"
+  - "Windows (WSL2)"
+  - "Docker"
+  - "Self-hosted"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "deployment"
 difficulty: "Intermediate"
 platforms:
@@ -12,6 +26,16 @@ platforms:
 time: "16 min"
 publishDate: 2026-03-09
 lastUpdated: 2026-03-09
+sources:
+  - label: 'OpenClaw docs — Concepts: Models & Providers'
+    url: https://docs.openclaw.ai/concepts/models
+    type: official-doc
+  - label: 'OpenClaw docs — Providers: Ollama'
+    url: https://docs.openclaw.ai/providers/ollama
+    type: official-doc
+  - label: 'OpenClaw GitHub repo'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 steps:
   - title: "Decide what you are optimizing for"
     content: "The right path depends on whether you care most about native behavior, broad interoperability, governance, or experimentation speed."
@@ -52,6 +76,13 @@ Because these are not interchangeable choices:
 - or a generic OpenAI-compatible relay.
 
 They solve different problems.
+
+If you are still deciding which backend family fits your workload, keep the
+[/guides/self-hosted-ai-api-compatibility-matrix](/guides/self-hosted-ai-api-compatibility-matrix)
+open beside this guide. If you already know you are going through a proxy or relay, pair this page
+with
+[/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+so you do not confuse product choice with transport-shape breakage.
 
 ---
 
@@ -120,6 +151,11 @@ Tradeoff:
 
 - another translation layer,
 - another place where modern runtime fields can be altered, dropped, or only partially supported.
+
+If that sounds like your current failure mode rather than a future design choice, stop here and use
+the
+[/guides/openclaw-relay-and-api-proxy-troubleshooting](/guides/openclaw-relay-and-api-proxy-troubleshooting)
+debug loop first.
 
 ---
 

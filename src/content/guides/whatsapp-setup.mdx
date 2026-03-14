@@ -1,6 +1,17 @@
 ---
 title: "Configure WhatsApp for OpenClaw (Baileys / WhatsApp Web)"
 description: "Connect a WhatsApp account to OpenClaw and restrict who can message your agent using allowlists and pairing."
+seoTitle: "OpenClaw WhatsApp Setup: Baileys, Pairing & Access Control"
+seoDescription: "Connect WhatsApp to OpenClaw with Baileys, then lock it down with pairing, allowlists, and practical operator safeguards."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "WhatsApp"
+  - "Messaging"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "integration"
 difficulty: "Beginner"
 platforms:
@@ -40,6 +51,11 @@ That means:
 Official reference:
 
 - WhatsApp channel docs: https://docs.openclaw.ai/channels/whatsapp
+
+If you want the fuller operating model before you scan a QR code, read
+[/channels/whatsapp](/channels/whatsapp)
+alongside this quick setup guide. Use this page for the shortest path to first login; use the
+channel page for number strategy, session ownership, and long-run trust posture.
 
 If you're still getting comfortable with `openclaw.json` (paths, env vars, allowlists, model refs), see:
 
@@ -151,6 +167,12 @@ This is useful for testing without messaging other people.
 - QR does not appear: make sure the gateway is running, then rerun `openclaw channels login`.
 - "Logged out" or messages stop arriving: rerun `openclaw channels login` to re-link.
 - You changed config but behavior did not change: restart the gateway (`openclaw gateway restart`).
+
+If the lane links successfully but later throws credential or listener failures, go straight to:
+
+- [/troubleshooting/solutions/whatsapp-401-no-cookie-auth-credentials](/troubleshooting/solutions/whatsapp-401-no-cookie-auth-credentials)
+- [/troubleshooting/solutions/whatsapp-login-timeout-408-websocket-error](/troubleshooting/solutions/whatsapp-login-timeout-408-websocket-error)
+- [/troubleshooting/solutions/whatsapp-no-active-listener](/troubleshooting/solutions/whatsapp-no-active-listener)
 
 ## Security checklist (do this)
 

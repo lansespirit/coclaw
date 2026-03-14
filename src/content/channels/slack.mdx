@@ -1,6 +1,16 @@
 ---
 title: 'Slack'
 description: 'Slack Bot setup for OpenClaw: scopes, Socket Mode or Events API behavior, thread policy, workspace rollout, and troubleshooting for silent bots.'
+seoTitle: 'Slack OpenClaw workspace rollout and threading policy'
+seoDescription: 'Explain Slack OpenClaw setup, highlighting workspace scopes, Socket Mode vs Events API, thread policy, pairing defaults, and verification drills.'
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Slack"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 75
 category: 'Channel Integration'
 subcategory: 'Core Channel'
 platform: 'Slack'
@@ -139,7 +149,7 @@ Use HTTP mode when you already know why your environment needs it.
 
 ## Step 3: Get scopes and events right before testing behavior
 
-Slack often fails in ways that look like routing bugs but are really **scope / event subscription** problems.
+Slack often fails in ways that look like routing bugs but are really **scope / event subscription** problems; treat the checklist in [/guides/openclaw-configuration](/guides/openclaw-configuration) as your source of truth so you do not drift into partial installs.
 
 A practical first checklist:
 
@@ -150,6 +160,7 @@ A practical first checklist:
 - and only then move on to thread or policy debugging.
 
 This is the channel where a bot can be “present” but functionally deaf.
+Apply the same deployment guardrails as the ones featured in [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting) when you roll out new scopes or change how events arrive.
 
 ## Step 4: Decide the DM trust model
 
@@ -165,7 +176,7 @@ Use pairing when:
 
 ### Allowlist for known owners
 
-If the set of allowed DM users is already known, keep it in config instead of relying on approval history.
+If the set of allowed DM users is already known, keep it in config instead of relying on approval history, and use the decision flow in [/troubleshooting/solutions/control-ui-pairing-required](/troubleshooting/solutions/control-ui-pairing-required) to document approvals for auditors.
 
 That makes the access model durable and inspectable.
 
@@ -301,7 +312,7 @@ Use it when OpenClaw is meant to be embedded in a company or project workspace.
 
 ### Shared operations lane
 
-Slack is a good place for incident triage, support handling, and project-context replies where thread structure matters.
+Slack is a good place for incident triage, support handling, and project-context replies where thread structure matters, so keep the operational validation steps from [/guides/openclaw-operability-and-observability](/guides/openclaw-operability-and-observability) alongside your channel rollout to prove every failure mode is covered.
 
 ### Paired with Telegram or WebChat for operator fallback
 

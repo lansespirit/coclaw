@@ -2,8 +2,9 @@
 /**
  * Content pre-publish checks.
  *
- * Today this focuses on Troubleshooting Solutions (src/content/troubleshooting/solutions),
- * because those pages have hard structural requirements that are easy to regress.
+ * Today this focuses on:
+ * - Troubleshooting Solutions structural integrity
+ * - SEO metadata contract coverage for strategic content types
  */
 
 import fs from 'node:fs/promises';
@@ -99,6 +100,98 @@ async function listFiles(dir) {
   return files;
 }
 
+async function listFilesRecursive(dir) {
+  const entries = await fs.readdir(dir, { withFileTypes: true });
+  const files = [];
+  for (const ent of entries) {
+    const full = path.join(dir, ent.name);
+    if (ent.isDirectory()) {
+      files.push(...(await listFilesRecursive(full)));
+      continue;
+    }
+    if (!ent.isFile()) continue;
+    if (!ent.name.endsWith('.mdx')) continue;
+    files.push(full);
+  }
+  files.sort((a, b) => a.localeCompare(b));
+  return files;
+}
+
+function textLengthWithin(value, min, max) {
+  const len = String(value ?? '').trim().length;
+  return len >= min && len <= max;
+}
+
+function hasTopLevelListField(frontmatterRaw, key) {
+  return new RegExp(`^${key}:\\s*$`, 'm').test(frontmatterRaw);
+}
+
+function hasTroubleshootingEvidence(frontmatterRaw) {
+  if (hasTopLevelListField(frontmatterRaw, 'sources')) return true;
+  if (
+    /^\s{2}docs:\s*$/m.test(frontmatterRaw) &&
+    /^\s{4}-\s*["']?https?:\/\//m.test(frontmatterRaw)
+  ) {
+    return true;
+  }
+  if (/^\s{2}githubIssues:\s*$/m.test(frontmatterRaw) && /^\s{4}-\s*\d+/m.test(frontmatterRaw)) {
+    return true;
+  }
+  if (/^\s{2}external:\s*$/m.test(frontmatterRaw)) return true;
+  return false;
+}
+
+function extractAbsoluteUrls(body) {
+  if (!body) return [];
+  const matches = body.match(/https?:\/\/[^\s)<>"']+/g) ?? [];
+  const cleaned = matches
+    .map((url) => url.replace(/[`)\],.;:]+$/g, ''))
+    .filter((url) => {
+      try {
+        const parsed = new URL(url);
+        return !['127.0.0.1', 'localhost', 'openclaw'].includes(parsed.hostname);
+      } catch {
+        return false;
+      }
+    });
+  return Array.from(new Set(cleaned));
+}
+
+function hasUrlFromHosts(body, hosts) {
+  const allow = new Set(hosts.map((host) => host.toLowerCase()));
+  return extractAbsoluteUrls(body).some((url) => {
+    try {
+      return allow.has(new URL(url).hostname.toLowerCase());
+    } catch {
+      return false;
+    }
+  });
+}
+
+function hasGuideSourceEvidence(frontmatterRaw, body) {
+  return (
+    hasTopLevelListField(frontmatterRaw, 'sources') || hasUrlFromHosts(body, ['docs.openclaw.ai'])
+  );
+}
+
+function hasGettingStartedSourceEvidence(frontmatterRaw, body) {
+  return (
+    hasTopLevelListField(frontmatterRaw, 'sources') ||
+    hasUrlFromHosts(body, ['docs.openclaw.ai', 'github.com', 'nodejs.org'])
+  );
+}
+
+function hasChannelSourceEvidence(frontmatterRaw, body, filePath) {
+  if (hasTopLevelListField(frontmatterRaw, 'sources')) return true;
+  if (hasUrlFromHosts(body, ['docs.openclaw.ai'])) return true;
+  const slug = path.basename(filePath, path.extname(filePath)).trim();
+  return slug.length > 0;
+}
+
+function hasBlogSourceEvidence(frontmatterRaw, body) {
+  return hasTopLevelListField(frontmatterRaw, 'sources') || extractAbsoluteUrls(body).length > 0;
+}
+
 async function checkTroubleshootingSolutions() {
   const dir = path.join(ROOT, 'src', 'content', 'troubleshooting', 'solutions');
   const files = await listFiles(dir);
@@ -181,10 +274,179 @@ async function checkTroubleshootingSolutions() {
   return { errors, warnings, checked: files.length };
 }
 
+async function checkSeoMetadataCoverage() {
+  const targets = [
+    {
+      name: 'Getting Started',
+      dir: path.join(ROOT, 'src', 'content', 'getting-started'),
+      requireTrust: true,
+    },
+    {
+      name: 'Guides',
+      dir: path.join(ROOT, 'src', 'content', 'guides'),
+      requireTrust: true,
+    },
+    {
+      name: 'Channels',
+      dir: path.join(ROOT, 'src', 'content', 'channels'),
+      requireTrust: true,
+    },
+    {
+      name: 'Troubleshooting',
+      dir: path.join(ROOT, 'src', 'content', 'troubleshooting'),
+      requireTrust: true,
+    },
+    {
+      name: 'Blog',
+      dir: path.join(ROOT, 'src', 'content', 'blog'),
+      requireTrust: false,
+    },
+    {
+      name: 'Stories',
+      dir: path.join(ROOT, 'src', 'content', 'stories'),
+      requireTrust: false,
+    },
+    {
+      name: 'Special Reports',
+      dir: path.join(ROOT, 'src', 'content', 'special-reports'),
+      requireTrust: false,
+    },
+  ];
+
+  const errors = [];
+  const warnings = [];
+  let checked = 0;
+
+  for (const target of targets) {
+    const files = await listFilesRecursive(target.dir);
+    checked += files.length;
+
+    for (const file of files) {
+      const rel = path.relative(ROOT, file);
+      const text = await fs.readFile(file, 'utf8');
+      const parts = splitFrontmatter(text);
+      if (!parts) {
+        errors.push(`${rel}: missing or malformed frontmatter (expected leading ---)`);
+        continue;
+      }
+
+      const fm = parseYamlishFrontmatter(parts.frontmatter);
+
+      if (!('seoTitle' in fm) || !String(fm.seoTitle).trim()) {
+        warnings.push(`${rel}: missing seoTitle`);
+      } else if (!textLengthWithin(fm.seoTitle, 45, 65)) {
+        warnings.push(
+          `${rel}: seoTitle length should usually be 45-65 chars (got ${String(fm.seoTitle).trim().length})`
+        );
+      }
+
+      if (!('seoDescription' in fm) || !String(fm.seoDescription).trim()) {
+        warnings.push(`${rel}: missing seoDescription`);
+      } else if (!textLengthWithin(fm.seoDescription, 110, 160)) {
+        warnings.push(
+          `${rel}: seoDescription length should usually be 110-160 chars (got ${String(fm.seoDescription).trim().length})`
+        );
+      }
+
+      if (target.requireTrust) {
+        if (!('reviewedBy' in fm) || !Array.isArray(fm.reviewedBy) || fm.reviewedBy.length === 0) {
+          warnings.push(`${rel}: missing reviewedBy for high-stakes content`);
+        }
+        if (!('testedOn' in fm) || !Array.isArray(fm.testedOn) || fm.testedOn.length === 0) {
+          warnings.push(`${rel}: missing testedOn for high-stakes content`);
+        }
+      }
+
+      if (target.name === 'Stories' && !hasTopLevelListField(parts.frontmatter, 'sources')) {
+        warnings.push(`${rel}: missing sources for story content`);
+      }
+
+      if (
+        target.name === 'Getting Started' &&
+        !hasGettingStartedSourceEvidence(parts.frontmatter, parts.body)
+      ) {
+        warnings.push(`${rel}: missing trusted source evidence (sources or trusted body links)`);
+      }
+
+      if (target.name === 'Guides' && !hasGuideSourceEvidence(parts.frontmatter, parts.body)) {
+        warnings.push(`${rel}: missing source evidence (sources or OpenClaw docs links)`);
+      }
+
+      if (
+        target.name === 'Channels' &&
+        !hasChannelSourceEvidence(parts.frontmatter, parts.body, file)
+      ) {
+        warnings.push(
+          `${rel}: missing source evidence (sources, docs links, or derived channel doc)`
+        );
+      }
+
+      if (target.name === 'Troubleshooting' && !hasTroubleshootingEvidence(parts.frontmatter)) {
+        warnings.push(`${rel}: missing source evidence (sources or related docs/issues/external)`);
+      }
+
+      if (target.name === 'Blog' && !hasBlogSourceEvidence(parts.frontmatter, parts.body)) {
+        warnings.push(`${rel}: missing source evidence (sources or cited absolute URLs)`);
+      }
+    }
+  }
+
+  return { errors, warnings, checked };
+}
+
+async function checkStaticPageSeo() {
+  const targets = [
+    'src/pages/index.astro',
+    'src/pages/resources.astro',
+    'src/pages/blog/index.astro',
+    'src/pages/channels/index.astro',
+    'src/pages/getting-started.astro',
+    'src/pages/guides/index.astro',
+    'src/pages/special-reports/index.astro',
+    'src/pages/stories/index.astro',
+    'src/pages/troubleshooting.astro',
+    'src/pages/troubleshooting/solutions.astro',
+    'src/pages/faq.astro',
+    'src/pages/about.astro',
+    'src/pages/contact.astro',
+    'src/pages/security.astro',
+    'src/pages/privacy.astro',
+  ];
+
+  const errors = [];
+  const warnings = [];
+
+  for (const rel of targets) {
+    const file = path.join(ROOT, rel);
+    const text = await fs.readFile(file, 'utf8');
+
+    if (!text.includes('<BaseLayout')) {
+      errors.push(`${rel}: missing BaseLayout wrapper`);
+      continue;
+    }
+
+    if (!/\btitle=/.test(text)) {
+      warnings.push(`${rel}: missing BaseLayout title prop`);
+    }
+
+    if (!/\bdescription=/.test(text)) {
+      warnings.push(`${rel}: missing BaseLayout description prop`);
+    }
+
+    if (!(text.includes('application/ld+json') || text.includes('structuredData='))) {
+      warnings.push(`${rel}: missing structured data on indexable static page`);
+    }
+  }
+
+  return { errors, warnings, checked: targets.length };
+}
+
 async function main() {
   const results = [];
 
   results.push({ name: 'Troubleshooting Solutions', ...(await checkTroubleshootingSolutions()) });
+  results.push({ name: 'SEO Metadata Coverage', ...(await checkSeoMetadataCoverage()) });
+  results.push({ name: 'Static Page SEO', ...(await checkStaticPageSeo()) });
 
   let totalErrors = 0;
   let totalWarnings = 0;

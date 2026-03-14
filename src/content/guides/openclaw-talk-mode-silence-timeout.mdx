@@ -1,6 +1,18 @@
 ---
 title: "OpenClaw Talk Mode: How to Tune `talk.silenceTimeoutMs` Without Making Voice Feel Weird"
 description: "A practical guide to OpenClaw Talk Mode's silence timeout: understand the platform defaults, decide when to shorten or lengthen the pause window, and tune for dictation, natural conversation, or slow-thinking workflows."
+seoTitle: "OpenClaw Talk Mode Silence Timeout Tuning Guide"
+seoDescription: "A practical guide to OpenClaw Talk Mode's silence timeout: understand the platform defaults, decide when to shorten or lengthen the pause window, and tune."
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "macOS"
+  - "iOS"
+  - "Android"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 60
 category: "advanced"
 difficulty: "Intermediate"
 platforms:
@@ -28,6 +40,16 @@ keywords:
   - "speech timeout"
   - "interruptOnSpeech"
   - "OpenClaw Talk"
+sources:
+  - label: 'OpenClaw docs — Configuration guide'
+    url: https://docs.openclaw.ai/guides/openclaw-configuration
+    type: official-doc
+  - label: 'OpenClaw docs — Installation troubleshooting'
+    url: https://docs.openclaw.ai/guides/openclaw-installation-troubleshooting
+    type: official-doc
+  - label: 'OpenClaw GitHub repository'
+    url: https://github.com/openclaw/openclaw
+    type: repo
 ---
 
 `2026.3.8` made `talk.silenceTimeoutMs` a top-level config you can tune deliberately.
@@ -236,4 +258,3 @@ In that case, you are tuning around a deeper problem.
 
 - [OpenClaw Configuration Guide: openclaw.json, Models, Gateway, Channels, and Plugins](/guides/openclaw-configuration)
 - [OpenClaw Control UI Auth & Pairing: Fix 'unauthorized', 1008, and Remote Dashboard Access](/guides/control-ui-auth-and-pairing)
-

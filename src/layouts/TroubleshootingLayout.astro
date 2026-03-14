@@ -2,7 +2,10 @@
 import BaseLayout from './BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import RelatedLinks from '../components/RelatedLinks.astro';
+import TrustSignals from '../components/content/TrustSignals.astro';
 import { buildWeightedTokens, topRelated } from '../lib/related';
+import { toContributorEntities, toDateValue } from '../lib/structured-data';
+import { deriveTroubleshootingSources } from '../lib/trust-sources';
 
 interface Props {
   frontmatter: {
@@ -20,6 +23,31 @@ interface Props {
     affectedVersions?: string[];
     keywords?: string[];
     author?: string;
+    seoTitle?: string;
+    seoDescription?: string;
+    canonicalPath?: string;
+    robots?: string;
+    noindex?: boolean;
+    reviewedBy?: string[];
+    reviewedAt?: Date | string | number;
+    testedOn?: string[];
+    verificationStatus?: string;
+    contentOwner?: string;
+    sources?: Array<{
+      label: string;
+      url: string;
+      type?: string;
+      notes?: string;
+    }>;
+    related?: {
+      guides?: string[];
+      docs?: string[];
+      githubIssues?: number[];
+      external?: Array<{
+        label: string;
+        url: string;
+      }>;
+    };
   };
 }
 
@@ -42,6 +70,30 @@ const os = (frontmatter.os ?? []).filter(Boolean);
 const component = frontmatter.component?.trim();
 const severity = frontmatter.severity?.trim();
 const errorSignatures = (frontmatter.errorSignatures ?? []).filter(Boolean);
+const seoTitle = frontmatter.seoTitle ?? frontmatter.title;
+const seoDescription = frontmatter.seoDescription ?? frontmatter.description;
+const canonicalURL = new URL(frontmatter.canonicalPath || Astro.url.pathname, Astro.site);
+const authorEntity = toContributorEntities([frontmatter.author || 'CoClaw Team']);
+const reviewedByEntities = toContributorEntities(frontmatter.reviewedBy);
+const trustSources = deriveTroubleshootingSources(frontmatter.related, frontmatter.sources);
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: frontmatter.title,
+  description: seoDescription,
+  datePublished: toDateValue(publishDate),
+  dateModified: toDateValue(lastUpdated),
+  author: authorEntity,
+  reviewer: reviewedByEntities,
+  articleSection: kind === 'solution' ? 'Troubleshooting solution' : 'Troubleshooting case',
+  keywords: frontmatter.keywords,
+  about: errorSignatures.map((signature) => ({
+    '@type': 'Thing',
+    name: signature,
+  })),
+  citation: trustSources.map((source) => source.url),
+  mainEntityOfPage: canonicalURL.toString(),
+};
 
 const pathname = Astro.url?.pathname ?? '';
 const tsSlug = pathname.startsWith('/troubleshooting/')
@@ -136,7 +188,17 @@ if (tsSlug) {
 }
 ---
 
-<BaseLayout title={frontmatter.title} description={frontmatter.description}>
+<BaseLayout
+  title={seoTitle}
+  description={seoDescription}
+  canonicalPath={frontmatter.canonicalPath}
+  robots={frontmatter.robots}
+  noindex={frontmatter.noindex}
+  author={frontmatter.author}
+  keywords={frontmatter.keywords?.join(', ')}
+  type="article"
+>
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(structuredData)} />
   <div class="container mx-auto px-4 py-8 max-w-4xl">
     <!-- Pagefind filters/meta -->
     <div class="hidden" data-pagefind-filter="type:troubleshooting"></div>
@@ -244,6 +306,16 @@ if (tsSlug) {
 
       <slot />
     </article>
+
+    <TrustSignals
+      reviewedBy={frontmatter.reviewedBy}
+      reviewedAt={frontmatter.reviewedAt}
+      testedOn={frontmatter.testedOn}
+      verificationStatus={frontmatter.verificationStatus}
+      sources={trustSources}
+      context="troubleshooting"
+      class="mt-10 not-prose"
+    />
 
     <div class="mt-10 border-t border-divider pt-6">
       <div class="flex flex-wrap items-center justify-between gap-3">

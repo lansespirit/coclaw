@@ -1,6 +1,16 @@
 ---
 title: 'Synology Chat'
 description: 'Synology Chat setup for OpenClaw: plugin install, outgoing versus incoming webhook roles, DM policy, user-ID allowlists, SSL posture, verification, and multi-account webhook routing.'
+seoTitle: 'Synology Chat webhook pairing and allowlist posture'
+seoDescription: 'Cover Synology Chat OpenClaw guide, covering dual webhook wiring, incoming/outgoing secrets, allowlisted DM policy, and SSL/verification posture.'
+reviewedBy:
+  - "CoClaw Editorial Team"
+reviewedAt: 2026-03-14
+testedOn:
+  - "Synology Chat"
+verificationStatus: "reviewed"
+contentOwner: "CoClaw Editorial Team"
+reviewCadenceDays: 75
 category: 'Channel Integration'
 subcategory: 'Community Plugin'
 platform: 'Synology Chat'
@@ -20,6 +30,13 @@ keywords:
 ---
 
 > Synology Chat is a **webhook-operated DM lane**. The important operator distinction is that inbound trust, outbound delivery, and OpenClaw user policy are three different things, and you need all three aligned before the channel feels reliable.
+
+Operator companion pages (read these alongside this channel dossier):
+
+- Channel directory: [/channels](/channels)
+- Configuration basics: [/guides/openclaw-configuration](/guides/openclaw-configuration)
+- Deployment + webhook failures: [/guides/openclaw-deployment-troubleshooting](/guides/openclaw-deployment-troubleshooting)
+- Pairing and allowlists (trust boundary): [/guides/openclaw-pairing-explained](/guides/openclaw-pairing-explained)
 
 ## Why choose Synology Chat
 
