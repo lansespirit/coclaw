@@ -2,12 +2,30 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/layout/Section.astro';
 import OpenClawConfigGenerator from '../components/ConfigGenerator/OpenClawConfigGenerator';
+import { buildBreadcrumbList, buildWebPage, wrapSchemaGraph } from '../lib/structured-data';
+
+const pageTitle = 'OpenClaw Config Generator / openclaw.json | CoClaw';
+const pageDescription =
+  'Generate a secure OpenClaw configuration (openclaw.json) visually. Runs 100% client-side.';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const structuredData = wrapSchemaGraph(
+  buildWebPage({
+    name: 'OpenClaw Config Generator',
+    description: pageDescription,
+    url: canonicalURL.toString(),
+  }),
+  buildBreadcrumbList([
+    { name: 'Home', item: new URL('/', Astro.site).toString() },
+    { name: 'Config Generator', item: canonicalURL.toString() },
+  ])
+);
 ---
 
 <BaseLayout
-  title="OpenClaw Config Generator / openclaw.json | CoClaw"
-  description="Generate a secure OpenClaw configuration (openclaw.json) visually. Runs 100% client-side."
+  title={pageTitle}
+  description={pageDescription}
   keywords="OpenClaw config generator, openclaw.json, OpenClaw configuration, allowlist, dmPolicy, sandbox"
+  structuredData={structuredData}
 >
   <Section containerClass="!z-0 max-w-6xl">
     <h1 class="text-4xl md:text-5xl font-bold mb-4">OpenClaw Config Generator / openclaw.json</h1>

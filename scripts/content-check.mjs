@@ -409,6 +409,11 @@ async function checkStaticPageSeo() {
     'src/pages/faq.astro',
     'src/pages/about.astro',
     'src/pages/contact.astro',
+    'src/pages/careers.astro',
+    'src/pages/contributing.astro',
+    'src/pages/code-of-conduct.astro',
+    'src/pages/terms.astro',
+    'src/pages/openclaw-config-generator.astro',
     'src/pages/security.astro',
     'src/pages/privacy.astro',
   ];

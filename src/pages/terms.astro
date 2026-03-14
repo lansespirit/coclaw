@@ -1,12 +1,29 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/layout/Section.astro';
+import { buildBreadcrumbList, buildWebPage, wrapSchemaGraph } from '../lib/structured-data';
+
+const pageTitle = 'Terms of Service | CoClaw';
+const pageDescription = 'Terms governing your use of the CoClaw website at coclaw.com.';
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const structuredData = wrapSchemaGraph(
+  buildWebPage({
+    name: 'CoClaw Terms of Service',
+    description: pageDescription,
+    url: canonicalURL.toString(),
+  }),
+  buildBreadcrumbList([
+    { name: 'Home', item: new URL('/', Astro.site).toString() },
+    { name: 'Terms of Service', item: canonicalURL.toString() },
+  ])
+);
 ---
 
 <BaseLayout
-  title="Terms of Service | CoClaw"
-  description="Terms governing your use of the CoClaw website at coclaw.com."
+  title={pageTitle}
+  description={pageDescription}
   keywords="CoClaw terms of service, coclaw.com terms, OpenClaw community terms"
+  structuredData={structuredData}
 >
   <div class="bg-background min-h-screen overflow-x-hidden relative">
     <Section containerClass="max-w-4xl mx-auto pt-24 pb-16">
