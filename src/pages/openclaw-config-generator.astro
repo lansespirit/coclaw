@@ -2,12 +2,94 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Section from '../components/layout/Section.astro';
 import OpenClawConfigGenerator from '../components/ConfigGenerator/OpenClawConfigGenerator';
-import { buildBreadcrumbList, buildWebPage, wrapSchemaGraph } from '../lib/structured-data';
+import {
+  buildBreadcrumbList,
+  buildSiteOrganization,
+  buildWebPage,
+  wrapSchemaGraph,
+} from '../lib/structured-data';
 
-const pageTitle = 'OpenClaw Config Generator / openclaw.json | CoClaw';
+const pageTitle = 'OpenClaw Config Generator (openclaw.json) — Secure Setup | CoClaw';
 const pageDescription =
-  'Generate a secure OpenClaw configuration (openclaw.json) visually. Runs 100% client-side.';
+  'Generate a secure OpenClaw configuration (openclaw.json) in minutes. Safe presets, sandbox defaults, allowlists, and gateway auth — runs 100% client-side.';
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const pageUrl = canonicalURL.toString();
+const publisher = buildSiteOrganization();
+
+const webAppSchema = {
+  '@type': 'WebApplication',
+  '@id': `${pageUrl}#app`,
+  name: 'OpenClaw Config Generator',
+  url: pageUrl,
+  description: pageDescription,
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Web',
+  inLanguage: 'en',
+  isAccessibleForFree: true,
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  publisher,
+  creator: publisher,
+  featureList: [
+    'Generate openclaw.json from safe presets.',
+    'Export environment variable placeholders (avoid hard-coding secrets).',
+    'Configure gateway binding and auth token defaults.',
+    'Configure channel allowlists and approval policies.',
+  ],
+} as const;
+
+const faqSchema = {
+  '@type': 'FAQPage',
+  '@id': `${pageUrl}#faq`,
+  url: pageUrl,
+  inLanguage: 'en',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Does this tool send my API keys or config data to CoClaw?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'No. The generator runs fully client-side in your browser. Prefer using environment variable placeholders so secrets are not stored inside openclaw.json.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What is openclaw.json used for?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'openclaw.json is the primary configuration file that controls your OpenClaw gateway, models, tools, and channel policies. The generator helps you start from safe defaults and export a schema-aligned config quickly.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'How do I apply the generated config?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Download the generated openclaw.json, place it in your OpenClaw config location, then start OpenClaw. If you used environment variable placeholders, set those env vars before launch.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Which preset should I start with?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Start with the most restrictive preset that still matches your workflow. You can always expand capabilities later, but rolling back trust is harder once you enable broad tools or public messaging.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'What should I do if OpenClaw rejects my config?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Look for validation errors, compare against official docs, and use the troubleshooting guide for config validation failures. The generator highlights unsafe or invalid combinations before export.',
+      },
+    },
+  ],
+} as const;
+
 const structuredData = wrapSchemaGraph(
   buildWebPage({
     name: 'OpenClaw Config Generator',
@@ -16,8 +98,10 @@ const structuredData = wrapSchemaGraph(
   }),
   buildBreadcrumbList([
     { name: 'Home', item: new URL('/', Astro.site).toString() },
-    { name: 'Config Generator', item: canonicalURL.toString() },
-  ])
+    { name: 'OpenClaw Config Generator', item: canonicalURL.toString() },
+  ]),
+  webAppSchema,
+  faqSchema
 );
 ---
 
@@ -26,14 +110,142 @@ const structuredData = wrapSchemaGraph(
   description={pageDescription}
   keywords="OpenClaw config generator, openclaw.json, OpenClaw configuration, allowlist, dmPolicy, sandbox"
   structuredData={structuredData}
+  author="CoClaw Team"
 >
-  <Section containerClass="!z-0 max-w-6xl">
+  <Section containerClass="!z-0 max-w-6xl" py="pt-24 pb-20">
     <h1 class="text-4xl md:text-5xl font-bold mb-4">OpenClaw Config Generator / openclaw.json</h1>
     <p class="text-lg text-default-800 dark:text-default-600 leading-relaxed mb-8 max-w-3xl">
       Build a Friendly OpenClaw Config. Generate an <code class="text-primary">openclaw.json</code>
       that matches how you actually want OpenClaw to behave, without hand-editing JSON.
     </p>
 
+    <div class="mb-10 max-w-3xl rounded-2xl border border-divider bg-content1/60 p-6">
+      <p class="text-xs font-semibold uppercase tracking-[0.18em] text-default-500">Quick path</p>
+      <ol class="mt-4 space-y-2 text-sm leading-6 text-default-800 dark:text-default-600">
+        <li>
+          <span class="font-semibold text-foreground">1)</span> Pick a preset that matches your trust
+          model.
+        </li>
+        <li>
+          <span class="font-semibold text-foreground">2)</span> Copy or download{' '}
+          <span class="font-mono">openclaw.json</span>.
+        </li>
+        <li>
+          <span class="font-semibold text-foreground">3)</span> Apply it, then verify with the CLI (and
+          fix validation errors if any).
+        </li>
+      </ol>
+    </div>
+
     <OpenClawConfigGenerator client:load />
+  </Section>
+
+  <Section containerSize="reading" containerGutter="docs" py="py-0 pb-24">
+    <article class="c-content prose prose-lg prose-primary max-w-none">
+      <h2>What this generator controls</h2>
+      <p>
+        The exported <code>openclaw.json</code> config typically includes these high-impact areas:
+      </p>
+      <ul>
+        <li>
+          <strong>Sandbox and tool access</strong>: choose a safer default posture before enabling
+          powerful tools.
+        </li>
+        <li>
+          <strong>Gateway network and auth</strong>: binding mode (local/LAN/tailnet) and secure
+          access tokens.
+        </li>
+        <li>
+          <strong>Models</strong>: primary provider setup, safe defaults, and practical limits.
+        </li>
+        <li>
+          <strong>Messaging policies</strong>: allowlists and approval-required modes to reduce
+          inbound abuse.
+        </li>
+      </ul>
+
+      <h2>Privacy &amp; safety</h2>
+      <ul>
+        <li>
+          <strong>Runs client-side:</strong> the generator UI executes in your browser.
+        </li>
+        <li>
+          <strong>Avoid hard-coded secrets:</strong> use environment variable placeholders for API keys
+          and tokens whenever possible.
+        </li>
+        <li>
+          <strong>Start restrictive:</strong> it is easier to expand capabilities than to roll back trust
+          after you expose tools or public inbound channels.
+        </li>
+      </ul>
+
+      <h2>How to apply the generated config</h2>
+      <ol>
+        <li>
+          Download the generated <code>openclaw.json</code>.
+        </li>
+        <li>
+          Place it in your OpenClaw config location, or import it through your deployment workflow.
+        </li>
+        <li>
+          If you used environment variables, set them before launch, then start OpenClaw and verify
+          status.
+        </li>
+      </ol>
+
+      <h2>Next steps</h2>
+      <ul>
+        <li>
+          Learn how configuration works:{' '}
+          <a href="/guides/openclaw-configuration">OpenClaw configuration guide</a>.
+        </li>
+        <li>
+          Fix config validation failures:{' '}
+          <a href="/troubleshooting/solutions/config-validation-failed">config validation failed</a
+          >.
+        </li>
+        <li>
+          Pick a deployment path: <a href="/getting-started">Getting started</a>.
+        </li>
+      </ul>
+
+      <h2 id="faq">FAQ</h2>
+      <details>
+        <summary>Does this tool send my API keys or config data to CoClaw?</summary>
+        <p>
+          No. The generator runs fully client-side in your browser. Prefer environment variable
+          placeholders so secrets are not stored inside <code>openclaw.json</code>.
+        </p>
+      </details>
+      <details>
+        <summary>What is openclaw.json used for?</summary>
+        <p>
+          It is the primary config file that controls your OpenClaw gateway, models, tools, and
+          channel policies. The generator helps you start from safe defaults quickly.
+        </p>
+      </details>
+      <details>
+        <summary>How do I apply the generated config?</summary>
+        <p>
+          Download the generated file, place it in your config location, set required environment
+          variables, then start OpenClaw and verify status in the CLI or dashboard.
+        </p>
+      </details>
+      <details>
+        <summary>Which preset should I start with?</summary>
+        <p>
+          Start with the most restrictive preset that still matches your workflow. Expand only after
+          the gateway is stable and you understand the security tradeoffs.
+        </p>
+      </details>
+      <details>
+        <summary>What should I do if OpenClaw rejects my config?</summary>
+        <p>
+          Review validation errors, compare against official docs, and follow the troubleshooting
+          guide for config validation failures. The generator highlights unsafe or invalid
+          combinations before export.
+        </p>
+      </details>
+    </article>
   </Section>
 </BaseLayout>
